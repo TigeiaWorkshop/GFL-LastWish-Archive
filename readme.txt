@@ -1,0 +1,1 @@
+使用python3和最新版的pygame进行研发
