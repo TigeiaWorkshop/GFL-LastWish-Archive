@@ -1,1 +1,1 @@
-使用python3和html5规则进行研发
+使用python3和pygame1.9进行研发
