@@ -56,4 +56,4 @@ while True:
     if move_gif_id == move_gif_total:
         move_gif_id = 0
     time.sleep(0.025)
-    pygame.display.update()
+    pygame.display.flip()
