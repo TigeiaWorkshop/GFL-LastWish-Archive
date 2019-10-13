@@ -7,7 +7,6 @@ import os
 pygame.init()
 
 # 创建窗口
-pygame.init()
 screen = pygame.display.set_mode((1600, 900), 0, 32)
 pygame.display.set_caption("Girls frontline-Last Wish") #窗口标题
 
