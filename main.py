@@ -17,14 +17,14 @@ def character_creater(character_name,action):
         files_amount+=1
     for i in range(files_amount):
         path = "img/character/"+character_name+"/"+action+"/"+character_name+"_"+action+"_"+str(i)+".png"
-        character_gif.append(pygame.image.load(path))
-    return tuple(character_gif)
+        character_gif.append(pygame.image.load(path).convert_alpha())
+    return character_gif
 
 # 加载并转换主菜单背景图
 #background_main = pygame.image.load('img/main_1600X900.png')
 
 #加载背景
-forestPineSnowCovered = pygame.image.load('img/environment/forestPineSnowCovered02.png')
+forestPineSnowCovered = pygame.image.load('img/environment/forestPineSnowCovered02.png').convert_alpha()
 
 #加载角色
 wait_gif_id=0
