@@ -18,7 +18,7 @@ my_font = pygame.font.SysFont("font/font.ttf", 42)
 lang_yaml = open("lang/zh_cn.yaml", "r", encoding='utf-8')
 lang_yaml = lang_yaml.read()
 
-text_title = my_font.render(lang_yaml["text_title"], True, (0,0,0))
+text_title = my_font.render("少女前线", True, (0,0,0))
 text_continue = my_font.render("继续游戏", True, (0,0,0))
 text_chooseChapter = my_font.render("选择章节", True, (0,0,0))
 text_setting = my_font.render("设置", True, (0,0,0))
@@ -28,7 +28,6 @@ text_exit = my_font.render("退出", True, (0,0,0))
 
 #加载背景
 background_img_id = 0
-
 background_img_list=[]
 for i in range(374):
     path = "img/main_menu/background_img"+str(i)+".jpg"
@@ -36,7 +35,6 @@ for i in range(374):
 
 
 # 游戏主循环
-"""
 while True:
     for event in pygame.event.get():
         if event.type == KEYDOWN and event.key == K_ESCAPE:
@@ -55,4 +53,3 @@ while True:
         pygame.mixer.music.play(loops=9999, start=0.0)
     pygame.display.update()
     time.sleep(1/20)
-"""
