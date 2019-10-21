@@ -1,6 +1,6 @@
 import os
-character="gsh-18"
-action=["attack","attack2","die","move","victory","victoryloop","wait"]
+character="sv-98"
+action=["attack","die","move","skill","victory","victoryloop","wait"]
 
 for a in range(len(action)):
     path="img/character/"+character+"/"+action[a]+"/"
@@ -11,6 +11,6 @@ for a in range(len(action)):
         oldname=path+f[n]
 
         #设置新文件名
-        newname=path+'gsh-18_'+action[a]+'_'+str(n)+'.png'
+        newname=path+character+'_'+action[a]+'_'+str(n)+'.png'
         os.rename(oldname,newname)
         n+=1

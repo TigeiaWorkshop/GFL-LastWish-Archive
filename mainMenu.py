@@ -42,7 +42,7 @@ while True:
             pygame.display.toggle_fullscreen()
 
     path = "img/main_menu/background_img"+str(background_img_id)+".jpg"
-    background_img_list.append(pygame.image.load(os.path.join(path)))
+    background_img_list.append(pygame.image.load(os.path.join(path)).convert_alpha())
     percent_of_img_loaded = '{:.0f}%'.format(background_img_id/374*100)
     background_img_id+=1
     if background_img_id == 375:
@@ -76,4 +76,4 @@ while True:
         pygame.mixer.music.load('music/White_Front.mp3')
         pygame.mixer.music.play(loops=9999, start=0.0)
     pygame.display.update()
-    time.sleep(1/20)
+    time.sleep(1/25)
