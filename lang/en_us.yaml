@@ -1,9 +1,20 @@
-"main_menu": {
-    "text_title": "Girls' Frontline-Last wish",
-    "text_continue" : "Continue",
-    'text_chooseChapter' : "Select Chapter",
-    "text_setting" : "setting",
-    "text_dlc" : "DLC",
-    "text_wrokshop" : "Workshop",
-    "text_exit" : "Exit",
+main_menu: {
+    text_title: "Girls' Frontline-Last wish",
+    text_continue: "Continue",
+    text_chooseChapter: "Select Chapter",
+    text_setting: "setting",
+    text_dlc: "DLC",
+    text_wrokshop: "Workshop",
+    text_exit: "Exit",
+    }
+chapter: {
+    c1: "chapter1",
+    c2: "chapter2",
+    c3: "chapter3",
+    c4: "chapter4",
+    c5: "chapter5",
+    c6: "chapter6",
+    c7: "chapter7",
+    c8: "chapter8",
+    back: "Back",
     }

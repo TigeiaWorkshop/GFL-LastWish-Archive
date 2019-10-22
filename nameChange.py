@@ -1,9 +1,10 @@
 import os
-character="sv-98"
-action=["attack","die","move","skill","victory","victoryloop","wait"]
+character="vespid"
+#action=["attack","die","move","skill","victory","victoryloop","wait"]
+action=["attack","die","move","wait"]
 
 for a in range(len(action)):
-    path="img/character/"+character+"/"+action[a]+"/"
+    path="img/enemies/"+character+"/"+action[a]+"/"
     f=os.listdir(path)
     n=0
     for i in f:
