@@ -110,7 +110,7 @@ for i in range(len(map)):
 
 #初始化角色信息
 #hpManager(self, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围)
-characters_data = characterDataManager("sv-98",50,100,500,500,6,8,8,3)
+characters_data = characterDataManager("sv-98",50,100,500,500,3,8,8,3)
 sangvisFerris_data = {}
 for enemy in sangvisFerris:
     sangvisFerris_data[enemy] = characterDataManager(enemy,50,100,500,500,10,40,10,3)
@@ -128,6 +128,8 @@ new_block_type = 0
 per_block_width = green.get_width()
 per_block_height = green.get_height()
 green_hide = True
+action = "wait"
+isWaiting = True
 # 游戏主循环
 while True:
     for event in pygame.event.get():
@@ -138,18 +140,25 @@ while True:
             mouse_x,mouse_y=pygame.mouse.get_pos()
             block_get_click_x = int(mouse_x/green.get_width())
             block_get_click_y = int(mouse_y/green.get_height())
-            if block_get_click_x == characters_data.x and block_get_click_y == characters_data.y:
-                if green_hide == True:
-                    green_hide = False
-                else:
-                    green_hide = True
             if green_hide == False:
                 if characters_data.x-characters_data.move_range-1<block_get_click_x<characters_data.x+characters_data.move_range+1 and characters_data.y == block_get_click_y:
                     if map[characters_data.y][block_get_click_x] == 1 or map[characters_data.y][block_get_click_x] ==2:
-                        characters_data.x = block_get_click_x
+                        temp_x = characters_data.x
+                        temp_max = block_get_click_x
+                        isWaiting = "LEFTANDRIGHT"
                 elif characters_data.y-characters_data.move_range-1<block_get_click_y<characters_data.y+characters_data.move_range+1 and characters_data.x == block_get_click_x:
                     if map[block_get_click_y][characters_data.x] ==1 or map[block_get_click_y][characters_data.x] ==2:
-                        characters_data.y = block_get_click_y
+                        temp_y = characters_data.y
+                        temp_max = block_get_click_y
+                        isWaiting = "TOPANDBOTTOM"
+            if block_get_click_x == characters_data.x and block_get_click_y == characters_data.y:
+                if green_hide == True:
+                    action = "move"
+                    green_hide = False
+                else:
+                    green_hide = True
+                    isWaiting = True
+                    action = "wait"
 
     #加载地图
     for i in range(len(map_img_list)):
@@ -157,20 +166,48 @@ while True:
             img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
             screen.blit(img_display,(a*block_x_length,i*block_y_length-block_x_length/2))
     if green_hide ==False:
-        #for y in range(block_y):
         for x in range(characters_data.x-characters_data.move_range,characters_data.x+characters_data.move_range+1):
-            if map[characters_data.y][x] == 0 or map[characters_data.y][x] == 3:
-                screen.blit(red,(x*green.get_width(),characters_data.y*green.get_height()))
-            else:
-                screen.blit(green,(x*green.get_width(),characters_data.y*green.get_height()))
+            if x < block_x:
+                if map[characters_data.y][x] == 0 or map[characters_data.y][x] == 3:
+                    screen.blit(red,(x*green.get_width(),characters_data.y*green.get_height()+7))
+                else:
+                    screen.blit(green,(x*green.get_width(),characters_data.y*green.get_height()+7))
         for y in range(characters_data.y-characters_data.move_range,characters_data.y+characters_data.move_range+1):
-            if map[y][characters_data.x] == 0 or map[y][characters_data.x] == 3:
-                screen.blit(red,(characters_data.x*green.get_width(),y*green.get_height()))
-            else:
-                screen.blit(green,(characters_data.x*green.get_width(),y*green.get_height()))
+            if y < block_y:
+                if map[y][characters_data.x] == 0 or map[y][characters_data.x] == 3:
+                    screen.blit(red,(characters_data.x*green.get_width(),y*green.get_height()+7))
+                else:
+                    screen.blit(green,(characters_data.x*green.get_width(),y*green.get_height()+7))
+    #角色动画
+    if isWaiting == True:
+        action_displayer(characters_dic[characters_data.name],action,characters_data.x,characters_data.y)
+    elif isWaiting == "LEFTANDRIGHT":
+        if temp_x < temp_max:
+            temp_x+=0.1
+            action_displayer(characters_dic[characters_data.name],action,temp_x,characters_data.y)
+            if temp_x >= temp_max:
+                isWaiting = True
+                characters_data.x = block_get_click_x
+        elif temp_x > temp_max:
+            temp_x-=0.1
+            action_displayer(characters_dic[characters_data.name],action,temp_x,characters_data.y)
+            if temp_x <= temp_max:
+                isWaiting = True
+                characters_data.x = block_get_click_x
+    elif isWaiting == "TOPANDBOTTOM":
+        if temp_y < temp_max:
+            temp_y+=0.1
+            action_displayer(characters_dic[characters_data.name],action,characters_data.x,temp_y,)
+            if temp_y >= temp_max:
+                isWaiting = True
+                characters_data.y = block_get_click_y
+        elif temp_y > temp_max:
+            temp_y-=0.1
+            action_displayer(characters_dic[characters_data.name],action,characters_data.x,temp_y,)
+            if temp_y <= temp_max:
+                isWaiting = True
+                characters_data.y = block_get_click_y
 
-    keys = pygame.key.get_pressed()
-    action_displayer(characters_dic[characters_data.name],"wait",characters_data.x,characters_data.y)
 
     for per_bullet in bullets_list:
         screen.blit(bullet_img, (per_bullet.x,per_bullet.y))

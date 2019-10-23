@@ -18,3 +18,9 @@ chapter: {
     c8: "chapter8",
     back: "Back",
     }
+select_menu: {
+    attack: "attack",
+    move: "move",
+    skill: "skill",
+    pass: "pass",
+    }
