@@ -83,10 +83,11 @@ for sangvisFerri in sangvisFerris:
 #加载动作：接受一个带有[动作]的gif字典，完成对应的指令
 def action_displayer(gif_dic,action,x,y,isContinue=True):
     img_of_char = gif_dic[action][0][0][gif_dic[action][1]]
-    screen.blit(img_of_char,(x,y))
+    screen.blit(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
     gif_dic[action][1]+=1
     if gif_dic[action][1] == 5 and action == "attack":
-        bullets_list.append(Bullet(characters_data.x+img_of_char.get_width()-20,characters_data.y+img_of_char.get_height()/2-5,300))
+        pass
+        #bullets_list.append(Bullet(characters_data.x+img_of_char.get_width()-20,characters_data.y+img_of_char.get_height()/2-5,300))
     if gif_dic[action][1] == gif_dic[action][0][1]:
         gif_dic[action][1] = 0
 
@@ -103,7 +104,7 @@ for i in range(block_y):
 
 #初始化角色信息
 #hpManager(self, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，移动速度)
-characters_data = characterDataManager("sv-98",50,100,500,500,10,40,5)
+characters_data = characterDataManager("sv-98",50,100,500,500,4,8,5)
 sangvisFerris_data = {}
 for enemy in sangvisFerris:
     sangvisFerris_data[enemy] = characterDataManager(enemy,50,100,500,500,10,40,10)
@@ -112,6 +113,9 @@ for enemy in sangvisFerris:
 bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("img/others/bullet.png")), (int(block_x_length/6), int(block_y_length/12)))
 bullets_list = []
 
+#测试
+green = pygame.transform.scale(pygame.image.load(os.path.join("img/others/green.png")), (int(block_x_length), int(block_y_length)))
+green.set_alpha(150)
 # 游戏主循环
 while True:
     for event in pygame.event.get():
@@ -133,7 +137,9 @@ while True:
                 else:
                     img = pygame.transform.scale(env_img_list["plainsColdSnowCovered"+randMountainNumLists[i][a]], (int(block_x_length), int(block_y_length*1.5)))
             screen.blit(img,(a*block_x_length,i*block_y_length-block_x_length/2))
-
+    for y in range(block_y):
+        for x in range(block_x):
+            screen.blit(green,(x*green.get_width(),y*green.get_height()))
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:

@@ -6,7 +6,7 @@ class characterDataManager:
         self.max_hp = max_hp
         self.current_hp = current_hp
         self.x = x
-        self.y = x
+        self.y = y
         self.speed = speed
 
     def decreaseHp(self,damage):
