@@ -1,5 +1,5 @@
 class characterDataManager:
-    def __init__(self, name, min_damage,max_damage,max_hp,current_hp,x,y,speed):
+    def __init__(self, name, min_damage,max_damage,max_hp,current_hp,x,y,attack_range,move_range):
         self.name = name
         self.min_damage = min_damage
         self.max_damage = max_damage
@@ -7,7 +7,8 @@ class characterDataManager:
         self.current_hp = current_hp
         self.x = x
         self.y = y
-        self.speed = speed
+        self.attack_range = attack_range
+        self.move_range = move_range
 
     def decreaseHp(self,damage):
         self.current_hp-=damage

@@ -31,10 +31,11 @@ for i in range(len(all_env_file_list)):
 #读取并初始化章节信息
 with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
     chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
-    block_x = chapter_info["map"]["size"][0]
-    block_y =  chapter_info["map"]["size"][1]
+    block_y = len(chapter_info["map"])
+    block_x = len(chapter_info["map"][0])
     characters = chapter_info["character"]
     sangvisFerris = chapter_info["sangvisFerri"]
+    map = chapter_info["map"]
 block_x_length = window_x/block_x
 block_y_length = window_y/block_y
 
@@ -91,81 +92,85 @@ def action_displayer(gif_dic,action,x,y,isContinue=True):
     if gif_dic[action][1] == gif_dic[action][0][1]:
         gif_dic[action][1] = 0
 
-#随机化山的结构
-randMountainNumLists = []
-for i in range(block_y):
-    randMountainNumList = []
-    for a in range(block_x):
-        if i==0 or i==block_y-1 or a==0 or a==block_x-1:
-            randMountainNumList.append(str(random.randint(0,7)))
-        else:
-            randMountainNumList.append(str(random.randint(0,3)))
-    randMountainNumLists.append(randMountainNumList)
+#生存随机方块名
+map_img_list = []
+for i in range(len(map)):
+    map_img_per_line = []
+    for a in range(len(map[i])):
+        if map[i][a] == 0:
+            img_name = "mountainSnow"+str(random.randint(0,7))
+        elif map[i][a] == 1:
+            img_name = "plainsColdSnowCovered"+str(random.randint(0,3))
+        elif map[i][a] == 2:
+            img_name = "forestPineSnowCovered"+str(random.randint(0,4))
+        elif map[i][a] == 3:
+            img_name = "ocean"+str(random.randint(0,4))
+        map_img_per_line.append(img_name)
+    map_img_list.append(map_img_per_line)
 
 #初始化角色信息
-#hpManager(self, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，移动速度)
-characters_data = characterDataManager("sv-98",50,100,500,500,4,8,5)
+#hpManager(self, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围)
+characters_data = characterDataManager("sv-98",50,100,500,500,6,8,8,3)
 sangvisFerris_data = {}
 for enemy in sangvisFerris:
-    sangvisFerris_data[enemy] = characterDataManager(enemy,50,100,500,500,10,40,10)
+    sangvisFerris_data[enemy] = characterDataManager(enemy,50,100,500,500,10,40,10,3)
 
 #加载子弹图片
 bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("img/others/bullet.png")), (int(block_x_length/6), int(block_y_length/12)))
 bullets_list = []
 
-#测试
+#绿色方块/方块标准
 green = pygame.transform.scale(pygame.image.load(os.path.join("img/others/green.png")), (int(block_x_length), int(block_y_length)))
-green.set_alpha(150)
+green.set_alpha(100)
+red = pygame.transform.scale(pygame.image.load(os.path.join("img/others/red.png")), (int(block_x_length), int(block_y_length)))
+red.set_alpha(100)
+new_block_type = 0
+per_block_width = green.get_width()
+per_block_height = green.get_height()
+green_hide = True
 # 游戏主循环
 while True:
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 exit()
-    #场景加载
-    for i in range(block_y):
-        for a in range(block_x):
-            if i == 0:
-                img = pygame.transform.scale(env_img_list["mountainSnow"+randMountainNumLists[i][a]], (int(block_x_length), int(block_y_length*1.5)))
-            elif i == block_y-1:
-                    img = pygame.transform.scale(env_img_list["mountainSnow"+randMountainNumLists[i][a]], (int(block_x_length), int(block_y_length*1.5)))
-            else:
-                if a == 0:
-                    img = pygame.transform.scale(env_img_list["mountainSnow"+randMountainNumLists[i][a]], (int(block_x_length), int(block_y_length*1.5)))
-                elif a == block_x-1:
-                    img = pygame.transform.scale(env_img_list["mountainSnow"+randMountainNumLists[i][a]], (int(block_x_length), int(block_y_length*1.5)))
+        elif event.type == MOUSEBUTTONDOWN:
+            mouse_x,mouse_y=pygame.mouse.get_pos()
+            block_get_click_x = int(mouse_x/green.get_width())
+            block_get_click_y = int(mouse_y/green.get_height())
+            if block_get_click_x == characters_data.x and block_get_click_y == characters_data.y:
+                if green_hide == True:
+                    green_hide = False
                 else:
-                    img = pygame.transform.scale(env_img_list["plainsColdSnowCovered"+randMountainNumLists[i][a]], (int(block_x_length), int(block_y_length*1.5)))
-            screen.blit(img,(a*block_x_length,i*block_y_length-block_x_length/2))
-    for y in range(block_y):
-        for x in range(block_x):
-            screen.blit(green,(x*green.get_width(),y*green.get_height()))
+                    green_hide = True
+            if green_hide == False:
+                if characters_data.x-characters_data.move_range-1<block_get_click_x<characters_data.x+characters_data.move_range+1 and characters_data.y == block_get_click_y:
+                    if map[characters_data.y][block_get_click_x] == 1 or map[characters_data.y][block_get_click_x] ==2:
+                        characters_data.x = block_get_click_x
+                elif characters_data.y-characters_data.move_range-1<block_get_click_y<characters_data.y+characters_data.move_range+1 and characters_data.x == block_get_click_x:
+                    if map[block_get_click_y][characters_data.x] ==1 or map[block_get_click_y][characters_data.x] ==2:
+                        characters_data.y = block_get_click_y
+
+    #加载地图
+    for i in range(len(map_img_list)):
+        for a in range(len(map_img_list[i])):
+            img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
+            screen.blit(img_display,(a*block_x_length,i*block_y_length-block_x_length/2))
+    if green_hide ==False:
+        #for y in range(block_y):
+        for x in range(characters_data.x-characters_data.move_range,characters_data.x+characters_data.move_range+1):
+            if map[characters_data.y][x] == 0 or map[characters_data.y][x] == 3:
+                screen.blit(red,(x*green.get_width(),characters_data.y*green.get_height()))
+            else:
+                screen.blit(green,(x*green.get_width(),characters_data.y*green.get_height()))
+        for y in range(characters_data.y-characters_data.move_range,characters_data.y+characters_data.move_range+1):
+            if map[y][characters_data.x] == 0 or map[y][characters_data.x] == 3:
+                screen.blit(red,(characters_data.x*green.get_width(),y*green.get_height()))
+            else:
+                screen.blit(green,(characters_data.x*green.get_width(),y*green.get_height()))
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        if keys[pygame.K_a]:
-            characters_data.x -= characters_data.speed
-        if keys[pygame.K_d]:
-            characters_data.x += characters_data.speed
-        characters_data.y -= characters_data.speed
-        action_displayer(characters_dic[characters_data.name],"move",characters_data.x,characters_data.y)
-    elif keys[pygame.K_s]:
-        if keys[pygame.K_a]:
-            characters_data.x -= characters_data.speed
-        if keys[pygame.K_d]:
-            characters_data.x += characters_data.speed
-        characters_data.y += characters_data.speed
-        action_displayer(characters_dic[characters_data.name],"move",characters_data.x,characters_data.y)
-    elif keys[pygame.K_a]:
-        characters_data.x -= characters_data.speed
-        action_displayer(characters_dic[characters_data.name],"move",characters_data.x,characters_data.y)
-    elif keys[pygame.K_d]:
-        characters_data.x += characters_data.speed
-        action_displayer(characters_dic[characters_data.name],"move",characters_data.x,characters_data.y)
-    elif keys[pygame.K_f]:
-        action_displayer(characters_dic[characters_data.name],"attack",characters_data.x,characters_data.y)
-    else:
-        action_displayer(characters_dic[characters_data.name],"wait",characters_data.x,characters_data.y)
+    action_displayer(characters_dic[characters_data.name],"wait",characters_data.x,characters_data.y)
 
     for per_bullet in bullets_list:
         screen.blit(bullet_img, (per_bullet.x,per_bullet.y))
