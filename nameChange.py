@@ -2,7 +2,6 @@ import os
 character="vespid"
 #action=["attack","die","move","skill","victory","victoryloop","wait"]
 action=["attack","die","move","wait"]
-
 for a in range(len(action)):
     path="img/enemies/"+character+"/"+action[a]+"/"
     f=os.listdir(path)

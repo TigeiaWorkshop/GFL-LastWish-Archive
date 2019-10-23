@@ -1,3 +1,5 @@
-$map: {
-    size: [32,18]
+map: {
+    size: [32,16]
     }
+character: ["gsh-18","pp1901","asval","sv-98"]
+sangvisFerri: ["guard","jaeger","prowler","ripper","vespid"]

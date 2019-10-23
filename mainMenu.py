@@ -54,17 +54,15 @@ while True:
     background_img_list.append(pygame.image.load(os.path.join(path)).convert_alpha())
     percent_of_img_loaded = '{:.0f}%'.format(background_img_id/374*100)
     background_img_id+=1
-    if background_img_id == 1:
-    #if background_img_id == 375:
+    if background_img_id == 375:
         break
     screen.blit(loading_img, (0,0))
     screen.blit(my_font.render(str(percent_of_img_loaded), True, (255, 255, 255)), (10,10))
     pygame.display.update()
 background_img_id = 0
 menu_type = 0
-
 txt_location = int(window_x*2/3)
-print(txt_location)
+
 # 游戏主循环
 while True:
     for event in pygame.event.get():
@@ -102,12 +100,10 @@ while True:
         screen.blit(back_button, (txt_location,window_y-150))
 
     background_img_id += 1
-    if background_img_id == 1:
-    #if background_img_id == 374:
+    if background_img_id == 374:
         background_img_id = 0
     while pygame.mixer.music.get_busy() != 1:
         pygame.mixer.music.load('music/White_Front.mp3')
         pygame.mixer.music.play(loops=9999, start=0.0)
-
+    time.sleep(0.04)
     pygame.display.update()
-    time.sleep(1/25)
