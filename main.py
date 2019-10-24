@@ -84,6 +84,7 @@ for sangvisFerri in sangvisFerris:
 #加载动作：接受一个带有[动作]的gif字典，完成对应的指令
 def action_displayer(gif_dic,action,x,y,isContinue=True):
     global isWaiting
+    global round
     img_of_char = gif_dic[action][0][0][gif_dic[action][1]]
     screen.blit(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
     gif_dic[action][1]+=1
@@ -100,6 +101,9 @@ def action_displayer(gif_dic,action,x,y,isContinue=True):
         if gif_dic[action][1] == gif_dic[action][0][1]:
             gif_dic[action][1] = 0
             isWaiting = True
+            round = 'sangvisFerri'
+            direction_to_move = -1
+            how_many_moved = 0
             sangvisFerris_data["ripper"].decreaseHp(random.randint(characters_data.min_damage,characters_data.max_damage))
 
 
@@ -141,6 +145,7 @@ per_block_height = green.get_height()
 green_hide = True
 action = "wait"
 isWaiting = True
+round="player"
 
 #加载选择菜单：
 select_menu = pygame.transform.scale(pygame.image.load(os.path.join("img/others/select_menu.png")), (int(block_x_length)*3, int(block_y_length)*3))
@@ -149,40 +154,6 @@ select_menu_show = False
 
 # 游戏主循环
 while True:
-    for event in pygame.event.get():
-        if event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
-                exit()
-        elif event.type == MOUSEBUTTONDOWN:
-            mouse_x,mouse_y=pygame.mouse.get_pos()
-            block_get_click_x = int(mouse_x/green.get_width())
-            block_get_click_y = int(mouse_y/green.get_height())
-            if green_hide == False:
-                if characters_data.x-characters_data.move_range-1<block_get_click_x<characters_data.x+characters_data.move_range+1 and characters_data.y == block_get_click_y:
-                    if map[characters_data.y][block_get_click_x] == 1 or map[characters_data.y][block_get_click_x] ==2:
-                        temp_x = characters_data.x
-                        temp_max = block_get_click_x
-                        isWaiting = "LEFTANDRIGHT"
-                elif characters_data.y-characters_data.move_range-1<block_get_click_y<characters_data.y+characters_data.move_range+1 and characters_data.x == block_get_click_x:
-                    if map[block_get_click_y][characters_data.x] ==1 or map[block_get_click_y][characters_data.x] ==2:
-                        temp_y = characters_data.y
-                        temp_max = block_get_click_y
-                        isWaiting = "TOPANDBOTTOM"
-                if characters_data.x-characters_data.attack_range-1<block_get_click_x<characters_data.x+characters_data.attack_range+1 and characters_data.y == block_get_click_y:
-                    if block_get_click_x == sangvisFerris_data["ripper"].x and  block_get_click_y == sangvisFerris_data["ripper"].y:
-                        isWaiting = "ATTACKING"
-                elif characters_data.y-characters_data.attack_range-1<block_get_click_y<characters_data.y+characters_data.attack_range+1 and characters_data.x == block_get_click_x:
-                    if block_get_click_x == sangvisFerris_data["ripper"].x and  block_get_click_y == sangvisFerris_data["ripper"].y:
-                        isWaiting = "ATTACKING"
-            if block_get_click_x == characters_data.x and block_get_click_y == characters_data.y:
-                if green_hide == True:
-                    action = "move"
-                    green_hide = False
-                else:
-                    green_hide = True
-                    isWaiting = True
-                    action = "wait"
-
     #加载地图
     for i in range(len(map_img_list)):
         for a in range(len(map_img_list[i])):
@@ -213,51 +184,140 @@ while True:
                         screen.blit(green,(characters_data.x*green.get_width(),y*green.get_height()+7))
                 else:
                     screen.blit(red,(characters_data.x*green.get_width(),y*green.get_height()+7))
-    #角色动画
-    if isWaiting == True:
-        action_displayer(characters_dic[characters_data.name],action,characters_data.x,characters_data.y)
-    elif isWaiting == "LEFTANDRIGHT":
-        if temp_x < temp_max:
-            temp_x+=0.1
-            action_displayer(characters_dic[characters_data.name],action,temp_x,characters_data.y)
-            if temp_x >= temp_max:
-                isWaiting = True
-                characters_data.x = block_get_click_x
-        elif temp_x > temp_max:
-            temp_x-=0.1
-            action_displayer(characters_dic[characters_data.name],action,temp_x,characters_data.y)
-            if temp_x <= temp_max:
-                isWaiting = True
-                characters_data.x = block_get_click_x
-    elif isWaiting == "TOPANDBOTTOM":
-        if temp_y < temp_max:
-            temp_y+=0.1
-            action_displayer(characters_dic[characters_data.name],action,characters_data.x,temp_y,)
-            if temp_y >= temp_max:
-                isWaiting = True
-                characters_data.y = block_get_click_y
-        elif temp_y > temp_max:
-            temp_y-=0.1
-            action_displayer(characters_dic[characters_data.name],action,characters_data.x,temp_y,)
-            if temp_y <= temp_max:
-                isWaiting = True
-                characters_data.y = block_get_click_y
-    elif isWaiting == "ATTACKING":
-            action_displayer(characters_dic[characters_data.name],"attack",characters_data.x,characters_data.y,False)
-    if sangvisFerris_data["ripper"].current_hp>0:
-        action_displayer(sangvisFerris_dic["ripper"],"wait",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y)
-    elif sangvisFerris_data["ripper"].current_hp<=0:
-        action_displayer(sangvisFerris_dic["ripper"],"die",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y,"die")
-    
-    #子弹
-    for per_bullet in bullets_list:
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_1]:
-            new_block_type = 0
-        screen.blit(bullet_img, (per_bullet.x,per_bullet.y))
-        per_bullet.x += 100
-        if per_bullet.x > window_x:
-            bullets_list.remove(per_bullet)
+    if round == "player":
+        for event in pygame.event.get():
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    exit()
+            elif event.type == MOUSEBUTTONDOWN:
+                mouse_x,mouse_y=pygame.mouse.get_pos()
+                block_get_click_x = int(mouse_x/green.get_width())
+                block_get_click_y = int(mouse_y/green.get_height())
+                if green_hide == False:
+                    if characters_data.x-characters_data.move_range-1<block_get_click_x<characters_data.x+characters_data.move_range+1 and characters_data.y == block_get_click_y:
+                        if map[characters_data.y][block_get_click_x] == 1 or map[characters_data.y][block_get_click_x] ==2:
+                            temp_x = characters_data.x
+                            temp_max = block_get_click_x
+                            isWaiting = "LEFTANDRIGHT"
+                    elif characters_data.y-characters_data.move_range-1<block_get_click_y<characters_data.y+characters_data.move_range+1 and characters_data.x == block_get_click_x:
+                        if map[block_get_click_y][characters_data.x] ==1 or map[block_get_click_y][characters_data.x] ==2:
+                            temp_y = characters_data.y
+                            temp_max = block_get_click_y
+                            isWaiting = "TOPANDBOTTOM"
+                    if characters_data.x-characters_data.attack_range-1<block_get_click_x<characters_data.x+characters_data.attack_range+1 and characters_data.y == block_get_click_y:
+                        if block_get_click_x == sangvisFerris_data["ripper"].x and  block_get_click_y == sangvisFerris_data["ripper"].y:
+                            isWaiting = "ATTACKING"
+                    elif characters_data.y-characters_data.attack_range-1<block_get_click_y<characters_data.y+characters_data.attack_range+1 and characters_data.x == block_get_click_x:
+                        if block_get_click_x == sangvisFerris_data["ripper"].x and  block_get_click_y == sangvisFerris_data["ripper"].y:
+                            isWaiting = "ATTACKING"
+                if block_get_click_x == characters_data.x and block_get_click_y == characters_data.y:
+                    if green_hide == True:
+                        action = "move"
+                        green_hide = False
+                    else:
+                        green_hide = True
+                        isWaiting = True
+                        action = "wait"
+
+        #角色动画
+        if isWaiting == True:
+            action_displayer(characters_dic[characters_data.name],action,characters_data.x,characters_data.y)
+        elif isWaiting == "LEFTANDRIGHT":
+            if temp_x < temp_max:
+                temp_x+=0.1
+                action_displayer(characters_dic[characters_data.name],action,temp_x,characters_data.y)
+                if temp_x >= temp_max:
+                    isWaiting = True
+                    characters_data.x = block_get_click_x
+                    round = 'sangvisFerri'
+                    direction_to_move = -1
+                    how_many_moved = 0
+            elif temp_x > temp_max:
+                temp_x-=0.1
+                action_displayer(characters_dic[characters_data.name],action,temp_x,characters_data.y)
+                if temp_x <= temp_max:
+                    isWaiting = True
+                    characters_data.x = block_get_click_x
+                    round = 'sangvisFerri'
+                    direction_to_move = -1
+                    how_many_moved = 0
+        elif isWaiting == "TOPANDBOTTOM":
+            if temp_y < temp_max:
+                temp_y+=0.1
+                action_displayer(characters_dic[characters_data.name],action,characters_data.x,temp_y,)
+                if temp_y >= temp_max:
+                    isWaiting = True
+                    characters_data.y = block_get_click_y
+                    round = 'sangvisFerri'
+                    direction_to_move = -1
+                    how_many_moved = 0
+            elif temp_y > temp_max:
+                temp_y-=0.1
+                action_displayer(characters_dic[characters_data.name],action,characters_data.x,temp_y,)
+                if temp_y <= temp_max:
+                    isWaiting = True
+                    characters_data.y = block_get_click_y
+                    round = 'sangvisFerri'
+                    direction_to_move = -1
+                    how_many_moved = 0
+        elif isWaiting == "ATTACKING":
+                action_displayer(characters_dic[characters_data.name],"attack",characters_data.x,characters_data.y,False)
+        if sangvisFerris_data["ripper"].current_hp>0:
+            action_displayer(sangvisFerris_dic["ripper"],"wait",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y)
+        elif sangvisFerris_data["ripper"].current_hp<=0:
+            action_displayer(sangvisFerris_dic["ripper"],"die",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y,"die")
+
+        #子弹
+        for per_bullet in bullets_list:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_1]:
+                new_block_type = 0
+            screen.blit(bullet_img, (per_bullet.x,per_bullet.y))
+            per_bullet.x += 100
+            if per_bullet.x > window_x:
+                bullets_list.remove(per_bullet)
+
+    if round == "sangvisFerri":
+        for event in pygame.event.get():
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    exit()
+        green_hide = True
+        action_displayer(characters_dic[characters_data.name],"wait",characters_data.x,characters_data.y,)
+        if direction_to_move == -1:
+            direction_to_move = random.randint(0,3) #0左1上2右3下
+        if direction_to_move == 0:
+            how_many_to_move = sangvisFerris_data["ripper"].x-sangvisFerris_data["ripper"].move_range
+            if how_many_to_move<0:
+                how_many_to_move=0
+            action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x-how_many_moved,sangvisFerris_data["ripper"].y)
+        elif direction_to_move == 2:
+            how_many_to_move = sangvisFerris_data["ripper"].x+sangvisFerris_data["ripper"].move_range
+            if how_many_to_move>block_x:
+                how_many_to_move=block_x
+            action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x+how_many_moved,sangvisFerris_data["ripper"].y)
+        elif direction_to_move == 1:
+            how_many_to_move = sangvisFerris_data["ripper"].y-sangvisFerris_data["ripper"].move_range
+            if how_many_to_move<0:
+                how_many_to_move=0
+            action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y-how_many_moved)
+        elif direction_to_move == 3:
+            how_many_to_move = sangvisFerris_data["ripper"].y+sangvisFerris_data["ripper"].move_range
+            if how_many_to_move>block_y:
+                how_many_to_move=block_y
+            action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y+how_many_moved)
+        if how_many_moved > how_many_to_move:
+            if direction_to_move == 0:
+                sangvisFerris_data["ripper"].x-=sangvisFerris_data["ripper"].move_range
+            elif direction_to_move == 2:
+                sangvisFerris_data["ripper"].x+=sangvisFerris_data["ripper"].move_range
+            elif direction_to_move == 1:
+                sangvisFerris_data["ripper"].y-=sangvisFerris_data["ripper"].move_range
+            elif direction_to_move == 3:
+                sangvisFerris_data["ripper"].y+=sangvisFerris_data["ripper"].move_range
+            round = "player"
+        else:
+            how_many_moved+=0.1
 
     while pygame.mixer.music.get_busy() != 1:
         pygame.mixer.music.load('music/Snowflake.mp3')
