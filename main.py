@@ -28,6 +28,7 @@ for i in range(len(all_env_file_list)):
     img_name = all_env_file_list[i].replace("img","").replace("environment","").replace(".png","").replace("\\","").replace("/","")
     env_img_list[img_name] = pygame.image.load(os.path.join(all_env_file_list[i])).convert_alpha()
 
+my_font =pygame.font.SysFont('simsunnsimsun',25)
 #读取并初始化章节信息
 with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
     chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -36,9 +37,11 @@ with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
     characters = chapter_info["character"]
     sangvisFerris = chapter_info["sangvisFerri"]
     map = chapter_info["map"]
+    dialog1 = chapter_info["dialog"]
+    dialog2 = chapter_info["dialog2"]
 block_x_length = window_x/block_x
 block_y_length = window_y/block_y
-
+    #dialog1[i][-1] = my_font.render(dialog1[i][-1], True, (255,255,255))
 #动图制作模块：接受一个友方角色名和动作，返回对应角色动作list和
 def character_creater(character_name,action,kind="character"):
     global block_x_length
@@ -97,14 +100,6 @@ def action_displayer(gif_dic,action,x,y,isContinue=True):
     if isContinue=="die":
         if gif_dic[action][1] == gif_dic[action][0][1]:
             gif_dic[action][1] -= 1
-    else:
-        if gif_dic[action][1] == gif_dic[action][0][1]:
-            gif_dic[action][1] = 0
-            isWaiting = True
-            round = 'sangvisFerri'
-            direction_to_move = -1
-            how_many_moved = 0
-            sangvisFerris_data["ripper"].decreaseHp(random.randint(characters_data.min_damage,characters_data.max_damage))
 
 
 #生存随机方块名
@@ -152,8 +147,49 @@ select_menu = pygame.transform.scale(pygame.image.load(os.path.join("img/others/
 select_menu.set_alpha(200)
 select_menu_show = False
 
+#故事前
+helianthus = pygame.image.load(os.path.join("img/npc/helianthus.png"))
+kryuger = pygame.image.load(os.path.join("img/npc/kryuger.png"))
+sv98_big_img = pygame.image.load(os.path.join("img/npc/sv98.png"))
+duel = pygame.transform.scale(pygame.image.load(os.path.join("img/others/duel.jpg")),(window_x,window_y))
+snowfield = pygame.transform.scale(pygame.image.load(os.path.join("img/others/snowfield.jpg")),(window_x,window_y))
+dialoguebox = pygame.transform.scale(pygame.image.load(os.path.join("img/others/dialoguebox.png")),(window_x-200,300))
+display_num = 0
+dialog1_display = True
+while len(dialog1)!=0 and dialog1_display == True:
+    for event in pygame.event.get():
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                exit()
+        elif event.type == MOUSEBUTTONDOWN:
+            display_num += 1
+            if display_num >= len(dialog1):
+                display_num -= 1
+                dialog1_display = False
+    if len(dialog1[display_num])==3:
+        display_name = my_font.render(dialog1[display_num][0], True, (255,255,255))
+        display_content = my_font.render(dialog1[display_num][-1], True, (255,255,255))
+        #背景
+        screen.blit(duel,(0,0))
+        #角色
+        screen.blit(helianthus,(-100,100))
+        screen.blit(kryuger,(window_x-1000,100))
+    if len(dialog1[display_num])==2:
+        display_name = my_font.render(dialog1[display_num][0], True, (255,255,255))
+        display_content = my_font.render(dialog1[display_num][1], True, (255,255,255))
+        #背景
+        screen.blit(snowfield,(0,0))
+        #角色
+        big_img_x = (window_x - sv98_big_img.get_width())/2
+        screen.blit(sv98_big_img,(big_img_x,100))
+    #对话框内容
+    screen.blit(dialoguebox,(100,window_y-dialoguebox.get_height()-50))
+    screen.blit(display_name,(500,window_y-dialoguebox.get_height()))
+    screen.blit(display_content,(440,window_y-dialoguebox.get_height()+70))
+    pygame.display.update()
 # 游戏主循环
-while True:
+battle=True
+while battle==True:
     #加载地图
     for i in range(len(map_img_list)):
         for a in range(len(map_img_list[i])):
@@ -189,6 +225,11 @@ while True:
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     exit()
+                if event.key == K_t:
+                    print("敌人x:",sangvisFerris_data["ripper"].x)
+                    print("敌人y:",sangvisFerris_data["ripper"].y)
+                    print("上一个移动的方向:",direction_to_move)
+                    exit()
             elif event.type == MOUSEBUTTONDOWN:
                 mouse_x,mouse_y=pygame.mouse.get_pos()
                 block_get_click_x = int(mouse_x/green.get_width())
@@ -218,6 +259,8 @@ while True:
                         green_hide = True
                         isWaiting = True
                         action = "wait"
+                if characters_data.x ==30 and characters_data.y ==14:
+                    battle=False
 
         #角色动画
         if isWaiting == True:
@@ -229,18 +272,16 @@ while True:
                 if temp_x >= temp_max:
                     isWaiting = True
                     characters_data.x = block_get_click_x
-                    round = 'sangvisFerri'
                     direction_to_move = -1
-                    how_many_moved = 0
+                    round = 'sangvisFerri'
             elif temp_x > temp_max:
                 temp_x-=0.1
                 action_displayer(characters_dic[characters_data.name],action,temp_x,characters_data.y)
                 if temp_x <= temp_max:
                     isWaiting = True
                     characters_data.x = block_get_click_x
-                    round = 'sangvisFerri'
                     direction_to_move = -1
-                    how_many_moved = 0
+                    round = 'sangvisFerri'
         elif isWaiting == "TOPANDBOTTOM":
             if temp_y < temp_max:
                 temp_y+=0.1
@@ -248,20 +289,24 @@ while True:
                 if temp_y >= temp_max:
                     isWaiting = True
                     characters_data.y = block_get_click_y
-                    round = 'sangvisFerri'
                     direction_to_move = -1
-                    how_many_moved = 0
+                    round = 'sangvisFerri'
             elif temp_y > temp_max:
                 temp_y-=0.1
                 action_displayer(characters_dic[characters_data.name],action,characters_data.x,temp_y,)
                 if temp_y <= temp_max:
                     isWaiting = True
                     characters_data.y = block_get_click_y
-                    round = 'sangvisFerri'
                     direction_to_move = -1
-                    how_many_moved = 0
+                    round = 'sangvisFerri'
         elif isWaiting == "ATTACKING":
-                action_displayer(characters_dic[characters_data.name],"attack",characters_data.x,characters_data.y,False)
+            action_displayer(characters_dic[characters_data.name],"attack",characters_data.x,characters_data.y,False)
+            if characters_dic[characters_data.name]["attack"][1] == characters_dic[characters_data.name]["attack"][0][1]:
+                sangvisFerris_data["ripper"].decreaseHp(random.randint(characters_data.min_damage,characters_data.max_damage))
+                isWaiting = True
+                direction_to_move = -1
+                round = 'sangvisFerri'
+                characters_dic[characters_data.name]["attack"][1] = 0
         if sangvisFerris_data["ripper"].current_hp>0:
             action_displayer(sangvisFerris_dic["ripper"],"wait",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y)
         elif sangvisFerris_data["ripper"].current_hp<=0:
@@ -278,50 +323,94 @@ while True:
                 bullets_list.remove(per_bullet)
 
     if round == "sangvisFerri":
-        for event in pygame.event.get():
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    exit()
-        green_hide = True
-        action_displayer(characters_dic[characters_data.name],"wait",characters_data.x,characters_data.y,)
-        if direction_to_move == -1:
-            direction_to_move = random.randint(0,3) #0左1上2右3下
-        if direction_to_move == 0:
-            how_many_to_move = sangvisFerris_data["ripper"].x-sangvisFerris_data["ripper"].move_range
-            if how_many_to_move<0:
-                how_many_to_move=0
-            action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x-how_many_moved,sangvisFerris_data["ripper"].y)
-        elif direction_to_move == 2:
-            how_many_to_move = sangvisFerris_data["ripper"].x+sangvisFerris_data["ripper"].move_range
-            if how_many_to_move>block_x:
-                how_many_to_move=block_x
-            action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x+how_many_moved,sangvisFerris_data["ripper"].y)
-        elif direction_to_move == 1:
-            how_many_to_move = sangvisFerris_data["ripper"].y-sangvisFerris_data["ripper"].move_range
-            if how_many_to_move<0:
-                how_many_to_move=0
-            action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y-how_many_moved)
-        elif direction_to_move == 3:
-            how_many_to_move = sangvisFerris_data["ripper"].y+sangvisFerris_data["ripper"].move_range
-            if how_many_to_move>block_y:
-                how_many_to_move=block_y
-            action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y+how_many_moved)
-        if how_many_moved > how_many_to_move:
+        if sangvisFerris_data["ripper"].current_hp>0:
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        exit()
+            green_hide = True
+            action_displayer(characters_dic[characters_data.name],"wait",characters_data.x,characters_data.y,)
+            if direction_to_move == -1:
+                direction_to_move = random.randint(0,3) #0左1上2右3下
+                how_many_moved = 0
+                if direction_to_move == 0:
+                    how_many_to_move = sangvisFerris_data["ripper"].x-sangvisFerris_data["ripper"].move_range
+                elif direction_to_move == 2:
+                    how_many_to_move = sangvisFerris_data["ripper"].x+sangvisFerris_data["ripper"].move_range
+                elif direction_to_move == 1:
+                    how_many_to_move = sangvisFerris_data["ripper"].y-sangvisFerris_data["ripper"].move_range
+                elif direction_to_move == 3:
+                    how_many_to_move = sangvisFerris_data["ripper"].y+sangvisFerris_data["ripper"].move_range
             if direction_to_move == 0:
-                sangvisFerris_data["ripper"].x-=sangvisFerris_data["ripper"].move_range
+                action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x-how_many_moved,sangvisFerris_data["ripper"].y)
             elif direction_to_move == 2:
-                sangvisFerris_data["ripper"].x+=sangvisFerris_data["ripper"].move_range
+                action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x+how_many_moved,sangvisFerris_data["ripper"].y)
             elif direction_to_move == 1:
-                sangvisFerris_data["ripper"].y-=sangvisFerris_data["ripper"].move_range
+                action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y-how_many_moved)
             elif direction_to_move == 3:
-                sangvisFerris_data["ripper"].y+=sangvisFerris_data["ripper"].move_range
-            round = "player"
+                action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y+how_many_moved)
+            if how_many_moved > sangvisFerris_data["ripper"].move_range:
+                if direction_to_move == 0:
+                    sangvisFerris_data["ripper"].x-=sangvisFerris_data["ripper"].move_range
+                elif direction_to_move == 2:
+                    sangvisFerris_data["ripper"].x+=sangvisFerris_data["ripper"].move_range
+                elif direction_to_move == 1:
+                    sangvisFerris_data["ripper"].y-=sangvisFerris_data["ripper"].move_range
+                elif direction_to_move == 3:
+                    sangvisFerris_data["ripper"].y+=sangvisFerris_data["ripper"].move_range
+                round = "player"
+            else:
+                if direction_to_move == 0:
+                    if map[sangvisFerris_data["ripper"].y][int(sangvisFerris_data["ripper"].x-how_many_moved-1)]==0 or map[sangvisFerris_data["ripper"].y][int(sangvisFerris_data["ripper"].x-how_many_moved-1)]==3:
+                        sangvisFerris_data["ripper"].x-=int(how_many_moved)
+                        round = "player"
+                elif direction_to_move == 2:
+                    if map[sangvisFerris_data["ripper"].y][int(sangvisFerris_data["ripper"].x+how_many_moved-1)]==0 or map[sangvisFerris_data["ripper"].y][int(sangvisFerris_data["ripper"].x+how_many_moved+1)]==3:
+                        sangvisFerris_data["ripper"].x+=int(how_many_moved)
+                        round = "player"
+                elif direction_to_move == 1:
+                    if map[int(sangvisFerris_data["ripper"].y-how_many_moved-1)][sangvisFerris_data["ripper"].x]==0 or map[int(sangvisFerris_data["ripper"].y-how_many_moved-1)][sangvisFerris_data["ripper"].x]==3:
+                        sangvisFerris_data["ripper"].y-=int(how_many_moved)
+                        round = "player"
+                elif direction_to_move == 3:
+                    if map[int(sangvisFerris_data["ripper"].y+how_many_moved-1)][sangvisFerris_data["ripper"].x]==0 or map[int(sangvisFerris_data["ripper"].y+how_many_moved-1)][sangvisFerris_data["ripper"].x]==3:
+                        sangvisFerris_data["ripper"].y+=int(how_many_moved)
+                        round = "player"
+                how_many_moved+=0.1
         else:
-            how_many_moved+=0.1
-
+            round = "player"
+    """
     while pygame.mixer.music.get_busy() != 1:
         pygame.mixer.music.load('music/Snowflake.mp3')
         pygame.mixer.music.play(loops=9999, start=0.0)
-
+    """
+    #胜利条件
     time.sleep(0.025)
+    pygame.display.update()
+
+#故事后
+kalina_img_list = []
+for i in range(7):
+    kalina_img_list.append(pygame.image.load(os.path.join("img/npc/kalina/kalina_"+str(i)+".png")))
+researchJPG = pygame.transform.scale(pygame.image.load(os.path.join("img/others/research.jpg")),(window_x,window_y))
+display_num = 0
+dialog2_display = True
+while len(dialog2)!=0 and dialog2_display == True:
+    for event in pygame.event.get():
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                exit()
+        elif event.type == MOUSEBUTTONDOWN:
+            display_num += 1
+            if display_num >= len(dialog2):
+                dialog2_display = False
+                display_num -= 1
+    display_name = my_font.render(dialog2[display_num][0], True, (255,255,255))
+    display_content = my_font.render(dialog2[display_num][-1], True, (255,255,255))
+    screen.blit(researchJPG,(0,0))
+    big_img_x = (window_x - kalina_img_list[2].get_width())/2
+    screen.blit(kalina_img_list[display_num+1],(big_img_x,100))
+    screen.blit(dialoguebox,(100,window_y-dialoguebox.get_height()-50))
+    screen.blit(display_name,(500,window_y-dialoguebox.get_height()))
+    screen.blit(display_content,(440,window_y-dialoguebox.get_height()+70))
     pygame.display.update()
