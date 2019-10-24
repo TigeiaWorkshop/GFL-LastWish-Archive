@@ -115,7 +115,7 @@ while True:
             screen.blit(img_display,(a*block_x_length,i*block_y_length-block_x_length/2))
     for y in range(block_y):
         for x in range(block_x):
-            screen.blit(green,(x*green.get_width(),y*green.get_height()))
+            screen.blit(green,(x*green.get_width(),y*green.get_height()+7))
     keys = pygame.key.get_pressed()
     if keys[pygame.K_1]:
         new_block_type = 0

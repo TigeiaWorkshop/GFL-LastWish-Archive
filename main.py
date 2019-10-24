@@ -83,14 +83,25 @@ for sangvisFerri in sangvisFerris:
 
 #加载动作：接受一个带有[动作]的gif字典，完成对应的指令
 def action_displayer(gif_dic,action,x,y,isContinue=True):
+    global isWaiting
     img_of_char = gif_dic[action][0][0][gif_dic[action][1]]
     screen.blit(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
     gif_dic[action][1]+=1
     if gif_dic[action][1] == 5 and action == "attack":
         pass
         #bullets_list.append(Bullet(characters_data.x+img_of_char.get_width()-20,characters_data.y+img_of_char.get_height()/2-5,300))
-    if gif_dic[action][1] == gif_dic[action][0][1]:
-        gif_dic[action][1] = 0
+    if isContinue==True:
+        if gif_dic[action][1] == gif_dic[action][0][1]:
+            gif_dic[action][1] = 0
+    if isContinue=="die":
+        if gif_dic[action][1] == gif_dic[action][0][1]:
+            gif_dic[action][1] -= 1
+    else:
+        if gif_dic[action][1] == gif_dic[action][0][1]:
+            gif_dic[action][1] = 0
+            isWaiting = True
+            sangvisFerris_data["ripper"].decreaseHp(random.randint(characters_data.min_damage,characters_data.max_damage))
+
 
 #生存随机方块名
 map_img_list = []
@@ -110,10 +121,10 @@ for i in range(len(map)):
 
 #初始化角色信息
 #hpManager(self, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围)
-characters_data = characterDataManager("sv-98",50,100,500,500,3,8,8,3)
+characters_data = characterDataManager("sv-98",150,200,500,500,3,8,8,3)
 sangvisFerris_data = {}
 for enemy in sangvisFerris:
-    sangvisFerris_data[enemy] = characterDataManager(enemy,50,100,500,500,10,40,10,3)
+    sangvisFerris_data[enemy] = characterDataManager(enemy,50,100,500,500,5,4,5,3)
 
 #加载子弹图片
 bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("img/others/bullet.png")), (int(block_x_length/6), int(block_y_length/12)))
@@ -130,6 +141,12 @@ per_block_height = green.get_height()
 green_hide = True
 action = "wait"
 isWaiting = True
+
+#加载选择菜单：
+select_menu = pygame.transform.scale(pygame.image.load(os.path.join("img/others/select_menu.png")), (int(block_x_length)*3, int(block_y_length)*3))
+select_menu.set_alpha(200)
+select_menu_show = False
+
 # 游戏主循环
 while True:
     for event in pygame.event.get():
@@ -151,6 +168,12 @@ while True:
                         temp_y = characters_data.y
                         temp_max = block_get_click_y
                         isWaiting = "TOPANDBOTTOM"
+                if characters_data.x-characters_data.attack_range-1<block_get_click_x<characters_data.x+characters_data.attack_range+1 and characters_data.y == block_get_click_y:
+                    if block_get_click_x == sangvisFerris_data["ripper"].x and  block_get_click_y == sangvisFerris_data["ripper"].y:
+                        isWaiting = "ATTACKING"
+                elif characters_data.y-characters_data.attack_range-1<block_get_click_y<characters_data.y+characters_data.attack_range+1 and characters_data.x == block_get_click_x:
+                    if block_get_click_x == sangvisFerris_data["ripper"].x and  block_get_click_y == sangvisFerris_data["ripper"].y:
+                        isWaiting = "ATTACKING"
             if block_get_click_x == characters_data.x and block_get_click_y == characters_data.y:
                 if green_hide == True:
                     action = "move"
@@ -166,18 +189,30 @@ while True:
             img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
             screen.blit(img_display,(a*block_x_length,i*block_y_length-block_x_length/2))
     if green_hide ==False:
-        for x in range(characters_data.x-characters_data.move_range,characters_data.x+characters_data.move_range+1):
+        for x in range(characters_data.x-characters_data.attack_range,characters_data.x+characters_data.attack_range+1):
+            attack_range_difference = characters_data.attack_range - characters_data.move_range
             if x < block_x:
-                if map[characters_data.y][x] == 0 or map[characters_data.y][x] == 3:
+                if x < characters_data.x-characters_data.move_range-1:
                     screen.blit(red,(x*green.get_width(),characters_data.y*green.get_height()+7))
+                elif characters_data.x-characters_data.move_range-1<x<characters_data.x+characters_data.move_range+1:
+                    if map[characters_data.y][x] == 0 or map[characters_data.y][x] == 3:
+                        screen.blit(red,(x*green.get_width(),characters_data.y*green.get_height()+7))
+                    else:
+                        screen.blit(green,(x*green.get_width(),characters_data.y*green.get_height()+7))
                 else:
-                    screen.blit(green,(x*green.get_width(),characters_data.y*green.get_height()+7))
-        for y in range(characters_data.y-characters_data.move_range,characters_data.y+characters_data.move_range+1):
+                    screen.blit(red,(x*green.get_width(),characters_data.y*green.get_height()+7))
+        for y in range(characters_data.y-characters_data.attack_range,characters_data.y+characters_data.attack_range+1):
+            attack_range_difference = characters_data.attack_range - characters_data.move_range
             if y < block_y:
-                if map[y][characters_data.x] == 0 or map[y][characters_data.x] == 3:
+                if y < characters_data.y-characters_data.move_range-1:
                     screen.blit(red,(characters_data.x*green.get_width(),y*green.get_height()+7))
+                elif characters_data.y-characters_data.move_range-1<y<characters_data.y+characters_data.move_range+1:
+                    if map[y][characters_data.x] == 0 or map[y][characters_data.x] == 3:
+                        screen.blit(red,(characters_data.x*green.get_width(),y*green.get_height()+7))
+                    else:
+                        screen.blit(green,(characters_data.x*green.get_width(),y*green.get_height()+7))
                 else:
-                    screen.blit(green,(characters_data.x*green.get_width(),y*green.get_height()+7))
+                    screen.blit(red,(characters_data.x*green.get_width(),y*green.get_height()+7))
     #角色动画
     if isWaiting == True:
         action_displayer(characters_dic[characters_data.name],action,characters_data.x,characters_data.y)
@@ -207,9 +242,18 @@ while True:
             if temp_y <= temp_max:
                 isWaiting = True
                 characters_data.y = block_get_click_y
-
-
+    elif isWaiting == "ATTACKING":
+            action_displayer(characters_dic[characters_data.name],"attack",characters_data.x,characters_data.y,False)
+    if sangvisFerris_data["ripper"].current_hp>0:
+        action_displayer(sangvisFerris_dic["ripper"],"wait",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y)
+    elif sangvisFerris_data["ripper"].current_hp<=0:
+        action_displayer(sangvisFerris_dic["ripper"],"die",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y,"die")
+    
+    #子弹
     for per_bullet in bullets_list:
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_1]:
+            new_block_type = 0
         screen.blit(bullet_img, (per_bullet.x,per_bullet.y))
         per_bullet.x += 100
         if per_bullet.x > window_x:
