@@ -199,13 +199,11 @@ while True:
     #初始化角色信息
     #hpManager(self, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围)
     characters_data = {}
-    i = 0
     for jiaose in characters:
-        characters_data[jiaose] = characterDataManager(jiaose,150,200,300,300,3+i,4+i,4,2)
-        i+=1
+        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"])
     sangvisFerris_data = {}
     for enemy in sangvisFerris:
-        sangvisFerris_data[enemy] = characterDataManager(enemy,50,100,500,500,5,4,5,3)
+        sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"])
 
     #生成随机方块名
     map_img_list = []
@@ -310,7 +308,6 @@ while True:
                     else:
                         screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()+7))
             for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1):
-                #attack_range_difference = characters_data.attack_range - characters_data.move_range
                 if y < block_y:
                     if y < characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1:
                         screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()+7))

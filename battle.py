@@ -41,7 +41,19 @@ with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
     dialog2 = chapter_info["dialog2"]
 block_x_length = window_x/block_x
 block_y_length = window_y/block_y
-    #dialog1[i][-1] = my_font.render(dialog1[i][-1], True, (255,255,255))
+
+#初始化角色信息
+#hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围)
+characters_data = {}
+for jiaose in characters:
+    characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"])
+
+sangvisFerris_name_list = []
+sangvisFerris_data = {}
+for enemy in sangvisFerris:
+    sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"])
+    sangvisFerris_name_list.append(enemy)
+
 #动图制作模块：接受一个友方角色名和动作，返回对应角色动作list和
 def character_creater(character_name,action,kind="character"):
     global block_x_length
@@ -81,15 +93,30 @@ for character in characters:
     characters_dic[character] = character_gif_dic(character)
 #加载敌方角色动画
 sangvisFerris_dic={}
+sangvisFerris_name_list = []
 for sangvisFerri in sangvisFerris:
     sangvisFerris_dic[sangvisFerri] = character_gif_dic(sangvisFerri,"sangvisFerri")
+    sangvisFerris_name_list.append(sangvisFerri)
 
-#加载动作：接受一个带有[动作]的gif字典，完成对应的指令
-def action_displayer(gif_dic,action,x,y,isContinue=True):
+
+hp_font =pygame.font.SysFont('simsunnsimsun',10)
+
+
+#加载动作：接受角色名，动作，方位，完成对应的指令
+def action_displayer(name,action,x,y,isContinue=True):
     global isWaiting
     global round
+    if name in sangvisFerris_name_list:
+        gif_dic = sangvisFerris_dic[name]
+        current_hp_to_display = hp_font.render(str(sangvisFerris_data[name].current_hp), True, (105,105,105))
+    else:
+        gif_dic = characters_dic[name]
+        current_hp_to_display = hp_font.render(str(characters_data[name].current_hp), True, (105,105,105))
+
     img_of_char = gif_dic[action][0][0][gif_dic[action][1]]
     screen.blit(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
+    screen.blit(heart_ico,(x*green.get_width()-5,y*green.get_height()-5))
+    screen.blit(current_hp_to_display,(x*green.get_width()-1,y*green.get_height()-1))
     gif_dic[action][1]+=1
     if gif_dic[action][1] == 5 and action == "attack":
         pass
@@ -118,22 +145,12 @@ for i in range(len(map)):
         map_img_per_line.append(img_name)
     map_img_list.append(map_img_per_line)
 
-#初始化角色信息
-#hpManager(self, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围)
-characters_data = {}
-i = 0
-for jiaose in characters:
-    characters_data[jiaose] = characterDataManager(jiaose,150,200,300,300,3+i,4+i,4,2)
-    i+=1
-sangvisFerris_data = {}
-for enemy in sangvisFerris:
-    sangvisFerris_data[enemy] = characterDataManager(enemy,50,100,500,500,5,4,5,3)
-
 #加载子弹图片
 bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("img/others/bullet.png")), (int(block_x_length/6), int(block_y_length/12)))
 bullets_list = []
 
 #绿色方块/方块标准
+heart_ico = pygame.transform.scale(pygame.image.load(os.path.join("img/others/heart.png")), (int(block_x_length/3)+2, int(block_y_length/3)+2))
 green = pygame.transform.scale(pygame.image.load(os.path.join("img/others/green.png")), (int(block_x_length), int(block_y_length)))
 green.set_alpha(100)
 red = pygame.transform.scale(pygame.image.load(os.path.join("img/others/red.png")), (int(block_x_length), int(block_y_length)))
@@ -225,16 +242,16 @@ while battle==True:
         if isWaiting == True:
             for every_chara in characters:
                 if every_chara != the_character_get_click:
-                    action_displayer(characters_dic[characters_data[every_chara].name],"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
+                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                 else:
-                    action_displayer(characters_dic[every_chara],action,characters_data[every_chara].x,characters_data[every_chara].y)
+                    action_displayer(every_chara,action,characters_data[every_chara].x,characters_data[every_chara].y)
         elif isWaiting == "LEFTANDRIGHT":
             if temp_x < temp_max:
                 temp_x+=0.1
-                action_displayer(characters_dic[the_character_get_click],action,temp_x,characters_data[the_character_get_click].y)
+                action_displayer(the_character_get_click,action,temp_x,characters_data[the_character_get_click].y)
                 for every_chara in characters:
                     if every_chara != the_character_get_click:
-                        action_displayer(characters_dic[characters_data[every_chara].name],"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
+                        action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                 if temp_x >= temp_max:
                     isWaiting = True
                     characters_data[the_character_get_click].x = block_get_click_x
@@ -242,10 +259,10 @@ while battle==True:
                     round = 'sangvisFerri'
             elif temp_x > temp_max:
                 temp_x-=0.1
-                action_displayer(characters_dic[characters_data[the_character_get_click].name],action,temp_x,characters_data[the_character_get_click].y)
+                action_displayer(characters_data[the_character_get_click].name,action,temp_x,characters_data[the_character_get_click].y)
                 for every_chara in characters:
                     if every_chara != the_character_get_click:
-                        action_displayer(characters_dic[characters_data[every_chara].name],"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
+                        action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                 if temp_x <= temp_max:
                     isWaiting = True
                     characters_data[the_character_get_click].x = block_get_click_x
@@ -254,10 +271,10 @@ while battle==True:
         elif isWaiting == "TOPANDBOTTOM":
             if temp_y < temp_max:
                 temp_y+=0.1
-                action_displayer(characters_dic[characters_data[the_character_get_click].name],action,characters_data[the_character_get_click].x,temp_y,)
+                action_displayer(characters_data[the_character_get_click].name,action,characters_data[the_character_get_click].x,temp_y,)
                 for every_chara in characters:
                     if every_chara != the_character_get_click:
-                        action_displayer(characters_dic[characters_data[every_chara].name],"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
+                        action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                 if temp_y >= temp_max:
                     isWaiting = True
                     characters_data[the_character_get_click].y = block_get_click_y
@@ -265,10 +282,10 @@ while battle==True:
                     round = 'sangvisFerri'
             elif temp_y > temp_max:
                 temp_y-=0.1
-                action_displayer(characters_dic[characters_data[the_character_get_click].name],action,characters_data[the_character_get_click].x,temp_y,)
+                action_displayer(characters_data[the_character_get_click].name,action,characters_data[the_character_get_click].x,temp_y,)
                 for every_chara in characters:
                     if every_chara != the_character_get_click:
-                        action_displayer(characters_dic[characters_data[every_chara].name],"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
+                        action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                 if temp_y <= temp_max:
                     isWaiting = True
                     characters_data[the_character_get_click].y = block_get_click_y
@@ -277,19 +294,20 @@ while battle==True:
         elif isWaiting == "ATTACKING":
             for every_chara in characters:
                 if every_chara != the_character_get_click:
-                    action_displayer(characters_dic[characters_data[every_chara].name],"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
+                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                 else:
-                    action_displayer(characters_dic[characters_data[every_chara].name],"attack",characters_data[every_chara].x,characters_data[every_chara].y,False)
+                    action_displayer(characters_data[every_chara].name,"attack",characters_data[every_chara].x,characters_data[every_chara].y,False)
             if characters_dic[characters_data[the_character_get_click].name]["attack"][1] == characters_dic[characters_data[the_character_get_click].name]["attack"][0][1]:
                 sangvisFerris_data["ripper"].decreaseHp(random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage))
                 isWaiting = True
                 direction_to_move = -1
                 round = 'sangvisFerri'
                 characters_dic[characters_data[the_character_get_click].name]["attack"][1] = 0
-        if sangvisFerris_data["ripper"].current_hp>0:
-            action_displayer(sangvisFerris_dic["ripper"],"wait",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y)
-        elif sangvisFerris_data["ripper"].current_hp<=0:
-            action_displayer(sangvisFerris_dic["ripper"],"die",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y,"die")
+        for enemies in sangvisFerris_data:
+            if sangvisFerris_data[enemies].current_hp>0:
+                action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+            elif sangvisFerris_data[enemies].current_hp<=0:
+                action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemiesenemies].y,"die")
 
         #子弹
         for per_bullet in bullets_list:
@@ -301,64 +319,72 @@ while battle==True:
             if per_bullet.x > window_x:
                 bullets_list.remove(per_bullet)
 
+    #检测所有敌人是否都已经被消灭
+    for enemies in sangvisFerris_data:
+        if sangvisFerris_data[enemies].current_hp>0:
+            break
+        else:
+            round = "player"
+
     if round == "sangvisFerri":
-        if sangvisFerris_data["ripper"].current_hp>0:
+        for enemies in sangvisFerris_data:
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         exit()
             green_hide = True
             for every_chara in characters:
-                action_displayer(characters_dic[characters_data[every_chara].name],"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
+                action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+            for other_enemies in sangvisFerris_data:
+                if other_enemies != enemies:
+                    action_displayer(enemies,"move",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
             if direction_to_move == -1:
                 direction_to_move = random.randint(0,3) #0左1上2右3下
                 how_many_moved = 0
                 if direction_to_move == 0:
-                    how_many_to_move = sangvisFerris_data["ripper"].x-sangvisFerris_data["ripper"].move_range
+                    how_many_to_move = sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].move_range
                 elif direction_to_move == 2:
-                    how_many_to_move = sangvisFerris_data["ripper"].x+sangvisFerris_data["ripper"].move_range
+                    how_many_to_move = sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].move_range
                 elif direction_to_move == 1:
-                    how_many_to_move = sangvisFerris_data["ripper"].y-sangvisFerris_data["ripper"].move_range
+                    how_many_to_move = sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].move_range
                 elif direction_to_move == 3:
-                    how_many_to_move = sangvisFerris_data["ripper"].y+sangvisFerris_data["ripper"].move_range
+                    how_many_to_move = sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].move_range
             if direction_to_move == 0:
-                action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x-how_many_moved,sangvisFerris_data["ripper"].y)
+                action_displayer(enemies,"move",sangvisFerris_data[enemies].x-how_many_moved,sangvisFerris_data[enemies].y)
             elif direction_to_move == 2:
-                action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x+how_many_moved,sangvisFerris_data["ripper"].y)
+                action_displayer(enemies,"move",sangvisFerris_data[enemies].x+how_many_moved,sangvisFerris_data[enemies].y)
             elif direction_to_move == 1:
-                action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y-how_many_moved)
+                action_displayer(enemies,"move",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y-how_many_moved)
             elif direction_to_move == 3:
-                action_displayer(sangvisFerris_dic["ripper"],"move",sangvisFerris_data["ripper"].x,sangvisFerris_data["ripper"].y+how_many_moved)
-            if how_many_moved > sangvisFerris_data["ripper"].move_range:
+                action_displayer(enemies,"move",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y+how_many_moved)
+            if how_many_moved > sangvisFerris_data[enemies].move_range:
                 if direction_to_move == 0:
-                    sangvisFerris_data["ripper"].x-=sangvisFerris_data["ripper"].move_range
+                    sangvisFerris_data[enemies].x-=sangvisFerris_data[enemies].move_range
                 elif direction_to_move == 2:
-                    sangvisFerris_data["ripper"].x+=sangvisFerris_data["ripper"].move_range
+                    sangvisFerris_data[enemies].x+=sangvisFerris_data[enemies].move_range
                 elif direction_to_move == 1:
-                    sangvisFerris_data["ripper"].y-=sangvisFerris_data["ripper"].move_range
+                    sangvisFerris_data[enemies].y-=sangvisFerris_data[enemies].move_range
                 elif direction_to_move == 3:
-                    sangvisFerris_data["ripper"].y+=sangvisFerris_data["ripper"].move_range
+                    sangvisFerris_data[enemies].y+=sangvisFerris_data[enemies].move_range
                 round = "player"
             else:
                 if direction_to_move == 0:
-                    if map[sangvisFerris_data["ripper"].y][int(sangvisFerris_data["ripper"].x-how_many_moved-1)]==0 or map[sangvisFerris_data["ripper"].y][int(sangvisFerris_data["ripper"].x-how_many_moved-1)]==3:
-                        sangvisFerris_data["ripper"].x-=int(how_many_moved)
+                    if map[sangvisFerris_data[enemies].y][int(sangvisFerris_data[enemies].x-how_many_moved-1)]==0 or map[sangvisFerris_data[enemies].y][int(sangvisFerris_data[enemies].x-how_many_moved-1)]==3:
+                        sangvisFerris_data[enemies].x-=int(how_many_moved)
                         round = "player"
                 elif direction_to_move == 2:
-                    if map[sangvisFerris_data["ripper"].y][int(sangvisFerris_data["ripper"].x+how_many_moved-1)]==0 or map[sangvisFerris_data["ripper"].y][int(sangvisFerris_data["ripper"].x+how_many_moved+1)]==3:
-                        sangvisFerris_data["ripper"].x+=int(how_many_moved)
+                    if map[sangvisFerris_data[enemies].y][int(sangvisFerris_data[enemies].x+how_many_moved-1)]==0 or map[sangvisFerris_data[enemies].y][int(sangvisFerris_data[enemies].x+how_many_moved+1)]==3:
+                        sangvisFerris_data[enemies].x+=int(how_many_moved)
                         round = "player"
                 elif direction_to_move == 1:
-                    if map[int(sangvisFerris_data["ripper"].y-how_many_moved-1)][sangvisFerris_data["ripper"].x]==0 or map[int(sangvisFerris_data["ripper"].y-how_many_moved-1)][sangvisFerris_data["ripper"].x]==3:
-                        sangvisFerris_data["ripper"].y-=int(how_many_moved)
+                    if map[int(sangvisFerris_data[enemies].y-how_many_moved-1)][sangvisFerris_data[enemies].x]==0 or map[int(sangvisFerris_data[enemies].y-how_many_moved-1)][sangvisFerris_data[enemies].x]==3:
+                        sangvisFerris_data[enemies].y-=int(how_many_moved)
                         round = "player"
                 elif direction_to_move == 3:
-                    if map[int(sangvisFerris_data["ripper"].y+how_many_moved-1)][sangvisFerris_data["ripper"].x]==0 or map[int(sangvisFerris_data["ripper"].y+how_many_moved-1)][sangvisFerris_data["ripper"].x]==3:
-                        sangvisFerris_data["ripper"].y+=int(how_many_moved)
+                    if map[int(sangvisFerris_data[enemies].y+how_many_moved-1)][sangvisFerris_data[enemies].x]==0 or map[int(sangvisFerris_data[enemies].y+how_many_moved-1)][sangvisFerris_data[enemies].x]==3:
+                        sangvisFerris_data[enemies].y+=int(how_many_moved)
                         round = "player"
                 how_many_moved+=0.1
-        else:
-            round = "player"
     """
     while pygame.mixer.music.get_busy() != 1:
         pygame.mixer.music.load('music/Snowflake.mp3')
