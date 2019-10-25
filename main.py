@@ -20,7 +20,7 @@ with open("setting.yaml", "r", encoding='utf-8') as f:
 #加载主菜单文字
 with open("lang/"+lang_file+".yaml", "r", encoding='utf-8') as f:
     lang_cn = yaml.load(f.read(),Loader=yaml.FullLoader)
-    my_font =pygame.font.SysFont('simsunnsimsun',60)
+    my_font =pygame.font.SysFont('simsunnsimsun',50)
     text_title =  lang_cn['main_menu']['text_title']
     text_continue = my_font.render(lang_cn['main_menu']['text_continue'], True, (105,105,105))
     text_chooseChapter = my_font.render(lang_cn['main_menu']['text_chooseChapter'], True, (255, 255, 255))
@@ -45,7 +45,7 @@ pygame.display.set_caption(text_title) #窗口标题
 #加载主菜单背景
 background_img_id = 0
 background_img_list=[]
-loading_img = pygame.image.load(os.path.join("img/loading_img/img1.png"))
+loading_img =  pygame.transform.scale(pygame.image.load(os.path.join("img/loading_img/img1.png")),(window_x,window_y))
 while True:
     for event in pygame.event.get():
         if event.type == KEYDOWN and event.key == K_ESCAPE:
@@ -53,7 +53,7 @@ while True:
         if event.type == KEYDOWN and event.key == K_s:
             pygame.display.toggle_fullscreen()
     path = "img/main_menu/background_img"+str(background_img_id)+".jpg"
-    background_img_list.append(pygame.image.load(os.path.join(path)).convert_alpha())
+    background_img_list.append(pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(),(window_x,window_y)))
     percent_of_img_loaded = '{:.0f}%'.format(background_img_id/374*100)
     background_img_id+=1
     if background_img_id == 375:
@@ -132,7 +132,8 @@ while True:
             elif event.type == MOUSEBUTTONDOWN:
                 mouse_x,mouse_y=pygame.mouse.get_pos()
                 if txt_location<mouse_x<txt_location+text_exit.get_width() and 750<mouse_y<750+text_exit.get_height():
-                    exit()
+                    if menu_type == 0:
+                        exit()
                 elif txt_location<mouse_x<txt_location+text_chooseChapter.get_width() and 350<mouse_y<350+text_chooseChapter.get_height():
                     if menu_type == 0:
                         menu_type = 1
