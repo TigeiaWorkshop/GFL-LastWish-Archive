@@ -154,17 +154,18 @@ def endOfPlayerRound():
     global isWaiting
     global how_many_to_move
     isWaiting = True
-    round = len(characters_name_list)
+    round += 1
     direction_to_move = random.randint(0,3) #0左1上2右3下
     how_many_moved = 0
-    if direction_to_move == 0:
-        how_many_to_move = sangvisFerris_data[object_to_play[round]].x-sangvisFerris_data[object_to_play[round]].move_range
-    elif direction_to_move == 2:
-        how_many_to_move = sangvisFerris_data[object_to_play[round]].x+sangvisFerris_data[object_to_play[round]].move_range
-    elif direction_to_move == 1:
-        how_many_to_move = sangvisFerris_data[object_to_play[round]].y-sangvisFerris_data[object_to_play[round]].move_range
-    elif direction_to_move == 3:
-        how_many_to_move = sangvisFerris_data[object_to_play[round]].y+sangvisFerris_data[object_to_play[round]].move_range
+    if round == len(characters_name_list):
+        if direction_to_move == 0:
+            how_many_to_move = sangvisFerris_data[object_to_play[round]].x-sangvisFerris_data[object_to_play[round]].move_range
+        elif direction_to_move == 2:
+            how_many_to_move = sangvisFerris_data[object_to_play[round]].x+sangvisFerris_data[object_to_play[round]].move_range
+        elif direction_to_move == 1:
+            how_many_to_move = sangvisFerris_data[object_to_play[round]].y-sangvisFerris_data[object_to_play[round]].move_range
+        elif direction_to_move == 3:
+            how_many_to_move = sangvisFerris_data[object_to_play[round]].y+sangvisFerris_data[object_to_play[round]].move_range
 
 #加载子弹图片
 bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("img/others/bullet.png")), (int(block_x_length/6), int(block_y_length/12)))
@@ -184,6 +185,7 @@ per_block_height = green.get_height()
 green_hide = True
 action = "wait"
 isWaiting = True
+action_point = len(characters_name_list)#行动值
 object_to_play = characters_name_list + sangvisFerris_name_list #行动顺序
 round = 0
 the_character_get_click = "sv-98"
