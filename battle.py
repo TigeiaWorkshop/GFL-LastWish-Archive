@@ -130,7 +130,6 @@ def action_displayer(name,action,x,y,isContinue=True):
         if gif_dic[action][1] == gif_dic[action][0][1]:
             gif_dic[action][1] -= 1
 
-
 #生存随机方块名
 map_img_list = []
 for i in range(len(map)):
@@ -155,17 +154,36 @@ def endOfPlayerRound():
     global how_many_to_move
     isWaiting = True
     round += 1
+    if round == len(characters_name_list):
+        resetEnemyMovingData()
+
+#重置敌方移动数值
+def resetEnemyMovingData():
+    global direction_to_move
+    global how_many_moved
+    global how_many_to_move
+    global object_to_play
+    global round
     direction_to_move = random.randint(0,3) #0左1上2右3下
     how_many_moved = 0
-    if round == len(characters_name_list):
+    how_many_to_move = sangvisFerris_data[object_to_play[round]].move_range
+    for i in range(1, how_many_to_move+1):
         if direction_to_move == 0:
-            how_many_to_move = sangvisFerris_data[object_to_play[round]].x-sangvisFerris_data[object_to_play[round]].move_range
+            if map[sangvisFerris_data[object_to_play[round]].y][sangvisFerris_data[object_to_play[round]].x-i] == 0 or map[sangvisFerris_data[object_to_play[round]].y][sangvisFerris_data[object_to_play[round]].x-i] == 3:
+                how_many_to_move = i-1
+                break
         elif direction_to_move == 2:
-            how_many_to_move = sangvisFerris_data[object_to_play[round]].x+sangvisFerris_data[object_to_play[round]].move_range
+            if map[sangvisFerris_data[object_to_play[round]].y][sangvisFerris_data[object_to_play[round]].x+i] == 0 or map[sangvisFerris_data[object_to_play[round]].y][sangvisFerris_data[object_to_play[round]].x+i] == 3:
+                how_many_to_move = i-1
+                break
         elif direction_to_move == 1:
-            how_many_to_move = sangvisFerris_data[object_to_play[round]].y-sangvisFerris_data[object_to_play[round]].move_range
+            if map[sangvisFerris_data[object_to_play[round]].y-i][sangvisFerris_data[object_to_play[round]].x] == 0 or map[sangvisFerris_data[object_to_play[round]].y-i][sangvisFerris_data[object_to_play[round]].x] == 3:
+                how_many_to_move = i-1
+                break
         elif direction_to_move == 3:
-            how_many_to_move = sangvisFerris_data[object_to_play[round]].y+sangvisFerris_data[object_to_play[round]].move_range
+            if map[sangvisFerris_data[object_to_play[round]].y+i][sangvisFerris_data[object_to_play[round]].x] == 0 or map[sangvisFerris_data[object_to_play[round]].y+i][sangvisFerris_data[object_to_play[round]].x] == 3:
+                how_many_to_move = i-1
+                break
 
 #加载子弹图片
 bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("img/others/bullet.png")), (int(block_x_length/6), int(block_y_length/12)))
@@ -350,41 +368,27 @@ while battle==True:
             if enemies != object_to_play[round]:
                 action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
         if direction_to_move == 0:
-            action_displayer(enemies,"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+            action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
         elif direction_to_move == 2:
-            action_displayer(enemies,"move",sangvisFerris_data[object_to_play[round]].x+how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+            action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x+how_many_moved,sangvisFerris_data[object_to_play[round]].y)
         elif direction_to_move == 1:
-            action_displayer(enemies,"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y-how_many_moved)
+            action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y-how_many_moved)
         elif direction_to_move == 3:
-            action_displayer(enemies,"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y+how_many_moved)
+            action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y+how_many_moved)
 
-        if how_many_moved > sangvisFerris_data[enemies].move_range:
+        if how_many_moved >= how_many_to_move:
             if direction_to_move == 0:
-                sangvisFerris_data[object_to_play[round]].x-=sangvisFerris_data[object_to_play[round]].move_range
+                sangvisFerris_data[object_to_play[round]].x-=how_many_to_move
             elif direction_to_move == 2:
-                sangvisFerris_data[object_to_play[round]].x+=sangvisFerris_data[object_to_play[round]].move_range
+                sangvisFerris_data[object_to_play[round]].x+=how_many_to_move
             elif direction_to_move == 1:
-                sangvisFerris_data[object_to_play[round]].y-=sangvisFerris_data[object_to_play[round]].move_range
+                sangvisFerris_data[object_to_play[round]].y-=how_many_to_move
             elif direction_to_move == 3:
-                sangvisFerris_data[object_to_play[round]].y+=sangvisFerris_data[object_to_play[round]].move_range
+                sangvisFerris_data[object_to_play[round]].y+=how_many_to_move
             round += 1
-        else:
-            if direction_to_move == 0:
-                if map[sangvisFerris_data[object_to_play[round]].y][int(sangvisFerris_data[object_to_play[round]].x-how_many_moved)]==0 or map[sangvisFerris_data[object_to_play[round]].y][int(sangvisFerris_data[object_to_play[round]].x-how_many_moved-1)]==3:
-                    sangvisFerris_data[enemies].x-=int(how_many_moved)
-                    round += 1
-            elif direction_to_move == 2:
-                if map[sangvisFerris_data[object_to_play[round]].y][int(sangvisFerris_data[object_to_play[round]].x+how_many_moved)]==0 or map[sangvisFerris_data[object_to_play[round]].y][int(sangvisFerris_data[object_to_play[round]].x+how_many_moved+1)]==3:
-                    sangvisFerris_data[enemies].x+=int(how_many_moved)
-                    round += 1
-            elif direction_to_move == 1:
-                if map[int(sangvisFerris_data[object_to_play[round]].y-how_many_moved)][sangvisFerris_data[object_to_play[round]].x]==0 or map[int(sangvisFerris_data[object_to_play[round]].y-how_many_moved-1)][sangvisFerris_data[object_to_play[round]].x]==3:
-                    sangvisFerris_data[enemies].y-=int(how_many_moved)
-                    round += 1
-            elif direction_to_move == 3:
-                if map[int(sangvisFerris_data[object_to_play[round]].y+how_many_moved)][sangvisFerris_data[object_to_play[round]].x]==0 or map[int(sangvisFerris_data[object_to_play[round]].y+how_many_moved-1)][sangvisFerris_data[object_to_play[round]].x]==3:
-                    sangvisFerris_data[object_to_play[round]].y+=int(how_many_moved)
-                    round += 1
+            if round != len(object_to_play):
+                resetEnemyMovingData()
+        elif how_many_moved < how_many_to_move:
             how_many_moved+=0.1
 
     if round == len(object_to_play):
