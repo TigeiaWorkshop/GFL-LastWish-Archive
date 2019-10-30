@@ -36,38 +36,40 @@ character:
     x: 10
     y: 8
 dialog:
-- - kryuger
-  - helianthus
+- - - kryuger
+    - helianthus
+  - duel
   - How is everything going so far?
-- - helianthus
-  - kryuger
+- - - helianthus
+    - kryuger
+  - duel
   - The cost is very high, but the commander complete his misiion.
-- - kryuger
-  - helianthus
+- - - kryuger
+    - helianthus
+  - duel
   - High cost is always is inevitable.
-- - helianthus
-  - kryuger
+- - - helianthus
+    - kryuger
+  - duel
   - The commander is getting his troops. The situation of the battlefield is still
     very complex
-- - kryuger
-  - helianthus
+- - - kryuger
+    - helianthus
+  - duel
   - You know we don't have enoght time left.
-- - helianthus
-  - kryuger
+- - - helianthus
+    - kryuger
+  - duel
   - I have already warned him, but there is still a missing squad.
-- - kryuger
-  - helianthus
+- - - kryuger
+    - helianthus
+  - duel
   - I will only give him another 24 hours. Then he has to stop searching and move
     on.
-- - helianthus
-  - kryuger
+- - - helianthus
+    - kryuger
+  - duel
   - Understand. I will tell him right now.
-- - sv-98
-  - Where am I...
-- - sv-98
-  - Any one here?!
-- - sv-98
-  - It seens like I get lost. I need to find a way out right now.
 dialog2:
 - - I
   - kalina

@@ -1,4 +1,3 @@
-#image purchased from unity store and internet
 import pygame
 import time
 from pygame.locals import *
@@ -8,8 +7,8 @@ import glob
 import yaml
 import random
 from hpManager import *
-pygame.init()
 
+pygame.init()
 #加载设置
 with open("setting.yaml", "r", encoding='utf-8') as f:
     setting = yaml.load(f.read(),Loader=yaml.FullLoader)
