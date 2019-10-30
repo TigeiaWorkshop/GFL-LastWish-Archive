@@ -184,6 +184,8 @@ def resetEnemyMovingData():
             if map[sangvisFerris_data[object_to_play[round]].y+i][sangvisFerris_data[object_to_play[round]].x] == 0 or map[sangvisFerris_data[object_to_play[round]].y+i][sangvisFerris_data[object_to_play[round]].x] == 3:
                 how_many_to_move = i-1
                 break
+    if how_many_to_move < 1:
+        resetEnemyMovingData()
 
 #加载子弹图片
 bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("img/others/bullet.png")), (int(block_x_length/6), int(block_y_length/12)))
@@ -200,6 +202,7 @@ per_block_width = green.get_width()
 per_block_height = green.get_height()
 
 #部分设定初始化
+enemies_get_attack = sangvisFerris_name_list[0]
 green_hide = True
 action = "wait"
 isWaiting = True
@@ -269,11 +272,15 @@ while battle==True:
                         temp_max = block_get_click_y
                         isWaiting = "TOPANDBOTTOM"
                 if characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
-                    if block_get_click_x == sangvisFerris_data["ripper"].x and  block_get_click_y == sangvisFerris_data["ripper"].y:
-                        isWaiting = "ATTACKING"
+                    for enemies in sangvisFerris_data:
+                        if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                            isWaiting = "ATTACKING"
+                            enemies_get_attack = enemies
                 elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
-                    if block_get_click_x == sangvisFerris_data["ripper"].x and  block_get_click_y == sangvisFerris_data["ripper"].y:
-                        isWaiting = "ATTACKING"
+                    for enemies in sangvisFerris_data:
+                        if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                            isWaiting = "ATTACKING"
+                            enemies_get_attack = enemies
             if block_get_click_x == characters_data[the_character_get_click].x and block_get_click_y == characters_data[the_character_get_click].y:
                 if green_hide == True:
                     action = "move"
@@ -333,14 +340,14 @@ while battle==True:
                 else:
                     action_displayer(characters_data[every_chara].name,"attack",characters_data[every_chara].x,characters_data[every_chara].y,False)
             if characters_dic[characters_data[the_character_get_click].name]["attack"][1] == characters_dic[characters_data[the_character_get_click].name]["attack"][0][1]:
-                sangvisFerris_data["ripper"].decreaseHp(random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage))
+                sangvisFerris_data[enemies_get_attack].decreaseHp(random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage))
                 endOfPlayerRound()
                 characters_dic[characters_data[the_character_get_click].name]["attack"][1] = 0
         for enemies in sangvisFerris_data:
             if sangvisFerris_data[enemies].current_hp>0:
                 action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
             elif sangvisFerris_data[enemies].current_hp<=0:
-                action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemiesenemies].y,"die")
+                action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,"die")
 
         #子弹
         for per_bullet in bullets_list:
@@ -353,43 +360,54 @@ while battle==True:
                 bullets_list.remove(per_bullet)
 
     #检测所有敌人是否都已经被消灭
-    for enemies in sangvisFerris_data:
-        if sangvisFerris_data[enemies].current_hp>0:
+    for i in range(len(sangvisFerris_name_list)):
+        if sangvisFerris_data[sangvisFerris_name_list[i]].current_hp>0:
             break
-        else:
-            round = object_to_play[0]
+        if i == len(sangvisFerris_name_list)-1:
+            battle = False
+    if battle == False:
+        exit()
+        break
 
     #敌方回合
     if object_to_play[round] in sangvisFerris_name_list:
-        green_hide = True
-        for every_chara in characters:
-            action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
-        for enemies in sangvisFerris_data:
-            if enemies != object_to_play[round]:
-                action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
-        if direction_to_move == 0:
-            action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
-        elif direction_to_move == 2:
-            action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x+how_many_moved,sangvisFerris_data[object_to_play[round]].y)
-        elif direction_to_move == 1:
-            action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y-how_many_moved)
-        elif direction_to_move == 3:
-            action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y+how_many_moved)
-
-        if how_many_moved >= how_many_to_move:
-            if direction_to_move == 0:
-                sangvisFerris_data[object_to_play[round]].x-=how_many_to_move
-            elif direction_to_move == 2:
-                sangvisFerris_data[object_to_play[round]].x+=how_many_to_move
-            elif direction_to_move == 1:
-                sangvisFerris_data[object_to_play[round]].y-=how_many_to_move
-            elif direction_to_move == 3:
-                sangvisFerris_data[object_to_play[round]].y+=how_many_to_move
+        if sangvisFerris_data[object_to_play[round]].current_hp<=0:
             round += 1
             if round != len(object_to_play):
                 resetEnemyMovingData()
-        elif how_many_moved < how_many_to_move:
-            how_many_moved+=0.1
+        else:
+            green_hide = True
+            for every_chara in characters:
+                action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+            for enemies in sangvisFerris_data:
+                if enemies != object_to_play[round]:
+                    if sangvisFerris_data[enemies].current_hp<=0:
+                        action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,"die")
+                    else:
+                        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+            if direction_to_move == 0:
+                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+            elif direction_to_move == 2:
+                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x+how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+            elif direction_to_move == 1:
+                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y-how_many_moved)
+            elif direction_to_move == 3:
+                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y+how_many_moved)
+
+            if how_many_moved >= how_many_to_move:
+                if direction_to_move == 0:
+                    sangvisFerris_data[object_to_play[round]].x-=how_many_to_move
+                elif direction_to_move == 2:
+                    sangvisFerris_data[object_to_play[round]].x+=how_many_to_move
+                elif direction_to_move == 1:
+                    sangvisFerris_data[object_to_play[round]].y-=how_many_to_move
+                elif direction_to_move == 3:
+                    sangvisFerris_data[object_to_play[round]].y+=how_many_to_move
+                round += 1
+                if round != len(object_to_play):
+                    resetEnemyMovingData()
+            elif how_many_moved < how_many_to_move:
+                how_many_moved+=0.1
 
     if round == len(object_to_play):
         round = 0
@@ -398,6 +416,7 @@ while battle==True:
         pygame.mixer.music.load('music/Snowflake.mp3')
         pygame.mixer.music.play(loops=9999, start=0.0)
     """
-    #胜利条件
+
+    #画面更新
     time.sleep(0.025)
     pygame.display.update()
