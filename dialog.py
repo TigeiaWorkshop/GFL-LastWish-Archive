@@ -13,17 +13,12 @@ def dialog_display_function(chapter_name,id=""):
         setting = yaml.load(f.read(),Loader=yaml.FullLoader)
         window_x = setting['Screen_size_x']
         window_y =  setting['Screen_size_y']
-        lang_file = setting['Language']
-
     # 创建窗口
     screen = pygame.display.set_mode([window_x, window_y])
     pygame.display.set_caption("Girls frontline-Last Wish") #窗口标题
-
     #读取章节信息
     with open("data/main_chapter/"+chapter_name+".yaml", "r", encoding='utf-8') as f:
-        chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
-        dialog_display = chapter_info["dialog"+id]
-
+        dialog_display = yaml.load(f.read(),Loader=yaml.FullLoader)["dialog"+id]
     #加载npc立绘
     all_npc_file_list = glob.glob(r'img\npc\*.png')
     npc_img_dic={}
@@ -49,7 +44,6 @@ def dialog_display_function(chapter_name,id=""):
     while len(dialog_display)!=0 and display_num<len(dialog_display):
         #背景
         screen.blit(dialog_bg_img_dic[dialog_display[display_num][1]],(0,0))
-
         if len(dialog_display[display_num][0])==2:
             screen.blit(npc_img_dic[dialog_display[display_num][0][0]],(-100,100))
             screen.blit(npc_img_dic[dialog_display[display_num][0][1]],(window_x-1000,100))
@@ -84,7 +78,6 @@ def dialog_display_function(chapter_name,id=""):
             elif event.type == MOUSEBUTTONDOWN:
                 display_num += 1
                 dialog_content_id = 1
-
         time.sleep(0.02)
         pygame.display.update()
 
