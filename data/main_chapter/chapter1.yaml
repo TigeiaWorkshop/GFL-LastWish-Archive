@@ -71,18 +71,9 @@ dialog:
   - duel
   - Understand. I will tell him right now.
 dialog2:
-- - I
-  - kalina
+- - - kalina_1
+  - research
   - Any good news?
-- - kalina
-  - I
-  - Nope... Don't worry, we will find them.
-- - I
-  - kalina
-  - I hope so. We are running out of time
-- - From Developer
-  - kalina
-  - Thanks for playing this demo!
 map:
 - - 0
   - 0
