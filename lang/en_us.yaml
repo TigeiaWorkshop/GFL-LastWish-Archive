@@ -1,4 +1,5 @@
 main_menu: {
+    now_loading: "Loading",
     text_title: "Girls' Frontline-Last wish",
     text_continue: "Continue",
     text_chooseChapter: "Select Chapter",

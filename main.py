@@ -21,6 +21,7 @@ with open("setting.yaml", "r", encoding='utf-8') as f:
 with open("lang/"+lang_file+".yaml", "r", encoding='utf-8') as f:
     lang_cn = yaml.load(f.read(),Loader=yaml.FullLoader)
     my_font =pygame.font.SysFont('simsunnsimsun',50)
+    now_loading = lang_cn['main_menu']['now_loading']
     text_title =  lang_cn['main_menu']['text_title']
     text_continue = my_font.render(lang_cn['main_menu']['text_continue'], True, (105,105,105))
     text_chooseChapter = my_font.render(lang_cn['main_menu']['text_chooseChapter'], True, (255, 255, 255))
@@ -59,7 +60,8 @@ while True:
     if background_img_id == 375:
         break
     screen.blit(loading_img, (0,0))
-    screen.blit(my_font.render(str(percent_of_img_loaded), True, (255, 255, 255)), (10,10))
+    the_str = my_font.render(now_loading+": "+str(percent_of_img_loaded), True, (255, 255, 255))
+    screen.blit(the_str, ((window_x-the_str.get_width())/2,window_y-100))
     pygame.display.update()
 
 #加载地图背景图片

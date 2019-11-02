@@ -1,4 +1,5 @@
 main_menu: {
+    now_loading: "正在加载",
     text_title: "少女前线-遗愿",
     text_continue: "继续游戏",
     text_chooseChapter: "选择章节",
@@ -17,4 +18,10 @@ chapter: {
     c7: "第七章",
     c8: "第八章",
     back: "返回",
+    }
+select_menu: {
+    attack: "攻击",
+    move: "移动",
+    skill: "技能",
+    pass: "跳过",
     }
