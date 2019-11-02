@@ -1,6 +1,6 @@
 import pygame
-from pygame.locals import *
 from sys import exit
+from pygame.locals import *
 import os
 import glob
 import yaml
@@ -36,18 +36,37 @@ def dialog_display_function(chapter_name,id=""):
     #鼠标图标
     mouse_none = pygame.transform.scale(pygame.image.load(os.path.join("img/others/mouse_none.png")),(35,35))
     mouse_click = pygame.transform.scale(pygame.image.load(os.path.join("img/others/mouse.png")),(35,35))
+    #黑色帘幕
+    the_black = pygame.transform.scale(pygame.image.load(os.path.join("img/others/black.png")),(window_x,window_y))
     #设定初始化
     display_num = 0
     my_font =pygame.font.SysFont('simsunnsimsun',25)
     dialog_content_id = 1
     mouse_gif_id=1
+    for i in range(0,250,10):
+        img = dialog_bg_img_dic[dialog_display[display_num][1]]
+        img.set_alpha(i)
+        screen.blit(img,(0,0))
+        if len(dialog_display[display_num][0])==2:
+            img = npc_img_dic[dialog_display[display_num][0][0]]
+            img.set_alpha(i+50)
+            screen.blit(img,(-100,100))
+            img = npc_img_dic[dialog_display[display_num][0][1]]
+            img.set_alpha(i+50)
+            screen.blit(img,(window_x-1000,100))
+        elif len(dialog_display[display_num][0])==1:
+            big_img_x = (window_x - npc_img_dic[dialog_display[display_num][0][0]].get_width())/2
+            img = npc_img_dic[dialog_display[display_num][0][0]]
+            img.set_alpha(i+50)
+            screen.blit(img,(big_img_x,100))
+        pygame.display.update()
     while len(dialog_display)!=0 and display_num<len(dialog_display):
         #背景
         screen.blit(dialog_bg_img_dic[dialog_display[display_num][1]],(0,0))
         if len(dialog_display[display_num][0])==2:
             screen.blit(npc_img_dic[dialog_display[display_num][0][0]],(-100,100))
             screen.blit(npc_img_dic[dialog_display[display_num][0][1]],(window_x-1000,100))
-        if len(dialog_display[display_num][0])==1:
+        elif len(dialog_display[display_num][0])==1:
             #角色
             big_img_x = (window_x - npc_img_dic[dialog_display[display_num][0][0]].get_width())/2
             screen.blit(npc_img_dic[dialog_display[display_num][0][0]],(big_img_x,100))
@@ -80,5 +99,9 @@ def dialog_display_function(chapter_name,id=""):
                 dialog_content_id = 1
         time.sleep(0.02)
         pygame.display.update()
-
+    for i in range(0,55,2):
+        the_black.set_alpha(i)
+        screen.blit(the_black,(0,0))
+        pygame.display.update()
+    exit()
 dialog_display_function("chapter1")
