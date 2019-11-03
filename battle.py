@@ -31,6 +31,7 @@ my_font =pygame.font.SysFont('simsunnsimsun',25)
 #读取并初始化章节信息
 with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
     chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
+    chapter_title = chapter_info["title"]
     block_y = len(chapter_info["map"])
     block_x = len(chapter_info["map"][0])
     characters = chapter_info["character"]
@@ -207,9 +208,28 @@ green = pygame.transform.scale(pygame.image.load(os.path.join("img/others/green.
 green.set_alpha(100)
 red = pygame.transform.scale(pygame.image.load(os.path.join("img/others/red.png")), (int(block_x_length), int(block_y_length)))
 red.set_alpha(100)
+the_black = pygame.transform.scale(pygame.image.load(os.path.join("img/others/black.png")),(window_x,window_y))
 new_block_type = 0
 per_block_width = green.get_width()
 per_block_height = green.get_height()
+
+#章节标题
+title_number_display = pygame.font.SysFont('simsunnsimsun',50).render("Chapter1", True, (255,255,255))
+title_main_display = pygame.font.SysFont('simsunnsimsun',50).render(chapter_title, True, (255,255,255))
+for i in range(0,600,1):
+    screen.blit(the_black,(0,0))
+    title_number_display.set_alpha(i)
+    title_main_display.set_alpha(i)
+    screen.blit(title_number_display,((window_x-title_number_display.get_width())/2,400))
+    screen.blit(title_main_display,((window_x-title_main_display.get_width())/2,500))
+    pygame.display.update()
+for i in range(600,0,-1):
+    screen.blit(the_black,(0,0))
+    title_number_display.set_alpha(i)
+    title_main_display.set_alpha(i)
+    screen.blit(title_number_display,((window_x-title_number_display.get_width())/2,400))
+    screen.blit(title_main_display,((window_x-title_main_display.get_width())/2,500))
+    pygame.display.update()
 
 #部分设定初始化
 enemies_get_attack = sangvisFerris_name_list[0]
