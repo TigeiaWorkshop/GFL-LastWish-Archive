@@ -109,15 +109,25 @@ def action_displayer(name,action,x,y,isContinue=True):
     global round
     if name in sangvisFerris_name_list:
         gif_dic = sangvisFerris_dic[name]
-        current_hp_to_display = hp_font.render(str(sangvisFerris_data[name].current_hp), True, (105,105,105))
+        if sangvisFerris_data[name].current_hp < 0:
+            sangvisFerris_data[name].current_hp = 0
+        current_hp_to_display = hp_font.render(str(sangvisFerris_data[name].current_hp)+"/"+str(sangvisFerris_data[name].max_hp), True, (0,0,0))
+        prcent_of_hp = sangvisFerris_data[name].current_hp/sangvisFerris_data[name].max_hp
     else:
         gif_dic = characters_dic[name]
-        current_hp_to_display = hp_font.render(str(characters_data[name].current_hp), True, (105,105,105))
+        if characters_data[name].current_hp<0:
+            characters_data[name].current_hp = 0
+        current_hp_to_display = hp_font.render(str(characters_data[name].current_hp)+"/"+str(characters_data[name].max_hp), True, (0,0,0))
+        prcent_of_hp = characters_data[name].current_hp/characters_data[name].max_hp
+    if prcent_of_hp<0:
+        prcent_of_hp=0
 
     img_of_char = gif_dic[action][0][0][gif_dic[action][1]]
     screen.blit(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
-    screen.blit(heart_ico,(x*green.get_width()-5,y*green.get_height()-5))
-    screen.blit(current_hp_to_display,(x*green.get_width()-1,y*green.get_height()-1))
+    if prcent_of_hp>0:
+        screen.blit(hp_empty,(x*green.get_width(),y*green.get_height()*0.98))
+        screen.blit(pygame.transform.scale(hp_red,(int(block_x_length*prcent_of_hp),int(block_y_length/5))),(x*green.get_width(),y*green.get_height()*0.98))
+        screen.blit(current_hp_to_display,(x*green.get_width(),y*green.get_height()*0.98))
     gif_dic[action][1]+=1
     if gif_dic[action][1] == 5 and action == "attack":
         pass
@@ -191,7 +201,8 @@ bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("img/others/b
 bullets_list = []
 
 #绿色方块/方块标准
-heart_ico = pygame.transform.scale(pygame.image.load(os.path.join("img/others/heart.png")), (int(block_x_length/3)+2, int(block_y_length/3)+2))
+hp_empty = pygame.transform.scale(pygame.image.load(os.path.join("img/others/hp_empty.png")), (int(block_x_length), int(block_y_length/5)))
+hp_red = pygame.transform.scale(pygame.image.load(os.path.join("img/others/hp_red.png")), (int(block_x_length), int(block_y_length/5)))
 green = pygame.transform.scale(pygame.image.load(os.path.join("img/others/green.png")), (int(block_x_length), int(block_y_length)))
 green.set_alpha(100)
 red = pygame.transform.scale(pygame.image.load(os.path.join("img/others/red.png")), (int(block_x_length), int(block_y_length)))
