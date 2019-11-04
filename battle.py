@@ -6,7 +6,7 @@ import os
 import glob
 import yaml
 import random
-from hpManager import *
+from characterDataManager import *
 
 pygame.init()
 #加载设置
@@ -239,7 +239,7 @@ isWaiting = True
 action_point = len(characters_name_list)#行动值
 object_to_play = characters_name_list + sangvisFerris_name_list #行动顺序
 round = 0
-the_character_get_click = "sv-98"
+the_character_get_click = characters_name_list[0]
 battle=True
 direction_to_move = 0
 how_many_to_move = 0
