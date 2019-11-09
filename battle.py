@@ -89,14 +89,7 @@ for enemy in sangvisFerris:
     sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(enemy,"sangvisFerri"))
     sangvisFerris_name_list.append(enemy)
 
-#加载敌方角色动画
-sangvisFerris_name_list = []
-for sangvisFerri in sangvisFerris:
-    sangvisFerris_name_list.append(sangvisFerri)
-
-
 hp_font =pygame.font.SysFont('simsunnsimsun',10)
-
 
 #加载动作：接受角色名，动作，方位，完成对应的指令
 def action_displayer(name,action,x,y,isContinue=True):
@@ -238,7 +231,6 @@ battle=True
 direction_to_move = 0
 how_many_to_move = 0
 how_many_moved = 0
-
 # 游戏主循环
 while battle==True:
     #加载地图
@@ -363,10 +355,10 @@ while battle==True:
                     action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                 else:
                     action_displayer(characters_data[every_chara].name,"attack",characters_data[every_chara].x,characters_data[every_chara].y,False)
-            if characters_dic[characters_data[the_character_get_click].name]["attack"][1] == characters_dic[characters_data[the_character_get_click].name]["attack"][0][1]:
+            if characters_data[the_character_get_click].gif["attack"][1] == characters_data[the_character_get_click].gif["attack"][0][1]:
                 sangvisFerris_data[enemies_get_attack].decreaseHp(random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage))
                 endOfPlayerRound()
-                characters_dic[characters_data[the_character_get_click].name]["attack"][1] = 0
+                characters_data[the_character_get_click].gif["attack"][1] = 0
         for enemies in sangvisFerris_data:
             if sangvisFerris_data[enemies].current_hp>0:
                 action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
