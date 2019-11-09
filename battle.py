@@ -42,20 +42,6 @@ with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
 block_x_length = window_x/block_x
 block_y_length = window_y/block_y
 
-#初始化角色信息
-#hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围)
-characters_name_list = []
-characters_data = {}
-for jiaose in characters:
-    characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"])
-    characters_name_list.append(jiaose)
-
-sangvisFerris_name_list = []
-sangvisFerris_data = {}
-for enemy in sangvisFerris:
-    sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"])
-    sangvisFerris_name_list.append(enemy)
-
 #动图制作模块：接受一个友方角色名和动作，返回对应角色动作list和
 def character_creater(character_name,action,kind="character"):
     global block_x_length
@@ -89,15 +75,23 @@ def character_gif_dic(character_name,kind="character"):
         }
     return gif_dic
 
-#加载友方角色动画
-characters_dic={}
-for character in characters:
-    characters_dic[character] = character_gif_dic(character)
+#初始化角色信息
+#hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
+characters_name_list = []
+characters_data = {}
+for jiaose in characters:
+    characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"],character_gif_dic(jiaose))
+    characters_name_list.append(jiaose)
+
+sangvisFerris_name_list = []
+sangvisFerris_data = {}
+for enemy in sangvisFerris:
+    sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(enemy,"sangvisFerri"))
+    sangvisFerris_name_list.append(enemy)
+
 #加载敌方角色动画
-sangvisFerris_dic={}
 sangvisFerris_name_list = []
 for sangvisFerri in sangvisFerris:
-    sangvisFerris_dic[sangvisFerri] = character_gif_dic(sangvisFerri,"sangvisFerri")
     sangvisFerris_name_list.append(sangvisFerri)
 
 
@@ -109,13 +103,13 @@ def action_displayer(name,action,x,y,isContinue=True):
     global isWaiting
     global round
     if name in sangvisFerris_name_list:
-        gif_dic = sangvisFerris_dic[name]
+        gif_dic = sangvisFerris_data[name].gif
         if sangvisFerris_data[name].current_hp < 0:
             sangvisFerris_data[name].current_hp = 0
         current_hp_to_display = hp_font.render(str(sangvisFerris_data[name].current_hp)+"/"+str(sangvisFerris_data[name].max_hp), True, (0,0,0))
         prcent_of_hp = sangvisFerris_data[name].current_hp/sangvisFerris_data[name].max_hp
     else:
-        gif_dic = characters_dic[name]
+        gif_dic = characters_data[name].gif
         if characters_data[name].current_hp<0:
             characters_data[name].current_hp = 0
         current_hp_to_display = hp_font.render(str(characters_data[name].current_hp)+"/"+str(characters_data[name].max_hp), True, (0,0,0))
