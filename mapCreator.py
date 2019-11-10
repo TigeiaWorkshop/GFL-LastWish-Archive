@@ -31,9 +31,9 @@ for i in range(len(all_env_file_list)):
 with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
     chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
     map = chapter_info["map"]
-block_x = 32
-block_y = 16
-block_x_length = window_x/block_x
+block_x = 48
+block_y = 24
+block_x_length = int(window_x/block_x)
 block_y_length = window_y/block_y
 
 #初始化地图
@@ -76,11 +76,9 @@ for i in range(len(map)):
     map_img_list.append(map_img_per_line)
 
 #绿色方块/方块标准
-green = pygame.transform.scale(pygame.image.load(os.path.join("img/others/green.png")), (int(block_x_length), int(block_y_length)))
+green = pygame.transform.scale(pygame.image.load(os.path.join("img/others/green.png")), (block_x_length, int(block_y_length)))
 green.set_alpha(100)
 new_block_type = 0
-per_block_width = green.get_width()
-per_block_height = green.get_height()
 
 # 游戏主循环
 while True:
@@ -111,11 +109,11 @@ while True:
     #场景加载
     for i in range(len(map_img_list)):
         for a in range(len(map_img_list[i])):
-            img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
+            img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (block_x_length, int(block_y_length*1.5)))
             screen.blit(img_display,(a*block_x_length,i*block_y_length-block_x_length/2))
     for y in range(block_y):
         for x in range(block_x):
-            screen.blit(green,(x*green.get_width(),y*green.get_height()+7))
+            screen.blit(green,(x*block_x_length,y*block_y_length))
     keys = pygame.key.get_pressed()
     if keys[pygame.K_1]:
         new_block_type = 0

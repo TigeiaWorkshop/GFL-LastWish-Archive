@@ -128,20 +128,7 @@ def action_displayer(name,action,x,y,isContinue=True):
             gif_dic[action][1] -= 1
 
 #生存随机方块名
-map_img_list = []
-for i in range(len(map)):
-    map_img_per_line = []
-    for a in range(len(map[i])):
-        if map[i][a] == 0:
-            img_name = "mountainSnow"+str(random.randint(0,7))
-        elif map[i][a] == 1:
-            img_name = "plainsColdSnowCovered"+str(random.randint(0,3))
-        elif map[i][a] == 2:
-            img_name = "forestPineSnowCovered"+str(random.randint(0,4))
-        elif map[i][a] == 3:
-            img_name = "ocean"+str(random.randint(0,4))
-        map_img_per_line.append(img_name)
-    map_img_list.append(map_img_per_line)
+map_img_list = randomBlock(map)
 
 #玩家回合结束
 def endOfPlayerRound():
@@ -237,31 +224,31 @@ while battle==True:
     for i in range(len(map_img_list)):
         for a in range(len(map_img_list[i])):
             img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
-            screen.blit(img_display,(a*block_x_length,i*block_y_length-block_x_length/2))
+            screen.blit(img_display,(a*block_x_length,i*block_y_length-block_y_length/2))
     if green_hide ==False:
         for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1):
             attack_range_difference = characters_data[the_character_get_click].attack_range - characters_data[the_character_get_click].move_range
             if x < block_x:
                 if x < characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1:
-                    screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()+7))
+                    screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
                 elif characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1<x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1:
                     if map[characters_data[the_character_get_click].y][x] == 0 or map[characters_data[the_character_get_click].y][x] == 3:
-                        screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()+7))
+                        screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
                     else:
-                        screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()+7))
+                        screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
                 else:
-                    screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()+7))
+                    screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
         for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1):
             if y < block_y:
                 if y < characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1:
-                    screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()+7))
+                    screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
                 elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1<y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1:
                     if map[y][characters_data[the_character_get_click].x] == 0 or map[y][characters_data[the_character_get_click].x] == 3:
-                        screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()+7))
+                        screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
                     else:
-                        screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()+7))
+                        screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
                 else:
-                    screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()+7))
+                    screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
     #玩家输入按键判定
     for event in pygame.event.get():
         if event.type == KEYDOWN:
@@ -356,7 +343,7 @@ while battle==True:
                 else:
                     action_displayer(characters_data[every_chara].name,"attack",characters_data[every_chara].x,characters_data[every_chara].y,False)
             if characters_data[the_character_get_click].gif["attack"][1] == characters_data[the_character_get_click].gif["attack"][0][1]:
-                sangvisFerris_data[enemies_get_attack].decreaseHp(random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage))
+                sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
                 endOfPlayerRound()
                 characters_data[the_character_get_click].gif["attack"][1] = 0
         for enemies in sangvisFerris_data:
