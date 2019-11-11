@@ -5,7 +5,6 @@ from sys import exit
 import os
 import glob
 import yaml
-import random
 from characterDataManager import *
 
 pygame.init()
@@ -133,9 +132,7 @@ map_img_list = randomBlock(map)
 #玩家回合结束
 def endOfPlayerRound():
     global round
-    global direction_to_move
     global isWaiting
-    global how_many_to_move
     isWaiting = True
     round += 1
     if round == len(characters_name_list):
@@ -148,7 +145,17 @@ def resetEnemyMovingData():
     global how_many_to_move
     global object_to_play
     global round
-    direction_to_move = random.randint(0,3) #0左1上2右3下
+    #direction_to_move 0左1上2右3下
+    if sangvisFerris_data[object_to_play[round]].x > characters_data["sv-98"].x:
+        if sangvisFerris_data[object_to_play[round]].y > characters_data["sv-98"].y:
+            if sangvisFerris_data[object_to_play[round]].x-characters_data["sv-98"].x > sangvisFerris_data[object_to_play[round]].y-characters_data["sv-98"].y:
+                direction_to_move=0
+            else:
+                direction_to_move=1
+        else:
+            direction_to_move=2
+    else:
+        direction_to_move=3
     how_many_moved = 0
     how_many_to_move = sangvisFerris_data[object_to_play[round]].move_range
     for i in range(1, how_many_to_move+1):
@@ -257,41 +264,42 @@ while battle==True:
             if event.key == K_t:
                 exit()
         elif event.type == MOUSEBUTTONDOWN:
-            mouse_x,mouse_y=pygame.mouse.get_pos()
-            block_get_click_x = int(mouse_x/green.get_width())
-            block_get_click_y = int(mouse_y/green.get_height())
-            for key in characters_data:
-                if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y:
-                    the_character_get_click = key
-            if green_hide == False:
-                if characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
-                    if map[characters_data[the_character_get_click].y][block_get_click_x] == 1 or map[characters_data[the_character_get_click].y][block_get_click_x] ==2:
-                        temp_x = characters_data[the_character_get_click].x
-                        temp_max = block_get_click_x
-                        isWaiting = "LEFTANDRIGHT"
-                elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
-                    if map[block_get_click_y][characters_data[the_character_get_click].x] ==1 or map[block_get_click_y][characters_data[the_character_get_click].x] ==2:
-                        temp_y = characters_data[the_character_get_click].y
-                        temp_max = block_get_click_y
-                        isWaiting = "TOPANDBOTTOM"
-                if characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
-                    for enemies in sangvisFerris_data:
-                        if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                            isWaiting = "ATTACKING"
-                            enemies_get_attack = enemies
-                elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
-                    for enemies in sangvisFerris_data:
-                        if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                            isWaiting = "ATTACKING"
-                            enemies_get_attack = enemies
-            if block_get_click_x == characters_data[the_character_get_click].x and block_get_click_y == characters_data[the_character_get_click].y:
-                if green_hide == True:
-                    action = "move"
-                    green_hide = False
-                else:
-                    green_hide = True
-                    isWaiting = True
-                    action = "wait"
+            if isWaiting == True:
+                mouse_x,mouse_y=pygame.mouse.get_pos()
+                block_get_click_x = int(mouse_x/green.get_width())
+                block_get_click_y = int(mouse_y/green.get_height())
+                for key in characters_data:
+                    if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y:
+                        the_character_get_click = key
+                if green_hide == False:
+                    if characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
+                        if map[characters_data[the_character_get_click].y][block_get_click_x] == 1 or map[characters_data[the_character_get_click].y][block_get_click_x] ==2:
+                            temp_x = characters_data[the_character_get_click].x
+                            temp_max = block_get_click_x
+                            isWaiting = "LEFTANDRIGHT"
+                    elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
+                        if map[block_get_click_y][characters_data[the_character_get_click].x] ==1 or map[block_get_click_y][characters_data[the_character_get_click].x] ==2:
+                            temp_y = characters_data[the_character_get_click].y
+                            temp_max = block_get_click_y
+                            isWaiting = "TOPANDBOTTOM"
+                    if characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
+                        for enemies in sangvisFerris_data:
+                            if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                                isWaiting = "ATTACKING"
+                                enemies_get_attack = enemies
+                    elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
+                        for enemies in sangvisFerris_data:
+                            if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                                isWaiting = "ATTACKING"
+                                enemies_get_attack = enemies
+                if block_get_click_x == characters_data[the_character_get_click].x and block_get_click_y == characters_data[the_character_get_click].y:
+                    if green_hide == True:
+                        action = "move"
+                        green_hide = False
+                    else:
+                        green_hide = True
+                        isWaiting = True
+                        action = "wait"
 
     if object_to_play[round] in characters_name_list:
         #角色动画
@@ -388,6 +396,8 @@ while battle==True:
                         action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,"die")
                     else:
                         action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+
+
             if direction_to_move == 0:
                 action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
             elif direction_to_move == 2:
