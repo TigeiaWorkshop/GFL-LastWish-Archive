@@ -36,6 +36,9 @@ character:
     x: 10
     y: 8
 dialog:
+- - - NAR
+  - research
+  - 旁白 test test
 - - - kryuger
     - helianthus
   - duel

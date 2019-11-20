@@ -54,7 +54,7 @@ def dialog_display_function(chapter_name,id=""):
             img = npc_img_dic[dialog_display[display_num][0][1]]
             img.set_alpha(i+50)
             screen.blit(img,(window_x-1000,100))
-        elif len(dialog_display[display_num][0])==1:
+        elif len(dialog_display[display_num][0])==1 and dialog_display[display_num][0][0] != "NAR":
             big_img_x = (window_x - npc_img_dic[dialog_display[display_num][0][0]].get_width())/2
             img = npc_img_dic[dialog_display[display_num][0][0]]
             img.set_alpha(i+50)
@@ -63,18 +63,19 @@ def dialog_display_function(chapter_name,id=""):
     while len(dialog_display)!=0 and display_num<len(dialog_display):
         #背景
         screen.blit(dialog_bg_img_dic[dialog_display[display_num][1]],(0,0))
+        #加载对话任务
         if len(dialog_display[display_num][0])==2:
             screen.blit(npc_img_dic[dialog_display[display_num][0][0]],(-100,100))
             screen.blit(npc_img_dic[dialog_display[display_num][0][1]],(window_x-1000,100))
         elif len(dialog_display[display_num][0])==1:
-            #角色
-            big_img_x = (window_x - npc_img_dic[dialog_display[display_num][0][0]].get_width())/2
-            screen.blit(npc_img_dic[dialog_display[display_num][0][0]],(big_img_x,100))
+            if dialog_display[display_num][0][0] != "NAR":
+                big_img_x = (window_x - npc_img_dic[dialog_display[display_num][0][0]].get_width())/2
+                screen.blit(npc_img_dic[dialog_display[display_num][0][0]],(big_img_x,100))
         #对话框内容
         screen.blit(dialoguebox,(100,window_y-dialoguebox.get_height()-50))
         if dialog_display[display_num][0][0][0:6] == "kalina":
             screen.blit(my_font.render("Kalina", True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
-        else:
+        elif dialog_display[display_num][0][0] != "NAR":
             screen.blit(my_font.render(dialog_display[display_num][0][0], True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
         screen.blit(my_font.render(dialog_display[display_num][2][0:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+70))
         if mouse_gif_id<=20:
