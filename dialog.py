@@ -34,13 +34,14 @@ def dialog_display_function(chapter_name,id=""):
     #加载对话框
     dialoguebox = pygame.transform.scale(pygame.image.load(os.path.join("img/others/dialoguebox.png")),(window_x-200,300))
     #鼠标图标
-    mouse_none = pygame.transform.scale(pygame.image.load(os.path.join("img/others/mouse_none.png")),(35,35))
-    mouse_click = pygame.transform.scale(pygame.image.load(os.path.join("img/others/mouse.png")),(35,35))
+    mouse_none = pygame.transform.scale(pygame.image.load(os.path.join("img/others/mouse_none.png")),(30,30))
+    mouse_click = pygame.transform.scale(pygame.image.load(os.path.join("img/others/mouse.png")),(30,30))
     #黑色帘幕
     the_black = pygame.transform.scale(pygame.image.load(os.path.join("img/others/black.png")),(window_x,window_y))
     #设定初始化
     display_num = 0
     my_font =pygame.font.SysFont('simsunnsimsun',25)
+    words_per_line = int((window_x-900)/12.5)
     dialog_content_id = 1
     mouse_gif_id=1
     for i in range(0,250,10):
@@ -77,16 +78,33 @@ def dialog_display_function(chapter_name,id=""):
             screen.blit(my_font.render("Kalina", True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
         elif dialog_display[display_num][0][0] != "NAR":
             screen.blit(my_font.render(dialog_display[display_num][0][0], True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
-        screen.blit(my_font.render(dialog_display[display_num][2][0:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+70))
+        
+        #目前只支持4行，用于自定义
+        if dialog_content_id < words_per_line:
+            screen.blit(my_font.render(dialog_display[display_num][2][0:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+60))
+        elif dialog_content_id >= words_per_line and dialog_content_id < words_per_line*2:
+            screen.blit(my_font.render(dialog_display[display_num][2][0:words_per_line], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+60))
+            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+90))
+        elif dialog_content_id >= words_per_line*2 and dialog_content_id < words_per_line*3:
+            screen.blit(my_font.render(dialog_display[display_num][2][0:words_per_line], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+60))
+            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line:words_per_line*2], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+90))
+            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line*2:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+120))
+        else:
+            screen.blit(my_font.render(dialog_display[display_num][2][0:words_per_line], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+60))
+            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line:words_per_line*2], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+90))
+            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line*2:words_per_line*3], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+120))
+            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line*3:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+150))
+
+        #鼠标gif
         if mouse_gif_id<=20:
             mouse_gif_id+=1
-            screen.blit(mouse_click,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.5))
+            screen.blit(mouse_click,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.48))
         elif mouse_gif_id==40:
             mouse_gif_id=1
-            screen.blit(mouse_none,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.5))
+            screen.blit(mouse_none,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.48))
         else:
             mouse_gif_id+=1
-            screen.blit(mouse_none,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.5))
+            screen.blit(mouse_none,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.48))
         #检测所有字是否都已经播出
         if dialog_content_id != len(dialog_display[display_num][2]):
             dialog_content_id +=1
