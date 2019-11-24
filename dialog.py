@@ -41,8 +41,8 @@ def dialog_display_function(chapter_name,id=""):
     #设定初始化
     display_num = 0
     my_font =pygame.font.SysFont('simsunnsimsun',25)
-    words_per_line = int((window_x-900)/12.5)
     dialog_content_id = 1
+    displayed_line = -1
     mouse_gif_id=1
     for i in range(0,250,10):
         img = dialog_bg_img_dic[dialog_display[display_num][1]]
@@ -72,28 +72,25 @@ def dialog_display_function(chapter_name,id=""):
             if dialog_display[display_num][0][0] != "NAR":
                 big_img_x = (window_x - npc_img_dic[dialog_display[display_num][0][0]].get_width())/2
                 screen.blit(npc_img_dic[dialog_display[display_num][0][0]],(big_img_x,100))
-        #对话框内容
+        #讲述者名称
         screen.blit(dialoguebox,(100,window_y-dialoguebox.get_height()-50))
         if dialog_display[display_num][0][0][0:6] == "kalina":
             screen.blit(my_font.render("Kalina", True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
         elif dialog_display[display_num][0][0] != "NAR":
             screen.blit(my_font.render(dialog_display[display_num][0][0], True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
-        
-        #目前只支持4行，用于自定义
-        if dialog_content_id < words_per_line:
-            screen.blit(my_font.render(dialog_display[display_num][2][0:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+60))
-        elif dialog_content_id >= words_per_line and dialog_content_id < words_per_line*2:
-            screen.blit(my_font.render(dialog_display[display_num][2][0:words_per_line], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+60))
-            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+90))
-        elif dialog_content_id >= words_per_line*2 and dialog_content_id < words_per_line*3:
-            screen.blit(my_font.render(dialog_display[display_num][2][0:words_per_line], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+60))
-            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line:words_per_line*2], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+90))
-            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line*2:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+120))
+        #对话框内容
+        if displayed_line >= 0:
+            for i in range(displayed_line+1):
+                screen.blit(my_font.render(dialog_display[display_num][2][i], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+55+30*i))
+
+        screen.blit(my_font.render(dialog_display[display_num][2][displayed_line+1][0:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+55+30*(displayed_line+1)))
+        #检测所有字是否都已经播出
+        if dialog_content_id < len(dialog_display[display_num][2][displayed_line+1]):
+            dialog_content_id +=1
         else:
-            screen.blit(my_font.render(dialog_display[display_num][2][0:words_per_line], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+60))
-            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line:words_per_line*2], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+90))
-            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line*2:words_per_line*3], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+120))
-            screen.blit(my_font.render(dialog_display[display_num][2][words_per_line*3:dialog_content_id], True, (255,255,255)),(440,window_y-dialoguebox.get_height()+150))
+            if displayed_line < len(dialog_display[display_num][2])-2:
+                dialog_content_id = 1
+                displayed_line += 1
 
         #鼠标gif
         if mouse_gif_id<=20:
@@ -105,9 +102,7 @@ def dialog_display_function(chapter_name,id=""):
         else:
             mouse_gif_id+=1
             screen.blit(mouse_none,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.48))
-        #检测所有字是否都已经播出
-        if dialog_content_id != len(dialog_display[display_num][2]):
-            dialog_content_id +=1
+
         #按键判定
         for event in pygame.event.get():
             if event.type == KEYDOWN:
@@ -116,6 +111,8 @@ def dialog_display_function(chapter_name,id=""):
             elif event.type == MOUSEBUTTONDOWN:
                 display_num += 1
                 dialog_content_id = 1
+                displayed_line = -1
+
         time.sleep(0.02)
         pygame.display.update()
     for i in range(0,55,2):
@@ -123,4 +120,3 @@ def dialog_display_function(chapter_name,id=""):
         screen.blit(the_black,(0,0))
         pygame.display.update()
     exit()
-dialog_display_function("chapter1")
