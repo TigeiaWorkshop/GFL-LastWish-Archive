@@ -1,11 +1,14 @@
-import pygame
-import time
-from pygame.locals import *
-from sys import exit
-from dialog import *
-import os
 import glob
+import os
+import time
+from sys import exit
+
+import pygame
 import yaml
+from pygame.locals import *
+
+from dialog import *
+
 pygame.init()
 
 def main():
@@ -25,7 +28,7 @@ def main():
         text_chooseChapter = my_font.render(lang_cn['main_menu']['text_chooseChapter'], True, (255, 255, 255))
         text_setting = my_font.render(lang_cn['main_menu']['text_setting'], True, (105,105,105))
         text_dlc = my_font.render(lang_cn['main_menu']['text_dlc'], True, (105,105,105))
-        text_wrokshop = my_font.render(lang_cn['main_menu']['text_wrokshop'], True, (105,105,105))
+        text_workshop = my_font.render(lang_cn['main_menu']['text_workshop'], True, (105,105,105))
         text_exit = my_font.render(lang_cn['main_menu']['text_exit'], True, (255, 255, 255))
         c1 = my_font.render(lang_cn['chapter']['c1'], True, (255, 255, 255))
         c2 = my_font.render(lang_cn['chapter']['c2'], True, (105,105,105))
@@ -94,7 +97,7 @@ def main():
             screen.blit(text_chooseChapter, (txt_location,350))
             screen.blit(text_setting, (txt_location,450))
             screen.blit(text_dlc, (txt_location,550))
-            screen.blit(text_wrokshop, (txt_location,650))
+            screen.blit(text_workshop, (txt_location,650))
             screen.blit(text_exit, (txt_location,750))
         elif menu_type == 1:
             screen.blit(c1, (txt_location,(window_y-200)/9*1))

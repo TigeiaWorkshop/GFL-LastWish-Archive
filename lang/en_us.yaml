@@ -5,7 +5,7 @@ main_menu: {
     text_chooseChapter: "Select Chapter",
     text_setting: "setting",
     text_dlc: "DLC",
-    text_wrokshop: "Workshop",
+    text_workshop: "Workshop",
     text_exit: "Exit",
     }
 chapter: {
