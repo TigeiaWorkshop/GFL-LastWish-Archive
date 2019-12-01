@@ -306,6 +306,7 @@ while battle==True:
             for every_chara in characters:
                 action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
         elif isWaiting == "LEFTANDRIGHT":
+            green_hide=True
             if temp_x < temp_max:
                 temp_x+=0.1
                 action_displayer(the_character_get_click,action,temp_x,characters_data[the_character_get_click].y)
@@ -325,6 +326,7 @@ while battle==True:
                     characters_data[the_character_get_click].x = block_get_click_x
                     endOfPlayerRound()
         elif isWaiting == "TOPANDBOTTOM":
+            green_hide=True
             if temp_y < temp_max:
                 temp_y+=0.1
                 action_displayer(characters_data[the_character_get_click].name,action,characters_data[the_character_get_click].x,temp_y,)
@@ -344,6 +346,7 @@ while battle==True:
                     characters_data[the_character_get_click].y = block_get_click_y
                     endOfPlayerRound()
         elif isWaiting == "ATTACKING":
+            green_hide=True
             for every_chara in characters:
                 if every_chara != the_character_get_click:
                     action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
