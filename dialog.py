@@ -1,10 +1,14 @@
-import pygame
-from sys import exit
-from pygame.locals import *
-import os
 import glob
-import yaml
+import os
 import time
+from sys import exit
+
+import pygame
+import yaml
+from pygame.locals import *
+
+from battle import *
+
 pygame.init()
 
 def dialog_display_function(chapter_name,id=""):
@@ -17,7 +21,7 @@ def dialog_display_function(chapter_name,id=""):
     screen = pygame.display.set_mode([window_x, window_y])
     pygame.display.set_caption("Girls frontline-Last Wish") #窗口标题
     #读取章节信息
-    with open("data/main_chapter/"+chapter_name+".yaml", "r", encoding='utf-8') as f:
+    with open("data/main_chapter/"+chapter_name+"_dialogs.yaml", "r", encoding='utf-8') as f:
         dialog_display = yaml.load(f.read(),Loader=yaml.FullLoader)["dialog"+id]
     #加载npc立绘
     all_npc_file_list = glob.glob(r'img\npc\*.png')

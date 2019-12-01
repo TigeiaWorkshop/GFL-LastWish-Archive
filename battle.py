@@ -8,6 +8,7 @@ import yaml
 from characterDataManager import *
 
 pygame.init()
+
 #加载设置
 with open("setting.yaml", "r", encoding='utf-8') as f:
     setting = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -28,7 +29,7 @@ for i in range(len(all_env_file_list)):
 
 my_font =pygame.font.SysFont('simsunnsimsun',25)
 #读取并初始化章节信息
-with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
+with open("data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
     chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
     chapter_title = chapter_info["title"]
     block_y = len(chapter_info["map"])
@@ -36,13 +37,11 @@ with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
     characters = chapter_info["character"]
     sangvisFerris = chapter_info["sangvisFerri"]
     map = chapter_info["map"]
-    dialog1 = chapter_info["dialog"]
-    dialog2 = chapter_info["dialog2"]
 block_x_length = window_x/block_x
 block_y_length = window_y/block_y
 
 #动图制作模块：接受一个友方角色名和动作，返回对应角色动作list和
-def character_creater(character_name,action,kind="character"):
+def character_creator(character_name,action,kind="character"):
     global block_x_length
     global block_y_length
     character_gif=[]
@@ -58,19 +57,19 @@ def character_creater(character_name,action,kind="character"):
 def character_gif_dic(character_name,kind="character"):
     if kind == "character":
         gif_dic = {
-            "attack":[character_creater(character_name,"attack"),0],
-            "die":[character_creater(character_name,"die"),0],
-            "move":[character_creater(character_name,"move"),0],
-            "victory":[character_creater(character_name,"victory"),0],
-            "victoryloop":[character_creater(character_name,"victoryloop"),0],
-            "wait":[character_creater(character_name,"wait"),0],
+            "attack":[character_creator(character_name,"attack"),0],
+            "die":[character_creator(character_name,"die"),0],
+            "move":[character_creator(character_name,"move"),0],
+            "victory":[character_creator(character_name,"victory"),0],
+            "victoryloop":[character_creator(character_name,"victoryloop"),0],
+            "wait":[character_creator(character_name,"wait"),0],
         }
     else:
         gif_dic = {
-        "attack":[character_creater(character_name,"attack",kind),0],
-        "die":[character_creater(character_name,"die",kind),0],
-        "move":[character_creater(character_name,"move",kind),0],
-        "wait":[character_creater(character_name,"wait",kind),0],
+        "attack":[character_creator(character_name,"attack",kind),0],
+        "die":[character_creator(character_name,"die",kind),0],
+        "move":[character_creator(character_name,"move",kind),0],
+        "wait":[character_creator(character_name,"wait",kind),0],
         }
     return gif_dic
 
@@ -99,21 +98,21 @@ def action_displayer(name,action,x,y,isContinue=True):
         if sangvisFerris_data[name].current_hp < 0:
             sangvisFerris_data[name].current_hp = 0
         current_hp_to_display = hp_font.render(str(sangvisFerris_data[name].current_hp)+"/"+str(sangvisFerris_data[name].max_hp), True, (0,0,0))
-        prcent_of_hp = sangvisFerris_data[name].current_hp/sangvisFerris_data[name].max_hp
+        percent_of_hp = sangvisFerris_data[name].current_hp/sangvisFerris_data[name].max_hp
     else:
         gif_dic = characters_data[name].gif
         if characters_data[name].current_hp<0:
             characters_data[name].current_hp = 0
         current_hp_to_display = hp_font.render(str(characters_data[name].current_hp)+"/"+str(characters_data[name].max_hp), True, (0,0,0))
-        prcent_of_hp = characters_data[name].current_hp/characters_data[name].max_hp
-    if prcent_of_hp<0:
-        prcent_of_hp=0
+        percent_of_hp = characters_data[name].current_hp/characters_data[name].max_hp
+    if percent_of_hp<0:
+        percent_of_hp=0
 
     img_of_char = gif_dic[action][0][0][gif_dic[action][1]]
     screen.blit(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
-    if prcent_of_hp>0:
+    if percent_of_hp>0:
         screen.blit(hp_empty,(x*green.get_width(),y*green.get_height()*0.98))
-        screen.blit(pygame.transform.scale(hp_red,(int(block_x_length*prcent_of_hp),int(block_y_length/5))),(x*green.get_width(),y*green.get_height()*0.98))
+        screen.blit(pygame.transform.scale(hp_red,(int(block_x_length*percent_of_hp),int(block_y_length/5))),(x*green.get_width(),y*green.get_height()*0.98))
         screen.blit(current_hp_to_display,(x*green.get_width(),y*green.get_height()*0.98))
     gif_dic[action][1]+=1
     if gif_dic[action][1] == 5 and action == "attack":

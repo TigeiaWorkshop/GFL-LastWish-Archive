@@ -35,22 +35,6 @@ character:
     move_range: 2
     x: 10
     y: 8
-dialog:
-- - - NAR
-  - research
-  - - test testASSsaS
-    - 旁白 test testaasadasdasssss
-    - 旁白 test testaa
-    - qqqqq旁白 test 
-- - - kryuger
-    - helianthus
-  - duel
-  - - How is everything going so far?
-
-dialog2:
-- - - kalina_1
-  - research
-  - Any good news?
 map:
 - - 0
   - 0
