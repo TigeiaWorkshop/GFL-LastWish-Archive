@@ -3,7 +3,7 @@ character="vespid"
 #action=["attack","die","move","skill","victory","victoryloop","wait"]
 action=["attack","die","move","wait"]
 for a in range(len(action)):
-    path="img/enemies/"+character+"/"+action[a]+"/"
+    path="Assets/img/enemies/"+character+"/"+action[a]+"/"
     f=os.listdir(path)
     n=0
     for i in f:

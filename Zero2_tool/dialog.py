@@ -7,31 +7,29 @@ import pygame
 import yaml
 from pygame.locals import *
 
-pygame.init()
-
 def dialog_display_function(chapter_name,window_x,window_y,screen,id=""):
     #读取章节信息
-    with open("data/main_chapter/"+chapter_name+"_dialogs.yaml", "r", encoding='utf-8') as f:
+    with open("Data/main_chapter/"+chapter_name+"_dialogs.yaml", "r", encoding='utf-8') as f:
         dialog_display = yaml.load(f.read(),Loader=yaml.FullLoader)["dialog"+id]
     #加载npc立绘
-    all_npc_file_list = glob.glob(r'img\npc\*.png')
+    all_npc_file_list = glob.glob(r'Assets/img/npc/*.png')
     npc_img_dic={}
     for i in range(len(all_npc_file_list)):
-        img_name = all_npc_file_list[i].replace("img","").replace("npc","").replace(".png","").replace("\\","").replace("/","")
+        img_name = all_npc_file_list[i].replace("Assets","").replace("img","").replace("npc","").replace(".png","").replace("\\","").replace("/","")
         npc_img_dic[img_name] = pygame.image.load(os.path.join(all_npc_file_list[i])).convert_alpha()
     #加载对话的背景图片（注意是jpg）
-    all_dialog_bg_file_list = glob.glob(r'img\dialog_background\*.jpg')
+    all_dialog_bg_file_list = glob.glob(r'Assets/img/dialog_background/*.jpg')
     dialog_bg_img_dic={}
     for i in range(len(all_dialog_bg_file_list)):
-        img_name = all_dialog_bg_file_list[i].replace("img","").replace("dialog_background","").replace(".jpg","").replace("\\","").replace("/","")
+        img_name = all_dialog_bg_file_list[i].replace("Assets","").replace("img","").replace("dialog_background","").replace(".jpg","").replace("\\","").replace("/","")
         dialog_bg_img_dic[img_name] = pygame.transform.scale(pygame.image.load(os.path.join(all_dialog_bg_file_list[i])).convert_alpha(),(window_x,window_y))
     #加载对话框
-    dialoguebox = pygame.transform.scale(pygame.image.load(os.path.join("img/others/dialoguebox.png")),(window_x-200,300))
+    dialoguebox = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/dialoguebox.png")),(window_x-200,300))
     #鼠标图标
-    mouse_none = pygame.transform.scale(pygame.image.load(os.path.join("img/others/mouse_none.png")),(30,30))
-    mouse_click = pygame.transform.scale(pygame.image.load(os.path.join("img/others/mouse.png")),(30,30))
+    mouse_none = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/mouse_none.png")),(30,30))
+    mouse_click = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/mouse.png")),(30,30))
     #黑色帘幕
-    the_black = pygame.transform.scale(pygame.image.load(os.path.join("img/others/black.png")),(window_x,window_y))
+    the_black = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/black.png")),(window_x,window_y))
     #设定初始化
     display_num = 0
     my_font =pygame.font.SysFont('simsunnsimsun',25)

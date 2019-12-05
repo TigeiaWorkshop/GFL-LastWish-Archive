@@ -10,7 +10,7 @@ import random
 pygame.init()
 
 #加载设置
-with open("setting.yaml", "r", encoding='utf-8') as f:
+with open("../Data/setting.yaml", "r", encoding='utf-8') as f:
     setting = yaml.load(f.read(),Loader=yaml.FullLoader)
     window_x = setting['Screen_size_x']
     window_y =  setting['Screen_size_y']
@@ -21,14 +21,14 @@ screen = pygame.display.set_mode([window_x, window_y])
 pygame.display.set_caption("Girls frontline-Last Wish") #窗口标题
 
 #加载背景图片
-all_env_file_list = glob.glob(r'img\environment\*.png')
+all_env_file_list = glob.glob(r'../Assets/img/environment/*.png')
 env_img_list={}
 for i in range(len(all_env_file_list)):
-    img_name = all_env_file_list[i].replace("img","").replace("environment","").replace(".png","").replace("\\","").replace("/","")
+    img_name = all_env_file_list[i].replace(".","").replace("Assets","").replace("img","").replace("environment","").replace("png","").replace("\\","").replace("/","")
     env_img_list[img_name] = pygame.image.load(os.path.join(all_env_file_list[i])).convert_alpha()
 
 #读取地图
-with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
+with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
     chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
     map = chapter_info["map"]
 block_x = 48
@@ -51,11 +51,11 @@ if len(map) == 0:
                     map_per_line.append(1)
         default_map.append(map_per_line)
 
-    with open("data/main_chapter/chapter1.yaml", "w", encoding='utf-8') as f:
+    with open("../Data/main_chapter/chapter1.yaml", "w", encoding='utf-8') as f:
         chapter_info["map"] = default_map
         yaml.dump(chapter_info, f)
 
-    with open("data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
+    with open("../Data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
         chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
         map = chapter_info["map"]
 
@@ -76,7 +76,7 @@ for i in range(len(map)):
     map_img_list.append(map_img_per_line)
 
 #绿色方块/方块标准
-green = pygame.transform.scale(pygame.image.load(os.path.join("img/others/green.png")), (block_x_length, int(block_y_length)))
+green = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/img/others/green.png")), (block_x_length, int(block_y_length)))
 green.set_alpha(100)
 new_block_type = 0
 
@@ -87,7 +87,7 @@ while True:
             if event.key == K_ESCAPE:
                 exit()
             if event.key == K_s:
-                with open("data/main_chapter/chapter1.yaml", "w", encoding='utf-8') as f:
+                with open("../Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
                     chapter_info["map"] = map
                     yaml.dump(chapter_info, f)
                 exit()

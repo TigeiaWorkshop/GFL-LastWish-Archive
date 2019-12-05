@@ -5,7 +5,7 @@ from sys import exit
 import os
 import glob
 import yaml
-from characterDataManager import *
+from Zero2_tool.characterDataManager import *
 
 pygame.init()
 
