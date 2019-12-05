@@ -11,15 +11,7 @@ from battle import *
 
 pygame.init()
 
-def dialog_display_function(chapter_name,id=""):
-    #加载设置
-    with open("setting.yaml", "r", encoding='utf-8') as f:
-        setting = yaml.load(f.read(),Loader=yaml.FullLoader)
-        window_x = setting['Screen_size_x']
-        window_y =  setting['Screen_size_y']
-    # 创建窗口
-    screen = pygame.display.set_mode([window_x, window_y])
-    pygame.display.set_caption("Girls frontline-Last Wish") #窗口标题
+def dialog_display_function(chapter_name,window_x,window_y,id=""):
     #读取章节信息
     with open("data/main_chapter/"+chapter_name+"_dialogs.yaml", "r", encoding='utf-8') as f:
         dialog_display = yaml.load(f.read(),Loader=yaml.FullLoader)["dialog"+id]
