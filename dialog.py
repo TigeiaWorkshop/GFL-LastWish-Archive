@@ -7,11 +7,9 @@ import pygame
 import yaml
 from pygame.locals import *
 
-from battle import *
-
 pygame.init()
 
-def dialog_display_function(chapter_name,window_x,window_y,id=""):
+def dialog_display_function(chapter_name,window_x,window_y,screen,id=""):
     #读取章节信息
     with open("data/main_chapter/"+chapter_name+"_dialogs.yaml", "r", encoding='utf-8') as f:
         dialog_display = yaml.load(f.read(),Loader=yaml.FullLoader)["dialog"+id]

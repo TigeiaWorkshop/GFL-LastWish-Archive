@@ -87,7 +87,7 @@ while True:
                         menu_type = 0
                 elif txt_location<mouse_x<txt_location+c1.get_width() and (window_y-200)/9<mouse_y<(window_y-200)/9+c1.get_height():
                     if menu_type == 1:
-                        dialog_display_function("chapter1",window_x,window_y)
+                        dialog_display_function("chapter1",window_x,window_y,screen)
 
         screen.blit(background_img_list[background_img_id], (0,0))
 
