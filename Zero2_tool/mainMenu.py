@@ -8,6 +8,7 @@ import yaml
 from pygame.locals import *
 
 from Zero2_tool.dialog import *
+from Zero2_tool.IsGetClick import *
 
 pygame.init()
 
@@ -69,17 +70,20 @@ def mainMenu(window_x,window_y,lang):
             if event.type == KEYDOWN and event.key == K_s:
                 pygame.display.toggle_fullscreen()
             elif event.type == MOUSEBUTTONDOWN:
-                mouse_x,mouse_y=pygame.mouse.get_pos()
-                if txt_location<mouse_x<txt_location+text_exit.get_width() and 750<mouse_y<750+text_exit.get_height():
+                #退出
+                if IsGetClick(text_exit, (txt_location,750)):
                     if menu_type == 0:
                         exit()
-                elif txt_location<mouse_x<txt_location+text_chooseChapter.get_width() and 350<mouse_y<350+text_chooseChapter.get_height():
+                #选择章节
+                elif IsGetClick(text_chooseChapter, (txt_location,350)):
                     if menu_type == 0:
                         menu_type = 1
-                elif txt_location<mouse_x<txt_location+back_button.get_width() and window_y-150<mouse_y<window_y-150+back_button.get_height():
+                #返回
+                elif IsGetClick(back_button, (txt_location,window_y-150)):
                     if menu_type == 1:
                         menu_type = 0
-                elif txt_location<mouse_x<txt_location+c1.get_width() and (window_y-200)/9<mouse_y<(window_y-200)/9+c1.get_height():
+                #章节选择
+                elif IsGetClick(c1, (txt_location,(window_y-200)/9*1)):
                     if menu_type == 1:
                         dialog_display_function("chapter1",window_x,window_y,screen)
 
