@@ -85,7 +85,7 @@ def mainMenu(window_x,window_y,lang):
                 #章节选择
                 elif IsGetClick(c1, (txt_location,(window_y-200)/9*1)):
                     if menu_type == 1:
-                        dialog_display_function("chapter1",window_x,window_y,screen)
+                        dialog_display_function("chapter1",window_x,window_y,screen,lang)
 
         screen.blit(background_img_list[background_img_id], (0,0))
 

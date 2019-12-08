@@ -7,9 +7,11 @@ import pygame
 import yaml
 from pygame.locals import *
 
-def dialog_display_function(chapter_name,window_x,window_y,screen,id=""):
+def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
+    #卸载音乐
+    pygame.mixer.music.unload()
     #读取章节信息
-    with open("Data/main_chapter/"+chapter_name+"_dialogs.yaml", "r", encoding='utf-8') as f:
+    with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
         dialog_display = yaml.load(f.read(),Loader=yaml.FullLoader)["dialog"+id]
     #加载npc立绘
     all_npc_file_list = glob.glob(r'Assets/img/npc/*.png')
@@ -37,7 +39,7 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,id=""):
     displayed_line = -1
     mouse_gif_id=1
     for i in range(0,250,10):
-        img = dialog_bg_img_dic[dialog_display[display_num][1]]
+        img = dialog_bg_img_dic[dialog_display[display_num][1][0]]
         img.set_alpha(i)
         screen.blit(img,(0,0))
         if len(dialog_display[display_num][0])==2:
@@ -53,9 +55,16 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,id=""):
             img.set_alpha(i+50)
             screen.blit(img,(big_img_x,100))
         pygame.display.update()
+    
+    the_bg_music = dialog_display[display_num][1][1]
+    pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
+    pygame.mixer.music.play(loops=9999, start=0.0)
+
+    #主循环
     while len(dialog_display)!=0 and display_num<len(dialog_display):
+        
         #背景
-        screen.blit(dialog_bg_img_dic[dialog_display[display_num][1]],(0,0))
+        screen.blit(dialog_bg_img_dic[dialog_display[display_num][1][0]],(0,0))
         #加载对话任务
         if len(dialog_display[display_num][0])==2:
             screen.blit(npc_img_dic[dialog_display[display_num][0][0]],(-100,100))
@@ -104,9 +113,15 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,id=""):
                 display_num += 1
                 dialog_content_id = 1
                 displayed_line = -1
-
+                if display_num<len(dialog_display):
+                    if dialog_display[display_num][1][1] != the_bg_music:
+                        the_bg_music = dialog_display[display_num][1][1]
+                        pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
+                        pygame.mixer.music.play(loops=9999, start=0.0)
         time.sleep(0.02)
         pygame.display.update()
+    
+    #淡出
     for i in range(0,55,2):
         the_black.set_alpha(i)
         screen.blit(the_black,(0,0))
