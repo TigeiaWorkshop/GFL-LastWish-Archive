@@ -76,8 +76,7 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
         # 对话框图片
         screen.blit(dialoguebox,(100,window_y-dialoguebox.get_height()-50))
         #讲述者名称
-        if dialog_display[display_num][0][0] != "NAR":
-            screen.blit(my_font.render(dialog_display[display_num][1][2], True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
+        screen.blit(my_font.render(dialog_display[display_num][1][2], True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
         #对话框内容
         if displayed_line >= 0:
             for i in range(displayed_line+1):
@@ -109,14 +108,25 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
                 if event.key == K_ESCAPE:
                     exit()
             elif event.type == MOUSEBUTTONDOWN:
-                display_num += 1
-                dialog_content_id = 1
-                displayed_line = -1
-                if display_num<len(dialog_display):
-                    if dialog_display[display_num][1][1] != the_bg_music:
-                        the_bg_music = dialog_display[display_num][1][1]
-                        pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
-                        pygame.mixer.music.play(loops=9999, start=0.0)
+                if pygame.mouse.get_pressed()[0]:
+                    display_num += 1
+                    dialog_content_id = 1
+                    displayed_line = -1
+                    if display_num<len(dialog_display):
+                        if dialog_display[display_num][1][1] != the_bg_music:
+                            the_bg_music = dialog_display[display_num][1][1]
+                            pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
+                            pygame.mixer.music.play(loops=9999, start=0.0)
+                elif pygame.mouse.get_pressed()[2]:
+                    if display_num>0:
+                        display_num -= 1
+                        dialog_content_id = 1
+                        displayed_line = -1
+                        if display_num<len(dialog_display):
+                            if dialog_display[display_num][1][1] != the_bg_music:
+                                the_bg_music = dialog_display[display_num][1][1]
+                                pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
+                                pygame.mixer.music.play(loops=9999, start=0.0)
         time.sleep(0.02)
         pygame.display.update()
     
