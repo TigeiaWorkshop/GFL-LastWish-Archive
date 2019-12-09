@@ -73,12 +73,11 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
             if dialog_display[display_num][0][0] != "NAR":
                 big_img_x = (window_x - npc_img_dic[dialog_display[display_num][0][0]].get_width())/2
                 screen.blit(npc_img_dic[dialog_display[display_num][0][0]],(big_img_x,100))
-        #讲述者名称
+        # 对话框图片
         screen.blit(dialoguebox,(100,window_y-dialoguebox.get_height()-50))
-        if dialog_display[display_num][0][0][0:6] == "kalina":
-            screen.blit(my_font.render("Kalina", True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
-        elif dialog_display[display_num][0][0] != "NAR":
-            screen.blit(my_font.render(dialog_display[display_num][0][0], True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
+        #讲述者名称
+        if dialog_display[display_num][0][0] != "NAR":
+            screen.blit(my_font.render(dialog_display[display_num][1][2], True, (255,255,255)),(500,window_y-dialoguebox.get_height()))
         #对话框内容
         if displayed_line >= 0:
             for i in range(displayed_line+1):
