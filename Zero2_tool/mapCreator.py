@@ -33,8 +33,8 @@ with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
     map = chapter_info["map"]
 block_x = 48
 block_y = 24
-block_x_length = int(window_x/block_x)
-block_y_length = window_y/block_y
+block_x_length = int(window_x*4/5/block_x)
+block_y_length = int(window_y/block_y)
 
 #初始化地图
 if len(map) == 0:
