@@ -8,19 +8,19 @@ dialog:
     - 旁白 test l2
     - qqqqq旁白 test 
 
-- - - kryuger
-    - helianthus
+- - - helianthus_1
+    - kryuger_dark
   - - duel
     - Room_1
     - Helianthus
-  - - How is everything going so far?
+  - - 报告，一切正常
 
 - - - kalina_1
-    - helianthus
+    - helianthus_dark_1
   - - duel
     - First_Kiss
     - Kryuger
-  - - I know it?
+  - - 我怎么知道
 
 dialog2:
 - - - kalina_1
