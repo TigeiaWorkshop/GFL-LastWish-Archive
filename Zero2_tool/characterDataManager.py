@@ -1,4 +1,5 @@
 import random
+
 class characterDataManager:
     def __init__(self, name, min_damage,max_damage,max_hp,current_hp,x,y,attack_range,move_range,gif_dic):
         self.name = name
@@ -25,6 +26,7 @@ class Bullet:
         self.y = y
         self.damage = damage
 
+#随机地图方块
 def randomBlock(map):
     map_img_list = []
     for i in range(len(map)):
