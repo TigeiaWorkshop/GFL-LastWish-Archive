@@ -6,6 +6,7 @@ from sys import exit
 import pygame
 import yaml
 from pygame.locals import *
+from Zero2_tool.battle import *
 
 def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
     #卸载音乐
@@ -135,4 +136,6 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
         the_black.set_alpha(i)
         screen.blit(the_black,(0,0))
         pygame.display.update()
-    exit()
+    
+    #进入战斗系统
+    battle(chapter_name,window_x,window_y,screen,lang)

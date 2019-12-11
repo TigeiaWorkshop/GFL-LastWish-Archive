@@ -8,7 +8,8 @@ import yaml
 from Zero2_tool.characterDataManager import *
 from Zero2_tool.animationCreator import *
 
-def all(window_x,window_y,screen,lang):
+def battle(chapter_name,window_x,window_y,screen,lang):
+    
     #加载动作：接受角色名，动作，方位，完成对应的指令
     def action_displayer(name,action,x,y,isContinue=True):
         if name in sangvisFerris_name_list:
@@ -43,65 +44,16 @@ def all(window_x,window_y,screen,lang):
             if gif_dic[action][1] == gif_dic[action][0][1]:
                 gif_dic[action][1] -= 1
 
-    #玩家回合结束
-    def endOfPlayerRound():
-        global round
-        global isWaiting
-        isWaiting = True
-        round += 1
-        if round == len(characters_name_list):
-            resetEnemyMovingData()
-
-    #重置敌方移动数值
-    def resetEnemyMovingData():
-        global direction_to_move
-        global how_many_moved
-        global how_many_to_move
-        global object_to_play
-        global round
-        #direction_to_move 0左1上2右3下
-        if sangvisFerris_data[object_to_play[round]].x > characters_data["sv-98"].x:
-            if sangvisFerris_data[object_to_play[round]].y > characters_data["sv-98"].y:
-                if sangvisFerris_data[object_to_play[round]].x-characters_data["sv-98"].x > sangvisFerris_data[object_to_play[round]].y-characters_data["sv-98"].y:
-                    direction_to_move=0
-                else:
-                    direction_to_move=1
-            else:
-                direction_to_move=2
-        else:
-            direction_to_move=3
-        how_many_moved = 0
-        how_many_to_move = sangvisFerris_data[object_to_play[round]].move_range
-        for i in range(1, how_many_to_move+1):
-            if direction_to_move == 0:
-                if map[sangvisFerris_data[object_to_play[round]].y][sangvisFerris_data[object_to_play[round]].x-i] == 0 or map[sangvisFerris_data[object_to_play[round]].y][sangvisFerris_data[object_to_play[round]].x-i] == 3:
-                    how_many_to_move = i-1
-                    break
-            elif direction_to_move == 2:
-                if map[sangvisFerris_data[object_to_play[round]].y][sangvisFerris_data[object_to_play[round]].x+i] == 0 or map[sangvisFerris_data[object_to_play[round]].y][sangvisFerris_data[object_to_play[round]].x+i] == 3:
-                    how_many_to_move = i-1
-                    break
-            elif direction_to_move == 1:
-                if map[sangvisFerris_data[object_to_play[round]].y-i][sangvisFerris_data[object_to_play[round]].x] == 0 or map[sangvisFerris_data[object_to_play[round]].y-i][sangvisFerris_data[object_to_play[round]].x] == 3:
-                    how_many_to_move = i-1
-                    break
-            elif direction_to_move == 3:
-                if map[sangvisFerris_data[object_to_play[round]].y+i][sangvisFerris_data[object_to_play[round]].x] == 0 or map[sangvisFerris_data[object_to_play[round]].y+i][sangvisFerris_data[object_to_play[round]].x] == 3:
-                    how_many_to_move = i-1
-                    break
-        if how_many_to_move < 1:
-            resetEnemyMovingData()
-
     #加载背景图片
-    all_env_file_list = glob.glob(r'img\environment\*.png')
+    all_env_file_list = glob.glob(r'Assets/img/environment/*.png')
     env_img_list={}
     for i in range(len(all_env_file_list)):
-        img_name = all_env_file_list[i].replace("img","").replace("environment","").replace(".png","").replace("\\","").replace("/","")
+        img_name = all_env_file_list[i].replace("Assets","").replace("img","").replace("environment","").replace(".png","").replace("\\","").replace("/","")
         env_img_list[img_name] = pygame.image.load(os.path.join(all_env_file_list[i])).convert_alpha()
 
     my_font =pygame.font.SysFont('simsunnsimsun',25)
     #读取并初始化章节信息
-    with open("data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
+    with open("data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
         chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
         chapter_title = chapter_info["title"]
         block_y = len(chapter_info["map"])
@@ -122,7 +74,7 @@ def all(window_x,window_y,screen,lang):
     characters_name_list = []
     characters_data = {}
     for jiaose in characters:
-        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"],character_gif_dic(jiaose,block_x_length,block_y_length,))
+        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"],character_gif_dic(jiaose,block_x_length,block_y_length))
         characters_name_list.append(jiaose)
 
     sangvisFerris_name_list = []
@@ -134,17 +86,17 @@ def all(window_x,window_y,screen,lang):
     hp_font =pygame.font.SysFont('simsunnsimsun',10)
 
     #加载子弹图片
-    bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("img/others/bullet.png")), (int(block_x_length/6), int(block_y_length/12)))
+    bullet_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/bullet.png")), (int(block_x_length/6), int(block_y_length/12)))
     bullets_list = []
 
     #绿色方块/方块标准
-    hp_empty = pygame.transform.scale(pygame.image.load(os.path.join("img/others/hp_empty.png")), (int(block_x_length), int(block_y_length/5)))
-    hp_red = pygame.transform.scale(pygame.image.load(os.path.join("img/others/hp_red.png")), (int(block_x_length), int(block_y_length/5)))
-    green = pygame.transform.scale(pygame.image.load(os.path.join("img/others/green.png")), (int(block_x_length), int(block_y_length)))
+    hp_empty = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/hp_empty.png")), (int(block_x_length), int(block_y_length/5)))
+    hp_red = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/hp_red.png")), (int(block_x_length), int(block_y_length/5)))
+    green = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/green.png")), (int(block_x_length), int(block_y_length)))
     green.set_alpha(100)
-    red = pygame.transform.scale(pygame.image.load(os.path.join("img/others/red.png")), (int(block_x_length), int(block_y_length)))
+    red = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/red.png")), (int(block_x_length), int(block_y_length)))
     red.set_alpha(100)
-    the_black = pygame.transform.scale(pygame.image.load(os.path.join("img/others/black.png")),(window_x,window_y))
+    the_black = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/black.png")),(window_x,window_y))
     new_block_type = 0
     per_block_width = green.get_width()
     per_block_height = green.get_height()
@@ -272,7 +224,7 @@ def all(window_x,window_y,screen,lang):
                             action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                     if temp_x >= temp_max:
                         characters_data[the_character_get_click].x = block_get_click_x
-                        endOfPlayerRound()
+                        #endOfPlayerRound()
                 elif temp_x > temp_max:
                     temp_x-=0.1
                     action_displayer(characters_data[the_character_get_click].name,action,temp_x,characters_data[the_character_get_click].y)
@@ -281,7 +233,7 @@ def all(window_x,window_y,screen,lang):
                             action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                     if temp_x <= temp_max:
                         characters_data[the_character_get_click].x = block_get_click_x
-                        endOfPlayerRound()
+                        #endOfPlayerRound()
             elif isWaiting == "TOPANDBOTTOM":
                 green_hide=True
                 if temp_y < temp_max:
@@ -292,7 +244,7 @@ def all(window_x,window_y,screen,lang):
                             action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                     if temp_y >= temp_max:
                         characters_data[the_character_get_click].y = block_get_click_y
-                        endOfPlayerRound()
+                        #endOfPlayerRound()
                 elif temp_y > temp_max:
                     temp_y-=0.1
                     action_displayer(characters_data[the_character_get_click].name,action,characters_data[the_character_get_click].x,temp_y,)
@@ -301,7 +253,7 @@ def all(window_x,window_y,screen,lang):
                             action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
                     if temp_y <= temp_max:
                         characters_data[the_character_get_click].y = block_get_click_y
-                        endOfPlayerRound()
+                        #endOfPlayerRound()
             elif isWaiting == "ATTACKING":
                 green_hide=True
                 for every_chara in characters:
@@ -311,7 +263,7 @@ def all(window_x,window_y,screen,lang):
                         action_displayer(characters_data[every_chara].name,"attack",characters_data[every_chara].x,characters_data[every_chara].y,False)
                 if characters_data[the_character_get_click].gif["attack"][1] == characters_data[the_character_get_click].gif["attack"][0][1]:
                     sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                    endOfPlayerRound()
+                    #endOfPlayerRound()
                     characters_data[the_character_get_click].gif["attack"][1] = 0
             for enemies in sangvisFerris_data:
                 if sangvisFerris_data[enemies].current_hp>0:
@@ -343,8 +295,8 @@ def all(window_x,window_y,screen,lang):
         if object_to_play[round] in sangvisFerris_name_list:
             if sangvisFerris_data[object_to_play[round]].current_hp<=0:
                 round += 1
-                if round != len(object_to_play):
-                    resetEnemyMovingData()
+                #if round != len(object_to_play):
+                    #resetEnemyMovingData()
             else:
                 green_hide = True
                 for every_chara in characters:
@@ -376,8 +328,8 @@ def all(window_x,window_y,screen,lang):
                     elif direction_to_move == 3:
                         sangvisFerris_data[object_to_play[round]].y+=how_many_to_move
                     round += 1
-                    if round != len(object_to_play):
-                        resetEnemyMovingData()
+                    #if round != len(object_to_play):
+                        #resetEnemyMovingData()
                 elif how_many_moved < how_many_to_move:
                     how_many_moved+=0.1
 

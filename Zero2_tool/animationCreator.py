@@ -5,10 +5,10 @@ import os
 def character_creator(character_name,action,block_x_length,block_y_length,kind="character"):
     character_gif=[]
     files_amount = 0
-    for file in os.listdir("img/"+kind+"/"+character_name+"/"+action):
+    for file in os.listdir("Assets/img/"+kind+"/"+character_name+"/"+action):
         files_amount+=1
     for i in range(files_amount):
-        path = "img/"+kind+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_"+str(i)+".png"
+        path = "Assets/img/"+kind+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_"+str(i)+".png"
         character_gif.append(pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(block_x_length*2), int(block_y_length*2))))
     return [character_gif,files_amount]
 
@@ -16,19 +16,19 @@ def character_creator(character_name,action,block_x_length,block_y_length,kind="
 def character_gif_dic(character_name,block_x_length,block_y_length,kind="character"):
     if kind == "character":
         gif_dic = {
-            "attack":[character_creator(character_name,block_x_length,block_y_length,"attack"),0],
-            "die":[character_creator(character_name,block_x_length,block_y_length,"die"),0],
-            "move":[character_creator(character_name,block_x_length,block_y_length,"move"),0],
-            "victory":[character_creator(character_name,block_x_length,block_y_length,"victory"),0],
-            "victoryloop":[character_creator(character_name,block_x_length,block_y_length,"victoryloop"),0],
-            "wait":[character_creator(character_name,block_x_length,block_y_length,"wait"),0],
+            "attack":[character_creator(character_name,"attack",block_x_length,block_y_length),0],
+            "die":[character_creator(character_name,"die",block_x_length,block_y_length),0],
+            "move":[character_creator(character_name,"move",block_x_length,block_y_length),0],
+            "victory":[character_creator(character_name,"victory",block_x_length,block_y_length),0],
+            "victoryloop":[character_creator(character_name,"victoryloop",block_x_length,block_y_length),0],
+            "wait":[character_creator(character_name,"wait",block_x_length,block_y_length),0],
         }
     else:
         gif_dic = {
-        "attack":[character_creator(character_name,block_x_length,block_y_length,"attack",kind),0],
-        "die":[character_creator(character_name,block_x_length,block_y_length,"die",kind),0],
-        "move":[character_creator(character_name,block_x_length,block_y_length,"move",kind),0],
-        "wait":[character_creator(character_name,block_x_length,block_y_length,"wait",kind),0],
+        "attack":[character_creator(character_name,"attack",block_x_length,block_y_length,kind),0],
+        "die":[character_creator(character_name,"die",block_x_length,block_y_length,kind),0],
+        "move":[character_creator(character_name,"move",block_x_length,block_y_length,kind),0],
+        "wait":[character_creator(character_name,"wait",block_x_length,block_y_length,kind),0],
         }
     return gif_dic
-    
+
