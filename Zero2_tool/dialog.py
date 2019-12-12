@@ -10,12 +10,12 @@ from Zero2_tool.battle import *
 
 def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
     #加载动画
-    LoadingImgAbove =pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/LoadingImgAbove.png")).convert_alpha(),(window_x+6,int(window_y/1.89)))
-    LoadingImgBelow =pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/LoadingImgBelow.png")).convert_alpha(),(window_x+6,int(window_y/1.89)))
+    LoadingImgAbove =pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/LoadingImgAbove.png")).convert_alpha(),(window_x+6,int(window_y/1.7)))
+    LoadingImgBelow =pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/LoadingImgBelow.png")).convert_alpha(),(window_x+6,int(window_y/2.05)))
     for i in range(100):
         screen.blit(LoadingImgAbove, (-3,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()))
         screen.blit(LoadingImgBelow, (-3,window_y-LoadingImgBelow.get_height()/100*i))
-        time.sleep(0.01)
+        time.sleep(0.005)
         pygame.display.update()
     
     #卸载音乐
