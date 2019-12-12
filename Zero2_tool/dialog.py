@@ -9,6 +9,15 @@ from pygame.locals import *
 from Zero2_tool.battle import *
 
 def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
+    #加载动画
+    LoadingImgAbove =pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/LoadingImgAbove.png")).convert_alpha(),(window_x+6,int(window_y/1.89)))
+    LoadingImgBelow =pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/LoadingImgBelow.png")).convert_alpha(),(window_x+6,int(window_y/1.89)))
+    for i in range(100):
+        screen.blit(LoadingImgAbove, (-3,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()))
+        screen.blit(LoadingImgBelow, (-3,window_y-LoadingImgBelow.get_height()/100*i))
+        time.sleep(0.01)
+        pygame.display.update()
+    
     #卸载音乐
     pygame.mixer.music.unload()
     #读取章节信息
@@ -39,7 +48,8 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
     dialog_content_id = 1
     displayed_line = -1
     mouse_gif_id=1
-    for i in range(0,250,10):
+    #渐入效果
+    for i in range(0,250,2):
         img = dialog_bg_img_dic[dialog_display[display_num][1][0]]
         img.set_alpha(i)
         screen.blit(img,(0,0))
@@ -55,6 +65,8 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
             img = npc_img_dic[dialog_display[display_num][0][0]]
             img.set_alpha(i+50)
             screen.blit(img,(big_img_x,100))
+        screen.blit(LoadingImgAbove, (-3,0-LoadingImgAbove.get_height()/250*i))
+        screen.blit(LoadingImgBelow, (-3,window_y-LoadingImgBelow.get_height()+LoadingImgBelow.get_height()/250*i))
         pygame.display.update()
     
     the_bg_music = dialog_display[display_num][1][1]

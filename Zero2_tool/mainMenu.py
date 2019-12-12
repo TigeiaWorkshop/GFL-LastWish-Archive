@@ -64,6 +64,7 @@ def mainMenu(window_x,window_y,lang):
     menu_type = 0
     txt_location = int(window_x*2/3)
 
+    
     # 游戏主循环
     while True:
         for event in pygame.event.get():
