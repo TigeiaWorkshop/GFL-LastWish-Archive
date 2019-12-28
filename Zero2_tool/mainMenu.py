@@ -43,6 +43,7 @@ def mainMenu(window_x,window_y,lang):
     background_img_id = 0
     background_img_list=[]
     loading_img =  pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/img1.png")),(window_x,window_y))
+    cover_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/covers/chapter1.png")),(window_x,window_y))
     while True:
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
@@ -60,6 +61,7 @@ def mainMenu(window_x,window_y,lang):
         screen.blit(the_str, ((window_x-the_str.get_width())/2,window_y-100))
         pygame.display.update()
     #数值初始化
+    cover_alpha = 0
     background_img_id = 0
     menu_type = 0
     txt_location = int(window_x*2/3)
@@ -89,7 +91,18 @@ def mainMenu(window_x,window_y,lang):
                         dialog_display_function("chapter1",window_x,window_y,screen,lang)
 
         screen.blit(background_img_list[background_img_id], (0,0))
-
+        
+        if IsGetClick(c1, (txt_location,(window_y-200)/9*1)):
+            cover_img.set_alpha(cover_alpha)
+            if menu_type == 1:
+                screen.blit(cover_img, (0,0))
+            if cover_alpha < 250:
+                cover_alpha+=10
+        else:
+            if cover_alpha >= 0:
+                cover_alpha -=10
+            if menu_type == 1:
+                screen.blit(cover_img, (0,0))
         #菜单选项
         if menu_type == 0:
             screen.blit(text_continue, (txt_location,250))
