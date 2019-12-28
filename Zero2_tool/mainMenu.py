@@ -12,7 +12,7 @@ from Zero2_tool.IsGetClick import *
 
 pygame.init()
 
-def mainMenu(window_x,window_y,lang):
+def mainMenu(window_x,window_y,lang,mode=""):
     #加载主菜单文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         lang_cn = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -54,8 +54,12 @@ def mainMenu(window_x,window_y,lang):
         background_img_list.append(pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(),(window_x,window_y)))
         percent_of_img_loaded = '{:.0f}%'.format(background_img_id/374*100)
         background_img_id+=1
-        if background_img_id == 375:
-            break
+        if mode == "test":
+            if background_img_id == 1:
+                break
+        else:
+            if background_img_id == 375:
+                break
         screen.blit(loading_img, (0,0))
         the_str = my_font.render(now_loading+": "+str(percent_of_img_loaded), True, (255, 255, 255))
         screen.blit(the_str, ((window_x-the_str.get_width())/2,window_y-100))
@@ -93,16 +97,16 @@ def mainMenu(window_x,window_y,lang):
         screen.blit(background_img_list[background_img_id], (0,0))
         
         if IsGetClick(c1, (txt_location,(window_y-200)/9*1)):
-            cover_img.set_alpha(cover_alpha)
-            if menu_type == 1:
-                screen.blit(cover_img, (0,0))
             if cover_alpha < 250:
                 cover_alpha+=10
         else:
             if cover_alpha >= 0:
                 cover_alpha -=10
-            if menu_type == 1:
-                screen.blit(cover_img, (0,0))
+
+        if menu_type == 1:
+            cover_img.set_alpha(cover_alpha)
+            screen.blit(cover_img, (0,0))
+
         #菜单选项
         if menu_type == 0:
             screen.blit(text_continue, (txt_location,250))
@@ -121,10 +125,14 @@ def mainMenu(window_x,window_y,lang):
             screen.blit(c7, (txt_location,(window_y-200)/9*7))
             screen.blit(c8, (txt_location,(window_y-200)/9*8))
             screen.blit(back_button, (txt_location,window_y-150))
-
-        background_img_id += 1
+        
+        #背景图片动画
         if background_img_id == 374:
             background_img_id = 0
+        else:
+            if mode != "test":
+                background_img_id += 1
+        
         time.sleep(0.04)
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/White_Front.mp3')
