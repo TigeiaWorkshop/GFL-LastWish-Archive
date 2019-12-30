@@ -59,15 +59,15 @@ def mainMenu(window_x,window_y,lang,mode=""):
                 pygame.display.toggle_fullscreen()
             elif event.type == MOUSEBUTTONDOWN:
                 #退出
-                if IsGetClick(text_exit.n, (txt_location,750)):
+                if IsGetClick(text_exit.b, (txt_location,750)):
                     if menu_type == 0:
                         exit()
                 #选择章节
-                elif IsGetClick(text_chooseChapter.n, (txt_location,350)):
+                elif IsGetClick(text_chooseChapter.b, (txt_location,350)):
                     if menu_type == 0:
                         menu_type = 1
                 #返回
-                elif IsGetClick(back_button.n, (txt_location,window_y-150)):
+                elif IsGetClick(back_button.b, (txt_location,window_y-150)):
                     if menu_type == 1:
                         menu_type = 0
                 #章节选择
@@ -125,7 +125,10 @@ def mainMenu(window_x,window_y,lang,mode=""):
             screen.blit(c6.n, (txt_location,(window_y-200)/9*6))
             screen.blit(c7.n, (txt_location,(window_y-200)/9*7))
             screen.blit(c8.n, (txt_location,(window_y-200)/9*8))
-            screen.blit(back_button.n, (txt_location,window_y-150))
+            if IsGetClick(back_button.n, (txt_location,window_y-150)):
+                screen.blit(back_button.b, (txt_location,window_y-150))
+            else:
+                screen.blit(back_button.n, (txt_location,window_y-150))
         
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')
