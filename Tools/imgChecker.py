@@ -1,11 +1,12 @@
 import cv2
 import numpy as np
 import yaml
-
-for i in range(375,3107):
+#933
+#1895
+for i in range(3106,375,-1):
     img1 = cv2.imread("../Assets/img/SquadAR/bgImg"+str(i)+".jpg")
 
-    for a in range(i+1,3107):
+    for a in range(i-1,375,-1):
         print("Now is checking "+str(i)+" and "+str(a))
         img2 = cv2.imread("../Assets/img/SquadAR/bgImg"+str(a)+".jpg")
         difference = cv2.subtract(img1, img2)

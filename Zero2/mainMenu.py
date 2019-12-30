@@ -52,15 +52,15 @@ def mainMenu(window_x,window_y,lang,mode=""):
                 exit()
             if event.type == KEYDOWN and event.key == K_s:
                 pygame.display.toggle_fullscreen()
-        path = "Assets/img/main_menu/background_img"+str(background_img_id)+".jpg"
+        path = "Assets/img/main_menu/bgImg"+str(background_img_id)+".jpg"
         background_img_list.append(pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(),(window_x,window_y)))
-        percent_of_img_loaded = '{:.0f}%'.format(background_img_id/374*100)
+        percent_of_img_loaded = '{:.0f}%'.format(background_img_id/1895*100)
         background_img_id+=1
         if mode == "test":
             if background_img_id == 1:
                 break
         else:
-            if background_img_id == 375:
+            if background_img_id == 1896:
                 break
         screen.blit(loading_img, (0,0))
         the_str = my_font.render(now_loading+": "+str(percent_of_img_loaded), True, (255, 255, 255))
@@ -142,14 +142,13 @@ def mainMenu(window_x,window_y,lang,mode=""):
             screen.blit(back_button.n, (txt_location,window_y-150))
         
         #背景图片动画
-        if background_img_id == 374:
-            background_img_id = 0
+        if background_img_id == 1895:
+            background_img_id = 933
         else:
             if mode != "test":
                 background_img_id += 1
         
-        time.sleep(0.04)
         while pygame.mixer.music.get_busy() != 1:
-            pygame.mixer.music.load('Assets/music/White_Front.mp3')
+            pygame.mixer.music.load('Assets/music/LoadOut.mp3')
             pygame.mixer.music.play(loops=9999, start=0.0)
         pygame.display.update()
