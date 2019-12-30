@@ -1,4 +1,4 @@
-from Zero2_tool.mainMenu import *
+from Zero2.mainMenu import *
 
 #加载设置
 with open("Data/setting.yaml", "r", encoding='utf-8') as f:

@@ -7,9 +7,9 @@ import pygame
 import yaml
 from pygame.locals import *
 
-from Zero2_tool.dialog import *
-from Zero2_tool.IsGetClick import *
-from Zero2_tool.fontRender import *
+from Zero2.dialog import *
+from Zero2.IsGetClick import *
+from Zero2.fontRender import *
 
 pygame.init()
 

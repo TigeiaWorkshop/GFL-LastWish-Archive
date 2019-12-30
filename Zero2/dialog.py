@@ -6,7 +6,7 @@ from sys import exit
 import pygame
 import yaml
 from pygame.locals import *
-from Zero2_tool.battle import *
+from Zero2.battle import *
 
 def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
     #加载动画

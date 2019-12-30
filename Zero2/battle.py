@@ -5,8 +5,8 @@ from sys import exit
 import os
 import glob
 import yaml
-from Zero2_tool.characterDataManager import *
-from Zero2_tool.animationCreator import *
+from Zero2.characterDataManager import *
+from Zero2.animationCreator import *
 
 def battle(chapter_name,window_x,window_y,screen,lang):
     
