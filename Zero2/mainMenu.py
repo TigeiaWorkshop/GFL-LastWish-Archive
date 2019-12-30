@@ -74,6 +74,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
                 elif IsGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
                     if menu_type == 1:
                         dialog_display_function("chapter1",window_x,window_y,screen,lang)
+        
         #加载背景图片
         if not ret:
             #视频播放结束
