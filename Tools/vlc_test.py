@@ -1,54 +1,20 @@
-import os
-import sys
-import vlc
 import pygame
-
-
-# Enable in Windows to use directx renderer instead of windib
-#os.environ["SDL_VIDEODRIVER"] = "directx"
-
+import cv2
 pygame.init()
-screen = pygame.display.set_mode((800,600),pygame.RESIZABLE)
-pygame.display.get_wm_info()
+cap = cv2.VideoCapture('../Assets/movie/SquadAR.mp4')
+ret, img = cap.read()
+img = cv2.transpose(img)
 
 
-# Get path to movie specified as command line argument
-movie = os.path.expanduser("../Assets/movie/SquadAR.mp4")
-# Check if movie is accessible
-if not os.access(movie, os.R_OK):
-    print('Error: %s file not readable' % movie)
-    sys.exit(1)
 
-# Create instane of VLC and create reference to movie.
-vlcInstance = vlc.Instance()
-media = vlcInstance.media_new(movie)
+screen = pygame.display.set_mode((192, 108))
+surface = pygame.surface.Surface((img.shape[0], img.shape[1]))
 
-# Create new instance of vlc player
-player = vlcInstance.media_player_new()
+while True:
+    ret, img = cap.read()
+    img = cv2.transpose(img)
+    pygame.surfarray.blit_array(surface, img)
+    screen.blit(surface, (0,0))
+    pygame.display.flip()
 
-# Pass pygame window id to vlc player, so it can render its contents there.
-win_id = pygame.display.get_wm_info()['window']
-if sys.platform == "linux2": # for Linux using the X Server
-    player.set_xwindow(win_id)
-elif sys.platform == "win32": # for Windows
-    player.set_hwnd(win_id)
-elif sys.platform == "darwin": # for MacOS
-    player.set_agl(win_id)
-
-# Load movie into vlc player instance
-player.set_media(media)
-
-# Quit pygame mixer to allow vlc full access to audio device (REINIT AFTER MOVIE PLAYBACK IS FINISHED!)
-pygame.mixer.quit()
-
-# Start movie playback
-player.play()
-
-while player.get_state() != vlc.State.Ended:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit(2)
-        if event.type == pygame.KEYDOWN:
-            print ("OMG keydown!")
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            print ("we got a mouse button down!")
+pygame.quit()
