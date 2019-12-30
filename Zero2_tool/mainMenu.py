@@ -113,17 +113,26 @@ def mainMenu(window_x,window_y,lang,mode=""):
         #菜单选项
         if menu_type == 0:
             screen.blit(text_continue.n, (txt_location,250))
-            screen.blit(text_chooseChapter.n, (txt_location,350))
+            if IsGetClick(text_chooseChapter.n, (txt_location,350)):
+                screen.blit(text_chooseChapter.b, (txt_location,350))
+            else:
+                screen.blit(text_chooseChapter.n, (txt_location,350))
             screen.blit(text_setting.n, (txt_location,450))
             screen.blit(text_dlc.n, (txt_location,550))
             screen.blit(text_workshop.n, (txt_location,650))
-            screen.blit(text_exit.n, (txt_location,750))
+            if IsGetClick(text_exit.n, (txt_location,750)):
+                screen.blit(text_exit.b, (txt_location,750))
+            else:
+                screen.blit(text_exit.n, (txt_location,750))
         elif menu_type == 1:
             if IsGetClick(c1.n, (txt_location,(window_y-200)/9*1)):
                 screen.blit(c1.b, (txt_location,(window_y-200)/9*1))
             else:
                 screen.blit(c1.n, (txt_location,(window_y-200)/9*1))
-            screen.blit(c2.n, (txt_location,(window_y-200)/9*2))
+            if IsGetClick (c2.n, (txt_location,(window_y-200)/9*2)):
+                screen.blit(c2.b, (txt_location,(window_y-200)/9*2))
+            else:
+                screen.blit(c2.n, (txt_location,(window_y-200)/9*2))
             screen.blit(c3.n, (txt_location,(window_y-200)/9*3))
             screen.blit(c4.n, (txt_location,(window_y-200)/9*4))
             screen.blit(c5.n, (txt_location,(window_y-200)/9*5))
