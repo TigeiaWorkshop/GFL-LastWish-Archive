@@ -1,7 +1,7 @@
 import os
 
 for a in range(3107):
-    path="../Assets/img/SquadAR/"
+    path="../Assets/img/main_menu/"
     f=os.listdir(path)
     n=0
     for i in f:
