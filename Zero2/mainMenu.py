@@ -42,16 +42,17 @@ def mainMenu(window_x,window_y,lang,mode=""):
     #加载主菜单背景
     background_img_id = 0
     background_img_list=[]
-    loading_img =  pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/img1.png")).convert_alpha(),(window_x,window_y))
+    loading_img =  pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/img1.png")),(window_x,window_y))
     my_font = pygame.font.SysFont('simsunnsimsun',50)
     while True:
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
                 exit()
-            if event.type == KEYDOWN and event.key == K_s:
-                pygame.display.toggle_fullscreen()
         path = "Assets/img/main_menu/bgImg"+str(background_img_id)+".jpg"
-        background_img_list.append(pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(),(window_x,window_y)))
+        img = pygame.image.load(os.path.join(path))
+        if window_x != 1920 or window_y != 1080:
+            img = pygame.transform.scale(img,(window_x,window_y))
+        background_img_list.append(img)
         percent_of_img_loaded = '{:.0f}%'.format(background_img_id/950*100)
         background_img_id+=1
         if mode == "test":

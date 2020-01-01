@@ -1,52 +1,27 @@
 import pygame
 import cv2
+from pygame.locals import *
+import os
+import yaml
+from sys import exit
+
+#加载主菜单背景
+
+background_img_list=[]
+
+for i in range(10):
+    print("now is loading:"+str(i))
+    path = "../Assets/img/main_menu/bgImg"+str(i)+".jpg"
+    img = pygame.image.load(os.path.join(path))
+    background_img_list.append(pygame.image.tostring(img,"RGB"))
 
 
-stream = '../Assets/movie/SquadAR.mov'
+with open("img_list.yaml", "r", encoding='utf-8') as f:
+    chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
 
-# open stream
-cap = cv2.VideoCapture(stream)
+with open("img_list.yaml", "w", encoding='utf-8') as f:
+    chapter_info["data"] = background_img_list
+    yaml.dump(chapter_info, f)
 
-# read one frame and check if there was no problem
-ret, img = cap.read()
-if not ret:
-    print("Can't read stream")
-    #exit()
-
-# transpose/rotate frame 
-#img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
-img = cv2.transpose(img)
-
-pqr=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-
-# display its width, height, color_depth
-print('shape:', img.shape)
-
-pygame.init()
-
-# create window with the same size as frame
-screen = pygame.display.set_mode((img.shape[0], img.shape[1]))
-
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    # read one frame and check if there was no problem
-    ret, img = cap.read()
-    if not ret:
-        running = False
-        break
-    else:
-        # transpose/rotate frame
-        #img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
-        #img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        img = cv2.transpose(img,cv2.COLOR_BGR2GRAY)
-
-        # blit directly on screen         
-        pygame.surfarray.blit_array(screen, img)
-
-    pygame.display.flip()
-
-pygame.quit()
+print("Done!")
+exit()

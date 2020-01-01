@@ -56,7 +56,7 @@ if len(map) == 0:
         yaml.dump(chapter_info, f)
 
     with open("../Data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
-        chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
+        #chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
         map = chapter_info["map"]
 
 #生存随机方块名
