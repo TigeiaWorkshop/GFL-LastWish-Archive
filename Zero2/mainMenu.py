@@ -2,14 +2,14 @@ import glob
 import os
 import time
 from sys import exit
+
 import cv2
 import pygame
 import yaml
 from pygame.locals import *
 
+from Zero2.basic import *
 from Zero2.dialog import *
-from Zero2.IsGetClick import *
-from Zero2.fontRender import *
 
 pygame.init()
 
@@ -82,26 +82,26 @@ def mainMenu(window_x,window_y,lang,mode=""):
                 pygame.display.toggle_fullscreen()
             elif event.type == MOUSEBUTTONDOWN:
                 #退出
-                if IsGetClick(text_exit.b, (txt_location,750)):
+                if isGetClick(text_exit.b, (txt_location,750)):
                     if menu_type == 0:
                         exit()
                 #选择章节
-                elif IsGetClick(text_chooseChapter.b, (txt_location,350)):
+                elif isGetClick(text_chooseChapter.b, (txt_location,350)):
                     if menu_type == 0:
                         menu_type = 1
                 #返回
-                elif IsGetClick(back_button.b, (txt_location,window_y-150)):
+                elif isGetClick(back_button.b, (txt_location,window_y-150)):
                     if menu_type == 1:
                         menu_type = 0
                 #章节选择
-                elif IsGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
+                elif isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
                     if menu_type == 1:
                         dialog_display_function("chapter1",window_x,window_y,screen,lang)
         
         
         screen.blit(background_img_list[background_img_id], (0,0))
         
-        if IsGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
+        if isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
                 cover_alpha+=10
         else:
@@ -115,23 +115,23 @@ def mainMenu(window_x,window_y,lang,mode=""):
         #菜单选项
         if menu_type == 0:
             screen.blit(text_continue.n, (txt_location,250))
-            if IsGetClick(text_chooseChapter.n, (txt_location,350)):
+            if isGetClick(text_chooseChapter.n, (txt_location,350)):
                 screen.blit(text_chooseChapter.b, (txt_location,350))
             else:
                 screen.blit(text_chooseChapter.n, (txt_location,350))
             screen.blit(text_setting.n, (txt_location,450))
             screen.blit(text_dlc.n, (txt_location,550))
             screen.blit(text_workshop.n, (txt_location,650))
-            if IsGetClick(text_exit.n, (txt_location,750)):
+            if isGetClick(text_exit.n, (txt_location,750)):
                 screen.blit(text_exit.b, (txt_location,750))
             else:
                 screen.blit(text_exit.n, (txt_location,750))
         elif menu_type == 1:
-            if IsGetClick(c1.n, (txt_location,(window_y-200)/9*1)):
+            if isGetClick(c1.n, (txt_location,(window_y-200)/9*1)):
                 screen.blit(c1.b, (txt_location,(window_y-200)/9*1))
             else:
                 screen.blit(c1.n, (txt_location,(window_y-200)/9*1))
-            if IsGetClick (c2.n, (txt_location,(window_y-200)/9*2)):
+            if isGetClick (c2.n, (txt_location,(window_y-200)/9*2)):
                 screen.blit(c2.b, (txt_location,(window_y-200)/9*2))
             else:
                 screen.blit(c2.n, (txt_location,(window_y-200)/9*2))
@@ -141,7 +141,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
             screen.blit(c6.n, (txt_location,(window_y-200)/9*6))
             screen.blit(c7.n, (txt_location,(window_y-200)/9*7))
             screen.blit(c8.n, (txt_location,(window_y-200)/9*8))
-            if IsGetClick(back_button.n, (txt_location,window_y-150)):
+            if isGetClick(back_button.n, (txt_location,window_y-150)):
                 screen.blit(back_button.b, (txt_location,window_y-150))
             else:
                 screen.blit(back_button.n, (txt_location,window_y-150))

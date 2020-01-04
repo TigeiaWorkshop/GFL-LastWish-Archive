@@ -1,12 +1,15 @@
-import pygame
-import time
-from pygame.locals import *
-from sys import exit
-import os
 import glob
+import os
+import time
+from sys import exit
+
+import pygame
 import yaml
+from pygame.locals import *
+
+from Zero2.basic import *
 from Zero2.characterDataManager import *
-from Zero2.animationCreator import *
+
 
 def battle(chapter_name,window_x,window_y,screen,lang):
     
