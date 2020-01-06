@@ -311,7 +311,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         else:
                             action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
 
-
                 if direction_to_move == 0:
                     action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
                 elif direction_to_move == 2:

@@ -40,27 +40,24 @@ def mainMenu(window_x,window_y,lang,mode=""):
     pygame.display.set_caption(text_title) #窗口标题
 
     #加载主菜单背景
-    background_img_id = 0
+    all_bg_img_list = glob.glob(r'Assets/img/main_menu/*.jpg')
+    if len(all_bg_img_list) <=1:
+        all_bg_img_list = glob.glob(r'Assets/img/main_menu/*.png')
     background_img_list=[]
     loading_img =  pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/img1.png")),(window_x,window_y))
     my_font = pygame.font.SysFont('simsunnsimsun',50)
-    while True:
+    for i in range(len(all_bg_img_list)):
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
                 exit()
-        path = "Assets/img/main_menu/bgImg"+str(background_img_id)+".jpg"
+        path = "Assets/img/main_menu/bgImg"+str(i)+".jpg"
         img = pygame.image.load(os.path.join(path))
         if window_x != 1920 or window_y != 1080:
             img = pygame.transform.scale(img,(window_x,window_y))
         background_img_list.append(img)
-        percent_of_img_loaded = '{:.0f}%'.format(background_img_id/950*100)
-        background_img_id+=1
-        if mode == "test":
-            if background_img_id == 1:
-                break
-        else:
-            if background_img_id == 950:
-                break
+        percent_of_img_loaded = '{:.0f}%'.format(i/len(all_bg_img_list)*100)
+        if mode == "safe":
+            break
         screen.blit(loading_img, (0,0))
         the_str = my_font.render(now_loading+": "+str(percent_of_img_loaded), True, (255, 255, 255))
         screen.blit(the_str, ((window_x-the_str.get_width())/2,window_y-100))
@@ -97,7 +94,6 @@ def mainMenu(window_x,window_y,lang,mode=""):
                 elif isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
                     if menu_type == 1:
                         dialog_display_function("chapter1",window_x,window_y,screen,lang)
-        
         
         screen.blit(background_img_list[background_img_id], (0,0))
         
@@ -145,15 +141,14 @@ def mainMenu(window_x,window_y,lang,mode=""):
                 screen.blit(back_button.b, (txt_location,window_y-150))
             else:
                 screen.blit(back_button.n, (txt_location,window_y-150))
-        if background_img_id < 480:
-            background_img_list[background_img_id] = ""
-        #背景图片动画
-        if background_img_id == 949:
-            background_img_id = 480
-        else:
-            if mode != "test":
-                background_img_id += 1
+
+        if mode != "safe":
+            background_img_id += 1
         
+        #背景图片动画
+        if background_img_id == len(all_bg_img_list):
+            background_img_id = 0
+
         time.sleep(0.04)
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')
