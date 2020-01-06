@@ -128,7 +128,7 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
                     dialog_content_id = 1
                     displayed_line = -1
                     if display_num<len(dialog_display):
-                        if dialog_display[display_num][1][1] != the_bg_music:
+                        if dialog_display[display_num][1][1] != the_bg_music and dialog_display[display_num][1][1] != "":
                             the_bg_music = dialog_display[display_num][1][1]
                             pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
                             pygame.mixer.music.play(loops=9999, start=0.0)
@@ -138,7 +138,7 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
                         dialog_content_id = 1
                         displayed_line = -1
                         if display_num<len(dialog_display):
-                            if dialog_display[display_num][1][1] != the_bg_music:
+                            if dialog_display[display_num][1][1] != the_bg_music and dialog_display[display_num][1][1] != "":
                                 the_bg_music = dialog_display[display_num][1][1]
                                 pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
                                 pygame.mixer.music.play(loops=9999, start=0.0)
