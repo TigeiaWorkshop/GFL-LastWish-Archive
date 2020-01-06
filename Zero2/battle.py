@@ -8,11 +8,14 @@ import yaml
 from pygame.locals import *
 
 from Zero2.basic import *
+from Zero2.map import *
 from Zero2.characterDataManager import *
 
 
-def battle(chapter_name,window_x,window_y,screen,lang):
-    
+def battle(chapter_name,window_x,window_y,screen):
+    #卸载音乐
+    pygame.mixer.music.unload()
+
     #加载动作：接受角色名，动作，方位，完成对应的指令
     def action_displayer(name,action,x,y,isContinue=True):
         if name in sangvisFerris_name_list:
@@ -64,6 +67,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         characters = chapter_info["character"]
         sangvisFerris = chapter_info["sangvisFerri"]
         map = chapter_info["map"]
+        bg_music = chapter_info["background_music"]
 
     #地图方块图片随机化
     map_img_list = randomBlock(map)
@@ -135,14 +139,15 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     direction_to_move = 0
     how_many_to_move = 0
     how_many_moved = 0
-    # 游戏主循环
 
+    # 游戏主循环
     while battle==True:
         #加载地图
         for i in range(len(map_img_list)):
             for a in range(len(map_img_list[i])):
                 img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
-                screen.blit(img_display,(a*block_x_length,i*block_y_length-block_y_length/2))
+                screen.blit(img_display,(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
+        #显示攻击或移动范围
         if green_hide ==False:
             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1):
                 attack_range_difference = characters_data[the_character_get_click].attack_range - characters_data[the_character_get_click].move_range
@@ -337,11 +342,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
 
         if round == len(object_to_play):
             round = 0
-        """
+
         while pygame.mixer.music.get_busy() != 1:
-            pygame.mixer.music.load('music/Snowflake.mp3')
+            pygame.mixer.music.load('Assets/music/'+bg_music)
             pygame.mixer.music.play(loops=9999, start=0.0)
-        """
 
         #画面更新
         time.sleep(0.025)

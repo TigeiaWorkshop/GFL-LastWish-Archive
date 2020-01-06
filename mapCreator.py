@@ -6,11 +6,11 @@ from sys import exit
 import os
 import glob
 import yaml
-import random
+from Zero2.map import *
 pygame.init()
 
 #加载设置
-with open("../Data/setting.yaml", "r", encoding='utf-8') as f:
+with open("Data/setting.yaml", "r", encoding='utf-8') as f:
     setting = yaml.load(f.read(),Loader=yaml.FullLoader)
     window_x = setting['Screen_size_x']
     window_y =  setting['Screen_size_y']
@@ -21,14 +21,14 @@ screen = pygame.display.set_mode([window_x, window_y])
 pygame.display.set_caption("Girls frontline-Last Wish") #窗口标题
 
 #加载背景图片
-all_env_file_list = glob.glob(r'../Assets/img/environment/*.png')
+all_env_file_list = glob.glob(r'Assets/img/environment/*.png')
 env_img_list={}
 for i in range(len(all_env_file_list)):
     img_name = all_env_file_list[i].replace(".","").replace("Assets","").replace("img","").replace("environment","").replace("png","").replace("\\","").replace("/","")
-    env_img_list[img_name] = pygame.image.load(os.path.join(all_env_file_list[i])).convert_alpha()
+    env_img_list[img_name] = pygame.image.load(os.path.join(all_env_file_list[i]))
 
 #读取地图
-with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
+with open("Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
     chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
     map = chapter_info["map"]
 block_x = 48
@@ -51,32 +51,18 @@ if len(map) == 0:
                     map_per_line.append(1)
         default_map.append(map_per_line)
 
-    with open("../Data/main_chapter/chapter1.yaml", "w", encoding='utf-8') as f:
+    with open("Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
         chapter_info["map"] = default_map
         yaml.dump(chapter_info, f)
 
-    with open("../Data/main_chapter/chapter1.yaml", "r", encoding='utf-8') as f:
-        #chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
+    with open("Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
         map = chapter_info["map"]
 
 #生存随机方块名
-map_img_list = []
-for i in range(len(map)):
-    map_img_per_line = []
-    for a in range(len(map[i])):
-        if map[i][a] == 0:
-            img_name = "mountainSnow"+str(random.randint(0,7))
-        elif map[i][a] == 1:
-            img_name = "plainsColdSnowCovered"+str(random.randint(0,3))
-        elif map[i][a] == 2:
-            img_name = "forestPineSnowCovered"+str(random.randint(0,4))
-        elif map[i][a] == 3:
-            img_name = "ocean"+str(random.randint(0,4))
-        map_img_per_line.append(img_name)
-    map_img_list.append(map_img_per_line)
+map_img_list = randomBlock(map)
 
 #绿色方块/方块标准
-green = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/img/others/green.png")), (block_x_length, int(block_y_length)))
+green = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/green.png")), (block_x_length, int(block_y_length)))
 green.set_alpha(100)
 new_block_type = 0
 
@@ -87,7 +73,7 @@ while True:
             if event.key == K_ESCAPE:
                 exit()
             if event.key == K_s:
-                with open("../Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
+                with open("Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
                     chapter_info["map"] = map
                     yaml.dump(chapter_info, f)
                 exit()
@@ -109,8 +95,8 @@ while True:
     #场景加载
     for i in range(len(map_img_list)):
         for a in range(len(map_img_list[i])):
-            img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (block_x_length, int(block_y_length*1.5)))
-            screen.blit(img_display,(a*block_x_length,i*block_y_length-block_x_length/2))
+            img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
+            screen.blit(img_display,(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
     for y in range(block_y):
         for x in range(block_x):
             screen.blit(green,(x*block_x_length,y*block_y_length))

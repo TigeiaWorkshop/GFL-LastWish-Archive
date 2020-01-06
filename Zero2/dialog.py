@@ -39,7 +39,6 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
         dialog_bg_img_dic[img_name] = pygame.transform.scale(pygame.image.load(os.path.join(all_dialog_bg_file_list[i])).convert_alpha(),(window_x,window_y))
     #加载对话框
     dialoguebox = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/dialoguebox.png")),(window_x-200,300))
-    dialoguebox.set_alpha(100)
     #鼠标图标
     mouse_none = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/mouse_none.png")),(30,30))
     mouse_click = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/mouse.png")),(30,30))
