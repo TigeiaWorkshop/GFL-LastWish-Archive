@@ -1,3 +1,4 @@
+background_music: Snowflake.mp3
 character:
   asval:
     attack_range: 5
@@ -334,7 +335,7 @@ map:
   - 1
   - 1
   - 1
-  - 1
+  - 0
   - 1
   - 1
   - 1
@@ -428,7 +429,7 @@ map:
   - 1
   - 1
   - 1
-  - 1
+  - 0
   - 1
   - 1
   - 1
@@ -526,7 +527,7 @@ map:
   - 1
   - 1
   - 1
-  - 1
+  - 0
   - 1
   - 1
   - 1
@@ -1235,4 +1236,3 @@ sangvisFerri:
     x: 28
     y: 13
 title: A way on snow
-background_music: Snowflake.mp3

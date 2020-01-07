@@ -59,7 +59,10 @@ if len(map) == 0:
         map = chapter_info["map"]
 
 #生存随机方块名
-map_img_list = randomBlock(map)
+with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
+    reader = yaml.load(f.read(),Loader=yaml.FullLoader)
+    blocks_setting = reader["blocks"]
+map_img_list = randomBlock(map,blocks_setting)
 
 #绿色方块/方块标准
 green = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/green.png")), (block_x_length, int(block_y_length)))

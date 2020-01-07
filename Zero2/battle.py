@@ -59,18 +59,22 @@ def battle(chapter_name,window_x,window_y,screen):
 
     my_font =pygame.font.SysFont('simsunnsimsun',25)
     #读取并初始化章节信息
-    with open("data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
+    with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
         chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
         chapter_title = chapter_info["title"]
         block_y = len(chapter_info["map"])
         block_x = len(chapter_info["map"][0])
         characters = chapter_info["character"]
         sangvisFerris = chapter_info["sangvisFerri"]
-        map = chapter_info["map"]
+        theMap = chapter_info["map"]
         bg_music = chapter_info["background_music"]
 
     #地图方块图片随机化
-    map_img_list = randomBlock(map)
+    with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
+        reader = yaml.load(f.read(),Loader=yaml.FullLoader)
+        blocks_setting = reader["blocks"]
+    map_img_list = randomBlock(theMap,blocks_setting)
+
     #一个方块的长
     block_x_length = window_x/block_x
     #一个方块的高
@@ -149,29 +153,35 @@ def battle(chapter_name,window_x,window_y,screen):
                 screen.blit(img_display,(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
         #显示攻击或移动范围
         if green_hide ==False:
-            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1):
-                attack_range_difference = characters_data[the_character_get_click].attack_range - characters_data[the_character_get_click].move_range
-                if x < block_x:
-                    if x < characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1:
-                        screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                    elif characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1<x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1:
-                        if map[characters_data[the_character_get_click].y][x] == 0 or map[characters_data[the_character_get_click].y][x] == 3:
-                            screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                        else:
-                            screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                    else:
-                        screen.blit(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-            for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1):
-                if y < block_y:
-                    if y < characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1:
-                        screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
-                    elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1<y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1:
-                        if map[y][characters_data[the_character_get_click].x] == 0 or map[y][characters_data[the_character_get_click].x] == 3:
-                            screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
-                        else:
-                            screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
-                    else:
-                        screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
+            for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1):
+                if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
+                    screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                else:
+                    for x_red in range(x,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1):
+                        screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                    break
+            for x in range(characters_data[the_character_get_click].x-1,characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1,-1):
+                if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
+                    screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                else:
+                    for x_red in range(x,characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1,-1):
+                        screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                    break
+            for y in range(characters_data[the_character_get_click].y+1,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1):
+                if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
+                    screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
+                else:
+                    for y_red in range(y,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1):
+                        screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
+                    break
+            for y in range(characters_data[the_character_get_click].y-1,characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1,-1):
+                if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
+                    screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
+                else:
+                    for y_red in range(y,characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1,-1):
+                        screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
+                    break
+
         #玩家输入按键判定
         for event in pygame.event.get():
             if event.type == KEYDOWN:
@@ -189,12 +199,12 @@ def battle(chapter_name,window_x,window_y,screen):
                             the_character_get_click = key
                     if green_hide == False:
                         if characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
-                            if map[characters_data[the_character_get_click].y][block_get_click_x] == 1 or map[characters_data[the_character_get_click].y][block_get_click_x] ==2:
+                            if theMap[characters_data[the_character_get_click].y][block_get_click_x] == 1 or theMap[characters_data[the_character_get_click].y][block_get_click_x] ==2:
                                 temp_x = characters_data[the_character_get_click].x
                                 temp_max = block_get_click_x
                                 isWaiting = "LEFTANDRIGHT"
                         elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
-                            if map[block_get_click_y][characters_data[the_character_get_click].x] ==1 or map[block_get_click_y][characters_data[the_character_get_click].x] ==2:
+                            if theMap[block_get_click_y][characters_data[the_character_get_click].x] ==1 or theMap[block_get_click_y][characters_data[the_character_get_click].x] ==2:
                                 temp_y = characters_data[the_character_get_click].y
                                 temp_max = block_get_click_y
                                 isWaiting = "TOPANDBOTTOM"

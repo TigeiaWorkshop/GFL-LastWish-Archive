@@ -1,0 +1,17 @@
+blocks:
+  0:
+  - mountainSnow
+  - false
+  - 7
+  1:
+  - plainsColdSnowCovered
+  - true
+  - 3
+  2:
+  - forestPineSnowCovered
+  - true
+  - 4
+  3:
+  - ocean
+  - false
+  - 4
