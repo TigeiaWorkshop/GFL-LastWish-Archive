@@ -18,4 +18,4 @@ pygame.display.set_caption(text_title) #窗口标题
 
 #dialog_display_function("chapter1",window_x,window_y,screen,lang,id="")
 
-battle("chapter1",window_x,window_y,screen)
+battle("chapter1",window_x,window_y,screen,"zh_cn")

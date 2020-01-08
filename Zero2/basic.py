@@ -58,3 +58,9 @@ def character_gif_dic(character_name,block_x_length,block_y_length,kind="charact
         }
     return gif_dic
 
+#中心展示模块：接受两个item和item2的x和y，将item1展示在item2的中心位置：
+def displayInCenter(item1,item2,x,y,screen):
+    local_x = (item2.get_width()-item1.get_width())/2
+    local_y = (item2.get_height()-item1.get_height())/2
+    screen.blit(item2,(x,y))
+    screen.blit(item1,(x+local_x,y+local_y))
