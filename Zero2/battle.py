@@ -163,8 +163,22 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             displayInCenter(move_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen)
             displayInCenter(skill_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5,screen)
             displayInCenter(pass_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5,screen)
+            if pygame.mouse.get_pressed()[0]:
+                if isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
+                    action_choice = "attack"
+                    green_hide = False
+                elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
+                    action_choice = "move"
+                    green_hide = False
+                elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5)):
+                    action_choice = "skill"
+                    green_hide = False
+                elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5)):
+                    action_choice = "pass"
+                    green_hide = False
         #显示攻击或移动范围
         if green_hide == False:
+            #显示移动范围
             if action_choice == "move":
                 the_moving_range=[]
                 for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
@@ -207,7 +221,16 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         break
                     if(y == characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1):
                         the_moving_range.append(y)
-            elif action_choice == "attack":
+                if the_moving_range[0]>block_get_click_x>the_moving_range[1] and characters_data[the_character_get_click].y == block_get_click_y:
+                    temp_x = characters_data[the_character_get_click].x
+                    temp_max = block_get_click_x
+                    isWaiting = "LEFTANDRIGHT"
+                elif the_moving_range[2]>block_get_click_y>the_moving_range[3] and characters_data[the_character_get_click].x == block_get_click_x:
+                    temp_y = characters_data[the_character_get_click].y
+                    temp_max = block_get_click_y
+                    isWaiting = "TOPANDBOTTOM"
+            #显示攻击范围        
+            elif action_choice == "attack" or action_choice == "skill":
                 attacking_range = []
                 for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range):
                     if y < characters_data[the_character_get_click].y:
@@ -227,6 +250,16 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                         attacking_range.append([x,y])
                                 else:
                                     screen.blit(red,(x*green.get_width(),y*green.get_height()))
+                if characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
+                    for enemies in sangvisFerris_data:
+                        if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                            isWaiting = "ATTACKING"
+                            enemies_get_attack = enemies
+                elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
+                    for enemies in sangvisFerris_data:
+                        if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                            isWaiting = "ATTACKING"
+                            enemies_get_attack = enemies
         #玩家输入按键判定
         for event in pygame.event.get():
             if event.type == KEYDOWN:
@@ -244,34 +277,8 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                             green_hide = "SelectMenu"
                             break
                         else:
-                            green_hide = False
+                            green_hide = True
                             the_character_get_click = ""
-
-                """
-                if green_hide ==False:
-                    if action_choice == "move":
-                        if the_moving_range[0]>block_get_click_x>the_moving_range[1] and characters_data[the_character_get_click].y == block_get_click_y:
-                                temp_x = characters_data[the_character_get_click].x
-                                temp_max = block_get_click_x
-                                isWaiting = "LEFTANDRIGHT"
-                        elif the_moving_range[2]>block_get_click_y>the_moving_range[3] and characters_data[the_character_get_click].x == block_get_click_x:
-                                temp_y = characters_data[the_character_get_click].y
-                                temp_max = block_get_click_y
-                                isWaiting = "TOPANDBOTTOM"
-                    elif action_choice == "attack":
-                        pass
-                        
-                        if characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
-                            for enemies in sangvisFerris_data:
-                                if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                                    isWaiting = "ATTACKING"
-                                    enemies_get_attack = enemies
-                        elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
-                            for enemies in sangvisFerris_data:
-                                if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                                    isWaiting = "ATTACKING"
-                                    enemies_get_attack = enemies
-                """
 
         #角色动画
         for every_chara in characters:
