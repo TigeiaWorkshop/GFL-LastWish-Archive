@@ -33,7 +33,7 @@ character:
     max_damage: 650
     max_hp: 250
     min_damage: 400
-    move_range: 2
+    move_range: 10
     x: 10
     y: 8
 map:

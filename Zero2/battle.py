@@ -143,6 +143,7 @@ def battle(chapter_name,window_x,window_y,screen):
     direction_to_move = 0
     how_many_to_move = 0
     how_many_moved = 0
+    action_choice = "move"
 
     # 游戏主循环
     while battle==True:
@@ -151,37 +152,70 @@ def battle(chapter_name,window_x,window_y,screen):
             for a in range(len(map_img_list[i])):
                 img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
                 screen.blit(img_display,(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
+        
         #显示攻击或移动范围
         if green_hide ==False:
-            for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1):
-                if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
-                    screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                else:
-                    for x_red in range(x,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1):
-                        screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                    break
-            for x in range(characters_data[the_character_get_click].x-1,characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1,-1):
-                if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
-                    screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                else:
-                    for x_red in range(x,characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1,-1):
-                        screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                    break
-            for y in range(characters_data[the_character_get_click].y+1,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1):
-                if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
-                    screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
-                else:
-                    for y_red in range(y,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1):
-                        screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
-                    break
-            for y in range(characters_data[the_character_get_click].y-1,characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1,-1):
-                if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
-                    screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
-                else:
-                    for y_red in range(y,characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1,-1):
-                        screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
-                    break
+            if action_choice == "move":
+                the_moving_range=[]
+                for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
+                    if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
+                        screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                    else:
+                        the_moving_range.append(x)
+                        for x_red in range(x,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
+                            screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                        break
+                    if(x == characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
+                        the_moving_range.append(x)
+                for x in range(characters_data[the_character_get_click].x-1,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
+                    if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
+                        screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                    else:
+                        the_moving_range.append(x)
+                        for x_red in range(x,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
+                            screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                        break
+                    if(x == characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1):
+                        the_moving_range.append(x)
+                for y in range(characters_data[the_character_get_click].y+1,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
+                    if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
+                        screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
+                    else:
+                        the_moving_range.append(y)
+                        for y_red in range(y,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
+                            screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
+                        break
+                    if(y == characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
+                        the_moving_range.append(y)
+                for y in range(characters_data[the_character_get_click].y-1,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
+                    if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
+                        screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
+                    else:
+                        the_moving_range.append(y)
+                        for y_red in range(y,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
+                            screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
+                        break
+                    if(y == characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1):
+                        the_moving_range.append(y)
+            elif action_choice == "attack":
+                for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y):
+                    for x in range(characters_data[the_character_get_click].x-y+1,characters_data[the_character_get_click].x+y):
+                        if blocks_setting[theMap[y][x]][1] == True:
+                                screen.blit(green,(x*green.get_width(),y*green.get_height()))
+                        else:
+                            screen.blit(red,(x*green.get_width(),y*green.get_height()))
 
+                """
+                for y in range(characters_data[the_character_get_click].y,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1):
+                    for x in range(y+characters_data[the_character_get_click].attack_range-characters_data[the_character_get_click].x-2,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-y+characters_data[the_character_get_click].y+1):
+                        if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
+                            pass
+                        else:
+                            if blocks_setting[theMap[y][x]][1] == True:
+                                screen.blit(green,(x*green.get_width(),y*green.get_height()))
+                            else:
+                                screen.blit(red,(x*green.get_width(),y*green.get_height()))
+                """
         #玩家输入按键判定
         for event in pygame.event.get():
             if event.type == KEYDOWN:
@@ -190,6 +224,10 @@ def battle(chapter_name,window_x,window_y,screen):
                 if event.key == K_t:
                     exit()
             elif event.type == MOUSEBUTTONDOWN:
+                if pygame.mouse.get_pressed()[0]:
+                    action_choice = "move"
+                elif pygame.mouse.get_pressed()[2]:
+                    action_choice = "attack"
                 if isWaiting == True:
                     mouse_x,mouse_y=pygame.mouse.get_pos()
                     block_get_click_x = int(mouse_x/green.get_width())
@@ -198,26 +236,29 @@ def battle(chapter_name,window_x,window_y,screen):
                         if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y:
                             the_character_get_click = key
                     if green_hide == False:
-                        if characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
-                            if theMap[characters_data[the_character_get_click].y][block_get_click_x] == 1 or theMap[characters_data[the_character_get_click].y][block_get_click_x] ==2:
-                                temp_x = characters_data[the_character_get_click].x
-                                temp_max = block_get_click_x
-                                isWaiting = "LEFTANDRIGHT"
-                        elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
-                            if theMap[block_get_click_y][characters_data[the_character_get_click].x] ==1 or theMap[block_get_click_y][characters_data[the_character_get_click].x] ==2:
-                                temp_y = characters_data[the_character_get_click].y
-                                temp_max = block_get_click_y
-                                isWaiting = "TOPANDBOTTOM"
-                        if characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
-                            for enemies in sangvisFerris_data:
-                                if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                                    isWaiting = "ATTACKING"
-                                    enemies_get_attack = enemies
-                        elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
-                            for enemies in sangvisFerris_data:
-                                if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                                    isWaiting = "ATTACKING"
-                                    enemies_get_attack = enemies
+                        if action_choice == "move":
+                            if the_moving_range[0]>block_get_click_x>the_moving_range[1] and characters_data[the_character_get_click].y == block_get_click_y:
+                                    temp_x = characters_data[the_character_get_click].x
+                                    temp_max = block_get_click_x
+                                    isWaiting = "LEFTANDRIGHT"
+                            elif the_moving_range[2]>block_get_click_y>the_moving_range[3] and characters_data[the_character_get_click].x == block_get_click_x:
+                                    temp_y = characters_data[the_character_get_click].y
+                                    temp_max = block_get_click_y
+                                    isWaiting = "TOPANDBOTTOM"
+                        elif action_choice == "attack":
+                            pass
+                            """
+                            if characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
+                                for enemies in sangvisFerris_data:
+                                    if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                                        isWaiting = "ATTACKING"
+                                        enemies_get_attack = enemies
+                            elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
+                                for enemies in sangvisFerris_data:
+                                    if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                                        isWaiting = "ATTACKING"
+                                        enemies_get_attack = enemies
+                            """
                     if block_get_click_x == characters_data[the_character_get_click].x and block_get_click_y == characters_data[the_character_get_click].y:
                         if green_hide == True:
                             action = "move"
