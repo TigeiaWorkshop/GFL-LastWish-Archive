@@ -1,7 +1,6 @@
 import os
 import pygame
 
-
 #文字制作模块：接受文字，颜色，模式，返回制作完的文字
 def fontRender(txt,color,mode=True):
     class the_text:

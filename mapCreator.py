@@ -65,7 +65,7 @@ with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
 map_img_list = randomBlock(map,blocks_setting)
 
 #绿色方块/方块标准
-green = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/others/green.png")), (block_x_length, int(block_y_length)))
+green = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/UI/green.png")), (block_x_length, int(block_y_length)))
 green.set_alpha(100)
 new_block_type = 0
 

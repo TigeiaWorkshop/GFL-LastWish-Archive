@@ -40,15 +40,16 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             screen.blit(pygame.transform.scale(hp_red,(int(block_x_length*percent_of_hp),int(block_y_length/5))),(x*green.get_width(),y*green.get_height()*0.98))
             screen.blit(current_hp_to_display,(x*green.get_width(),y*green.get_height()*0.98))
         gif_dic[action][1]+=1
+        #射击动作
         if gif_dic[action][1] == 5 and action == "attack":
             pass
             #bullets_list.append(Bullet(characters_data.x+img_of_char.get_width()-20,characters_data.y+img_of_char.get_height()/2-5,300))
         if isContinue==True:
             if gif_dic[action][1] == gif_dic[action][0][1]:
                 gif_dic[action][1] = 0
-        if isContinue=="die":
+        elif isContinue==False:
             if gif_dic[action][1] == gif_dic[action][0][1]:
-                gif_dic[action][1] -= 1
+                return("Done")
 
     #加载背景图片
     all_env_file_list = glob.glob(r'Assets/img/environment/*.png')
@@ -149,6 +150,8 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     battle=True
     how_many_to_move = 0
     how_many_moved = 0
+    isWaiting = True
+    the_dead_one = ""
 
     # 游戏主循环
     while battle==True:
@@ -157,109 +160,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             for a in range(len(map_img_list[i])):
                 img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
                 screen.blit(img_display,(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
-        #显示选择菜单
-        if green_hide == "SelectMenu":
-            displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen)
-            displayInCenter(move_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen)
-            displayInCenter(skill_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5,screen)
-            displayInCenter(pass_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5,screen)
-            if pygame.mouse.get_pressed()[0]:
-                if isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
-                    action_choice = "attack"
-                    green_hide = False
-                elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
-                    action_choice = "move"
-                    green_hide = False
-                elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5)):
-                    action_choice = "skill"
-                    green_hide = False
-                elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5)):
-                    action_choice = "pass"
-                    green_hide = False
-        #显示攻击或移动范围
-        if green_hide == False:
-            #显示移动范围
-            if action_choice == "move":
-                the_moving_range=[]
-                for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
-                    if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
-                        screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                    else:
-                        the_moving_range.append(x)
-                        for x_red in range(x,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
-                            screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                        break
-                    if(x == characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
-                        the_moving_range.append(x)
-                for x in range(characters_data[the_character_get_click].x-1,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
-                    if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
-                        screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                    else:
-                        the_moving_range.append(x)
-                        for x_red in range(x,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
-                            screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
-                        break
-                    if(x == characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1):
-                        the_moving_range.append(x)
-                for y in range(characters_data[the_character_get_click].y+1,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
-                    if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
-                        screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
-                    else:
-                        the_moving_range.append(y)
-                        for y_red in range(y,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
-                            screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
-                        break
-                    if(y == characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
-                        the_moving_range.append(y)
-                for y in range(characters_data[the_character_get_click].y-1,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
-                    if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
-                        screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
-                    else:
-                        the_moving_range.append(y)
-                        for y_red in range(y,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
-                            screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
-                        break
-                    if(y == characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1):
-                        the_moving_range.append(y)
-                if the_moving_range[0]>block_get_click_x>the_moving_range[1] and characters_data[the_character_get_click].y == block_get_click_y:
-                    temp_x = characters_data[the_character_get_click].x
-                    temp_max = block_get_click_x
-                    isWaiting = "LEFTANDRIGHT"
-                elif the_moving_range[2]>block_get_click_y>the_moving_range[3] and characters_data[the_character_get_click].x == block_get_click_x:
-                    temp_y = characters_data[the_character_get_click].y
-                    temp_max = block_get_click_y
-                    isWaiting = "TOPANDBOTTOM"
-            #显示攻击范围        
-            elif action_choice == "attack" or action_choice == "skill":
-                attacking_range = []
-                for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range):
-                    if y < characters_data[the_character_get_click].y:
-                        for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)):
-                            if blocks_setting[theMap[y][x]][1] == True:
-                                    screen.blit(green,(x*green.get_width(),y*green.get_height()))
-                                    attacking_range.append([x,y])
-                            else:
-                                screen.blit(red,(x*green.get_width(),y*green.get_height()))
-                    else:
-                        for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)):
-                            if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
-                                pass
-                            else:
-                                if blocks_setting[theMap[y][x]][1] == True:
-                                        screen.blit(green,(x*green.get_width(),y*green.get_height()))
-                                        attacking_range.append([x,y])
-                                else:
-                                    screen.blit(red,(x*green.get_width(),y*green.get_height()))
-                if characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-1<block_get_click_x<characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].y == block_get_click_y:
-                    for enemies in sangvisFerris_data:
-                        if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                            isWaiting = "ATTACKING"
-                            enemies_get_attack = enemies
-                elif characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range-1<block_get_click_y<characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range+1 and characters_data[the_character_get_click].x == block_get_click_x:
-                    for enemies in sangvisFerris_data:
-                        if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                            isWaiting = "ATTACKING"
-                            enemies_get_attack = enemies
         #玩家输入按键判定
         for event in pygame.event.get():
             if event.type == KEYDOWN:
@@ -279,20 +179,252 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         else:
                             green_hide = True
                             the_character_get_click = ""
+        #显示选择菜单
+        if green_hide == "SelectMenu":
+            displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen)
+            displayInCenter(move_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen)
+            displayInCenter(skill_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5,screen)
+            displayInCenter(pass_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5,screen)
+            if pygame.mouse.get_pressed()[0]:
+                if isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
+                    action_choice = "attack"
+                    block_get_click_x = -100
+                    block_get_click_y = -100
+                    green_hide = False
+                elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
+                    action_choice = "move"
+                    block_get_click_x = -100
+                    block_get_click_y = -100
+                    green_hide = False
+                elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5)):
+                    action_choice = "skill"
+                    block_get_click_x = -100
+                    block_get_click_y = -100
+                    green_hide = False
+                elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5)):
+                    action_choice = "pass"
+                    block_get_click_x = -100
+                    block_get_click_y = -100
+                    green_hide = False
+        #显示攻击或移动范围
+        if green_hide == False:
+            #显示移动范围
+            if action_choice == "move":
+                the_moving_range=[]
+                for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
+                    if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
+                        screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                    else:
+                        the_moving_range.append(x-1)
+                        for x_red in range(x,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
+                            screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                        break
+                    if(x == characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range):
+                        the_moving_range.append(x)
+                        
+                for x in range(characters_data[the_character_get_click].x-1,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
+                    if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
+                        screen.blit(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                    else:
+                        the_moving_range.append(x+1)
+                        for x_red in range(x,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
+                            screen.blit(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()))
+                        break
+                    if(x == characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range):
+                        the_moving_range.append(x)
+                for y in range(characters_data[the_character_get_click].y+1,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
+                    if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
+                        screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
+                    else:
+                        the_moving_range.append(y-1)
+                        for y_red in range(y,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
+                            screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
+                        break
+                    if(y == characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range):
+                        the_moving_range.append(y)
+                for y in range(characters_data[the_character_get_click].y-1,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
+                    if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
+                        screen.blit(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()))
+                    else:
+                        the_moving_range.append(y+1)
+                        for y_red in range(y,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
+                            screen.blit(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()))
+                        break
+                    if(y == characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range):
+                        the_moving_range.append(y)
+                if the_moving_range[0]>=block_get_click_x>=the_moving_range[1] and characters_data[the_character_get_click].y == block_get_click_y:
+                    temp_x = characters_data[the_character_get_click].x
+                    temp_max = block_get_click_x
+                    isWaiting = "LEFTANDRIGHT"
+                    green_hide = True
+                elif the_moving_range[2]>=block_get_click_y>=the_moving_range[3] and characters_data[the_character_get_click].x == block_get_click_x:
+                    temp_y = characters_data[the_character_get_click].y
+                    temp_max = block_get_click_y
+                    isWaiting = "TOPANDBOTTOM"
+                    green_hide = True
+                
+            #显示攻击范围        
+            elif action_choice == "attack" or action_choice == "skill":
+                attacking_range = []
+                for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range):
+                    if y < characters_data[the_character_get_click].y:
+                        for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)):
+                            if blocks_setting[theMap[y][x]][1] == True:
+                                screen.blit(green,(x*green.get_width(),y*green.get_height()))
+                                attacking_range.append([x,y])
+                            else:
+                                screen.blit(red,(x*green.get_width(),y*green.get_height()))
+                    else:
+                        for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)):
+                            if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
+                                pass
+                            else:
+                                if blocks_setting[theMap[y][x]][1] == True:
+                                    screen.blit(green,(x*green.get_width(),y*green.get_height()))
+                                    attacking_range.append([x,y])
+                                else:
+                                    screen.blit(red,(x*green.get_width(),y*green.get_height()))
+                if [block_get_click_x,block_get_click_y] in attacking_range:
+                    for enemies in sangvisFerris_data:
+                        if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                            isWaiting = "ATTACKING"
+                            enemies_get_attack = enemies
+                            green_hide = True
+                            break
 
         #角色动画
         for every_chara in characters:
-            action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y,)
+            if every_chara != the_character_get_click:
+                action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+        #当有角色被点击时
+        if the_character_get_click != "":
+            #被点击的角色动画
+            if isWaiting == "LEFTANDRIGHT":
+                green_hide=True
+                if temp_x < temp_max:
+                    temp_x+=0.1
+                    action_displayer(the_character_get_click,"move",temp_x,characters_data[the_character_get_click].y)
+                    if temp_x >= temp_max:
+                        characters_data[the_character_get_click].x = temp_max
+                        #endOfPlayerRound()
+                        isWaiting =True
+                        the_character_get_click = ""
+                elif temp_x > temp_max:
+                    temp_x-=0.1
+                    action_displayer(characters_data[the_character_get_click].name,"move",temp_x,characters_data[the_character_get_click].y)
+                    if temp_x <= temp_max:
+                        characters_data[the_character_get_click].x = temp_max
+                        #endOfPlayerRound()
+                        isWaiting =True
+                        the_character_get_click = ""
+            elif isWaiting == "TOPANDBOTTOM":
+                green_hide=True
+                if temp_y < temp_max:
+                    temp_y+=0.1
+                    action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,temp_y)
+                    if temp_y >= temp_max:
+                        characters_data[the_character_get_click].y = temp_max
+                        #endOfPlayerRound()
+                        isWaiting =True
+                        the_character_get_click = ""
+                elif temp_y > temp_max:
+                    temp_y-=0.1
+                    action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,temp_y)
+                    if temp_y <= temp_max:
+                        characters_data[the_character_get_click].y = temp_max
+                        #endOfPlayerRound()
+                        isWaiting =True
+                        the_character_get_click = ""
+            elif isWaiting == "ATTACKING":
+                green_hide=True
+                action_displayer(characters_data[the_character_get_click].name,"attack",characters_data[every_chara].x,characters_data[every_chara].y,False)
+                if characters_data[the_character_get_click].gif["attack"][1] == characters_data[the_character_get_click].gif["attack"][0][1]-2:
+                    sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
+                
+                the_characters_attacking = characters_data[the_character_get_click].gif
+                if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
+                    the_characters_attacking["attack"][1] = 0
+                    isWaiting =True
+                    the_character_get_click = ""
+                
+            elif isWaiting == True:
+                action_displayer(characters_data[the_character_get_click].name,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+        
+        #敌方动画
         for enemies in sangvisFerris_data:
             if sangvisFerris_data[enemies].current_hp>0:
                 action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
             elif sangvisFerris_data[enemies].current_hp<=0:
-                action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,"die")
+                action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
+                the_dead_one = enemies
+        if the_dead_one != "":
+            the_characters_attacking = sangvisFerris_data[the_dead_one].gif
+            if the_characters_attacking["die"][1] == the_characters_attacking["die"][0][1]-1:
+                sangvisFerris_data.pop(the_dead_one)
+            the_dead_one=""
+        
+        #子弹
+        for per_bullet in bullets_list:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_1]:
+                new_block_type = 0
+            screen.blit(bullet_img, (per_bullet.x,per_bullet.y))
+            per_bullet.x += 100
+            if per_bullet.x > window_x:
+                bullets_list.remove(per_bullet)
+        
+        """
+        #检测所有敌人是否都已经被消灭
+        for i in range(len(sangvisFerris_name_list)):
+            if sangvisFerris_data[sangvisFerris_name_list[i]].current_hp>0:
+                break
+            if i == len(sangvisFerris_name_list)-1:
+                battle = False
+        if battle == False:
+            exit()
+            break
 
-        while pygame.mixer.music.get_busy() != 1:
-            pygame.mixer.music.load('Assets/music/'+bg_music)
-            pygame.mixer.music.play(loops=9999, start=0.0)
+        #敌方回合
+        if object_to_play[round] in sangvisFerris_name_list:
+            if sangvisFerris_data[object_to_play[round]].current_hp<=0:
+                round += 1
+                #if round != len(object_to_play):
+                    #resetEnemyMovingData()
+            else:
+                green_hide = True
+                for every_chara in characters:
+                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+                for enemies in sangvisFerris_data:
+                    if enemies != object_to_play[round]:
+                        if sangvisFerris_data[enemies].current_hp<=0:
+                            action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,"die")
+                        else:
+                            action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
 
+                if direction_to_move == 0:
+                    action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+                elif direction_to_move == 2:
+                    action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x+how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+                elif direction_to_move == 1:
+                    action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y-how_many_moved)
+                elif direction_to_move == 3:
+                    action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y+how_many_moved)
+
+                if how_many_moved >= how_many_to_move:
+                    if direction_to_move == 0:
+                        sangvisFerris_data[object_to_play[round]].x-=how_many_to_move
+                    elif direction_to_move == 2:
+                        sangvisFerris_data[object_to_play[round]].x+=how_many_to_move
+                    elif direction_to_move == 1:
+                        sangvisFerris_data[object_to_play[round]].y-=how_many_to_move
+                    elif direction_to_move == 3:
+                        sangvisFerris_data[object_to_play[round]].y+=how_many_to_move
+                    round += 1
+                    #if round != len(object_to_play):
+                        #resetEnemyMovingData()
+                elif how_many_moved < how_many_to_move:
+                    how_many_moved+=0.1
+        """
         #画面更新
         time.sleep(0.025)
         pygame.display.update()

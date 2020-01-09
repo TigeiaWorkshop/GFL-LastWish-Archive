@@ -1,3 +1,5 @@
+import random
+
 class characterDataManager:
     def __init__(self, name, min_damage,max_damage,max_hp,current_hp,x,y,attack_range,move_range,gif_dic):
         self.name = name
@@ -11,7 +13,8 @@ class characterDataManager:
         self.move_range = move_range
         self.gif = gif_dic
 
-    def decreaseHp(self,damage):
+    def decreaseHp(self,min_damage,max_damage):
+        damage = random.randint(min_damage,max_damage)
         self.current_hp-=damage
 
     def heal(self,hpHealed):

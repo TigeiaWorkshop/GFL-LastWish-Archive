@@ -434,7 +434,7 @@ map:
   - 1
   - 1
   - 1
-  - 1
+  - 0
   - 1
   - 2
   - 3
@@ -1206,7 +1206,7 @@ sangvisFerri:
     max_hp: 200
     min_damage: 450
     move_range: 2
-    x: 28
+    x: 9
     y: 10
   prowler:
     attack_range: 2
