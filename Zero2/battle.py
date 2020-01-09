@@ -17,23 +17,29 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     pygame.mixer.music.unload()
 
     #加载动作：接受角色名，动作，方位，完成对应的指令
-    def action_displayer(name,action,x,y,isContinue=True):
-        if name in sangvisFerris_name_list:
-            gif_dic = sangvisFerris_data[name].gif
-            if sangvisFerris_data[name].current_hp < 0:
-                sangvisFerris_data[name].current_hp = 0
-            current_hp_to_display = hp_font.render(str(sangvisFerris_data[name].current_hp)+"/"+str(sangvisFerris_data[name].max_hp), True, (0,0,0))
-            percent_of_hp = sangvisFerris_data[name].current_hp/sangvisFerris_data[name].max_hp
+    def action_displayer(chara_name,action,x,y,isContinue=True):
+        if chara_name in sangvisFerris_name_list:
+            hidden = sangvisFerris_data[chara_name].undetected
+            gif_dic = sangvisFerris_data[chara_name].gif
+            if sangvisFerris_data[chara_name].current_hp < 0:
+                sangvisFerris_data[chara_name].current_hp = 0
+            current_hp_to_display = hp_font.render(str(sangvisFerris_data[chara_name].current_hp)+"/"+str(sangvisFerris_data[chara_name].max_hp), True, (0,0,0))
+            percent_of_hp = sangvisFerris_data[chara_name].current_hp/sangvisFerris_data[chara_name].max_hp
         else:
-            gif_dic = characters_data[name].gif
-            if characters_data[name].current_hp<0:
-                characters_data[name].current_hp = 0
-            current_hp_to_display = hp_font.render(str(characters_data[name].current_hp)+"/"+str(characters_data[name].max_hp), True, (0,0,0))
-            percent_of_hp = characters_data[name].current_hp/characters_data[name].max_hp
+            hidden = characters_data[chara_name].undetected
+            gif_dic = characters_data[chara_name].gif
+            if characters_data[chara_name].current_hp<0:
+                characters_data[chara_name].current_hp = 0
+            current_hp_to_display = hp_font.render(str(characters_data[chara_name].current_hp)+"/"+str(characters_data[chara_name].max_hp), True, (0,0,0))
+            percent_of_hp = characters_data[chara_name].current_hp/characters_data[chara_name].max_hp
         if percent_of_hp<0:
             percent_of_hp=0
 
         img_of_char = gif_dic[action][0][0][gif_dic[action][1]]
+        if hidden == True:
+            img_of_char.set_alpha(130)
+        else:
+            img_of_char.set_alpha(300)
         screen.blit(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
         if percent_of_hp>0:
             screen.blit(hp_empty,(x*green.get_width(),y*green.get_height()*0.98))
@@ -80,18 +86,30 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     #一个方块的高
     block_y_length = window_y/block_y
 
+    #章节标题显示
+    the_black = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/UI/black.png")),(window_x,window_y))
+    title_number_display = pygame.font.SysFont('simsunnsimsun',50).render("Chapter1", True, (255,255,255))
+    title_main_display = pygame.font.SysFont('simsunnsimsun',50).render(chapter_title, True, (255,255,255))
+    for i in range(0,600,1):
+        screen.blit(the_black,(0,0))
+        title_number_display.set_alpha(i)
+        title_main_display.set_alpha(i)
+        screen.blit(title_number_display,((window_x-title_number_display.get_width())/2,400))
+        screen.blit(title_main_display,((window_x-title_main_display.get_width())/2,500))
+        pygame.display.update()
+    
     #初始化角色信息
     #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
     characters_name_list = []
     characters_data = {}
     for jiaose in characters:
-        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"],character_gif_dic(jiaose,block_x_length,block_y_length))
+        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"],characters[jiaose]["undetected"],character_gif_dic(jiaose,block_x_length,block_y_length),)
         characters_name_list.append(jiaose)
 
     sangvisFerris_name_list = []
     sangvisFerris_data = {}
     for enemy in sangvisFerris:
-        sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(enemy,block_x_length,block_y_length,"sangvisFerri"))
+        sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],sangvisFerris[enemy]["undetected"],character_gif_dic(enemy,block_x_length,block_y_length,"sangvisFerri"))
         sangvisFerris_name_list.append(enemy)
 
     hp_font =pygame.font.SysFont('simsunnsimsun',10)
@@ -118,21 +136,11 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     green.set_alpha(100)
     red = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/UI/red.png")), (int(block_x_length), int(block_y_length)))
     red.set_alpha(100)
-    the_black = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/UI/black.png")),(window_x,window_y))
     new_block_type = 0
     per_block_width = green.get_width()
     per_block_height = green.get_height()
-    """
-    #章节标题
-    title_number_display = pygame.font.SysFont('simsunnsimsun',50).render("Chapter1", True, (255,255,255))
-    title_main_display = pygame.font.SysFont('simsunnsimsun',50).render(chapter_title, True, (255,255,255))
-    for i in range(0,600,1):
-        screen.blit(the_black,(0,0))
-        title_number_display.set_alpha(i)
-        title_main_display.set_alpha(i)
-        screen.blit(title_number_display,((window_x-title_number_display.get_width())/2,400))
-        screen.blit(title_main_display,((window_x-title_main_display.get_width())/2,500))
-        pygame.display.update()
+    
+    #章节标题淡出
     for i in range(600,0,-1):
         screen.blit(the_black,(0,0))
         title_number_display.set_alpha(i)
@@ -140,7 +148,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         screen.blit(title_number_display,((window_x-title_number_display.get_width())/2,400))
         screen.blit(title_main_display,((window_x-title_main_display.get_width())/2,500))
         pygame.display.update()
-    """
+    
     #部分设定初始化
     the_character_get_click = ""
     enemies_get_attack = ""
@@ -295,6 +303,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         #角色动画
         for every_chara in characters:
             if every_chara != the_character_get_click:
+                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                    characters_data[every_chara].undetected = True
+                else:
+                    characters_data[every_chara].undetected = False
                 action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
         #当有角色被点击时
         if the_character_get_click != "":
@@ -337,16 +349,26 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         the_character_get_click = ""
             elif isWaiting == "ATTACKING":
                 green_hide=True
-                action_displayer(characters_data[the_character_get_click].name,"attack",characters_data[every_chara].x,characters_data[every_chara].y,False)
-                if characters_data[the_character_get_click].gif["attack"][1] == characters_data[the_character_get_click].gif["attack"][0][1]-2:
-                    sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                
-                the_characters_attacking = characters_data[the_character_get_click].gif
-                if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
-                    the_characters_attacking["attack"][1] = 0
-                    isWaiting =True
-                    the_character_get_click = ""
-                
+                if action_choice == "attack":
+                    action_displayer(characters_data[the_character_get_click].name,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
+                    if characters_data[the_character_get_click].gif["attack"][1] == characters_data[the_character_get_click].gif["attack"][0][1]-2:
+                        sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
+                    
+                    the_characters_attacking = characters_data[the_character_get_click].gif
+                    if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
+                        the_characters_attacking["attack"][1] = 0
+                        isWaiting =True
+                        the_character_get_click = ""
+                if action_choice == "skill":
+                    action_displayer(characters_data[the_character_get_click].name,"skill",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
+                    if characters_data[the_character_get_click].gif["skill"][1] == characters_data[the_character_get_click].gif["skill"][0][1]-2:
+                        sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
+                    
+                    the_characters_attacking = characters_data[the_character_get_click].gif
+                    if the_characters_attacking["skill"][1] == the_characters_attacking["skill"][0][1]-1:
+                        the_characters_attacking["skill"][1] = 0
+                        isWaiting =True
+                        the_character_get_click = ""
             elif isWaiting == True:
                 action_displayer(characters_data[the_character_get_click].name,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
         

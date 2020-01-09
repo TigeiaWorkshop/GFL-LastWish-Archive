@@ -34,7 +34,7 @@ def character_creator(character_name,action,block_x_length,block_y_length,kind="
         files_amount+=1
     for i in range(files_amount):
         path = "Assets/img/"+kind+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_"+str(i)+".png"
-        character_gif.append(pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(block_x_length*2), int(block_y_length*2))))
+        character_gif.append(pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (int(block_x_length*2), int(block_y_length*2))))
     return [character_gif,files_amount]
 
 #动图字典制作模块：接受一个友方角色名，返回对应的动图字典：
@@ -44,6 +44,7 @@ def character_gif_dic(character_name,block_x_length,block_y_length,kind="charact
             "attack":[character_creator(character_name,"attack",block_x_length,block_y_length),0],
             "die":[character_creator(character_name,"die",block_x_length,block_y_length),0],
             "move":[character_creator(character_name,"move",block_x_length,block_y_length),0],
+            "skill":[character_creator(character_name,"skill",block_x_length,block_y_length),0],
             "victory":[character_creator(character_name,"victory",block_x_length,block_y_length),0],
             "victoryloop":[character_creator(character_name,"victoryloop",block_x_length,block_y_length),0],
             "wait":[character_creator(character_name,"wait",block_x_length,block_y_length),0],

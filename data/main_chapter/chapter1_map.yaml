@@ -7,6 +7,7 @@ character:
     max_hp: 550
     min_damage: 250
     move_range: 4
+    undetected: False
     x: 7
     y: 5
   gsh-18:
@@ -16,6 +17,7 @@ character:
     max_hp: 350
     min_damage: 100
     move_range: 3
+    undetected: False
     x: 3
     y: 4
   pp1901:
@@ -25,6 +27,7 @@ character:
     max_hp: 800
     min_damage: 150
     move_range: 2
+    undetected: False
     x: 6
     y: 3
   sv-98:
@@ -34,6 +37,7 @@ character:
     max_hp: 250
     min_damage: 400
     move_range: 4
+    undetected: False
     x: 10
     y: 8
 map:
@@ -1197,15 +1201,17 @@ sangvisFerri:
     max_hp: 1000
     min_damage: 50
     move_range: 2
+    undetected: False
     x: 28
     y: 9
   jaeger:
     attack_range: 6
-    current_hp: 200
+    current_hp: 2000
     max_damage: 500
     max_hp: 200
     min_damage: 450
     move_range: 2
+    undetected: False
     x: 9
     y: 10
   prowler:
@@ -1215,6 +1221,7 @@ sangvisFerri:
     max_hp: 250
     min_damage: 100
     move_range: 10
+    undetected: False
     x: 28
     y: 11
   ripper:
@@ -1224,6 +1231,7 @@ sangvisFerri:
     max_hp: 400
     min_damage: 300
     move_range: 5
+    undetected: False
     x: 28
     y: 12
   vespid:
@@ -1233,6 +1241,7 @@ sangvisFerri:
     max_hp: 350
     min_damage: 400
     move_range: 4
+    undetected: False
     x: 28
     y: 13
 title: A way on snow
