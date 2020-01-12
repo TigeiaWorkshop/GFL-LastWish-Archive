@@ -1,6 +1,20 @@
 import os
 import pygame
 
+#图片加载模块：接收图片路径,长,高,返回对应图片
+def loadImg(path,length=None,height=None):
+    if length == None and height== None:
+        return pygame.image.load(os.path.join(path))
+    else:
+        if length == None:
+            raise Exception('Length is required')
+        elif height== None:
+            raise Exception('Height is required')
+        elif length >= 0 and height >= 0:
+            return pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(length), int(height)))
+        elif length < 0 or height < 0:
+            raise Exception('Both length and height must be positive')
+
 #文字制作模块：接受文字，颜色，模式，返回制作完的文字
 def fontRender(txt,color,mode=True):
     class the_text:
