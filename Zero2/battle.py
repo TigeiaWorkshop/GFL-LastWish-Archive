@@ -415,6 +415,26 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             for enemies in sangvisFerris_data:
                 if sangvisFerris_data[enemies].current_hp>0:
                     if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area:
+                        mouse_x,mouse_y=pygame.mouse.get_pos()
+                        block_get_click_x2 = int(mouse_x/green.get_width())
+                        block_get_click_y2 = int(mouse_y/green.get_height())
+                        if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
+                            for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].attack_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].attack_range):
+                                if y < sangvisFerris_data[enemies].y:
+                                    for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)):
+                                        if blocks_setting[theMap[y][x]][1] == True:
+                                            screen.blit(green,(x*green.get_width(),y*green.get_height()))
+                                        else:
+                                            screen.blit(red,(x*green.get_width(),y*green.get_height()))
+                                else:
+                                    for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)):
+                                        if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
+                                            pass
+                                        else:
+                                            if blocks_setting[theMap[y][x]][1] == True:
+                                                screen.blit(green,(x*green.get_width(),y*green.get_height()))
+                                            else:
+                                                screen.blit(red,(x*green.get_width(),y*green.get_height()))
                         action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
                 elif sangvisFerris_data[enemies].current_hp<=0:
                     action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
