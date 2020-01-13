@@ -132,10 +132,12 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     hp_empty = loadImg("Assets/img/UI/hp_empty.png", block_x_length, block_y_length/5)
     hp_red = loadImg("Assets/img/UI/hp_red.png", block_x_length, block_y_length/5)
     #绿色方块/方块标准
-    green = loadImg("Assets/img/UI/green.png", block_x_length, block_y_length)
+    green = loadImg("Assets/img/UI/green.png", block_x_length, block_y_length).convert_alpha()
     green.set_alpha(100)
-    red = loadImg("Assets/img/UI/red.png", block_x_length, block_y_length)
+    red = loadImg("Assets/img/UI/red.png", block_x_length, block_y_length).convert_alpha()
     red.set_alpha(100)
+    black = loadImg("Assets/img/UI/black.png", block_x_length, block_y_length).convert_alpha()
+    black.set_alpha(100)
     new_block_type = 0
     per_block_width = green.get_width()
     per_block_height = green.get_height()
@@ -154,6 +156,8 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         pygame.display.update()
     
     #部分设定初始化
+    #行动点数
+    action_points = len(characters_name_list)*7
     the_character_get_click = ""
     enemies_get_attack = ""
     action_choice =""
@@ -166,6 +170,24 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     the_dead_one = ""
     whose_round = "player"
 
+    #计算光亮区域
+    def calculate_darkness():
+        light_area = []
+        for each_chara in characters_data:
+            for y in range(characters_data[each_chara].y-characters_data[each_chara].attack_range,characters_data[each_chara].y+characters_data[each_chara].attack_range):
+                if y < characters_data[each_chara].y:
+                    for x in range(characters_data[each_chara].x-characters_data[each_chara].attack_range-(y-characters_data[each_chara].y)+1,characters_data[each_chara].x+characters_data[each_chara].attack_range+(y-characters_data[each_chara].y)):
+                        if (x,y) not in light_area:
+                            light_area.append((x,y))
+                else:
+                    for x in range(characters_data[each_chara].x-characters_data[each_chara].attack_range+(y-characters_data[each_chara].y)+1,characters_data[each_chara].x+characters_data[each_chara].attack_range-(y-characters_data[each_chara].y)):
+                        if (x,y) not in light_area:
+                            light_area.append((x,y))
+        return light_area
+    
+    light_area = calculate_darkness()
+    
+
     # 游戏主循环
     while battle==True:
         #加载地图
@@ -173,6 +195,13 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             for a in range(len(map_img_list[i])):
                 img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
                 screen.blit(img_display,(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
+        
+        #加载阴环境
+        for y in range(len(map_img_list)):
+            for x in range(len(map_img_list[i])):
+                if (x,y) not in light_area:
+                    screen.blit(black,(x*block_x_length,y*block_y_length))
+
         if whose_round == "player":
             #玩家输入按键判定
             for event in pygame.event.get():
@@ -325,6 +354,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         if temp_x >= temp_max:
                             characters_data[the_character_get_click].x = temp_max
                             #endOfPlayerRound()
+                            light_area = calculate_darkness()
                             isWaiting =True
                             the_character_get_click = ""
                     elif temp_x > temp_max:
@@ -333,6 +363,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         if temp_x <= temp_max:
                             characters_data[the_character_get_click].x = temp_max
                             #endOfPlayerRound()
+                            light_area = calculate_darkness()
                             isWaiting =True
                             the_character_get_click = ""
                 elif isWaiting == "TOPANDBOTTOM":
@@ -343,6 +374,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         if temp_y >= temp_max:
                             characters_data[the_character_get_click].y = temp_max
                             #endOfPlayerRound()
+                            light_area = calculate_darkness()
                             isWaiting =True
                             the_character_get_click = ""
                     elif temp_y > temp_max:
@@ -351,6 +383,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         if temp_y <= temp_max:
                             characters_data[the_character_get_click].y = temp_max
                             #endOfPlayerRound()
+                            light_area = calculate_darkness()
                             isWaiting =True
                             the_character_get_click = ""
                 elif isWaiting == "ATTACKING":
@@ -381,7 +414,8 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             #敌方动画
             for enemies in sangvisFerris_data:
                 if sangvisFerris_data[enemies].current_hp>0:
-                    action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+                    if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area:
+                        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
                 elif sangvisFerris_data[enemies].current_hp<=0:
                     action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
                     the_dead_one = enemies
@@ -457,5 +491,4 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             pygame.mixer.music.load("Assets/music/"+bg_music)
             pygame.mixer.music.play(loops=9999, start=0.0)
         #画面更新
-        time.sleep(0.025)
         pygame.display.update()
