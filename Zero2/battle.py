@@ -97,6 +97,21 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         screen.blit(title_main_display,((window_x-title_main_display.get_width())/2,500))
         pygame.display.update()
     
+    #加载雪花
+    snow_list = []
+    for i in range(1,17):
+        snow_list.append(loadImage("Assets/img/environment/snow/"+str(i)+".png"))
+
+    snow_width = int(1920/200)
+
+    all_snow_on_screen = []
+    for i in range(1000):
+        the_snow_add = snow_list[random.randint(0,15)]
+        the_snow_add.y = random.randint(1,1080)
+        the_snow_add.x = random.randint(1,1920)
+        the_snow_add.img = pygame.transform.scale(the_snow_add.img, (snow_width,snow_width))
+        all_snow_on_screen.append(the_snow_add)
+    
     #初始化角色信息
     #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
     characters_name_list = []
@@ -510,5 +525,14 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load("Assets/music/"+bg_music)
             pygame.mixer.music.play(loops=9999, start=0.0)
+
+        #加载雪花
+        for i in range(len(all_snow_on_screen)):
+            screen.blit(all_snow_on_screen[i].img,(all_snow_on_screen[i].x,all_snow_on_screen[i].y))
+            all_snow_on_screen[i].x -= 0.01
+            all_snow_on_screen[i].y += 0.02
+            if all_snow_on_screen[i].x < 0 or all_snow_on_screen[i].y > 1080:
+                all_snow_on_screen[i].y = 0
+                all_snow_on_screen[i].x = random.randint(1,1920)
         #画面更新
         pygame.display.update()
