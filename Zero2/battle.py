@@ -98,19 +98,26 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         pygame.display.update()
     
     #加载雪花
+    all_snow_img = glob.glob(r'Assets/img/environment/snow/*.png')
     snow_list = []
-    for i in range(1,17):
-        snow_list.append(loadImage("Assets/img/environment/snow/"+str(i)+".png"))
+    for snowflake in all_snow_img:
+        snow_list.append(loadImg(snowflake))
 
-    snow_width = int(1920/200)
-
+    snow_width = int(window_x/200)
+    all_snow_img_len = len(snow_list)-1
     all_snow_on_screen = []
-    for i in range(1000):
-        the_snow_add = snow_list[random.randint(0,15)]
-        the_snow_add.y = random.randint(1,1080)
-        the_snow_add.x = random.randint(1,1920)
-        the_snow_add.img = pygame.transform.scale(the_snow_add.img, (snow_width,snow_width))
-        all_snow_on_screen.append(the_snow_add)
+
+    class theImg:
+        def __init__(self,x,y,img):
+            self.x = x
+            self.y = y 
+            self.img = img
+
+    for i in range(100):
+        the_snow_add_y = random.randint(1,window_y)
+        the_snow_add_x = random.randint(1,window_x*1.5)
+        the_snow_add_img = pygame.transform.scale(snow_list[random.randint(0,all_snow_img_len)], (snow_width,snow_width))
+        all_snow_on_screen.append(theImg(the_snow_add_x,the_snow_add_y,the_snow_add_img))
     
     #初始化角色信息
     #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
@@ -430,26 +437,27 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             for enemies in sangvisFerris_data:
                 if sangvisFerris_data[enemies].current_hp>0:
                     if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area:
-                        mouse_x,mouse_y=pygame.mouse.get_pos()
-                        block_get_click_x2 = int(mouse_x/green.get_width())
-                        block_get_click_y2 = int(mouse_y/green.get_height())
-                        if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
-                            for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].attack_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].attack_range):
-                                if y < sangvisFerris_data[enemies].y:
-                                    for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)):
-                                        if blocks_setting[theMap[y][x]][1] == True:
-                                            screen.blit(green,(x*green.get_width(),y*green.get_height()))
-                                        else:
-                                            screen.blit(red,(x*green.get_width(),y*green.get_height()))
-                                else:
-                                    for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)):
-                                        if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
-                                            pass
-                                        else:
+                        if green_hide == True:
+                            mouse_x,mouse_y=pygame.mouse.get_pos()
+                            block_get_click_x2 = int(mouse_x/green.get_width())
+                            block_get_click_y2 = int(mouse_y/green.get_height())
+                            if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
+                                for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].attack_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].attack_range):
+                                    if y < sangvisFerris_data[enemies].y:
+                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)):
                                             if blocks_setting[theMap[y][x]][1] == True:
                                                 screen.blit(green,(x*green.get_width(),y*green.get_height()))
                                             else:
                                                 screen.blit(red,(x*green.get_width(),y*green.get_height()))
+                                    else:
+                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)):
+                                            if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
+                                                pass
+                                            else:
+                                                if blocks_setting[theMap[y][x]][1] == True:
+                                                    screen.blit(green,(x*green.get_width(),y*green.get_height()))
+                                                else:
+                                                    screen.blit(red,(x*green.get_width(),y*green.get_height()))
                         action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
                 elif sangvisFerris_data[enemies].current_hp<=0:
                     action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
@@ -529,10 +537,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         #加载雪花
         for i in range(len(all_snow_on_screen)):
             screen.blit(all_snow_on_screen[i].img,(all_snow_on_screen[i].x,all_snow_on_screen[i].y))
-            all_snow_on_screen[i].x -= 0.01
-            all_snow_on_screen[i].y += 0.02
+            all_snow_on_screen[i].x -= 10
+            all_snow_on_screen[i].y += 20
             if all_snow_on_screen[i].x < 0 or all_snow_on_screen[i].y > 1080:
                 all_snow_on_screen[i].y = 0
-                all_snow_on_screen[i].x = random.randint(1,1920)
+                all_snow_on_screen[i].x = random.randint(1,window_x*1.5)
         #画面更新
         pygame.display.update()

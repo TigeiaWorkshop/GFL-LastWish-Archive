@@ -35,6 +35,7 @@ block_x = 48
 block_y = 24
 block_x_length = int(window_x*4/5/block_x)
 block_y_length = int(window_y*4/5/block_y)
+bg_img_test = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/img/loading_img/test.png")),(int(1920),int(1080)))
 
 #初始化地图
 if len(map) == 0:
@@ -69,6 +70,7 @@ dirt_void = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/img
 
 # 游戏主循环
 while True:
+    screen.blit(bg_img_test,(0,0))
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:

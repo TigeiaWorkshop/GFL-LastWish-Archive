@@ -18,12 +18,11 @@ def loadImg(path,length=None,height=None):
 #高级图片加载模块：接收图片路径,长,高,返回对应的图片class
 def loadImage(path,length=None,height=None):
     class theImg:
-        def __init__(self):
-            self.x = 0
-            self.y = 0 
-            self.img = None
-    theImg.img = loadImg(path,length,height)
-    return theImg
+        def __init__(self,x,y,img):
+            self.x = x
+            self.y = y
+            self.img = img 
+    return theImg(0,0,loadImg(path,length,height))
 
 #文字制作模块：接受文字，颜色，模式，返回制作完的文字
 def fontRender(txt,color,mode=True):
