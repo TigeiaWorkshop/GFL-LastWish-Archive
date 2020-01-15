@@ -16,7 +16,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     pygame.mixer.music.unload()
 
     #加载动作：接受角色名，动作，方位，完成对应的指令
-    def action_displayer(chara_name,action,x,y,isContinue=True):
+    def action_displayer(chara_name,action,x,y,isContinue=True,ifFlip=False):
         if chara_name in sangvisFerris_name_list:
             hidden = sangvisFerris_data[chara_name].undetected
             gif_dic = sangvisFerris_data[chara_name].gif
@@ -39,7 +39,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             img_of_char.set_alpha(130)
         else:
             img_of_char.set_alpha(300)
-        screen.blit(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
+        if ifFlip == True:
+            screen.blit(pygame.transform.flip(img_of_char,True,False),(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
+        else:
+            screen.blit(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2))
         if percent_of_hp>0:
             screen.blit(hp_empty,(x*green.get_width(),y*green.get_height()*0.98))
             screen.blit(pygame.transform.scale(hp_red,(int(block_x_length*percent_of_hp),int(block_y_length/5))),(x*green.get_width(),y*green.get_height()*0.98))
@@ -87,7 +90,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
 
     #章节标题显示
     the_black = loadImg("Assets/img/UI/black.png",window_x,window_y)
-    title_number_display = pygame.font.SysFont('simsunnsimsun',50).render("Chapter1", True, (255,255,255))
+    title_number_display = pygame.font.SysFont('simsunnsimsun',50).render("Chapter-1", True, (255,255,255))
     title_main_display = pygame.font.SysFont('simsunnsimsun',50).render(chapter_title, True, (255,255,255))
     for i in range(0,600,1):
         screen.blit(the_black,(0,0))
@@ -113,7 +116,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             self.y = y 
             self.img = img
 
-    for i in range(100):
+    for i in range(500):
         the_snow_add_y = random.randint(1,window_y)
         the_snow_add_x = random.randint(1,window_x*1.5)
         the_snow_add_img = pygame.transform.scale(snow_list[random.randint(0,all_snow_img_len)], (snow_width,snow_width))
@@ -178,13 +181,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         pygame.display.update()
     
     #部分设定初始化
-    #行动点数
-    action_points = len(characters_name_list)*7
     the_character_get_click = ""
     enemies_get_attack = ""
     action_choice =""
     green_hide = True
-    action_point = len(characters_name_list)#行动值
     battle=True
     how_many_to_move = 0
     how_many_moved = 0
@@ -192,6 +192,9 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     the_dead_one = ""
     whose_round = "player"
 
+    #行动点数
+    action_points = len(characters_name_list)*7
+    
     #计算光亮区域
     def calculate_darkness():
         light_area = []
@@ -322,11 +325,13 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         temp_max = block_get_click_x
                         isWaiting = "LEFTANDRIGHT"
                         green_hide = True
+                        action_points -= abs(block_get_click_x-characters_data[the_character_get_click].x)
                     elif the_moving_range[2]>=block_get_click_y>=the_moving_range[3] and characters_data[the_character_get_click].x == block_get_click_x:
                         temp_y = characters_data[the_character_get_click].y
                         temp_max = block_get_click_y
                         isWaiting = "TOPANDBOTTOM"
                         green_hide = True
+                        action_points -= abs(block_get_click_y-characters_data[the_character_get_click].y)
                     
                 #显示攻击范围        
                 elif action_choice == "attack" or action_choice == "skill":
@@ -381,7 +386,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                             the_character_get_click = ""
                     elif temp_x > temp_max:
                         temp_x-=0.1
-                        action_displayer(characters_data[the_character_get_click].name,"move",temp_x,characters_data[the_character_get_click].y)
+                        action_displayer(characters_data[the_character_get_click].name,"move",temp_x,characters_data[the_character_get_click].y,True,True)
                         if temp_x <= temp_max:
                             characters_data[the_character_get_click].x = temp_max
                             #endOfPlayerRound()
@@ -437,7 +442,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             for enemies in sangvisFerris_data:
                 if sangvisFerris_data[enemies].current_hp>0:
                     if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area:
-                        if green_hide == True:
+                        if green_hide == True and pygame.mouse.get_pressed()[2]:
                             mouse_x,mouse_y=pygame.mouse.get_pos()
                             block_get_click_x2 = int(mouse_x/green.get_width())
                             block_get_click_y2 = int(mouse_y/green.get_height())
@@ -477,7 +482,17 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 per_bullet.x += 100
                 if per_bullet.x > window_x:
                     bullets_list.remove(per_bullet)
-        
+
+        ##################中间检测区##################
+        if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
+            for enemies in sangvisFerris_data:
+                action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+            for every_chara in characters:
+                action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+            if whose_round == "playerToSangvisFerris":
+                whose_round = "sangvisFerris"
+            elif whose_round == "sangvisFerrisToPlayer":
+                whose_round = "player"
         """
         #检测所有敌人是否都已经被消灭
         for i in range(len(sangvisFerris_name_list)):
@@ -489,6 +504,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             exit()
             break
         """
+        ##################中间检测区##################
         #敌方回合
         if whose_round == "sangvisFerris":
             if sangvisFerris_data[object_to_play[round]].current_hp<=0:
@@ -529,11 +545,11 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         #resetEnemyMovingData()
                 elif how_many_moved < how_many_to_move:
                     how_many_moved+=0.1
-        
+        """
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load("Assets/music/"+bg_music)
             pygame.mixer.music.play(loops=9999, start=0.0)
-
+        """
         #加载雪花
         for i in range(len(all_snow_on_screen)):
             screen.blit(all_snow_on_screen[i].img,(all_snow_on_screen[i].x,all_snow_on_screen[i].y))
@@ -542,5 +558,9 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             if all_snow_on_screen[i].x < 0 or all_snow_on_screen[i].y > 1080:
                 all_snow_on_screen[i].y = 0
                 all_snow_on_screen[i].x = random.randint(1,window_x*1.5)
+        
+        points_left_txt = pygame.font.SysFont('simsunnsimsun',50).render("剩余行动值："+str(action_points), True, (255,255,255))
+        screen.blit(points_left_txt,(0,0))
+
         #画面更新
         pygame.display.update()
