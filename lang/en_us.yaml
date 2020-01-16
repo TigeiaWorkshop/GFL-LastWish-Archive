@@ -20,8 +20,8 @@ chapter: {
     back: "Back",
     }
 select_menu: {
-    attack: "attack",
-    move: "move",
-    skill: "skill",
-    pass: "pass",
+    attack: "Attack",
+    move: "Move",
+    skill: "Skill",
+    reload: "Reload",
     }

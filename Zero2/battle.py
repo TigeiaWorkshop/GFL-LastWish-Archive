@@ -2,6 +2,7 @@ import glob
 import time
 from sys import exit
 
+import math
 import pygame
 import yaml
 from pygame.locals import *
@@ -24,13 +25,16 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 sangvisFerris_data[chara_name].current_hp = 0
             current_hp_to_display = hp_font.render(str(sangvisFerris_data[chara_name].current_hp)+"/"+str(sangvisFerris_data[chara_name].max_hp), True, (0,0,0))
             percent_of_hp = sangvisFerris_data[chara_name].current_hp/sangvisFerris_data[chara_name].max_hp
-        else:
+            current_bullets_situation = hp_font.render(str(sangvisFerris_data[chara_name].current_bullets)+"/"+str(sangvisFerris_data[chara_name].maximum_bullets), True, (0,0,0))
+        elif chara_name in characters_name_list:
             hidden = characters_data[chara_name].undetected
             gif_dic = characters_data[chara_name].gif
             if characters_data[chara_name].current_hp<0:
                 characters_data[chara_name].current_hp = 0
             current_hp_to_display = hp_font.render(str(characters_data[chara_name].current_hp)+"/"+str(characters_data[chara_name].max_hp), True, (0,0,0))
             percent_of_hp = characters_data[chara_name].current_hp/characters_data[chara_name].max_hp
+            current_bullets_situation = hp_font.render(str(characters_data[chara_name].current_bullets)+"/"+str(characters_data[chara_name].maximum_bullets), True, (0,0,0))
+
         if percent_of_hp<0:
             percent_of_hp=0
 
@@ -47,6 +51,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             screen.blit(hp_empty,(x*green.get_width(),y*green.get_height()*0.98))
             screen.blit(pygame.transform.scale(hp_red,(int(block_x_length*percent_of_hp),int(block_y_length/5))),(x*green.get_width(),y*green.get_height()*0.98))
             screen.blit(current_hp_to_display,(x*green.get_width(),y*green.get_height()*0.98))
+            screen.blit(current_bullets_situation,(x*green.get_width()+current_hp_to_display.get_width()-current_bullets_situation.get_width(),y*green.get_height()*0.98-current_bullets_situation.get_height()))
         gif_dic[action][1]+=1
         #射击动作
         if gif_dic[action][1] == 5 and action == "attack":
@@ -127,19 +132,19 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     characters_name_list = []
     characters_data = {}
     for jiaose in characters:
-        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"],characters[jiaose]["undetected"],character_gif_dic(jiaose,block_x_length,block_y_length),)
+        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"],characters[jiaose]["undetected"],character_gif_dic(jiaose,block_x_length,block_y_length),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
         characters_name_list.append(jiaose)
 
     sangvisFerris_name_list = []
     sangvisFerris_data = {}
     for enemy in sangvisFerris:
-        sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],sangvisFerris[enemy]["undetected"],character_gif_dic(enemy,block_x_length,block_y_length,"sangvisFerri"))
+        sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],sangvisFerris[enemy]["undetected"],character_gif_dic(enemy,block_x_length,block_y_length,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"])
         sangvisFerris_name_list.append(enemy)
 
     hp_font =pygame.font.SysFont('simsunnsimsun',10)
 
     #加载UI
-    #加载按钮
+    #加载按钮的文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
         selectMenuButtons_dic = chapter_info["select_menu"]
@@ -147,9 +152,11 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     attack_button_txt = selectMenuFont.render(selectMenuButtons_dic["attack"], True, (105,105,105))
     move_button_txt = selectMenuFont.render(selectMenuButtons_dic["move"], True, (105,105,105))
     skill_button_txt = selectMenuFont.render(selectMenuButtons_dic["skill"], True, (105,105,105))
-    pass_button_txt = selectMenuFont.render(selectMenuButtons_dic["pass"], True, (105,105,105))
-
+    reload_button_txt = selectMenuFont.render(selectMenuButtons_dic["reload"], True, (105,105,105))
+    #加载选择菜单的图片
     select_menu_button = loadImg("Assets/img/UI/menu.png", block_x_length*2, block_x_length/1.3)
+    #加载结束回合的图片
+    end_round_button = loadImg("Assets/img/UI/endRound.png", block_x_length*2*28/15, block_x_length*2)
     #加载子弹图片
     bullet_img = loadImg("Assets/img/UI/bullet.png", block_x_length/6, block_y_length/12)
     bullets_list = []
@@ -226,7 +233,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             for x in range(len(map_img_list[i])):
                 if (x,y) not in light_area:
                     screen.blit(black,(x*block_x_length,y*block_y_length))
-
+        
+        #加载结束回合的按钮
+        screen.blit(end_round_button,(window_x-select_menu_button.get_width()*1.5,window_y-300))
+        
         if whose_round == "player":
             #玩家输入按键判定
             for event in pygame.event.get():
@@ -234,6 +244,9 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     if event.key == K_ESCAPE:
                         exit()
                 elif event.type == MOUSEBUTTONDOWN:
+                    if isGetClick(select_menu_button,(window_x-select_menu_button.get_width()*1.5,window_y-300))==True:
+                        whose_round = "playerToSangvisFerris"
+                        break
                     #获取角色坐标
                     mouse_x,mouse_y=pygame.mouse.get_pos()
                     block_get_click_x = int(mouse_x/green.get_width())
@@ -252,13 +265,14 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen)
                 displayInCenter(move_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen)
                 displayInCenter(skill_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5,screen)
-                displayInCenter(pass_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5,screen)
+                displayInCenter(reload_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5,screen)
                 if pygame.mouse.get_pressed()[0]:
                     if isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
-                        action_choice = "attack"
-                        block_get_click_x = -100
-                        block_get_click_y = -100
-                        green_hide = False
+                        if characters_data[the_character_get_click].current_bullets > 0:
+                            action_choice = "attack"
+                            block_get_click_x = -100
+                            block_get_click_y = -100
+                            green_hide = False
                     elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
                         action_choice = "move"
                         block_get_click_x = -100
@@ -270,7 +284,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         block_get_click_y = -100
                         green_hide = False
                     elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5)):
-                        action_choice = "pass"
+                        action_choice = "reload"
                         block_get_click_x = -100
                         block_get_click_y = -100
                         green_hide = False
@@ -361,7 +375,14 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                 enemies_get_attack = enemies
                                 green_hide = True
                                 break
-
+                elif action_choice == "reload":
+                    if characters_data[the_character_get_click].maximum_bullets-characters_data[the_character_get_click].current_bullets > 0:
+                        #向上取整
+                        action_points -= math.ceil((characters_data[the_character_get_click].maximum_bullets-characters_data[the_character_get_click].current_bullets)/2)
+                        characters_data[the_character_get_click].current_bullets = characters_data[the_character_get_click].maximum_bullets
+                    else:
+                        #无需换弹
+                        pass
             #角色动画
             for every_chara in characters:
                 if every_chara != the_character_get_click:
@@ -423,6 +444,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         the_characters_attacking = characters_data[the_character_get_click].gif
                         if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
                             the_characters_attacking["attack"][1] = 0
+                            characters_data[the_character_get_click].current_bullets -= 1
                             isWaiting =True
                             the_character_get_click = ""
                     if action_choice == "skill":
@@ -507,6 +529,9 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         ##################中间检测区##################
         #敌方回合
         if whose_round == "sangvisFerris":
+            for every_chara in characters:
+                action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+            
             if sangvisFerris_data[object_to_play[round]].current_hp<=0:
                 round += 1
                 #if round != len(object_to_play):
@@ -541,7 +566,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     elif direction_to_move == 3:
                         sangvisFerris_data[object_to_play[round]].y+=how_many_to_move
                     round += 1
-                    #if round != len(object_to_play):
+                    #if round != len(object_to_play): 
                         #resetEnemyMovingData()
                 elif how_many_moved < how_many_to_move:
                     how_many_moved+=0.1

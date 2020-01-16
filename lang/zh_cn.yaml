@@ -23,5 +23,5 @@ select_menu: {
     attack: "攻击",
     move: "移动",
     skill: "技能",
-    pass: "跳过",
+    reload: "换弹",
     }
