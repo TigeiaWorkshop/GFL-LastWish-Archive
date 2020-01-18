@@ -19,21 +19,21 @@ def mainMenu(window_x,window_y,lang,mode=""):
         lang_cn = yaml.load(f.read(),Loader=yaml.FullLoader)
         now_loading = lang_cn['main_menu']['now_loading']
         text_title =  lang_cn['main_menu']['text_title']
-        text_continue = fontRender(lang_cn['main_menu']['text_continue'],"disable")
-        text_chooseChapter = fontRender(lang_cn['main_menu']['text_chooseChapter'],"enable")
-        text_setting = fontRender(lang_cn['main_menu']['text_setting'],"disable")
-        text_dlc = fontRender(lang_cn['main_menu']['text_dlc'],"disable")
-        text_workshop = fontRender(lang_cn['main_menu']['text_workshop'],"disable")
-        text_exit = fontRender(lang_cn['main_menu']['text_exit'],"enable")
-        c1 = fontRender(lang_cn['chapter']['c1'],"enable")
-        c2 = fontRender(lang_cn['chapter']['c2'],"disable")
-        c3 = fontRender(lang_cn['chapter']['c3'],"disable")
-        c4 = fontRender(lang_cn['chapter']['c4'],"disable")
-        c5 = fontRender(lang_cn['chapter']['c5'],"disable")
-        c6 = fontRender(lang_cn['chapter']['c6'],"disable")
-        c7 = fontRender(lang_cn['chapter']['c7'],"disable")
-        c8 = fontRender(lang_cn['chapter']['c8'],"disable")
-        back_button = fontRender(lang_cn['chapter']['back'],"enable")
+        text_continue = fontRenderPro(lang_cn['main_menu']['text_continue'],"disable")
+        text_chooseChapter = fontRenderPro(lang_cn['main_menu']['text_chooseChapter'],"enable")
+        text_setting = fontRenderPro(lang_cn['main_menu']['text_setting'],"disable")
+        text_dlc = fontRenderPro(lang_cn['main_menu']['text_dlc'],"disable")
+        text_workshop = fontRenderPro(lang_cn['main_menu']['text_workshop'],"disable")
+        text_exit = fontRenderPro(lang_cn['main_menu']['text_exit'],"enable")
+        c1 = fontRenderPro(lang_cn['chapter']['c1'],"enable")
+        c2 = fontRenderPro(lang_cn['chapter']['c2'],"disable")
+        c3 = fontRenderPro(lang_cn['chapter']['c3'],"disable")
+        c4 = fontRenderPro(lang_cn['chapter']['c4'],"disable")
+        c5 = fontRenderPro(lang_cn['chapter']['c5'],"disable")
+        c6 = fontRenderPro(lang_cn['chapter']['c6'],"disable")
+        c7 = fontRenderPro(lang_cn['chapter']['c7'],"disable")
+        c8 = fontRenderPro(lang_cn['chapter']['c8'],"disable")
+        back_button = fontRenderPro(lang_cn['chapter']['back'],"enable")
 
     # 创建窗口
     screen = pygame.display.set_mode((window_x, window_y))
@@ -45,7 +45,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
         all_bg_img_list = glob.glob(r'Assets/img/main_menu/*.png')
     background_img_list=[]
     loading_img =  pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/img1.png")),(window_x,window_y))
-    my_font = pygame.font.SysFont('simsunnsimsun',50)
+    
     for i in range(len(all_bg_img_list)):
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
@@ -59,7 +59,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
         if mode == "safe":
             break
         screen.blit(loading_img, (0,0))
-        the_str = my_font.render(now_loading+": "+str(percent_of_img_loaded), True, (255, 255, 255))
+        the_str = fontRender(now_loading+": "+str(percent_of_img_loaded), "white")
         screen.blit(the_str, ((window_x-the_str.get_width())/2,window_y-100))
         pygame.display.update()
 
