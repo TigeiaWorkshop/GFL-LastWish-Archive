@@ -259,8 +259,8 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         break
                     #获取角色坐标
                     mouse_x,mouse_y=pygame.mouse.get_pos()
-                    block_get_click_x = int(mouse_x/green.get_width())
-                    block_get_click_y = int(mouse_y/green.get_height())
+                    block_get_click_x = int((mouse_x-local_x)/green.get_width())
+                    block_get_click_y = int((mouse_y-local_y)/green.get_height())
                     for key in characters_data:
                         if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y:
                             if key != the_character_get_click:
@@ -272,28 +272,28 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                 the_character_get_click = ""
             #显示选择菜单
             if green_hide == "SelectMenu":
-                displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen)
-                displayInCenter(move_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen)
-                displayInCenter(skill_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5,screen)
-                displayInCenter(reload_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5,screen)
+                displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen,local_x,local_y)
+                displayInCenter(move_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen,local_x,local_y)
+                displayInCenter(skill_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5,screen,local_x,local_y)
+                displayInCenter(reload_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5,screen,local_x,local_y)
                 if pygame.mouse.get_pressed()[0]:
-                    if isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
+                    if isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()),local_x,local_y):
                         if characters_data[the_character_get_click].current_bullets > 0:
                             action_choice = "attack"
                             block_get_click_x = -100
                             block_get_click_y = -100
                             green_hide = False
-                    elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height())):
+                    elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()),local_x,local_y):
                         action_choice = "move"
                         block_get_click_x = -100
                         block_get_click_y = -100
                         green_hide = False
-                    elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5)):
+                    elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5),local_x,local_y):
                         action_choice = "skill"
                         block_get_click_x = -100
                         block_get_click_y = -100
                         green_hide = False
-                    elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5)):
+                    elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()+select_menu_button.get_height()+block_x_length*0.5),local_x,local_y):
                         action_choice = "reload"
                         block_get_click_x = -100
                         block_get_click_y = -100
@@ -305,42 +305,42 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     the_moving_range=[]
                     for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
                         if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
-                            printf(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen)
+                            printf(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
                         else:
                             the_moving_range.append(x-1)
                             for x_red in range(x,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
-                                printf(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen)
+                                printf(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
                             break
                         if(x == characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range):
                             the_moving_range.append(x)
                             
                     for x in range(characters_data[the_character_get_click].x-1,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
                         if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
-                            printf(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen)
+                            printf(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
                         else:
                             the_moving_range.append(x+1)
                             for x_red in range(x,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
-                                printf(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen)
+                                printf(red,(x_red*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
                             break
                         if(x == characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range):
                             the_moving_range.append(x)
                     for y in range(characters_data[the_character_get_click].y+1,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
                         if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
-                            printf(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen)
+                            printf(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                         else:
                             the_moving_range.append(y-1)
                             for y_red in range(y,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
-                                printf(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()),screen)
+                                printf(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()),screen,local_x,local_y)
                             break
                         if(y == characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range):
                             the_moving_range.append(y)
                     for y in range(characters_data[the_character_get_click].y-1,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
                         if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
-                            printf(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen)
+                            printf(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                         else:
                             the_moving_range.append(y+1)
                             for y_red in range(y,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
-                                printf(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()),screen)
+                                printf(red,(characters_data[the_character_get_click].x*green.get_width(),y_red*green.get_height()),screen,local_x,local_y)
                             break
                         if(y == characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range):
                             the_moving_range.append(y)
@@ -364,20 +364,20 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         if y < characters_data[the_character_get_click].y:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]][1] == True:
-                                    printf(green,(x*green.get_width(),y*green.get_height()),screen)
+                                    printf(green,(x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                                     attacking_range.append([x,y])
                                 else:
-                                    printf(red,(x*green.get_width(),y*green.get_height()),screen)
+                                    printf(red,(x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                         else:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)):
                                 if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
                                     pass
                                 else:
                                     if blocks_setting[theMap[y][x]][1] == True:
-                                        printf(green,(x*green.get_width(),y*green.get_height()),screen)
+                                        printf(green,(x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                                         attacking_range.append([x,y])
                                     else:
-                                        printf(red,(x*green.get_width(),y*green.get_height()),screen)
+                                        printf(red,(x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                     if [block_get_click_x,block_get_click_y] in attacking_range:
                         for enemies in sangvisFerris_data:
                             if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:

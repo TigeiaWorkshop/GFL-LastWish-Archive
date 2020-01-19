@@ -64,9 +64,9 @@ def fontRenderPro(txt,color,size=50,font="simsunnsimsun",mode=True):
     return text_out
 
 #检测是否被点击
-def isGetClick(the_object,the_object_position):
+def isGetClick(the_object,the_object_position,local_x=0,local_y=0):
     mouse_x,mouse_y=pygame.mouse.get_pos()
-    if the_object_position[0]<mouse_x<the_object_position[0]+the_object.get_width() and the_object_position[1]<mouse_y<the_object_position[1]+the_object.get_height():
+    if the_object_position[0]+local_x<mouse_x<the_object_position[0]+the_object.get_width()+local_x and the_object_position[1]+local_y<mouse_y<the_object_position[1]+the_object.get_height()+local_y:
         return True
     else:
         return False
@@ -104,11 +104,11 @@ def character_gif_dic(character_name,block_x_length,block_y_length,kind="charact
     return gif_dic
 
 #中心展示模块：接受两个item和item2的x和y，将item1展示在item2的中心位置：
-def displayInCenter(item1,item2,x,y,screen):
-    local_x = (item2.get_width()-item1.get_width())/2
-    local_y = (item2.get_height()-item1.get_height())/2
-    screen.blit(item2,(x,y))
-    screen.blit(item1,(x+local_x,y+local_y))
+def displayInCenter(item1,item2,x,y,screen,local_x=0,local_y=0):
+    added_x = (item2.get_width()-item1.get_width())/2
+    added_y = (item2.get_height()-item1.get_height())/2
+    screen.blit(item2,(x+local_x,y+local_y))
+    screen.blit(item1,(x+added_x+local_x,y+added_y+local_y))
 
 #图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
 def printf(img,position,screen,local_x=0,local_y=0):
