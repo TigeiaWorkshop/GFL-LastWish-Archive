@@ -200,7 +200,8 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     whose_round = "player"
     local_x = 0
     local_y = 0
-    
+    mouse_move_temp_x = -1
+    mouse_move_temp_y = -1
     #行动点数
     action_points = len(characters_name_list)*7
     
@@ -220,7 +221,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         return light_area
     
     light_area = calculate_darkness()
-
+    
     # 游戏主循环
     while battle==True:
         #加载地图
@@ -237,39 +238,37 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         
         #加载结束回合的按钮
         printf(end_round_button,(window_x-select_menu_button.get_width()*1.5,window_y-300),screen)
-        
+
         #加载玩家回合
         if whose_round == "player":
             #玩家输入按键判定
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
+                        print("local_x:",local_x)
+                        print("local_y:",local_y)
+                        print(0-(len(map_img_list[0]))*per_block_width+window_x)
+                        print(0-(len(map_img_list))*per_block_height+window_y)
                         exit()
-                    elif event.key == K_s:
-                        local_y += 10
-                    elif event.key == K_w:
-                        local_y -= 10
-                    elif event.key == K_a:
-                        local_x -= 10
-                    elif event.key == K_d:
-                        local_x += 10
+                        
                 elif event.type == MOUSEBUTTONDOWN:
-                    if isGetClick(select_menu_button,(window_x-select_menu_button.get_width()*1.5,window_y-300))==True:
-                        whose_round = "playerToSangvisFerris"
-                        break
-                    #获取角色坐标
-                    mouse_x,mouse_y=pygame.mouse.get_pos()
-                    block_get_click_x = int((mouse_x-local_x)/green.get_width())
-                    block_get_click_y = int((mouse_y-local_y)/green.get_height())
-                    for key in characters_data:
-                        if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y:
-                            if key != the_character_get_click:
-                                the_character_get_click = key
-                                green_hide = "SelectMenu"
-                                break
-                            else:
-                                green_hide = True
-                                the_character_get_click = ""
+                    if pygame.mouse.get_pressed()[0]:
+                        if isGetClick(select_menu_button,(window_x-select_menu_button.get_width()*1.5,window_y-300))==True:
+                            whose_round = "playerToSangvisFerris"
+                            break
+                        #获取角色坐标
+                        mouse_x,mouse_y=pygame.mouse.get_pos()
+                        block_get_click_x = int((mouse_x-local_x)/green.get_width())
+                        block_get_click_y = int((mouse_y-local_y)/green.get_height())
+                        for key in characters_data:
+                            if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y:
+                                if key != the_character_get_click:
+                                    the_character_get_click = key
+                                    green_hide = "SelectMenu"
+                                    break
+                                else:
+                                    green_hide = True
+                                    the_character_get_click = ""
             #显示选择菜单
             if green_hide == "SelectMenu":
                 displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen,local_x,local_y)
@@ -537,7 +536,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         """
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         # 我方角色动画
-        for every_chara in characters:
+        for every_chara in characters_data:
             if every_chara != the_character_get_click:
                 if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
                     characters_data[every_chara].undetected = True
@@ -551,25 +550,25 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area:
                         if green_hide == True and pygame.mouse.get_pressed()[2]:
                             mouse_x,mouse_y=pygame.mouse.get_pos()
-                            block_get_click_x2 = int(mouse_x/green.get_width())
-                            block_get_click_y2 = int(mouse_y/green.get_height())
+                            block_get_click_x2 = int((mouse_x-local_x)/green.get_width())
+                            block_get_click_y2 = int((mouse_y-local_y)/green.get_height())
                             if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
                                 for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].attack_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].attack_range):
                                     if y < sangvisFerris_data[enemies].y:
                                         for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)):
                                             if blocks_setting[theMap[y][x]][1] == True:
-                                                printf(green,(x*green.get_width(),y*green.get_height()))
+                                                printf(green,(x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                                             else:
-                                                printf(red,(x*green.get_width(),y*green.get_height()))
+                                                printf(red,(x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                                     else:
                                         for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)):
                                             if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
                                                 pass
                                             else:
                                                 if blocks_setting[theMap[y][x]][1] == True:
-                                                    printf(green,(x*green.get_width(),y*green.get_height()))
+                                                    printf(green,(x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                                                 else:
-                                                    printf(red,(x*green.get_width(),y*green.get_height()))
+                                                    printf(red,(x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                         action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
                 elif sangvisFerris_data[enemies].current_hp<=0:
                     action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
@@ -580,6 +579,31 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 sangvisFerris_data.pop(the_dead_one)
             the_dead_one=""
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
+
+        if pygame.mouse.get_pressed()[1]:
+            mouse_x,mouse_y=pygame.mouse.get_pos()
+            if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
+                mouse_move_temp_x = mouse_x
+                mouse_move_temp_y = mouse_y
+            else:
+                if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
+                    if mouse_move_temp_x > mouse_x:
+                        if local_x+mouse_move_temp_x-mouse_x <= 0:
+                            local_x += mouse_move_temp_x-mouse_x
+                    elif mouse_move_temp_x < mouse_x:
+                        if local_x-(mouse_x - mouse_move_temp_x) >= -window_x:
+                            local_x -= mouse_x-mouse_move_temp_x
+                    if mouse_move_temp_y > mouse_y:
+                        if local_y+mouse_move_temp_y-mouse_y <= 0:
+                            local_y += mouse_move_temp_y-mouse_y
+                    elif mouse_move_temp_y < mouse_y:
+                        if local_y-(mouse_y-mouse_move_temp_y) >= -window_y:
+                            local_y -= mouse_y-mouse_move_temp_y
+                    mouse_move_temp_x = mouse_x
+                    mouse_move_temp_y = mouse_y
+        else:
+            mouse_move_temp_x = -1
+            mouse_move_temp_y = -1
 
         #加载雪花
         for i in range(len(all_snow_on_screen)):
