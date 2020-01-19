@@ -152,17 +152,17 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     move_button_txt = selectMenuFont.render(selectMenuButtons_dic["move"], True, (105,105,105))
     skill_button_txt = selectMenuFont.render(selectMenuButtons_dic["skill"], True, (105,105,105))
     reload_button_txt = selectMenuFont.render(selectMenuButtons_dic["reload"], True, (105,105,105))
-    #加载选择菜单的图片
-    select_menu_button = loadImg("Assets/img/UI/menu.png", block_x_length*2, block_x_length/1.3)
     #加载结束回合的图片
     end_round_button = loadImg("Assets/img/UI/endRound.png", block_x_length*2*28/15, block_x_length*2)
+    #加载选择菜单的图片
+    select_menu_button = loadImg("Assets/img/UI/menu.png", block_x_length*2, block_x_length/1.3)
     #加载子弹图片
     bullet_img = loadImg("Assets/img/UI/bullet.png", block_x_length/6, block_y_length/12)
     bullets_list = []
     #加载血条
     hp_empty = loadImg("Assets/img/UI/hp_empty.png", block_x_length, block_y_length/5)
     hp_red = loadImg("Assets/img/UI/hp_red.png", block_x_length, block_y_length/5)
-    #绿色方块/方块标准
+    #各色方块/方块标准
     green = loadImg("Assets/img/UI/green.png", block_x_length, block_y_length).convert_alpha()
     green.set_alpha(100)
     red = loadImg("Assets/img/UI/red.png", block_x_length, block_y_length).convert_alpha()
@@ -170,8 +170,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     black = loadImg("Assets/img/UI/black.png", block_x_length, block_y_length).convert_alpha()
     black.set_alpha(100)
     new_block_type = 0
-    per_block_width = green.get_width()
-    per_block_height = green.get_height()
     
     #章节标题淡出
     for t in range(250,200,-1):
@@ -245,12 +243,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        print("local_x:",local_x)
-                        print("local_y:",local_y)
-                        print(0-(len(map_img_list[0]))*per_block_width+window_x)
-                        print(0-(len(map_img_list))*per_block_height+window_y)
                         exit()
-                        
                 elif event.type == MOUSEBUTTONDOWN:
                     if pygame.mouse.get_pressed()[0]:
                         if isGetClick(select_menu_button,(window_x-select_menu_button.get_width()*1.5,window_y-300))==True:
@@ -269,6 +262,27 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                 else:
                                     green_hide = True
                                     the_character_get_click = ""
+                    if event.button == 4:
+                        block_x_length *= 1.5
+                        block_y_length *= 1.5
+                        green = pygame.transform.scale(green, (int(block_x_length), int(block_y_length)))
+                        red = pygame.transform.scale(red, (int(block_x_length), int(block_y_length)))
+                        black = pygame.transform.scale(black, (int(block_x_length), int(block_y_length)))
+                        for jiaose in characters_data:
+                            characters_data[jiaose].gif = character_gif_dic(jiaose,int(block_x_length),int(block_y_length))
+                        for enemy in sangvisFerris_data:
+                            sangvisFerris_data[enemy].gif = character_gif_dic(enemy,int(block_x_length),int(block_y_length),"sangvisFerri")
+                    if event.button == 5:
+                        block_x_length /= 1.5
+                        block_y_length /= 1.5
+                        green = pygame.transform.scale(green, (int(block_x_length), int(block_y_length)))
+                        red = pygame.transform.scale(red, (int(block_x_length), int(block_y_length)))
+                        black = pygame.transform.scale(black, (int(block_x_length), int(block_y_length)))
+                        for jiaose in characters_data:
+                            characters_data[jiaose].gif = character_gif_dic(jiaose,int(block_x_length),int(block_y_length))
+                        for enemy in sangvisFerris_data:
+                            sangvisFerris_data[enemy].gif = character_gif_dic(enemy,int(block_x_length),int(block_y_length),"sangvisFerri")
+
             #显示选择菜单
             if green_hide == "SelectMenu":
                 displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen,local_x,local_y)
