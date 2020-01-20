@@ -79,7 +79,7 @@ def character_creator(character_name,action,block_x_length,block_y_length,kind="
         files_amount+=1
     for i in range(files_amount):
         path = "Assets/img/"+kind+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_"+str(i)+".png"
-        character_gif.append(pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (int(block_x_length*2), int(block_y_length*2))))
+        character_gif.append(pygame.image.load(os.path.join(path)).convert_alpha())
     return [character_gif,files_amount]
 
 #动图字典制作模块：接受一个友方角色名，返回对应的动图字典：

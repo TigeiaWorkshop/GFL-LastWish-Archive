@@ -46,6 +46,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         if ifFlip == True:
             printf(pygame.transform.flip(img_of_char,True,False),(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2),screen,local_x,local_y)
         else:
+            img_of_char = pygame.transform.scale(img_of_char, (int(block_x_length*2), int(block_y_length*2)))
             printf(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2),screen,local_x,local_y)
         if percent_of_hp>0:
             printf(hp_empty,(x*green.get_width(),y*green.get_height()*0.98),screen,local_x,local_y)
@@ -89,9 +90,9 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         blocks_setting = reader["blocks"]
     map_img_list = randomBlock(theMap,blocks_setting)
     #一个方块的长
-    block_x_length = window_x/block_x*2
+    block_x_length = window_x/block_x
     #一个方块的高
-    block_y_length = window_y/block_y*2
+    block_y_length = window_y/block_y
 
     #章节标题显示
     the_black = loadImg("Assets/img/UI/black.png",window_x,window_y)
@@ -203,17 +204,20 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     #行动点数
     action_points = len(characters_name_list)*7
     
+    #放大倍数
+    zoom_in = 1
+
     #计算光亮区域
     def calculate_darkness():
         light_area = []
         for each_chara in characters_data:
-            for y in range(characters_data[each_chara].y-characters_data[each_chara].attack_range,characters_data[each_chara].y+characters_data[each_chara].attack_range):
+            for y in range(int(characters_data[each_chara].y-characters_data[each_chara].attack_range),int(characters_data[each_chara].y+characters_data[each_chara].attack_range)):
                 if y < characters_data[each_chara].y:
-                    for x in range(characters_data[each_chara].x-characters_data[each_chara].attack_range-(y-characters_data[each_chara].y)+1,characters_data[each_chara].x+characters_data[each_chara].attack_range+(y-characters_data[each_chara].y)):
+                    for x in range(int(characters_data[each_chara].x-characters_data[each_chara].attack_range-(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+characters_data[each_chara].attack_range+(y-characters_data[each_chara].y))):
                         if (x,y) not in light_area:
                             light_area.append((x,y))
                 else:
-                    for x in range(characters_data[each_chara].x-characters_data[each_chara].attack_range+(y-characters_data[each_chara].y)+1,characters_data[each_chara].x+characters_data[each_chara].attack_range-(y-characters_data[each_chara].y)):
+                    for x in range(int(characters_data[each_chara].x-characters_data[each_chara].attack_range+(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+characters_data[each_chara].attack_range-(y-characters_data[each_chara].y))):
                         if (x,y) not in light_area:
                             light_area.append((x,y))
         return light_area
@@ -263,26 +267,21 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                     green_hide = True
                                     the_character_get_click = ""
                     if event.button == 4:
-                        block_x_length *= 1.5
-                        block_y_length *= 1.5
+                        if zoom_in < 2:
+                            zoom_in += 0.25
+                        block_x_length = window_x/block_x*zoom_in
+                        block_y_length = window_y/block_y*zoom_in
                         green = pygame.transform.scale(green, (int(block_x_length), int(block_y_length)))
                         red = pygame.transform.scale(red, (int(block_x_length), int(block_y_length)))
-                        black = pygame.transform.scale(black, (int(block_x_length), int(block_y_length)))
-                        for jiaose in characters_data:
-                            characters_data[jiaose].gif = character_gif_dic(jiaose,int(block_x_length),int(block_y_length))
-                        for enemy in sangvisFerris_data:
-                            sangvisFerris_data[enemy].gif = character_gif_dic(enemy,int(block_x_length),int(block_y_length),"sangvisFerri")
+                        black = pygame.transform.scale(black, (math.ceil(block_x_length), math.ceil(block_y_length)))
                     if event.button == 5:
-                        block_x_length /= 1.5
-                        block_y_length /= 1.5
+                        if zoom_in > 1:
+                            zoom_in -= 0.25
+                        block_x_length = window_x/block_x*zoom_in
+                        block_y_length = window_y/block_y*zoom_in
                         green = pygame.transform.scale(green, (int(block_x_length), int(block_y_length)))
                         red = pygame.transform.scale(red, (int(block_x_length), int(block_y_length)))
-                        black = pygame.transform.scale(black, (int(block_x_length), int(block_y_length)))
-                        for jiaose in characters_data:
-                            characters_data[jiaose].gif = character_gif_dic(jiaose,int(block_x_length),int(block_y_length))
-                        for enemy in sangvisFerris_data:
-                            sangvisFerris_data[enemy].gif = character_gif_dic(enemy,int(block_x_length),int(block_y_length),"sangvisFerri")
-
+                        black = pygame.transform.scale(black, (math.ceil(block_x_length), math.ceil(block_y_length)))
             #显示选择菜单
             if green_hide == "SelectMenu":
                 displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen,local_x,local_y)
@@ -318,7 +317,21 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     the_moving_range=[]
                     for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
                         if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
-                            printf(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
+                            print_green = True
+                            for enemies in sangvisFerris_data:
+                                if sangvisFerris_data[enemies].x == x and sangvisFerris_data[enemies].y == characters_data[the_character_get_click].y:
+                                    print_green = False
+                                    break
+                            #如果该方块还是green则需要二次判断
+                            if print_green == True:
+                                for every_chara in characters_data:
+                                    if characters_data[every_chara].x == x and characters_data[every_chara].y == characters_data[the_character_get_click].y:
+                                        print_green = False
+                                        break
+                            if print_green == True:
+                                printf(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
+                            else:
+                                printf(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
                         else:
                             the_moving_range.append(x-1)
                             for x_red in range(x,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
@@ -329,7 +342,21 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                             
                     for x in range(characters_data[the_character_get_click].x-1,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
                         if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
-                            printf(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
+                            print_green = True
+                            for enemies in sangvisFerris_data:
+                                if sangvisFerris_data[enemies].x == x and sangvisFerris_data[enemies].y == characters_data[the_character_get_click].y:
+                                    print_green = False
+                                    break
+                            #如果该方块还是green则需要二次判断
+                            if print_green == True:
+                                for every_chara in characters_data:
+                                    if characters_data[every_chara].x == x and characters_data[every_chara].y == characters_data[the_character_get_click].y:
+                                        print_green = False
+                                        break
+                            if print_green == True:
+                                printf(green,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
+                            else:
+                                printf(red,(x*green.get_width(),characters_data[the_character_get_click].y*green.get_height()),screen,local_x,local_y)
                         else:
                             the_moving_range.append(x+1)
                             for x_red in range(x,characters_data[the_character_get_click].x-characters_data[the_character_get_click].move_range-1,-1):
@@ -339,7 +366,21 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                             the_moving_range.append(x)
                     for y in range(characters_data[the_character_get_click].y+1,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
                         if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
-                            printf(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
+                            print_green = True
+                            for enemies in sangvisFerris_data:
+                                if sangvisFerris_data[enemies].x == characters_data[the_character_get_click].x and sangvisFerris_data[enemies].y == y:
+                                    print_green = False
+                                    break
+                            #如果该方块还是green则需要二次判断
+                            if print_green == True:
+                                for every_chara in characters_data:
+                                    if characters_data[every_chara].x == characters_data[the_character_get_click].x and characters_data[every_chara].y == y:
+                                        print_green = False
+                                        break
+                            if print_green == True:
+                                printf(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
+                            else:
+                                printf(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                         else:
                             the_moving_range.append(y-1)
                             for y_red in range(y,characters_data[the_character_get_click].y+characters_data[the_character_get_click].move_range+1):
@@ -349,7 +390,21 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                             the_moving_range.append(y)
                     for y in range(characters_data[the_character_get_click].y-1,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
                         if blocks_setting[theMap[y][characters_data[the_character_get_click].x]][1] == True:
-                            printf(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
+                            print_green = True
+                            for enemies in sangvisFerris_data:
+                                if sangvisFerris_data[enemies].x == characters_data[the_character_get_click].x and sangvisFerris_data[enemies].y == y:
+                                    print_green = False
+                                    break
+                            #如果该方块还是green则需要二次判断
+                            if print_green == True:
+                                for every_chara in characters_data:
+                                    if characters_data[every_chara].x == characters_data[the_character_get_click].x and characters_data[every_chara].y == y:
+                                        print_green = False
+                                        break
+                            if print_green == True:
+                                printf(green,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
+                            else:
+                                printf(red,(characters_data[the_character_get_click].x*green.get_width(),y*green.get_height()),screen,local_x,local_y)
                         else:
                             the_moving_range.append(y+1)
                             for y_red in range(y,characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range-1,-1):
@@ -358,13 +413,11 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         if(y == characters_data[the_character_get_click].y-characters_data[the_character_get_click].move_range):
                             the_moving_range.append(y)
                     if the_moving_range[0]>=block_get_click_x>=the_moving_range[1] and characters_data[the_character_get_click].y == block_get_click_y:
-                        temp_x = characters_data[the_character_get_click].x
                         temp_max = block_get_click_x
                         isWaiting = "LEFTANDRIGHT"
                         green_hide = True
                         action_points -= abs(block_get_click_x-characters_data[the_character_get_click].x)
                     elif the_moving_range[2]>=block_get_click_y>=the_moving_range[3] and characters_data[the_character_get_click].x == block_get_click_x:
-                        temp_y = characters_data[the_character_get_click].y
                         temp_max = block_get_click_y
                         isWaiting = "TOPANDBOTTOM"
                         green_hide = True
@@ -412,44 +465,39 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 #被点击的角色动画
                 if isWaiting == "LEFTANDRIGHT":
                     green_hide=True
-                    if temp_x < temp_max:
-                        temp_x+=0.1
-                        action_displayer(the_character_get_click,"move",temp_x,characters_data[the_character_get_click].y)
-                        if temp_x >= temp_max:
+                    if characters_data[the_character_get_click].x < temp_max:
+                        characters_data[the_character_get_click].x+=0.1
+                        action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                        if characters_data[the_character_get_click].x >= temp_max:
                             characters_data[the_character_get_click].x = temp_max
-                            #endOfPlayerRound()
                             light_area = calculate_darkness()
                             isWaiting =True
                             the_character_get_click = ""
-                    elif temp_x > temp_max:
-                        temp_x-=0.1
-                        action_displayer(characters_data[the_character_get_click].name,"move",temp_x,characters_data[the_character_get_click].y,True,True)
-                        if temp_x <= temp_max:
+                    elif characters_data[the_character_get_click].x > temp_max:
+                        characters_data[the_character_get_click].x-=0.1
+                        action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,True,True)
+                        if characters_data[the_character_get_click].x <= temp_max:
                             characters_data[the_character_get_click].x = temp_max
-                            #endOfPlayerRound()
-                            light_area = calculate_darkness()
                             isWaiting =True
                             the_character_get_click = ""
+                    light_area = calculate_darkness()
                 elif isWaiting == "TOPANDBOTTOM":
                     green_hide=True
-                    if temp_y < temp_max:
-                        temp_y+=0.1
-                        action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,temp_y)
-                        if temp_y >= temp_max:
+                    if characters_data[the_character_get_click].y < temp_max:
+                        characters_data[the_character_get_click].y+=0.1
+                        action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                        if characters_data[the_character_get_click].y >= temp_max:
                             characters_data[the_character_get_click].y = temp_max
-                            #endOfPlayerRound()
-                            light_area = calculate_darkness()
                             isWaiting =True
                             the_character_get_click = ""
-                    elif temp_y > temp_max:
-                        temp_y-=0.1
-                        action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,temp_y)
-                        if temp_y <= temp_max:
+                    elif characters_data[the_character_get_click].y > temp_max:
+                        characters_data[the_character_get_click].y-=0.1
+                        action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                        if characters_data[the_character_get_click].y <= temp_max:
                             characters_data[the_character_get_click].y = temp_max
-                            #endOfPlayerRound()
-                            light_area = calculate_darkness()
                             isWaiting =True
                             the_character_get_click = ""
+                    light_area = calculate_darkness()
                 elif isWaiting == "ATTACKING":
                     green_hide=True
                     if action_choice == "attack":
@@ -516,10 +564,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 #if round != len(object_to_play):
                     #resetEnemyMovingData()
             else:
-                green_hide = True
-                for every_chara in characters:
-                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
-                
                 if direction_to_move == 0:
                     action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
                 elif direction_to_move == 2:
@@ -543,11 +587,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         #resetEnemyMovingData()
                 elif how_many_moved < how_many_to_move:
                     how_many_moved+=0.1
-        """
-        while pygame.mixer.music.get_busy() != 1:
-            pygame.mixer.music.load("Assets/music/"+bg_music)
-            pygame.mixer.music.play(loops=9999, start=0.0)
-        """
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         # 我方角色动画
         for every_chara in characters_data:
@@ -627,9 +666,15 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             if all_snow_on_screen[i].x < 0 or all_snow_on_screen[i].y > 1080:
                 all_snow_on_screen[i].y = 0
                 all_snow_on_screen[i].x = random.randint(1,window_x*1.5)
-        
-        points_left_txt = fontRender("剩余行动值："+str(action_points), "white")
 
+        #加载音乐
+        """
+        while pygame.mixer.music.get_busy() != 1:
+            pygame.mixer.music.load("Assets/music/"+bg_music)
+            pygame.mixer.music.play(loops=9999, start=0.0)
+        """
+
+        points_left_txt = fontRender("剩余行动值："+str(action_points), "white")
         printf(points_left_txt,(0,0),screen)
 
         #画面更新
