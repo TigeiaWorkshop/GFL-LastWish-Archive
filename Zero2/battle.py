@@ -38,7 +38,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         if percent_of_hp<0:
             percent_of_hp=0
 
-        img_of_char = gif_dic[action][0][0][gif_dic[action][1]]
+        img_of_char = pygame.transform.scale(gif_dic[action][0][0][gif_dic[action][1]], (int(block_x_length*2), int(block_y_length*2)))
         if hidden == True:
             img_of_char.set_alpha(130)
         else:
@@ -46,7 +46,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         if ifFlip == True:
             printf(pygame.transform.flip(img_of_char,True,False),(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2),screen,local_x,local_y)
         else:
-            img_of_char = pygame.transform.scale(img_of_char, (int(block_x_length*2), int(block_y_length*2)))
             printf(img_of_char,(x*green.get_width()-green.get_width()/2,y*green.get_height()-green.get_height()/2),screen,local_x,local_y)
         if percent_of_hp>0:
             printf(hp_empty,(x*green.get_width(),y*green.get_height()*0.98),screen,local_x,local_y)
@@ -171,7 +170,11 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     black = loadImg("Assets/img/UI/black.png", block_x_length, block_y_length).convert_alpha()
     black.set_alpha(100)
     new_block_type = 0
-    
+    #文字
+    your_round_txt = fontRender("你的回合", "white")
+    enemy_round_txt = fontRender("敌方回合", "white")
+    text_of_endround_move = 0
+    text_of_endround_alpha = 510
     #章节标题淡出
     for t in range(250,200,-1):
         for i in range(len(map_img_list)):
@@ -196,11 +199,12 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     how_many_moved = 0
     isWaiting = True
     the_dead_one = ""
-    whose_round = "player"
+    whose_round = "sangvisFerrisToPlayer"
     local_x = 0
     local_y = 0
     mouse_move_temp_x = -1
     mouse_move_temp_y = -1
+    total_rounds = 1
     #行动点数
     action_points = len(characters_name_list)*7
     
@@ -238,11 +242,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 if (x,y) not in light_area:
                     printf(black,(x*block_x_length,y*block_y_length),screen,local_x,local_y,)
         
-        #加载结束回合的按钮
-        printf(end_round_button,(window_x-select_menu_button.get_width()*1.5,window_y-300),screen)
-
         #加载玩家回合
         if whose_round == "player":
+            #加载结束回合的按钮
+            printf(end_round_button,(window_x-select_menu_button.get_width()*1.5,window_y-400),screen)
             #玩家输入按键判定
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
@@ -250,7 +253,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         exit()
                 elif event.type == MOUSEBUTTONDOWN:
                     if pygame.mouse.get_pressed()[0]:
-                        if isGetClick(select_menu_button,(window_x-select_menu_button.get_width()*1.5,window_y-300))==True:
+                        if isGetClick(end_round_button,(window_x-select_menu_button.get_width()*1.5,window_y-400))==True:
                             whose_round = "playerToSangvisFerris"
                             break
                         #获取角色坐标
@@ -536,14 +539,35 @@ def battle(chapter_name,window_x,window_y,screen,lang):
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
-            for enemies in sangvisFerris_data:
-                action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
-            for every_chara in characters:
-                action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        exit()
+            
+            text_now_total_rounds = fontRender("第"+str(total_rounds)+"回合", "white")
+            if text_of_endround_move < (window_x-your_round_txt.get_width()*2)/2:
+                text_of_endround_move += green.get_width()*2
+            if text_of_endround_move >= (window_x-your_round_txt.get_width()*2)/2-30:
+                text_now_total_rounds.set_alpha(text_of_endround_alpha)
+                your_round_txt.set_alpha(text_of_endround_alpha)
+                enemy_round_txt.set_alpha(text_of_endround_alpha)
+                text_of_endround_alpha -= 5
+            
+            printf(text_now_total_rounds,(text_of_endround_move,(window_y-your_round_txt.get_height()*2.5)/2),screen)
+            if whose_round == "sangvisFerrisToPlayer":
+                printf(your_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
             if whose_round == "playerToSangvisFerris":
-                whose_round = "sangvisFerris"
-            elif whose_round == "sangvisFerrisToPlayer":
-                whose_round = "player"
+                printf(enemy_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
+            if text_of_endround_alpha <=0:
+                if whose_round == "playerToSangvisFerris":
+                    whose_round = "sangvisFerris"
+                elif whose_round == "sangvisFerrisToPlayer":
+                    whose_round = "player"
+                text_of_endround_alpha = 510
+                text_of_endround_move = 0
+                text_now_total_rounds.set_alpha(text_of_endround_alpha)
+                your_round_txt.set_alpha(text_of_endround_alpha)
+                enemy_round_txt.set_alpha(text_of_endround_alpha)
         """
         #检测所有敌人是否都已经被消灭
         for i in range(len(sangvisFerris_name_list)):
@@ -644,13 +668,13 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         if local_x+mouse_move_temp_x-mouse_x <= 0:
                             local_x += mouse_move_temp_x-mouse_x
                     elif mouse_move_temp_x < mouse_x:
-                        if local_x-(mouse_x - mouse_move_temp_x) >= -window_x:
+                        if local_x-(mouse_x - mouse_move_temp_x) >= 0 - green.get_width()*len(map_img_list[0]) + window_x:
                             local_x -= mouse_x-mouse_move_temp_x
                     if mouse_move_temp_y > mouse_y:
                         if local_y+mouse_move_temp_y-mouse_y <= 0:
                             local_y += mouse_move_temp_y-mouse_y
                     elif mouse_move_temp_y < mouse_y:
-                        if local_y-(mouse_y-mouse_move_temp_y) >= -window_y:
+                        if local_y-(mouse_y-mouse_move_temp_y) >= 0 - green.get_height()*len(map_img_list) + window_y:
                             local_y -= mouse_y-mouse_move_temp_y
                     mouse_move_temp_x = mouse_x
                     mouse_move_temp_y = mouse_y
