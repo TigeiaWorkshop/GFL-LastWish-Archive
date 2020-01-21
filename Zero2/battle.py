@@ -155,7 +155,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     #加载结束回合的图片
     end_round_button = loadImg("Assets/img/UI/endRound.png", block_x_length*2*28/15, block_x_length*2)
     #加载选择菜单的图片
-    select_menu_button = loadImg("Assets/img/UI/menu.png", block_x_length*2, block_x_length/1.3)
+    select_menu_button_original = loadImg("Assets/img/UI/menu.png")
     #加载子弹图片
     bullet_img = loadImg("Assets/img/UI/bullet.png", block_x_length/6, block_y_length/12)
     bullets_list = []
@@ -205,6 +205,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     mouse_move_temp_x = -1
     mouse_move_temp_y = -1
     total_rounds = 1
+    enemies_in_control_id= 0
     #行动点数
     action_points = len(characters_name_list)*7
     
@@ -245,7 +246,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         #加载玩家回合
         if whose_round == "player":
             #加载结束回合的按钮
-            printf(end_round_button,(window_x-select_menu_button.get_width()*1.5,window_y-400),screen)
+            printf(end_round_button,(window_x-end_round_button.get_width()*2,window_y-400),screen)
             #玩家输入按键判定
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
@@ -253,7 +254,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         exit()
                 elif event.type == MOUSEBUTTONDOWN:
                     if pygame.mouse.get_pressed()[0]:
-                        if isGetClick(end_round_button,(window_x-select_menu_button.get_width()*1.5,window_y-400))==True:
+                        if isGetClick(end_round_button,(window_x-end_round_button.get_width()*2,window_y-400))==True:
                             whose_round = "playerToSangvisFerris"
                             break
                         #获取角色坐标
@@ -287,6 +288,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         black = pygame.transform.scale(black, (math.ceil(block_x_length), math.ceil(block_y_length)))
             #显示选择菜单
             if green_hide == "SelectMenu":
+                select_menu_button = pygame.transform.scale(select_menu_button_original, (int(block_x_length*2), int(block_x_length/1.3)))
                 displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen,local_x,local_y)
                 displayInCenter(move_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()+select_menu_button.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height(),screen,local_x,local_y)
                 displayInCenter(skill_button_txt,select_menu_button,characters_data[the_character_get_click].x*green.get_width()-block_x_length*0.5,characters_data[the_character_get_click].y*green.get_height()-select_menu_button.get_height()-block_x_length*0.5,screen,local_x,local_y)
@@ -582,35 +584,28 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑中间检测区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
         #敌方回合
         if whose_round == "sangvisFerris":
-        
-            if sangvisFerris_data[object_to_play[round]].current_hp<=0:
-                round += 1
-                #if round != len(object_to_play):
-                    #resetEnemyMovingData()
-            else:
+        enemies_in_control = sangvisFerris_data[sangvisFerris_name_list[enemies_in_control_id]]
+            if direction_to_move == 0:
+                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+            elif direction_to_move == 2:
+                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x+how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+            elif direction_to_move == 1:
+                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y-how_many_moved)
+            elif direction_to_move == 3:
+                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y+how_many_moved)
+            if how_many_moved >= how_many_to_move:
                 if direction_to_move == 0:
-                    action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+                    sangvisFerris_data[object_to_play[round]].x-=how_many_to_move
                 elif direction_to_move == 2:
-                    action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x+how_many_moved,sangvisFerris_data[object_to_play[round]].y)
+                    sangvisFerris_data[object_to_play[round]].x+=how_many_to_move
                 elif direction_to_move == 1:
-                    action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y-how_many_moved)
+                    sangvisFerris_data[object_to_play[round]].y-=how_many_to_move
                 elif direction_to_move == 3:
-                    action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y+how_many_moved)
-
-                if how_many_moved >= how_many_to_move:
-                    if direction_to_move == 0:
-                        sangvisFerris_data[object_to_play[round]].x-=how_many_to_move
-                    elif direction_to_move == 2:
-                        sangvisFerris_data[object_to_play[round]].x+=how_many_to_move
-                    elif direction_to_move == 1:
-                        sangvisFerris_data[object_to_play[round]].y-=how_many_to_move
-                    elif direction_to_move == 3:
-                        sangvisFerris_data[object_to_play[round]].y+=how_many_to_move
-                    round += 1
-                    #if round != len(object_to_play): 
-                        #resetEnemyMovingData()
-                elif how_many_moved < how_many_to_move:
-                    how_many_moved+=0.1
+                    sangvisFerris_data[object_to_play[round]].y+=how_many_to_move
+                total_rounds += 1
+            elif how_many_moved < how_many_to_move:
+                how_many_moved+=0.1
+        
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         # 我方角色动画
         for every_chara in characters_data:
