@@ -253,12 +253,12 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     if event.key == K_ESCAPE:
                         exit()
                 elif event.type == MOUSEBUTTONDOWN:
+                    mouse_x,mouse_y=pygame.mouse.get_pos()
                     if pygame.mouse.get_pressed()[0]:
                         if isGetClick(end_round_button,(window_x-end_round_button.get_width()*2,window_y-400))==True:
                             whose_round = "playerToSangvisFerris"
                             break
                         #获取角色坐标
-                        mouse_x,mouse_y=pygame.mouse.get_pos()
                         block_get_click_x = int((mouse_x-local_x)/green.get_width())
                         block_get_click_y = int((mouse_y-local_y)/green.get_height())
                         for key in characters_data:
@@ -273,19 +273,27 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     if event.button == 4:
                         if zoom_in < 2:
                             zoom_in += 0.25
-                        block_x_length = window_x/block_x*zoom_in
-                        block_y_length = window_y/block_y*zoom_in
-                        green = pygame.transform.scale(green, (int(block_x_length), int(block_y_length)))
-                        red = pygame.transform.scale(red, (int(block_x_length), int(block_y_length)))
-                        black = pygame.transform.scale(black, (math.ceil(block_x_length), math.ceil(block_y_length)))
+                            block_x_length = window_x/block_x*zoom_in
+                            block_y_length = window_y/block_y*zoom_in
+                            local_x -= window_x/block_x*0.25*len(map_img_list[0])
+                            local_y -= window_y/block_y*0.25*len(map_img_list)
+                            green = pygame.transform.scale(green, (int(block_x_length), int(block_y_length)))
+                            red = pygame.transform.scale(red, (int(block_x_length), int(block_y_length)))
+                            black = pygame.transform.scale(black, (math.ceil(block_x_length), math.ceil(block_y_length)))
                     if event.button == 5:
                         if zoom_in > 1:
                             zoom_in -= 0.25
-                        block_x_length = window_x/block_x*zoom_in
-                        block_y_length = window_y/block_y*zoom_in
-                        green = pygame.transform.scale(green, (int(block_x_length), int(block_y_length)))
-                        red = pygame.transform.scale(red, (int(block_x_length), int(block_y_length)))
-                        black = pygame.transform.scale(black, (math.ceil(block_x_length), math.ceil(block_y_length)))
+                            block_x_length = window_x/block_x*zoom_in
+                            block_y_length = window_y/block_y*zoom_in
+                            local_x += window_x/block_x*0.25*len(map_img_list[0])
+                            if local_x >0:
+                                local_x=0
+                            local_y += window_y/block_y*0.25*len(map_img_list)
+                            if local_y>0:
+                                local_y = 0
+                            green = pygame.transform.scale(green, (int(block_x_length), int(block_y_length)))
+                            red = pygame.transform.scale(red, (int(block_x_length), int(block_y_length)))
+                            black = pygame.transform.scale(black, (math.ceil(block_x_length), math.ceil(block_y_length)))
             #显示选择菜单
             if green_hide == "SelectMenu":
                 select_menu_button = pygame.transform.scale(select_menu_button_original, (int(block_x_length*2), int(block_x_length/1.3)))
@@ -584,7 +592,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑中间检测区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
         #敌方回合
         if whose_round == "sangvisFerris":
-        enemies_in_control = sangvisFerris_data[sangvisFerris_name_list[enemies_in_control_id]]
+            enemies_in_control = sangvisFerris_data[sangvisFerris_name_list[enemies_in_control_id]]
             if direction_to_move == 0:
                 action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
             elif direction_to_move == 2:
@@ -679,7 +687,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
 
         #加载雪花
         for i in range(len(all_snow_on_screen)):
-            printf(all_snow_on_screen[i].img,(all_snow_on_screen[i].x,all_snow_on_screen[i].y),screen)
+            printf(all_snow_on_screen[i].img,(all_snow_on_screen[i].x+local_x,all_snow_on_screen[i].y+local_y),screen)
             all_snow_on_screen[i].x -= 10
             all_snow_on_screen[i].y += 20
             if all_snow_on_screen[i].x < 0 or all_snow_on_screen[i].y > 1080:
