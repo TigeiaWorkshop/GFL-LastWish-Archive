@@ -19,6 +19,11 @@ chapter: {
     c8: "chapter8",
     back: "Back",
     }
+Battle_UI: {
+    yourRound: "Your Round",
+    enemyRound: "enemyRound",
+    numRound: "NaN Round"
+}
 select_menu: {
     attack: "Attack",
     move: "Move",

@@ -19,6 +19,11 @@ chapter: {
     c8: "第八章",
     back: "返回",
     }
+Battle_UI: {
+    yourRound: "你的回合",
+    enemyRound: "敌方回合",
+    numRound: "第NaN回合"
+}
 select_menu: {
     attack: "攻击",
     move: "移动",
