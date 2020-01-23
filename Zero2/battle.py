@@ -10,7 +10,7 @@ from pygame.locals import *
 from Zero2.basic import *
 from Zero2.characterDataManager import *
 from Zero2.map import *
-
+from Zero2.AI import *
 
 def battle(chapter_name,window_x,window_y,screen,lang):
     #卸载音乐
@@ -175,7 +175,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     new_block_type = 0
     #文字
     text_of_endround_move = 0
-    text_of_endround_alpha = 510
+    text_of_endround_alpha = 400
     #章节标题淡出
     for t in range(250,200,-1):
         for i in range(len(map_img_list)):
@@ -207,6 +207,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     mouse_move_temp_y = -1
     total_rounds = 1
     enemies_in_control_id= 0
+    the_character_get_click_moving_range = 0
     #行动点数
     action_points = len(characters_name_list)*7
     #放大倍数
@@ -315,6 +316,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 #显示移动范围
                 if action_choice == "move":
                     the_moving_range=[]
+                    if characters_data[the_character_get_click].move_range < action_points:
+                        the_character_get_click_moving_range = characters_data[the_character_get_click].move_range
+                    elif characters_data[the_character_get_click].move_range > action_points:
+                        the_character_get_click_moving_range = action_points
                     for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
                         if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
                             print_green = True
@@ -560,7 +565,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     whose_round = "sangvisFerris"
                 elif whose_round == "sangvisFerrisToPlayer":
                     whose_round = "player"
-                text_of_endround_alpha = 510
+                text_of_endround_alpha = 400
                 text_of_endround_move = 0
                 text_now_total_rounds.set_alpha(text_of_endround_alpha)
                 your_round_txt.set_alpha(text_of_endround_alpha)
@@ -580,24 +585,32 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         #敌方回合
         if whose_round == "sangvisFerris":
             enemies_in_control = sangvisFerris_data[sangvisFerris_name_list[enemies_in_control_id]]
-            if direction_to_move == 0:
-                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x-how_many_moved,sangvisFerris_data[object_to_play[round]].y)
-            elif direction_to_move == 2:
-                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x+how_many_moved,sangvisFerris_data[object_to_play[round]].y)
-            elif direction_to_move == 1:
-                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y-how_many_moved)
-            elif direction_to_move == 3:
-                action_displayer(object_to_play[round],"move",sangvisFerris_data[object_to_play[round]].x,sangvisFerris_data[object_to_play[round]].y+how_many_moved)
+            enemy_action = AI(enemies_in_control,the_map_data,characters_data,sangvisFerris_data)
+            if enemy_action == 0:
+                action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x+how_many_moved,sangvisFerris_data[enemies_in_control].y)
+            elif enemy_action == 1:
+                action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x+how_many_moved,sangvisFerris_data[enemies_in_control].y)
+            elif enemy_action == 2:
+                action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y-how_many_moved)
+            elif enemy_action == 3:
+                action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y+how_many_moved)
+            elif enemy_action == 4:
+                action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x-how_many_moved,sangvisFerris_data[enemies_in_control].y)
             if how_many_moved >= how_many_to_move:
-                if direction_to_move == 0:
-                    sangvisFerris_data[object_to_play[round]].x-=how_many_to_move
-                elif direction_to_move == 2:
-                    sangvisFerris_data[object_to_play[round]].x+=how_many_to_move
-                elif direction_to_move == 1:
-                    sangvisFerris_data[object_to_play[round]].y-=how_many_to_move
-                elif direction_to_move == 3:
-                    sangvisFerris_data[object_to_play[round]].y+=how_many_to_move
-                total_rounds += 1
+                if enemy_action == 0:
+                    sangvisFerris_data[enemies_in_control].x-=how_many_to_move
+                elif enemy_action == 2:
+                    sangvisFerris_data[enemies_in_control].x+=how_many_to_move
+                elif enemy_action == 1:
+                    sangvisFerris_data[enemies_in_control].y-=how_many_to_move
+                elif enemy_action == 3:
+                    sangvisFerris_data[enemies_in_control].y+=how_many_to_move
+                if enemies_in_control_id == len(sangvisFerris_name_list) - 1:
+                    total_rounds += 1
+                    whose_round == "playerToSangvisFerris"
+                    enemies_in_control_id = 0
+                else:
+                    enemies_in_control_id += 1
             elif how_many_moved < how_many_to_move:
                 how_many_moved+=0.1
         
