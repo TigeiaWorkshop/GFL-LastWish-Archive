@@ -75,7 +75,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     #读取并初始化章节信息
     with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
         chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
-        chapter_title = chapter_info["title"]
         block_y = len(chapter_info["map"])
         block_x = len(chapter_info["map"][0])
         characters = chapter_info["character"]
@@ -88,6 +87,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
         blocks_setting = chapter_info["blocks"]
     
+    with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
+        chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
+        chapter_title = chapter_info["title"]
+
     map_img_list = randomBlock(theMap,blocks_setting)
     #一个方块的长
     perBlockWidth = window_x/block_x
@@ -163,12 +166,12 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     hp_empty = loadImg("Assets/img/UI/hp_empty.png", perBlockWidth, perBlockHeight/5)
     hp_red = loadImg("Assets/img/UI/hp_red.png", perBlockWidth, perBlockHeight/5)
     #各色方块/方块标准
-    green = loadImg("Assets/img/UI/green.png", perBlockWidth*0.9, perBlockHeight*0.9).convert_alpha()
-    green.set_alpha(100)
-    red = loadImg("Assets/img/UI/red.png", perBlockWidth*0.9, perBlockHeight*0.9).convert_alpha()
-    red.set_alpha(100)
-    black = loadImg("Assets/img/UI/black.png", perBlockWidth, perBlockHeight).convert_alpha()
-    black.set_alpha(100)
+    green_original = loadImg("Assets/img/UI/green.png").convert_alpha()
+    green_original.set_alpha(100)
+    red_original = loadImg("Assets/img/UI/red.png").convert_alpha()
+    red_original.set_alpha(100)
+    black_original = loadImg("Assets/img/UI/black.png").convert_alpha()
+    black_original.set_alpha(100)
     new_block_type = 0
     #文字
     text_of_endround_move = 0
@@ -206,26 +209,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     enemies_in_control_id= 0
     #行动点数
     action_points = len(characters_name_list)*7
-    
     #放大倍数
     zoom_in = 1
-
     #计算光亮区域
-    def calculate_darkness():
-        light_area = []
-        for each_chara in characters_data:
-            for y in range(int(characters_data[each_chara].y-characters_data[each_chara].attack_range),int(characters_data[each_chara].y+characters_data[each_chara].attack_range)):
-                if y < characters_data[each_chara].y:
-                    for x in range(int(characters_data[each_chara].x-characters_data[each_chara].attack_range-(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+characters_data[each_chara].attack_range+(y-characters_data[each_chara].y))):
-                        if (x,y) not in light_area:
-                            light_area.append((x,y))
-                else:
-                    for x in range(int(characters_data[each_chara].x-characters_data[each_chara].attack_range+(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+characters_data[each_chara].attack_range-(y-characters_data[each_chara].y))):
-                        if (x,y) not in light_area:
-                            light_area.append((x,y))
-        return light_area
-    
-    light_area = calculate_darkness()
+    light_area = calculate_darkness(characters_data)
     
     # 游戏主循环
     while battle==True:
@@ -236,6 +223,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 printf(img_display,(a*perBlockWidth,(i+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
         
         #加载阴环境
+        black = pygame.transform.scale(black_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[i])):
                 if (x,y) not in light_area:
@@ -275,9 +263,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                             perBlockHeight = window_y/block_y*zoom_in
                             local_x -= window_x/block_x*0.25*len(map_img_list[0])
                             local_y -= window_y/block_y*0.25*len(map_img_list)
-                            green = pygame.transform.scale(green, (int(perBlockWidth*0.9), int(perBlockHeight*0.9)))
-                            red = pygame.transform.scale(red, (int(perBlockWidth*0.9), int(perBlockHeight*0.9)))
-                            black = pygame.transform.scale(black, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
                     if event.button == 5:
                         if zoom_in > 1:
                             zoom_in -= 0.25
@@ -289,9 +274,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                             local_y += window_y/block_y*0.25*len(map_img_list)
                             if local_y>0:
                                 local_y = 0
-                            green = pygame.transform.scale(green, (int(perBlockWidth*0.9), int(perBlockHeight*0.9)))
-                            red = pygame.transform.scale(red, (int(perBlockWidth*0.9), int(perBlockHeight*0.9)))
-                            black = pygame.transform.scale(black, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+
             #显示选择菜单
             if green_hide == "SelectMenu":
                 attack_button_txt = fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/2))
@@ -327,6 +310,8 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         green_hide = False
             #显示攻击或移动范围
             if green_hide == False:
+                green = pygame.transform.scale(green_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+                red = pygame.transform.scale(red_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
                 #显示移动范围
                 if action_choice == "move":
                     the_moving_range=[]
@@ -485,7 +470,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
                         if characters_data[the_character_get_click].x >= temp_max:
                             characters_data[the_character_get_click].x = temp_max
-                            light_area = calculate_darkness()
+                            light_area = calculate_darkness(characters_data)
                             isWaiting =True
                             the_character_get_click = ""
                     elif characters_data[the_character_get_click].x > temp_max:
@@ -495,7 +480,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                             characters_data[the_character_get_click].x = temp_max
                             isWaiting =True
                             the_character_get_click = ""
-                    light_area = calculate_darkness()
+                    light_area = calculate_darkness(characters_data)
                 elif isWaiting == "TOPANDBOTTOM":
                     green_hide=True
                     if characters_data[the_character_get_click].y < temp_max:
@@ -512,7 +497,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                             characters_data[the_character_get_click].y = temp_max
                             isWaiting =True
                             the_character_get_click = ""
-                    light_area = calculate_darkness()
+                    light_area = calculate_darkness(characters_data)
                 elif isWaiting == "ATTACKING":
                     green_hide=True
                     if action_choice == "attack":
@@ -689,12 +674,12 @@ def battle(chapter_name,window_x,window_y,screen,lang):
 
         #加载雪花
         for i in range(len(all_snow_on_screen)):
-            printf(all_snow_on_screen[i].img,(all_snow_on_screen[i].x+local_x,all_snow_on_screen[i].y+local_y),screen)
-            all_snow_on_screen[i].x -= 10
-            all_snow_on_screen[i].y += 20
-            if all_snow_on_screen[i].x < 0 or all_snow_on_screen[i].y > 1080:
-                all_snow_on_screen[i].y = 0
-                all_snow_on_screen[i].x = random.randint(1,window_x*1.5)
+            printf(all_snow_on_screen[i].img,(all_snow_on_screen[i].x,all_snow_on_screen[i].y),screen,local_x,local_y)
+            all_snow_on_screen[i].x -= 10*zoom_in
+            all_snow_on_screen[i].y += 20*zoom_in
+            if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
+                all_snow_on_screen[i].y = random.randint(-100,0)
+                all_snow_on_screen[i].x = random.randint(0,window_x*2)
 
         #加载音乐
         """
