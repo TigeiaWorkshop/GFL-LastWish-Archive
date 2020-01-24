@@ -437,8 +437,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                 if blocks_setting[theMap[y][x]][1] == True:
                                     printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     attacking_range.append([x,y])
-                                else:
-                                    printf(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                         else:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)):
                                 if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
@@ -447,8 +445,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                     if blocks_setting[theMap[y][x]][1] == True:
                                         printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range.append([x,y])
-                                    else:
-                                        printf(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                     if [block_get_click_x,block_get_click_y] in attacking_range:
                         for enemies in sangvisFerris_data:
                             if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
