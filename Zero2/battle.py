@@ -97,9 +97,18 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     #一个方块的高
     perBlockHeight = window_y/block_y
 
+    #加载按钮的文字
+    with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
+        chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
+        selectMenuButtons_dic = chapter_info["select_menu"]
+        your_round_txt = fontRender(chapter_info["Battle_UI"]["yourRound"], "white")
+        enemy_round_txt = fontRender(chapter_info["Battle_UI"]["enemyRound"], "white")
+        text_now_total_rounds_original = chapter_info["Battle_UI"]["numRound"]
+        chapter_no = chapter_info["Battle_UI"]["numChapter"]
+    
     #章节标题显示
     the_black = loadImg("Assets/img/UI/black.png",window_x,window_y)
-    title_number_display = fontRender("Chapter-1","white")
+    title_number_display = fontRender(chapter_no.replace("NaN",chapter_name.replace("chapter","")),"white")
     title_main_display = fontRender(chapter_title,"white")
 
     for i in range(0,600,1):
@@ -147,14 +156,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         sangvisFerris_name_list.append(enemy)
 
     #加载UI
-    #加载按钮的文字
-    with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
-        chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
-        selectMenuButtons_dic = chapter_info["select_menu"]
-        your_round_txt = fontRender(chapter_info["Battle_UI"]["yourRound"], "white")
-        enemy_round_txt = fontRender(chapter_info["Battle_UI"]["enemyRound"], "white")
-        text_now_total_rounds_original = chapter_info["Battle_UI"]["numRound"]
-
     #加载结束回合的图片
     end_round_button = loadImg("Assets/img/UI/endRound.png", perBlockWidth*2*28/15, perBlockWidth*2)
     #加载选择菜单的图片

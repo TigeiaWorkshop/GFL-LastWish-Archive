@@ -22,7 +22,8 @@ chapter: {
 Battle_UI: {
     yourRound: "Your Round",
     enemyRound: "enemyRound",
-    numRound: "NaN Round"
+    numRound: "NaN Round",
+    numChapter: "Chapter NaN"
 }
 select_menu: {
     attack: "Attack",

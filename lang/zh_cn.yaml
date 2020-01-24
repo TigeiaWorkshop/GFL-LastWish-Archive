@@ -22,7 +22,8 @@ chapter: {
 Battle_UI: {
     yourRound: "你的回合",
     enemyRound: "敌方回合",
-    numRound: "第NaN回合"
+    numRound: "第NaN回合",
+    numChapter: "第NaN章"
 }
 select_menu: {
     attack: "攻击",
