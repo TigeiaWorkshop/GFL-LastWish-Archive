@@ -68,6 +68,8 @@ map_img_list = randomBlock(map,blocks_setting)
 #绿色方块/方块标准
 green = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/img/UI/green.png")), (block_x_length, int(block_y_length)))
 green.set_alpha(100)
+red = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/img/UI/red.png")), (block_x_length, int(block_y_length)))
+red.set_alpha(100)
 
 first_point = None
 second_point = None
@@ -85,75 +87,78 @@ def create_map_with_path(x_start,y_start,map_in):
                 elif y >= y_start and x <= x_start:
                     map_out_line.append(x_start+y-x-y_start)
                 elif y >= y_start and x >= x_start:
-                    map_out_line.append(x+y-x_start-y_start)
+                    map_out_line.append(x+y-x_start-y_start)     
             else:
-                map_out_line.append("disable")
+                map_out_line.append(-1)
         map_out.append(map_out_line)
     return map_out
 
-def findPath(x_togo,y_togo,theMapWithRoute):
-    route_move = []
-    pathlist.append([x,y])
-    if x == x_togo and y == y_togo:
-        return pathlist
-    else:
-        if [x+1,y] not in pathlist and x<len(map_in[y])-2:
-            to_add = findPath(x+1,y,x_togo,y_togo,map_in,pathlist)
-            if to_add != None:
-                all_path_to_compare.append(to_add)
-        if [x-1,y] not in pathlist and x>1:
-            to_add = findPath(x-1,y,x_togo,y_togo,map_in,pathlist)
-            if to_add != None:
-                all_path_to_compare.append(to_add)
-        if [x,y+1] not in pathlist and y<len(map_in)-2:
-            to_add = findPath(x,y+1,x_togo,y_togo,map_in,pathlist)
-            if to_add != None:
-                all_path_to_compare.append(to_add)
-        if [x,y-1] not in pathlist and y>1:
-            to_add = findPath(x,y-1,x_togo,y_togo,map_in,pathlist)
-            if to_add != None:
-                all_path_to_compare.append(to_add)
-        if len(all_path_to_compare) == 0:
-            return None
-        elif len(all_path_to_compare) == 1:
-            return all_path_to_compare[0]
-        elif len(all_path_to_compare) > 1:
-            min_len = all_path_to_compare[0]
-            for i in range(1,len(all_path_to_compare)):
-                if len(all_path_to_compare[i]) <= len(min_len):
-                    min_len = all_path_to_compare[i]
-            return min_len
+def findPath(x_start,y_start,x_togo,y_togo,theMap):
+    theMapWithRoute = create_map_with_path(x_start,y_start,theMap)
+    the_point_value = theMapWithRoute[y_togo][x_togo]
+    route_move = [[x_togo,y_togo]]
+    temp_x = x_togo
+    temp_y = y_togo
+    direction_not_work=""
+    for i in range (theMapWithRoute[y_togo][x_togo],0,-1):
+        if y_start < temp_y and theMapWithRoute[temp_y-1][temp_x] == the_point_value-1 and direction_not_work != "top":
+            temp_y-=1
+            route_move.append([temp_x,temp_y])
+            direction_not_work=""
+        else:
+            if y_start > temp_y and theMapWithRoute[temp_y+1][temp_x] == the_point_value-1 and direction_not_work != "bottom":
+                temp_y+=1
+                route_move.append([temp_x,temp_y])
+                direction_not_work=""
+            else:
+                if x_start < temp_x and theMapWithRoute[temp_y][temp_x-1] == the_point_value-1 and direction_not_work != "left":
+                    temp_x-=1
+                    route_move.append([temp_x,temp_y])
+                    direction_not_work=""
+                else:
+                    if x_start > temp_x and theMapWithRoute[temp_y][temp_x+1] == the_point_value-1 and direction_not_work != "right":
+                        temp_x+=1
+                        route_move.append([temp_x,temp_y])
+                        direction_not_work=""
+                    else:
+                        if temp_x == route_move[-1][0]:
+                            if temp_y == route_move[-1][1]-1:
+                                direction_not_work = "top"
+                            else:
+                                direction_not_work = "bottom"
+                            temp_y = route_move[-1][1]
+                        else:
+                            if temp_x == route_move[-1][0]-1:
+                                direction_not_work = "left"
+                            else:
+                                direction_not_work = "right"
+                            temp_x = route_move[-1][0]
+                        
 
-all_list = []
-all_list = create_map_with_path(3,2,3,5,map)
-for i in range(len(all_list)):
-    print(all_list[i])
-exit()
-"""
+        the_point_value-=1
+    route_move.append([temp_x,temp_y])
+    return route_move
+
+
+all_list = findPath(6,7,18,20,map)
+
 # 游戏主循环
 while True:
-    mouse_x,mouse_y=pygame.mouse.get_pos()
-    block_get_click_x = int(mouse_x/green.get_width())
-    block_get_click_y = int(mouse_y/green.get_height())
-                
-    second_point = [block_get_click_x,block_get_click_y]
+    for event in pygame.event.get():
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                exit()
     #场景加载
     for i in range(len(map_img_list)):
         for a in range(len(map_img_list[i])):
             img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
             screen.blit(img_display,(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
+
+    for x in range(len(map_img_list)):
+        for y in range(len(map_img_list[i])):
+            if [x,y] in all_list:
+                screen.blit(green,(x*block_x_length,y*block_y_length))
+
+    time.sleep(0.025)
+    pygame.display.update()
     
-    for i in range(len(all_list)):
-        screen.blit(green,(all_list[i][0]*block_x_length,all_list[i][1]*block_y_length))
-        time.sleep(0.025)
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    exit()
-                if event.key == K_s:
-                    first_point = None
-                    second_point = None
-            elif event.type == MOUSEBUTTONDOWN:
-                first_point = [block_get_click_x,block_get_click_y]
-"""
