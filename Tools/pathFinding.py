@@ -99,48 +99,46 @@ def findPath(x_start,y_start,x_togo,y_togo,theMap):
     route_move = [[x_togo,y_togo]]
     temp_x = x_togo
     temp_y = y_togo
-    direction_not_work=""
+    direction_not_work=[]
     for i in range (theMapWithRoute[y_togo][x_togo],0,-1):
-        if y_start < temp_y and theMapWithRoute[temp_y-1][temp_x] == the_point_value-1 and direction_not_work != "top":
+        if y_start < temp_y and theMapWithRoute[temp_y-1][temp_x] == the_point_value-1 and "top" not in direction_not_work:
             temp_y-=1
             route_move.append([temp_x,temp_y])
-            direction_not_work=""
+            direction_not_work=[]
         else:
-            if y_start > temp_y and theMapWithRoute[temp_y+1][temp_x] == the_point_value-1 and direction_not_work != "bottom":
+            if y_start > temp_y and theMapWithRoute[temp_y+1][temp_x] == the_point_value-1 and "bottom" not in direction_not_work:
                 temp_y+=1
                 route_move.append([temp_x,temp_y])
-                direction_not_work=""
+                direction_not_work=[]
             else:
-                if x_start < temp_x and theMapWithRoute[temp_y][temp_x-1] == the_point_value-1 and direction_not_work != "left":
+                if x_start < temp_x and theMapWithRoute[temp_y][temp_x-1] == the_point_value-1 and "left" not in direction_not_work:
                     temp_x-=1
                     route_move.append([temp_x,temp_y])
-                    direction_not_work=""
+                    direction_not_work=[]
                 else:
-                    if x_start > temp_x and theMapWithRoute[temp_y][temp_x+1] == the_point_value-1 and direction_not_work != "right":
+                    if x_start > temp_x and theMapWithRoute[temp_y][temp_x+1] == the_point_value-1 and  "right" not in direction_not_work:
                         temp_x+=1
                         route_move.append([temp_x,temp_y])
-                        direction_not_work=""
+                        direction_not_work=[]
                     else:
                         if temp_x == route_move[-1][0]:
                             if temp_y == route_move[-1][1]-1:
-                                direction_not_work = "top"
+                                direction_not_work.append("top")
                             else:
-                                direction_not_work = "bottom"
+                                direction_not_work.append("bottom")
                             temp_y = route_move[-1][1]
                         else:
                             if temp_x == route_move[-1][0]-1:
-                                direction_not_work = "left"
+                                direction_not_work.append("left")
                             else:
-                                direction_not_work = "right"
+                                direction_not_work.append("right")
                             temp_x = route_move[-1][0]
-                        
-
         the_point_value-=1
     route_move.append([temp_x,temp_y])
     return route_move
 
 
-all_list = findPath(6,7,18,20,map)
+all_list = findPath(6,7,17,14,map)
 
 # 游戏主循环
 while True:

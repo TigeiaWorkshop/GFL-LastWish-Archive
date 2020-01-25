@@ -321,6 +321,15 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         the_character_get_click_moving_range = characters_data[the_character_get_click].move_range
                     elif characters_data[the_character_get_click].move_range > action_points:
                         the_character_get_click_moving_range = action_points
+                    mouse_x,mouse_y=pygame.mouse.get_pos()
+                    block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
+                    block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
+                    the_route = findPath(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,block_get_click_x,block_get_click_y,theMap,blocks_setting)
+                    for x in range(len(map_img_list)):
+                        for y in range(len(map_img_list[i])):
+                            if [x,y] in the_route[-the_character_get_click_moving_range-1:-1]:
+                                screen.blit(green,(x*perBlockWidth,y*perBlockHeight))
+                    """
                     for x in range(characters_data[the_character_get_click].x+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].move_range+1):
                         if blocks_setting[theMap[characters_data[the_character_get_click].y][x]][1] == True:
                             print_green = True
@@ -428,7 +437,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         isWaiting = "TOPANDBOTTOM"
                         green_hide = True
                         action_points -= abs(block_get_click_y-characters_data[the_character_get_click].y)
-                    
+                    """
                 #显示攻击范围        
                 elif action_choice == "attack" or action_choice == "skill":
                     attacking_range = []
