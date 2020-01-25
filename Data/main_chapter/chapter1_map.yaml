@@ -44,7 +44,7 @@ character:
     max_hp: 250
     maximum_bullets: 10
     min_damage: 400
-    move_range: 4
+    move_range: 10
     undetected: false
     x: 10
     y: 8
