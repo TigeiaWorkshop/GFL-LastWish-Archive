@@ -12,7 +12,6 @@ from Zero2.characterDataManager import *
 from Zero2.characterAnimation import *
 from Zero2.map import *
 from Zero2.AI import *
-
 def battle(chapter_name,window_x,window_y,screen,lang):
     #卸载音乐
     pygame.mixer.music.unload()
