@@ -253,6 +253,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         #获取角色坐标
                         block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
                         block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
+                        #控制选择菜单的显示与隐藏
                         for key in characters_data:
                             if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y:
                                 if key != the_character_get_click:
@@ -265,7 +266,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         #是否在显示移动范围后点击了
                         if the_route != []:
                             if [block_get_click_x,block_get_click_y] in the_route[-the_character_get_click_moving_range-1:-1]:
-                                the_moving_path = the_route[-the_character_get_click_moving_range-1:-1]
+                                the_moving_path = the_route[-the_character_get_click_moving_range:-1]
                                 the_moving_path.reverse()
                                 the_route = []
                                 isWaiting = "MOVING"
@@ -336,10 +337,11 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     mouse_x,mouse_y=pygame.mouse.get_pos()
                     block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
                     block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
-                    the_route = findPath(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,block_get_click_x,block_get_click_y,theMap,blocks_setting)
+                    theMapWithRoute = create_map_with_path(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,theMap,blocks_setting)
+                    the_route = findPath(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,block_get_click_x,block_get_click_y,theMapWithRoute)
                     for x in range(len(map_img_list)):
                         for y in range(len(map_img_list[i])):
-                            if [x,y] in the_route[-the_character_get_click_moving_range-1:-2]:
+                            if [x,y] in the_route[-the_character_get_click_moving_range-1:-1]:
                                 printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                     
                 #显示攻击范围        
@@ -379,7 +381,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             if the_character_get_click != "":
                 #被点击的角色动画
                 if isWaiting == "MOVING":
-                    print(the_moving_path)
+                    #print(the_moving_path)
                     green_hide=True
                     if the_moving_path != []:
                         if characters_data[the_character_get_click].x < the_moving_path[-1][0]:

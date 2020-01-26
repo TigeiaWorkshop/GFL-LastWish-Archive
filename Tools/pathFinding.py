@@ -96,6 +96,18 @@ def create_map_with_path(x_start,y_start,map_in):
 def findPath(x_start,y_start,x_togo,y_togo,theMap):
     theMapWithRoute = create_map_with_path(x_start,y_start,theMap)
     the_point_value = theMapWithRoute[y_togo][x_togo]
+    if the_point_value == -1:
+        the_point_value = min([theMapWithRoute[y_togo+1][x_togo],theMapWithRoute[y_togo-1][x_togo],theMapWithRoute[y_togo][x_togo+1],theMapWithRoute[y_togo][x_togo-1]])
+        if the_point_value == [theMapWithRoute[y_togo+1][x_togo]:
+            y_togo+=1
+        elif the_point_value == theMapWithRoute[y_togo-1][x_togo]:
+            y_togo-=1
+        elif the_point_value == theMapWithRoute[y_togo][x_togo+1]:
+            x_togo+=1
+        elif the_point_value == theMapWithRoute[y_togo][x_togo-1]:
+            x_togo-=1
+        else:
+            print("warning from findpath system")
     route_move = [[x_togo,y_togo]]
     temp_x = x_togo
     temp_y = y_togo
@@ -134,7 +146,7 @@ def findPath(x_start,y_start,x_togo,y_togo,theMap):
                                 direction_not_work.append("right")
                             temp_x = route_move[-1][0]
         the_point_value-=1
-    route_move.append([temp_x,temp_y])
+    route_move.append([x_start,y_start])
     return route_move
 
 

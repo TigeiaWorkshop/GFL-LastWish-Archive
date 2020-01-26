@@ -27,6 +27,7 @@ def calculate_darkness(characters_data):
                         light_area.append((x,y))
     return light_area
 
+
 def create_map_with_path(x_start,y_start,map_in,blocks_setting):
     map_out = []
     for y in range(len(map_in)):
@@ -46,46 +47,42 @@ def create_map_with_path(x_start,y_start,map_in,blocks_setting):
         map_out.append(map_out_line)
     return map_out
 
-def findPath(x_start,y_start,x_togo,y_togo,theMap,blocks_setting):
-    theMapWithRoute = create_map_with_path(x_start,y_start,theMap,blocks_setting)
-    the_point_value = theMapWithRoute[y_togo][x_togo]
-    route_move = [[x_togo,y_togo]]
-    temp_x = x_togo
-    temp_y = y_togo
-    direction_not_work=[]
-    for i in range (theMapWithRoute[y_togo][x_togo],0,-1):
-        if y_start < temp_y and theMapWithRoute[temp_y-1][temp_x] == the_point_value-1 and "top" not in direction_not_work:
-            temp_y-=1
-            route_move.append([temp_x,temp_y])
-            direction_not_work=[]
-        else:
-            if y_start > temp_y and theMapWithRoute[temp_y+1][temp_x] == the_point_value-1 and "bottom" not in direction_not_work:
-                temp_y+=1
-                route_move.append([temp_x,temp_y])
-                direction_not_work=[]
+def findPath(x_start,y_start,x_togo,y_togo,theMapWithRoute,route_move=[],direction_not_work=[]):
+    if route_move == []:
+        the_point_value = theMapWithRoute[y_togo][x_togo]
+        if the_point_value == -1:
+            the_point_value = min([theMapWithRoute[y_togo+1][x_togo],theMapWithRoute[y_togo-1][x_togo],theMapWithRoute[y_togo][x_togo+1],theMapWithRoute[y_togo][x_togo-1]])
+            if the_point_value ==  theMapWithRoute[y_togo+1][x_togo]:
+                y_togo+=1
+            elif the_point_value == theMapWithRoute[y_togo-1][x_togo]:
+                y_togo-=1
+            elif the_point_value == theMapWithRoute[y_togo][x_togo+1]:
+                x_togo+=1
+            elif the_point_value == theMapWithRoute[y_togo][x_togo-1]:
+                x_togo-=1
             else:
-                if x_start < temp_x and theMapWithRoute[temp_y][temp_x-1] == the_point_value-1 and "left" not in direction_not_work:
-                    temp_x-=1
-                    route_move.append([temp_x,temp_y])
-                    direction_not_work=[]
-                else:
-                    if x_start > temp_x and theMapWithRoute[temp_y][temp_x+1] == the_point_value-1 and  "right" not in direction_not_work:
-                        temp_x+=1
-                        route_move.append([temp_x,temp_y])
-                        direction_not_work=[]
-                    else:
-                        if temp_x == route_move[-1][0]:
-                            if temp_y == route_move[-1][1]-1:
-                                direction_not_work.append("top")
-                            else:
-                                direction_not_work.append("bottom")
-                            temp_y = route_move[-1][1]
-                        else:
-                            if temp_x == route_move[-1][0]-1:
-                                direction_not_work.append("left")
-                            else:
-                                direction_not_work.append("right")
-                            temp_x = route_move[-1][0]
+                print("warning from findpath system")
+        route_move = [[x_togo,y_togo]]
+    while the_point_value > 0:
+        if y_start < y_togo and theMapWithRoute[y_togo-1][x_togo] == the_point_value-1 and route_move+[[y_togo-1,x_togo]] not in direction_not_work:
+            y_togo-=1
+            route_move.append([x_togo,y_togo])
+        elif y_start > y_togo and theMapWithRoute[y_togo+1][x_togo] == the_point_value-1 and route_move+[[y_togo+1,x_togo]] not in direction_not_work:
+            y_togo+=1
+            route_move.append([x_togo,y_togo])
+        elif x_start < x_togo and theMapWithRoute[y_togo][x_togo-1] == the_point_value-1 and route_move+[[y_togo,x_togo-1]] not in direction_not_work:
+            x_togo-=1
+            route_move.append([x_togo,y_togo])
+        elif x_start > x_togo and theMapWithRoute[y_togo][x_togo+1] == the_point_value-1 and route_move+[[y_togo,x_togo+1]] not in direction_not_work:
+            x_togo+=1
+            route_move.append([x_togo,y_togo])
+        else:
+            direction_not_work.append(route_move)
+            if len(route_move) > 1:
+                route_move.pop()
+                x_togo = route_move[-1][0]
+                y_togo = route_move[-1][1]
+        
         the_point_value-=1
-    route_move.append([temp_x,temp_y])
+    route_move.append([x_start,y_start])
     return route_move
