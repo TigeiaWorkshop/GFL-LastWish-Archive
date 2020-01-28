@@ -16,18 +16,19 @@ def loadImg(path,length=None,height=None):
             raise Exception('Both length and height must be positive')
 
 #高级图片加载模块：接收图片路径,长,高,返回对应的图片class
-def loadImage(path,ifConvertAlpha=False,width=None,height=None,x=None,y=None):
+def loadImage(path,description="Default",ifConvertAlpha=False,width=None,height=None,x=None,y=None):
     class theImg:
-        def __init__(self,img,width,height,x,y):
+        def __init__(self,img,description,width,height,x,y):
             self.img = img
+            self.description = description
             self.width = width
             self.height = height
             self.x = x
             self.y = y
     if ifConvertAlpha ==False:
-        return theImg(pygame.image.load(os.path.join(path)),width,height,x,y)
+        return theImg(pygame.image.load(os.path.join(path)),description,width,height,x,y)
     else:
-        return theImg(pygame.image.load(os.path.join(path)).convert_alpha(),width,height,x,y)
+        return theImg(pygame.image.load(os.path.join(path)).convert_alpha(),description,width,height,x,y)
 
 #文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
 def fontRender(txt,color,size=50,font="simsunnsimsun",mode=True):
