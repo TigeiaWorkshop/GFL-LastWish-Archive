@@ -216,7 +216,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     #计算光亮区域
     light_area = calculate_darkness(characters_data)
     # 移动路径
-    the_moving_path = []
     the_route = []
     
     # 游戏主循环
@@ -264,13 +263,10 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                     the_character_get_click = ""
                         #是否在显示移动范围后点击了
                         if the_route != []:
-                            if [block_get_click_x,block_get_click_y] in the_route[-the_character_get_click_moving_range-1:-1]:
-                                the_moving_path = the_route[-the_character_get_click_moving_range:-1]
-                                the_moving_path.reverse()
-                                the_route = []
+                            if [block_get_click_x,block_get_click_y] in the_route:
                                 isWaiting = "MOVING"
                                 green_hide = True
-                                action_points -= len(the_moving_path)
+                                action_points -= len(the_route)
                     if event.button == 4:
                         if zoom_in < 2:
                             zoom_in += 0.25
@@ -329,7 +325,6 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 red = pygame.transform.scale(red_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
                 #显示移动范围
                 if action_choice == "move":
-                    
                     if characters_data[the_character_get_click].move_range < action_points:
                         the_character_get_click_moving_range = characters_data[the_character_get_click].move_range
                     elif characters_data[the_character_get_click].move_range > action_points:
@@ -345,19 +340,31 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                 map2d[x][y]=1
 
                     #创建AStar对象,并设置起点为0,0终点为9,0
-                    aStar=AStar(map2d,Point(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y),Point(block_get_click_x,block_get_click_y))
+                    star_point_x = characters_data[the_character_get_click].x
+                    star_point_y = characters_data[the_character_get_click].y
+                    aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(block_get_click_x,block_get_click_y))
                     #开始寻路
                     pathList=aStar.start()
                     #遍历路径点,在map2d上以'8'显示
-                    path_route = []
+                    the_route = []
                     if pathList != None:
-                        for point in pathList:
-                            path_route.append([point.x,point.y])
-
-                    for y in range(len(map_img_list)):
-                        for x in range(len(map_img_list[y])):
-                            if [x,y] in path_route:
-                                printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        if len(pathList)>the_character_get_click_moving_range:
+                            route_len = the_character_get_click_moving_range
+                        else:
+                            route_len = len(pathList)
+                        for i in range(route_len):
+                            if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
+                                star_point_x+=1
+                            elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
+                                star_point_x-=1
+                            elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
+                                star_point_y+=1
+                            elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
+                                star_point_y-=1
+                            the_route.append([star_point_x,star_point_y])
+                    
+                    for i in range(len(the_route)):
+                        printf(green,(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
 
                 #显示攻击范围        
                 elif action_choice == "attack" or action_choice == "skill":
@@ -396,33 +403,33 @@ def battle(chapter_name,window_x,window_y,screen,lang):
             if the_character_get_click != "":
                 #被点击的角色动画
                 if isWaiting == "MOVING":
-                    #print(the_moving_path)
+                    #print(the_route)
                     green_hide=True
-                    if the_moving_path != []:
-                        if characters_data[the_character_get_click].x < the_moving_path[-1][0]:
+                    if the_route != []:
+                        if characters_data[the_character_get_click].x < the_route[0][0]:
                             characters_data[the_character_get_click].x+=0.1
                             action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
-                            if characters_data[the_character_get_click].x >= the_moving_path[0][0]:
-                                characters_data[the_character_get_click].x = the_moving_path[0][0]
-                                the_moving_path.pop(0)
-                        elif characters_data[the_character_get_click].x > the_moving_path[-1][0]:
+                            if characters_data[the_character_get_click].x >= the_route[0][0]:
+                                characters_data[the_character_get_click].x = the_route[0][0]
+                                the_route.pop(0)
+                        elif characters_data[the_character_get_click].x > the_route[0][0]:
                             characters_data[the_character_get_click].x-=0.1
                             action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,True,True)
-                            if characters_data[the_character_get_click].x <= the_moving_path[0][0]:
-                                characters_data[the_character_get_click].x = the_moving_path[0][0]
-                                the_moving_path.pop(0)
-                        elif characters_data[the_character_get_click].y < the_moving_path[-1][1]:
+                            if characters_data[the_character_get_click].x <= the_route[0][0]:
+                                characters_data[the_character_get_click].x = the_route[0][0]
+                                the_route.pop(0)
+                        elif characters_data[the_character_get_click].y < the_route[0][1]:
                             characters_data[the_character_get_click].y+=0.1
                             action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
-                            if characters_data[the_character_get_click].y >= the_moving_path[0][1]:
-                                characters_data[the_character_get_click].y = the_moving_path[0][1]
-                                the_moving_path.pop(0)
-                        elif characters_data[the_character_get_click].y > the_moving_path[-1][1]:
+                            if characters_data[the_character_get_click].y >= the_route[0][1]:
+                                characters_data[the_character_get_click].y = the_route[0][1]
+                                the_route.pop(0)
+                        elif characters_data[the_character_get_click].y > the_route[0][1]:
                             characters_data[the_character_get_click].y-=0.1
                             action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
-                            if characters_data[the_character_get_click].y <= the_moving_path[0][1]:
-                                characters_data[the_character_get_click].y = the_moving_path[0][1]
-                                the_moving_path.pop(0)
+                            if characters_data[the_character_get_click].y <= the_route[0][1]:
+                                characters_data[the_character_get_click].y = the_route[0][1]
+                                the_route.pop(0)
                     else:
                         isWaiting =True
                         the_character_get_click = ""
