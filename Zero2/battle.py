@@ -329,6 +329,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                 red = pygame.transform.scale(red_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
                 #显示移动范围
                 if action_choice == "move":
+                    
                     if characters_data[the_character_get_click].move_range < action_points:
                         the_character_get_click_moving_range = characters_data[the_character_get_click].move_range
                     elif characters_data[the_character_get_click].move_range > action_points:
@@ -336,13 +337,28 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     mouse_x,mouse_y=pygame.mouse.get_pos()
                     block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
                     block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
-                    theMapWithRoute = create_map_with_path(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,theMap,blocks_setting)
-                    the_route = findPath(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,block_get_click_x,block_get_click_y,theMapWithRoute)
-                    for x in range(len(map_img_list)):
-                        for y in range(len(map_img_list[i])):
-                            if [x,y] in the_route[-the_character_get_click_moving_range-1:-1]:
+
+                    map2d=Array2D(block_x,block_y)
+                    for y in range(len(map_img_list)):
+                        for x in range(len(map_img_list[y])):
+                            if blocks_setting[theMap[y][x]][1] == False:
+                                map2d[x][y]=1
+
+                    #创建AStar对象,并设置起点为0,0终点为9,0
+                    aStar=AStar(map2d,Point(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y),Point(block_get_click_x,block_get_click_y))
+                    #开始寻路
+                    pathList=aStar.start()
+                    #遍历路径点,在map2d上以'8'显示
+                    path_route = []
+                    if pathList != None:
+                        for point in pathList:
+                            path_route.append([point.x,point.y])
+
+                    for y in range(len(map_img_list)):
+                        for x in range(len(map_img_list[y])):
+                            if [x,y] in path_route:
                                 printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                    
+
                 #显示攻击范围        
                 elif action_choice == "attack" or action_choice == "skill":
                     attacking_range = []
