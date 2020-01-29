@@ -44,25 +44,26 @@ def mainMenu(window_x,window_y,lang,mode=""):
     if len(all_bg_img_list) <=1:
         all_bg_img_list = glob.glob(r'Assets/img/main_menu/*.png')
     background_img_list=[]
-    loading_img =  pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/loading_img/img1.png")),(window_x,window_y))
+    loading_img =  loadImg("Assets/img/loading_img/img1.png",window_x,window_y)
     
     for i in range(len(all_bg_img_list)):
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
                 exit()
-        path = "Assets/img/main_menu/bgImg"+str(i)+".jpg"
-        img = pygame.image.load(os.path.join(path))
+        img = loadImg("Assets/img/main_menu/bgImg"+str(i)+".jpg")
         if window_x != 1920 or window_y != 1080:
             img = pygame.transform.scale(img,(window_x,window_y))
         background_img_list.append(img)
         percent_of_img_loaded = '{:.0f}%'.format(i/len(all_bg_img_list)*100)
         if mode == "safe":
             break
-        screen.blit(loading_img, (0,0))
+        printf(loading_img, (0,0),screen)
         the_str = fontRender(now_loading+": "+str(percent_of_img_loaded), "white")
-        screen.blit(the_str, ((window_x-the_str.get_width())/2,window_y-100))
+        printf(the_str, ((window_x-the_str.get_width())/2,window_y-100),screen)
         pygame.display.update()
-
+    #图片列表转元组以节约内存
+    background_img_list = tuple(background_img_list)
+    
     #数值初始化
     background_img_id = 0
     cover_alpha = 0
@@ -70,7 +71,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
     menu_type = 0
     txt_location = int(window_x*2/3)
     #关卡选择的封面
-    cover_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/img/covers/chapter1.png")),(window_x,window_y))
+    cover_img = loadImg("Assets/img/covers/chapter1.png",window_x,window_y)
     
     # 游戏主循环
     while True:
@@ -95,7 +96,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
                     if menu_type == 1:
                         dialog_display_function("chapter1",window_x,window_y,screen,lang)
         
-        screen.blit(background_img_list[background_img_id], (0,0))
+        printf(background_img_list[background_img_id], (0,0),screen)
         
         if isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
@@ -106,41 +107,41 @@ def mainMenu(window_x,window_y,lang,mode=""):
 
         if menu_type == 1:
             cover_img.set_alpha(cover_alpha)
-            screen.blit(cover_img, (0,0))
+            printf(cover_img, (0,0),screen)
 
         #菜单选项
         if menu_type == 0:
-            screen.blit(text_continue.n, (txt_location,250))
+            printf(text_continue.n, (txt_location,250),screen)
             if isGetClick(text_chooseChapter.n, (txt_location,350)):
-                screen.blit(text_chooseChapter.b, (txt_location,350))
+                printf(text_chooseChapter.b, (txt_location,350),screen)
             else:
-                screen.blit(text_chooseChapter.n, (txt_location,350))
-            screen.blit(text_setting.n, (txt_location,450))
-            screen.blit(text_dlc.n, (txt_location,550))
-            screen.blit(text_workshop.n, (txt_location,650))
+                printf(text_chooseChapter.n, (txt_location,350),screen)
+            printf(text_setting.n, (txt_location,450),screen)
+            printf(text_dlc.n, (txt_location,550),screen)
+            printf(text_workshop.n, (txt_location,650),screen)
             if isGetClick(text_exit.n, (txt_location,750)):
-                screen.blit(text_exit.b, (txt_location,750))
+                printf(text_exit.b, (txt_location,750),screen)
             else:
-                screen.blit(text_exit.n, (txt_location,750))
+                printf(text_exit.n, (txt_location,750),screen)
         elif menu_type == 1:
             if isGetClick(c1.n, (txt_location,(window_y-200)/9*1)):
-                screen.blit(c1.b, (txt_location,(window_y-200)/9*1))
+                printf(c1.b, (txt_location,(window_y-200)/9*1),screen)
             else:
-                screen.blit(c1.n, (txt_location,(window_y-200)/9*1))
+                printf(c1.n, (txt_location,(window_y-200)/9*1),screen)
             if isGetClick (c2.n, (txt_location,(window_y-200)/9*2)):
-                screen.blit(c2.b, (txt_location,(window_y-200)/9*2))
+                printf(c2.b, (txt_location,(window_y-200)/9*2),screen)
             else:
-                screen.blit(c2.n, (txt_location,(window_y-200)/9*2))
-            screen.blit(c3.n, (txt_location,(window_y-200)/9*3))
-            screen.blit(c4.n, (txt_location,(window_y-200)/9*4))
-            screen.blit(c5.n, (txt_location,(window_y-200)/9*5))
-            screen.blit(c6.n, (txt_location,(window_y-200)/9*6))
-            screen.blit(c7.n, (txt_location,(window_y-200)/9*7))
-            screen.blit(c8.n, (txt_location,(window_y-200)/9*8))
+                printf(c2.n, (txt_location,(window_y-200)/9*2),screen)
+            printf(c3.n, (txt_location,(window_y-200)/9*3),screen)
+            printf(c4.n, (txt_location,(window_y-200)/9*4),screen)
+            printf(c5.n, (txt_location,(window_y-200)/9*5),screen)
+            printf(c6.n, (txt_location,(window_y-200)/9*6),screen)
+            printf(c7.n, (txt_location,(window_y-200)/9*7),screen)
+            printf(c8.n, (txt_location,(window_y-200)/9*8),screen)
             if isGetClick(back_button.n, (txt_location,window_y-150)):
-                screen.blit(back_button.b, (txt_location,window_y-150))
+                printf(back_button.b, (txt_location,window_y-150),screen)
             else:
-                screen.blit(back_button.n, (txt_location,window_y-150))
+                printf(back_button.n, (txt_location,window_y-150),screen)
 
         if mode != "safe":
             background_img_id += 1

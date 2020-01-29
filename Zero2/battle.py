@@ -69,7 +69,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     env_img_list={}
     for i in range(len(all_env_file_list)):
         img_name = all_env_file_list[i].replace("Assets","").replace("img","").replace("environment","").replace(".png","").replace("\\","").replace("/","")
-        env_img_list[img_name] = loadImg(all_env_file_list[i]).convert_alpha()
+        env_img_list[img_name] = loadImg(all_env_file_list[i])
 
     my_font =pygame.font.SysFont('simsunnsimsun',25)
     #读取并初始化章节信息
@@ -167,11 +167,11 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     hp_empty = loadImg("Assets/img/UI/hp_empty.png", perBlockWidth, perBlockHeight/5)
     hp_red = loadImg("Assets/img/UI/hp_red.png", perBlockWidth, perBlockHeight/5)
     #各色方块/方块标准
-    green_original = loadImg("Assets/img/UI/green.png").convert_alpha()
+    green_original = loadImg("Assets/img/UI/green.png")
     green_original.set_alpha(100)
-    red_original = loadImg("Assets/img/UI/red.png").convert_alpha()
+    red_original = loadImg("Assets/img/UI/red.png")
     red_original.set_alpha(100)
-    black_original = loadImg("Assets/img/UI/black.png").convert_alpha()
+    black_original = loadImg("Assets/img/UI/black.png")
     black_original.set_alpha(100)
     new_block_type = 0
     #文字

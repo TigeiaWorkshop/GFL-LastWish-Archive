@@ -2,21 +2,27 @@ import os
 import pygame
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
-def loadImg(path,length=None,height=None):
+def loadImg(path,ifConvertAlpha=True,length=None,height=None):
     if length == None and height== None:
-        return pygame.image.load(os.path.join(path))
+        if ifConvertAlpha == False:
+            return pygame.image.load(os.path.join(path))
+        else:
+            return pygame.image.load(os.path.join(path)).convert_alpha()
     else:
         if length == None:
             raise Exception('Length is required')
         elif height== None:
             raise Exception('Height is required')
         elif length >= 0 and height >= 0:
-            return pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(length), int(height)))
+            if ifConvertAlpha == False:
+                pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(length), int(height)))
+            else:
+                return pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (int(length), int(height)))
         elif length < 0 or height < 0:
             raise Exception('Both length and height must be positive')
 
 #高级图片加载模块：接收图片路径,长,高,返回对应的图片class
-def loadImage(path,description="Default",ifConvertAlpha=False,width=None,height=None,x=None,y=None):
+def loadImage(path,description="Default",ifConvertAlpha=True,width=None,height=None,x=None,y=None):
     class theImg:
         def __init__(self,img,description,width,height,x,y):
             self.img = img
@@ -78,3 +84,10 @@ def displayInCenter(item1,item2,x,y,screen,local_x=0,local_y=0):
 #图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
 def printf(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))
+
+#高级图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
+def printIn(theImgClass,screen,local_x=0,local_y=0):
+    if theImgClass.img.get_width() == theImgClass.width and  theImgClass.img.get_height() == theImgClass.height or theImgClass.width == None and theImgClass.height ==None:
+        screen.blit(theImgClass.img,(theImgClass.x+local_x,theImgClass.y+local_y))
+    else:
+        screen.blit(pygame.transform.scale(theImgClass.img, (theImgClass.width,theImgClass.height)),(theImgClass.x+local_x,theImgClass.y+local_y))
