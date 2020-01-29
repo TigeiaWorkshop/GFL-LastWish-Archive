@@ -2,7 +2,7 @@ import os
 import pygame
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
-def loadImg(path,ifConvertAlpha=True,length=None,height=None):
+def loadImg(path,length=None,height=None,ifConvertAlpha=True):
     if length == None and height== None:
         if ifConvertAlpha == False:
             return pygame.image.load(os.path.join(path))
@@ -91,3 +91,8 @@ def printIn(theImgClass,screen,local_x=0,local_y=0):
         screen.blit(theImgClass.img,(theImgClass.x+local_x,theImgClass.y+local_y))
     else:
         screen.blit(pygame.transform.scale(theImgClass.img, (theImgClass.width,theImgClass.height)),(theImgClass.x+local_x,theImgClass.y+local_y))
+
+#字典合并
+def dicMerge(dict1, dict2): 
+    res = {**dict1, **dict2} 
+    return res 

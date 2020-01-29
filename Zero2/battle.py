@@ -338,6 +338,11 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                         for x in range(len(map_img_list[y])):
                             if blocks_setting[theMap[y][x]][1] == False:
                                 map2d[x][y]=1
+                            else:
+                                temp_dic = dicMerge(characters_data,sangvisFerris_data)
+                                for every_chara in temp_dic:
+                                    if every_chara != the_character_get_click:
+                                        map2d[temp_dic[every_chara].x][temp_dic[every_chara].y] = 1
 
                     #创建AStar对象,并设置起点为0,0终点为9,0
                     star_point_x = characters_data[the_character_get_click].x

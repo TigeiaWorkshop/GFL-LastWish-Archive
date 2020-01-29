@@ -44,7 +44,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
     if len(all_bg_img_list) <=1:
         all_bg_img_list = glob.glob(r'Assets/img/main_menu/*.png')
     background_img_list=[]
-    loading_img =  loadImg("Assets/img/loading_img/img1.png",window_x,window_y)
+    loading_img = loadImg("Assets/img/loading_img/img1.png",window_x,window_y)
     
     for i in range(len(all_bg_img_list)):
         for event in pygame.event.get():

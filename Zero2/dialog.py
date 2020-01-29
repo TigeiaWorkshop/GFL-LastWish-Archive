@@ -17,7 +17,7 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang,id=""):
     for i in range(100):
         printf(LoadingImgAbove,(-3,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         printf(LoadingImgBelow,(-3,window_y-LoadingImgBelow.get_height()/100*i),screen)
-        time.sleep(0.005)
+        time.sleep(0.01)
         pygame.display.update()
     
     #卸载音乐
