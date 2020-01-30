@@ -18,8 +18,8 @@ def battle(chapter_name,window_x,window_y,screen,lang):
 
     #加载动作：接受角色名，动作，方位，完成对应的指令
     def action_displayer(chara_name,action,x,y,isContinue=True,ifFlip=False):
+        hidden = False
         if chara_name in sangvisFerris_name_list:
-            hidden = sangvisFerris_data[chara_name].undetected
             gif_dic = sangvisFerris_data[chara_name].gif
             if sangvisFerris_data[chara_name].current_hp < 0:
                 sangvisFerris_data[chara_name].current_hp = 0
@@ -152,7 +152,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     sangvisFerris_name_list = []
     sangvisFerris_data = {}
     for enemy in sangvisFerris:
-        sangvisFerris_data[enemy] = characterDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],sangvisFerris[enemy]["undetected"],character_gif_dic(enemy,perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"])
+        sangvisFerris_data[enemy] = sangvisFerriDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(enemy,perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
         sangvisFerris_name_list.append(enemy)
 
     #加载UI
@@ -217,7 +217,9 @@ def battle(chapter_name,window_x,window_y,screen,lang):
     light_area = calculate_darkness(characters_data)
     # 移动路径
     the_route = []
-    
+    #上个回合因为暴露被敌人发现的角色
+    the_characters_detected_last_round=[]
+
     # 游戏主循环
     while battle==True:
         #加载地图
@@ -333,9 +335,9 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                     block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
                     block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
 
-                    map2d=Array2D(block_x,block_y)
-                    for y in range(len(map_img_list)):
-                        for x in range(len(map_img_list[y])):
+                    map2d=Array2D(len(theMap[0]),len(theMap))
+                    for y in range(len(theMap)):
+                        for x in range(len(theMap[y])):
                             if blocks_setting[theMap[y][x]][1] == False:
                                 map2d[x][y]=1
                             else:
@@ -344,13 +346,13 @@ def battle(chapter_name,window_x,window_y,screen,lang):
                                     if every_chara != the_character_get_click:
                                         map2d[temp_dic[every_chara].x][temp_dic[every_chara].y] = 1
 
-                    #创建AStar对象,并设置起点为0,0终点为9,0
+                    #创建AStar对象,并设置起点和终点为
                     star_point_x = characters_data[the_character_get_click].x
                     star_point_y = characters_data[the_character_get_click].y
                     aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(block_get_click_x,block_get_click_y))
                     #开始寻路
                     pathList=aStar.start()
-                    #遍历路径点,在map2d上以'8'显示
+                    #遍历路径点,讲指定数量的点放到路径列表中
                     the_route = []
                     if pathList != None:
                         if len(pathList)>the_character_get_click_moving_range:
@@ -521,7 +523,7 @@ def battle(chapter_name,window_x,window_y,screen,lang):
         #敌方回合
         if whose_round == "sangvisFerris":
             enemies_in_control = sangvisFerris_data[sangvisFerris_name_list[enemies_in_control_id]]
-            enemy_action = AI(enemies_in_control,the_map_data,characters_data,sangvisFerris_data)
+            enemy_action = AI(enemies_in_control,the_map_data,characters_data,sangvisFerris_data,the_characters_detected_last_round)
             if enemy_action == 0:
                 action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x+how_many_moved,sangvisFerris_data[enemies_in_control].y)
             elif enemy_action == 1:

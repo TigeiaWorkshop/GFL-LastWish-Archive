@@ -445,7 +445,7 @@ map:
   - 1
   - 1
   - 1
-  - 1
+  - 0
   - 1
   - 1
   - 2
@@ -1211,7 +1211,7 @@ sangvisFerri:
     maximum_bullets: 20
     min_damage: 50
     move_range: 2
-    undetected: false
+    patrol_path: []
     x: 28
     y: 9
   jaeger:
@@ -1223,7 +1223,7 @@ sangvisFerri:
     maximum_bullets: 20
     min_damage: 450
     move_range: 2
-    undetected: false
+    patrol_path: []
     x: 9
     y: 10
   prowler:
@@ -1235,7 +1235,7 @@ sangvisFerri:
     maximum_bullets: 20
     min_damage: 100
     move_range: 10
-    undetected: false
+    patrol_path: []
     x: 28
     y: 11
   ripper:
@@ -1247,7 +1247,7 @@ sangvisFerri:
     maximum_bullets: 20
     min_damage: 300
     move_range: 5
-    undetected: false
+    patrol_path: []
     x: 28
     y: 12
   vespid:
@@ -1259,6 +1259,6 @@ sangvisFerri:
     maximum_bullets: 20
     min_damage: 400
     move_range: 4
-    undetected: false
+    patrol_path: []
     x: 28
     y: 13
