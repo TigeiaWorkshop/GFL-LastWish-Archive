@@ -219,7 +219,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     the_route = []
     #上个回合因为暴露被敌人发现的角色
     #格式：角色：[x,y]
-    the_characters_detected_last_round={}
+    the_characters_detected_last_round = {}
     all_characters_data = dicMerge(characters_data,sangvisFerris_data)
     enemy_action = None
 
@@ -239,7 +239,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             for x in range(len(map_img_list[i])):
                 if (x,y) not in light_area and dark_mode == True:
                     printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-
         #加载玩家回合
         if whose_round == "player":
             #加载结束回合的按钮
@@ -254,13 +253,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                     if pygame.mouse.get_pressed()[0]:
                         if isGetClick(end_round_button,(window_x-end_round_button.get_width()*2,window_y-400))==True:
                             whose_round = "playerToSangvisFerris"
+                            the_character_get_click = ""
                             break
                         #获取角色坐标
                         block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
                         block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
                         #控制选择菜单的显示与隐藏
                         for key in characters_data:
-                            if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y:
+                            if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True:
                                 if key != the_character_get_click:
                                     the_character_get_click = key
                                     green_hide = "SelectMenu"
@@ -327,7 +327,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                         block_get_click_y = -100
                         green_hide = False
             #显示攻击或移动范围
-            if green_hide == False:
+            if green_hide == False and action_points > 0:
                 #显示移动范围
                 if action_choice == "move":
                     if characters_data[the_character_get_click].move_range < action_points:
@@ -412,7 +412,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             if the_character_get_click != "":
                 #被点击的角色动画
                 if isWaiting == "MOVING":
-                    #print(the_route)
                     green_hide=True
                     if the_route != []:
                         if characters_data[the_character_get_click].x < the_route[0][0]:
@@ -454,7 +453,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                         if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
                             the_characters_attacking["attack"][1] = 0
                             characters_data[the_character_get_click].current_bullets -= 1
-                            isWaiting =True
+                            isWaiting = True
                             the_character_get_click = ""
                     if action_choice == "skill":
                         action_displayer(characters_data[the_character_get_click].name,"skill",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
@@ -502,8 +501,15 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 printf(enemy_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
             if text_of_endround_alpha <=0:
                 if whose_round == "playerToSangvisFerris":
+                    characters_detect_this_round = []
                     whose_round = "sangvisFerris"
                 elif whose_round == "sangvisFerrisToPlayer":
+                    enemies_in_control_id = 0
+                    characters_detect_this_round = {}
+                    for key in characters_data:
+                        if characters_data[key].undetected == False:
+                            characters_detect_this_round[key] = [characters_data[key].x,characters_data[key].y]
+                    action_points = len(characters_name_list)*7
                     whose_round = "player"
                 text_of_endround_alpha = 400
                 text_of_endround_move = 0
@@ -527,6 +533,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]
             if enemy_action == None:
                 enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting)
+                print(enemy_action)
             if enemy_action[0] == "attack":
                 action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
                 if sangvisFerris_data[enemies_in_control].gif["attack"][1] == sangvisFerris_data[enemies_in_control].gif["attack"][0][1]-2:
@@ -537,9 +544,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                     enemies_in_control_id +=1
                     if enemies_in_control_id == len(sangvisFerris_name_list):
                         whose_round = "sangvisFerrisToPlayer"
+                        total_rounds += 1
                     enemy_action = None
                     enemies_in_control = ""
             elif enemy_action[0] == "move":
+                the_route = enemy_action[1]
                 if the_route != []:
                     if sangvisFerris_data[enemies_in_control].x < the_route[0][0]:
                         sangvisFerris_data[enemies_in_control].x+=0.1
@@ -549,7 +558,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                             the_route.pop(0)
                     elif sangvisFerris_data[enemies_in_control].x > the_route[0][0]:
                         sangvisFerris_data[enemies_in_control].x-=0.1
-                        action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,True,True)
+                        action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
                         if sangvisFerris_data[enemies_in_control].x <= the_route[0][0]:
                             sangvisFerris_data[enemies_in_control].x = the_route[0][0]
                             the_route.pop(0)
@@ -561,7 +570,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                             the_route.pop(0)
                     elif sangvisFerris_data[enemies_in_control].y > the_route[0][1]:
                         sangvisFerris_data[enemies_in_control].y-=0.1
-                        action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
+                        action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,True,True)
                         if sangvisFerris_data[enemies_in_control].y <= the_route[0][1]:
                             sangvisFerris_data[enemies_in_control].y = the_route[0][1]
                             the_route.pop(0)
@@ -569,12 +578,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                     enemies_in_control_id +=1
                     if enemies_in_control_id == len(sangvisFerris_name_list):
                         whose_round = "sangvisFerrisToPlayer"
+                        total_rounds += 1
                     enemy_action = None
                     enemies_in_control = ""
             elif enemy_action[0] == "stay":
                 enemies_in_control_id +=1
                 if enemies_in_control_id == len(sangvisFerris_name_list):
                     whose_round = "sangvisFerrisToPlayer"
+                    total_rounds += 1
                 enemy_action = None
                 enemies_in_control = ""
             else:
