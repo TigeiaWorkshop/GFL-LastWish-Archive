@@ -9,7 +9,7 @@ character:
     maximum_bullets: 20
     min_damage: 250
     move_range: 4
-    undetected: false
+    undetected: False
     x: 7
     y: 5
   gsh-18:
@@ -21,7 +21,7 @@ character:
     maximum_bullets: 18
     min_damage: 100
     move_range: 3
-    undetected: false
+    undetected: False
     x: 3
     y: 4
   pp1901:
@@ -33,7 +33,7 @@ character:
     maximum_bullets: 30
     min_damage: 150
     move_range: 2
-    undetected: false
+    undetected: False
     x: 6
     y: 3
   sv-98:
@@ -45,7 +45,7 @@ character:
     maximum_bullets: 10
     min_damage: 400
     move_range: 10
-    undetected: false
+    undetected: False
     x: 10
     y: 8
 map:
