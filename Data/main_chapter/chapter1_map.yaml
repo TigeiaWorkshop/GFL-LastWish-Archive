@@ -39,7 +39,7 @@ character:
   sv-98:
     attack_range: 7
     current_bullets: 1
-    current_hp: 2500
+    current_hp: 100
     max_damage: 650
     max_hp: 2500
     maximum_bullets: 10

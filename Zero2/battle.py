@@ -19,6 +19,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     #加载动作：接受角色名，动作，方位，完成对应的指令
     def action_displayer(chara_name,action,x,y,isContinue=True,ifFlip=False):
         hidden = False
+        hp_img = hp_green
         if chara_name in sangvisFerris_name_list:
             gif_dic = sangvisFerris_data[chara_name].gif
             if sangvisFerris_data[chara_name].current_hp < 0:
@@ -29,10 +30,18 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
         elif chara_name in characters_name_list:
             hidden = characters_data[chara_name].undetected
             gif_dic = characters_data[chara_name].gif
-            if characters_data[chara_name].current_hp<0:
+            if characters_data[chara_name].current_hp<=0:
                 characters_data[chara_name].current_hp = 0
-            current_hp_to_display = fontRender(str(characters_data[chara_name].current_hp)+"/"+str(characters_data[chara_name].max_hp),"black",10)
-            percent_of_hp = characters_data[chara_name].current_hp/characters_data[chara_name].max_hp
+                if characters_data[chara_name].dying == False:
+                    characters_data[chara_name].dying = 3
+                current_hp_to_display = fontRender(str(characters_data[chara_name].dying)+"/3","black",10)
+                percent_of_hp = characters_data[chara_name].dying/3
+                hp_img = hp_red
+            else:
+                if characters_data[chara_name].dying != False:
+                    characters_data[chara_name].dying = False
+                current_hp_to_display = fontRender(str(characters_data[chara_name].current_hp)+"/"+str(characters_data[chara_name].max_hp),"black",10)
+                percent_of_hp = characters_data[chara_name].current_hp/characters_data[chara_name].max_hp
             current_bullets_situation = fontRender(str(characters_data[chara_name].current_bullets)+"/"+str(characters_data[chara_name].maximum_bullets),"black",10)
 
         if percent_of_hp<0:
@@ -49,7 +58,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             printf(img_of_char,(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
         if percent_of_hp>0:
             printf(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
-            printf(pygame.transform.scale(hp_red,(int(perBlockWidth*percent_of_hp),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
+            printf(pygame.transform.scale(hp_img,(int(perBlockWidth*percent_of_hp),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
             printf(current_hp_to_display,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
             printf(current_bullets_situation,(x*perBlockWidth+current_hp_to_display.get_width()-current_bullets_situation.get_width(),y*perBlockHeight*0.98-current_bullets_situation.get_height()),screen,local_x,local_y)
         gif_dic[action][1]+=1
@@ -166,6 +175,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     #加载血条
     hp_empty = loadImg("Assets/img/UI/hp_empty.png", perBlockWidth, perBlockHeight/5)
     hp_red = loadImg("Assets/img/UI/hp_red.png", perBlockWidth, perBlockHeight/5)
+    hp_green = loadImg("Assets/img/UI/hp_green.png", perBlockWidth, perBlockHeight/5)
     #各色方块/方块标准
     green_original = loadImg("Assets/img/UI/green.png")
     green_original.set_alpha(100)
@@ -266,7 +276,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                         block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
                         #控制选择菜单的显示与隐藏
                         for key in characters_data:
-                            if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True:
+                            if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill":
                                 if key != the_character_get_click:
                                     the_character_get_click = key
                                     green_hide = "SelectMenu"
@@ -382,7 +392,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                         printf(green,(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
 
                 #显示攻击范围        
-                elif action_choice == "attack" or action_choice == "skill":
+                elif action_choice == "attack":
                     attacking_range = []
                     for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range):
                         if y < characters_data[the_character_get_click].y:
@@ -405,6 +415,38 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                                 enemies_get_attack = enemies
                                 green_hide = True
                                 break
+                #显示技能范围        
+                elif action_choice == "skill":
+                    skill_range = []
+                    for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range):
+                        if y < characters_data[the_character_get_click].y:
+                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)):
+                                if blocks_setting[theMap[y][x]][1] == True:
+                                    printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                    skill_range.append([x,y])
+                        else:
+                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)):
+                                if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
+                                    pass
+                                else:
+                                    if blocks_setting[theMap[y][x]][1] == True:
+                                        printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        skill_range.append([x,y])
+                    if [block_get_click_x,block_get_click_y] in skill_range:
+                        if the_character_get_click == "gsh-18":
+                            for character in characters_data:
+                                if block_get_click_x == characters_data[character].x and  block_get_click_y == characters_data[character].y:
+                                    isWaiting = "ATTACKING"
+                                    enemies_get_attack = character
+                                    green_hide = True
+                                    break
+                        else:
+                            for enemies in sangvisFerris_data:
+                                if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                                    isWaiting = "ATTACKING"
+                                    enemies_get_attack = enemies
+                                    green_hide = True
+                                    break
                 elif action_choice == "reload":
                     if characters_data[the_character_get_click].maximum_bullets-characters_data[the_character_get_click].current_bullets > 0:
                         #向上取整
@@ -454,23 +496,28 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                         action_displayer(characters_data[the_character_get_click].name,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
                         if characters_data[the_character_get_click].gif["attack"][1] == characters_data[the_character_get_click].gif["attack"][0][1]-2:
                             sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                        
                         the_characters_attacking = characters_data[the_character_get_click].gif
                         if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
                             the_characters_attacking["attack"][1] = 0
                             characters_data[the_character_get_click].current_bullets -= 1
                             isWaiting = True
                             the_character_get_click = ""
+                            action_choice = ""
                     if action_choice == "skill":
                         action_displayer(characters_data[the_character_get_click].name,"skill",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
                         if characters_data[the_character_get_click].gif["skill"][1] == characters_data[the_character_get_click].gif["skill"][0][1]-2:
-                            sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                        
+                            if the_character_get_click == "gsh-18":
+                                characters_data[enemies_get_attack].heal(characters_data[the_character_get_click].min_damage)
+                                if characters_data[enemies_get_attack].current_hp > characters_data[enemies_get_attack].max_hp:
+                                    characters_data[enemies_get_attack].current_hp = characters_data[enemies_get_attack].max_hp
+                            else:
+                                sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
                         the_characters_attacking = characters_data[the_character_get_click].gif
                         if the_characters_attacking["skill"][1] == the_characters_attacking["skill"][0][1]-1:
                             the_characters_attacking["skill"][1] = 0
                             isWaiting =True
                             the_character_get_click = ""
+                            action_choice = ""
                 elif isWaiting == True:
                     action_displayer(characters_data[the_character_get_click].name,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
             
@@ -507,7 +554,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 printf(enemy_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
             if text_of_endround_alpha <=0:
                 if whose_round == "playerToSangvisFerris":
-                    characters_detect_this_round = []
+                    for every_chara in characters_data:
+                        if characters_data[every_chara].dying != False:
+                            characters_data[every_chara].dying -= 1
                     whose_round = "sangvisFerris"
                 elif whose_round == "sangvisFerrisToPlayer":
                     enemies_in_control_id = 0
