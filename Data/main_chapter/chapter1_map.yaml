@@ -1217,7 +1217,7 @@ sangvisFerri:
   jaeger:
     attack_range: 6
     current_bullets: 20
-    current_hp: 2000
+    current_hp: 200
     max_damage: 500
     max_hp: 200
     maximum_bullets: 20

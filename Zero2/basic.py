@@ -22,7 +22,7 @@ def loadImg(path,length=None,height=None,ifConvertAlpha=True):
             raise Exception('Both length and height must be positive')
 
 #高级图片加载模块：接收图片路径,长,高,返回对应的图片class
-def loadImage(path,description="Default",ifConvertAlpha=True,width=None,height=None,x=None,y=None):
+def loadImage(path,width=None,height=None,x=None,y=None,description="Default",ifConvertAlpha=True):
     class theImg:
         def __init__(self,img,description,width,height,x,y):
             self.img = img
@@ -31,7 +31,7 @@ def loadImage(path,description="Default",ifConvertAlpha=True,width=None,height=N
             self.height = height
             self.x = x
             self.y = y
-    if ifConvertAlpha ==False:
+    if ifConvertAlpha == False:
         return theImg(pygame.image.load(os.path.join(path)),description,width,height,x,y)
     else:
         return theImg(pygame.image.load(os.path.join(path)).convert_alpha(),description,width,height,x,y)

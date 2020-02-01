@@ -174,6 +174,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     black_original = loadImg("Assets/img/UI/black.png")
     black_original.set_alpha(100)
     new_block_type = 0
+    #回合结束
+    score_original = loadImage("Assets/img/UI/score.png",300,600,200,200)
     #文字
     text_of_endround_move = 0
     text_of_endround_alpha = 400
@@ -222,7 +224,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     the_characters_detected_last_round = {}
     all_characters_data = dicMerge(characters_data,sangvisFerris_data)
     enemy_action = None
-
+    result_of_round = {
+        "total_kills" : 0,
+        "total_time" : time.time(),
+        "times_characters_down" : 0
+    }
     # 游戏主循环
     while battle==True:
         #加载地图
@@ -327,7 +333,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                         block_get_click_y = -100
                         green_hide = False
             #显示攻击或移动范围
-            if green_hide == False and action_points > 0:
+            if green_hide == False and action_points > 0 and the_character_get_click != "":
                 #显示移动范围
                 if action_choice == "move":
                     if characters_data[the_character_get_click].move_range < action_points:
@@ -516,17 +522,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 text_now_total_rounds.set_alpha(text_of_endround_alpha)
                 your_round_txt.set_alpha(text_of_endround_alpha)
                 enemy_round_txt.set_alpha(text_of_endround_alpha)
-        """
+
         #检测所有敌人是否都已经被消灭
-        for i in range(len(sangvisFerris_name_list)):
-            if sangvisFerris_data[sangvisFerris_name_list[i]].current_hp>0:
-                break
-            if i == len(sangvisFerris_name_list)-1:
-                battle = False
-        if battle == False:
-            exit()
-            break
-        """
+        if len(sangvisFerris_name_list) == 0 and whose_round != "result":
+            whose_round = "result_win"
+        
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑中间检测区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
         #敌方回合
         if whose_round == "sangvisFerris":
@@ -633,6 +633,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             the_characters_attacking = sangvisFerris_data[the_dead_one].gif
             if the_characters_attacking["die"][1] == the_characters_attacking["die"][0][1]-1:
                 sangvisFerris_data.pop(the_dead_one)
+                sangvisFerris_name_list.remove(the_dead_one)
+                result_of_round["total_kills"]+=1
             the_dead_one=""
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
 
@@ -677,8 +679,31 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             pygame.mixer.music.play(loops=9999, start=0.0)
         """
 
-        points_left_txt = fontRender("剩余行动值："+str(action_points), "white")
+        points_left_txt = fontRender("剩余行动值："+str(action_points),"white")
         printf(points_left_txt,(0,0),screen)
 
+        #结束动画
+        if whose_round == "result_win":
+            total_kills = fontRender("总杀敌："+str(result_of_round["total_kills"]),"white",20)
+            total_time = fontRender("通关时间："+str(time.strftime('%M:%S',time.localtime(time.time()-result_of_round["total_time"]))),"white",20)
+            total_rounds_txt = fontRender("通关回合数："+str(total_rounds),"white",20)
+            times_characters_down = fontRender("友方角色被击倒："+str(result_of_round["times_characters_down"]),"white",20)
+            player_rate = fontRender("评价：A","white",20)
+            press_space = fontRender("按空格继续","white",20)
+            whose_round = "result"
+        
+        if whose_round == "result":
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    if event.key == K_SPACE:
+                        battle = False
+            printIn(score_original,screen)
+            printf(total_kills,(250,300),screen)
+            printf(total_time,(250,350),screen)
+            printf(total_rounds_txt,(250,400),screen)
+            printf(times_characters_down,(250,450),screen)
+            printf(player_rate,(250,500),screen)
+            printf(press_space,(250,700),screen)
         #画面更新
         pygame.display.update()
+
