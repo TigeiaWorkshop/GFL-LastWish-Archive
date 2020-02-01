@@ -11,6 +11,7 @@ class characterDataManager:
         self.y = y
         self.attack_range = attack_range
         self.move_range = move_range
+        self.dying = False
         self.undetected = detect
         self.gif = gif_dic
         self.current_bullets = current_bullets

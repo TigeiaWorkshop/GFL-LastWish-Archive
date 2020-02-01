@@ -535,7 +535,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting)
                 print(enemy_action)
             if enemy_action[0] == "attack":
-                action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
+                if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
+                    action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
                 if sangvisFerris_data[enemies_in_control].gif["attack"][1] == sangvisFerris_data[enemies_in_control].gif["attack"][0][1]-2:
                     characters_data[enemy_action[1]].decreaseHp(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                 the_characters_attacking = sangvisFerris_data[enemies_in_control].gif
@@ -552,25 +553,29 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 if the_route != []:
                     if sangvisFerris_data[enemies_in_control].x < the_route[0][0]:
                         sangvisFerris_data[enemies_in_control].x+=0.1
-                        action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
                         if sangvisFerris_data[enemies_in_control].x >= the_route[0][0]:
                             sangvisFerris_data[enemies_in_control].x = the_route[0][0]
                             the_route.pop(0)
                     elif sangvisFerris_data[enemies_in_control].x > the_route[0][0]:
                         sangvisFerris_data[enemies_in_control].x-=0.1
-                        action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
                         if sangvisFerris_data[enemies_in_control].x <= the_route[0][0]:
                             sangvisFerris_data[enemies_in_control].x = the_route[0][0]
                             the_route.pop(0)
                     elif sangvisFerris_data[enemies_in_control].y < the_route[0][1]:
                         sangvisFerris_data[enemies_in_control].y+=0.1
-                        action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
                         if sangvisFerris_data[enemies_in_control].y >= the_route[0][1]:
                             sangvisFerris_data[enemies_in_control].y = the_route[0][1]
                             the_route.pop(0)
                     elif sangvisFerris_data[enemies_in_control].y > the_route[0][1]:
                         sangvisFerris_data[enemies_in_control].y-=0.1
-                        action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,True,True)
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,True,True)
                         if sangvisFerris_data[enemies_in_control].y <= the_route[0][1]:
                             sangvisFerris_data[enemies_in_control].y = the_route[0][1]
                             the_route.pop(0)
@@ -673,11 +678,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 all_snow_on_screen[i].x = random.randint(0,window_x*2)
 
         #加载音乐
-        """
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load("Assets/music/"+bg_music)
             pygame.mixer.music.play(loops=9999, start=0.0)
-        """
 
         points_left_txt = fontRender("剩余行动值："+str(action_points),"white")
         printf(points_left_txt,(0,0),screen)
