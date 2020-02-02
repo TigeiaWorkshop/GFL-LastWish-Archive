@@ -3,6 +3,7 @@ import os
 import time
 from sys import exit
 
+import numpy as np
 import cv2
 import pygame
 import yaml
@@ -40,32 +41,9 @@ def mainMenu(window_x,window_y,lang,mode=""):
     pygame.display.set_caption(text_title) #窗口标题
 
     #加载主菜单背景
-    all_bg_img_list = glob.glob(r'Assets/img/main_menu/*.jpg')
-    if len(all_bg_img_list) <=1:
-        all_bg_img_list = glob.glob(r'Assets/img/main_menu/*.png')
-    background_img_list=[]
-    loading_img = loadImg("Assets/img/loading_img/img1.png",window_x,window_y)
-    
-    for i in range(len(all_bg_img_list)):
-        for event in pygame.event.get():
-            if event.type == KEYDOWN and event.key == K_ESCAPE:
-                exit()
-        img = loadImg("Assets/img/main_menu/bgImg"+str(i)+".jpg")
-        if window_x != 1920 or window_y != 1080:
-            img = pygame.transform.scale(img,(window_x,window_y))
-        background_img_list.append(img)
-        percent_of_img_loaded = '{:.0f}%'.format(i/len(all_bg_img_list)*100)
-        if mode == "safe":
-            break
-        printf(loading_img, (0,0),screen)
-        the_str = fontRender(now_loading+": "+str(percent_of_img_loaded), "white")
-        printf(the_str, ((window_x-the_str.get_width())/2,window_y-100),screen)
-        pygame.display.update()
-    #图片列表转元组以节约内存
-    background_img_list = tuple(background_img_list)
+    videoCapture = cv2.VideoCapture("Assets/movie/SquadAR.mp4")
     
     #数值初始化
-    background_img_id = 0
     cover_alpha = 0
     background_img_id = 0
     menu_type = 0
@@ -96,7 +74,16 @@ def mainMenu(window_x,window_y,lang,mode=""):
                     if menu_type == 1:
                         dialog_display_function("chapter1",window_x,window_y,screen,lang)
         
-        printf(background_img_list[background_img_id], (0,0),screen)
+        if videoCapture.isOpened():
+            ret, frame = videoCapture.read()
+            try:
+                frame = np.rot90(frame,k=-1)
+            except:
+                continue
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) 
+            frame = pygame.surfarray.make_surface(frame)
+            frame = pygame.transform.flip(frame,False,True)
+            screen.blit(frame, (0,0))
         
         if isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
@@ -143,14 +130,6 @@ def mainMenu(window_x,window_y,lang,mode=""):
             else:
                 printf(back_button.n, (txt_location,window_y-150),screen)
 
-        if mode != "safe":
-            background_img_id += 1
-        
-        #背景图片动画
-        if background_img_id == len(all_bg_img_list):
-            background_img_id = 0
-
-        time.sleep(0.04)
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')
             pygame.mixer.music.play(loops=9999, start=0.0)
