@@ -42,7 +42,6 @@ def mainMenu(window_x,window_y,lang,mode=""):
 
     #加载主菜单背景
     videoCapture = cv2.VideoCapture("Assets/movie/SquadAR.mp4")
-    
     #数值初始化
     cover_alpha = 0
     background_img_id = 0
@@ -73,17 +72,20 @@ def mainMenu(window_x,window_y,lang,mode=""):
                 elif isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
                     if menu_type == 1:
                         dialog_display_function("chapter1",window_x,window_y,screen,lang)
-        
+                        
+        #背景图片
         if videoCapture.isOpened():
             ret, frame = videoCapture.read()
             try:
                 frame = np.rot90(frame,k=-1)
             except:
                 continue
+            if videoCapture.get(1) >= 3105:
+                videoCapture.set(1, 935)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = pygame.surfarray.make_surface(frame)
             frame = pygame.transform.flip(frame,False,True)
-            frame = pygame.transform.scale(frame, (1920,1080)).convert_alpha()
+            frame = pygame.transform.scale(frame, (1920,1080))
             printf(frame, (0,0),screen)
         
         if isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
