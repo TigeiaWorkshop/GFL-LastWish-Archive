@@ -40,6 +40,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             else:
                 if characters_data[chara_name].dying != False:
                     characters_data[chara_name].dying = False
+                    gif_dic["die"][1] = 0
                 current_hp_to_display = fontRender(str(characters_data[chara_name].current_hp)+"/"+str(characters_data[chara_name].max_hp),"black",10)
                 percent_of_hp = characters_data[chara_name].current_hp/characters_data[chara_name].max_hp
             current_bullets_situation = fontRender(str(characters_data[chara_name].current_bullets)+"/"+str(characters_data[chara_name].maximum_bullets),"black",10)
@@ -61,17 +62,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             printf(pygame.transform.scale(hp_img,(int(perBlockWidth*percent_of_hp),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
             printf(current_hp_to_display,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
             printf(current_bullets_situation,(x*perBlockWidth+current_hp_to_display.get_width()-current_bullets_situation.get_width(),y*perBlockHeight*0.98-current_bullets_situation.get_height()),screen,local_x,local_y)
+        
         gif_dic[action][1]+=1
-        #射击动作
-        if gif_dic[action][1] == 5 and action == "attack":
-            pass
-            #bullets_list.append(Bullet(characters_data.x+img_of_char.get_width()-20,characters_data.y+img_of_char.get_height()/2-5,300))
         if isContinue==True:
             if gif_dic[action][1] == gif_dic[action][0][1]:
                 gif_dic[action][1] = 0
         elif isContinue==False:
             if gif_dic[action][1] == gif_dic[action][0][1]:
-                return("Done")
+                gif_dic[action][1]-=1
 
     #加载背景图片
     all_env_file_list = glob.glob(r'Assets/img/environment/*.png')
@@ -346,13 +344,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             if green_hide == False and action_points > 0 and the_character_get_click != "":
                 #显示移动范围
                 if action_choice == "move":
+                    mouse_x,mouse_y=pygame.mouse.get_pos()
+                    block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
+                    block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
                     if characters_data[the_character_get_click].move_range < action_points:
                         the_character_get_click_moving_range = characters_data[the_character_get_click].move_range
                     elif characters_data[the_character_get_click].move_range > action_points:
                         the_character_get_click_moving_range = action_points
-                    mouse_x,mouse_y=pygame.mouse.get_pos()
-                    block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
-                    block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
                     #建立地图
                     map2d=Array2D(len(theMap[0]),len(theMap))
                     #历遍地图，设置障碍方块
@@ -360,10 +358,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                         for x in range(len(theMap[y])):
                             if blocks_setting[theMap[y][x]][1] == False:
                                 map2d[x][y]=1
-                    #  历遍所有角色，将角色的坐标点设置为障碍方块
+                    # 历遍所有角色，将角色的坐标点设置为障碍方块
                     for every_chara in all_characters_data:
-                        if every_chara != the_character_get_click:
-                            map2d[all_characters_data[every_chara].x][all_characters_data[every_chara].y] = 1
+                        map2d[all_characters_data[every_chara].x][all_characters_data[every_chara].y] = 1
                     #创建AStar对象,并设置起点和终点为
                     star_point_x = characters_data[the_character_get_click].x
                     star_point_y = characters_data[the_character_get_click].y
@@ -386,6 +383,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                                 star_point_y+=1
                             elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
                                 star_point_y-=1
+                            else:
+                                #快速跳出
+                                break
                             the_route.append([star_point_x,star_point_y])
                     
                     for i in range(len(the_route)):
@@ -652,7 +652,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                     characters_data[every_chara].undetected = True
                 else:
                     characters_data[every_chara].undetected = False
-                action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+                if characters_data[every_chara].dying == False:
+                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+                else:
+                    action_displayer(characters_data[every_chara].name,"die",characters_data[every_chara].x,characters_data[every_chara].y,False)
         #敌方动画
         for enemies in sangvisFerris_data:
             if enemies != enemies_in_control:

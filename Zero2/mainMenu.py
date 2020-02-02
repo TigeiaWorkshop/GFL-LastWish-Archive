@@ -80,10 +80,11 @@ def mainMenu(window_x,window_y,lang,mode=""):
                 frame = np.rot90(frame,k=-1)
             except:
                 continue
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) 
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = pygame.surfarray.make_surface(frame)
             frame = pygame.transform.flip(frame,False,True)
-            screen.blit(frame, (0,0))
+            frame = pygame.transform.scale(frame, (1920,1080)).convert_alpha()
+            printf(frame, (0,0),screen)
         
         if isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
