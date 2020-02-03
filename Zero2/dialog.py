@@ -53,9 +53,8 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang):
     displayed_line = -1
     mouse_gif_id=1
     #渐入效果
-    for i in range(0,250,2):
+    for i in range(0,250,5):
         img = dialog_bg_img_dic[dialog_display[display_num][1][0]]
-        img.set_alpha(i)
         printf(img,(0,0),screen)
         if len(dialog_display[display_num][0])==2:
             img = npc_img_dic[dialog_display[display_num][0][0]]
@@ -79,7 +78,6 @@ def dialog_display_function(chapter_name,window_x,window_y,screen,lang):
 
     #主循环
     while len(dialog_display)!=0 and display_num<len(dialog_display):
-        
         #背景
         printf(dialog_bg_img_dic[dialog_display[display_num][1][0]],(0,0),screen)
         #加载对话任务

@@ -1,33 +1,29 @@
-main_menu: {
-    now_loading: "Loading",
-    text_title: "Girls' Frontline-Last wish",
-    text_continue: "Continue",
-    text_chooseChapter: "Select Chapter",
-    text_setting: "setting",
-    text_dlc: "DLC",
-    text_workshop: "Workshop",
-    text_exit: "Exit",
-    }
-chapter: {
-    c1: "chapter1",
-    c2: "chapter2",
-    c3: "chapter3",
-    c4: "chapter4",
-    c5: "chapter5",
-    c6: "chapter6",
-    c7: "chapter7",
-    c8: "chapter8",
-    back: "Back",
-    }
-Battle_UI: {
-    yourRound: "Your Round",
-    enemyRound: "enemyRound",
-    numRound: "NaN Round",
-    numChapter: "Chapter NaN"
-}
-select_menu: {
-    attack: "Attack",
-    move: "Move",
-    skill: "Skill",
-    reload: "Reload",
-    }
+Battle_UI:
+  enemyRound: enemyRound
+  numChapter: Chapter NaN
+  numRound: NaN Round
+  yourRound: Your Round
+chapter:
+- chapter1
+- chapter2
+- chapter3
+- chapter4
+- chapter5
+- chapter6
+- chapter7
+- chapter8
+- back
+main_menu:
+  now_loading: Loading
+  text_chooseChapter: Select Chapter
+  text_continue: Continue
+  text_dlc: DLC
+  text_exit: Exit
+  text_setting: setting
+  text_title: Girls' Frontline-Last wish
+  text_workshop: Workshop
+select_menu:
+  attack: Attack
+  move: Move
+  reload: Reload
+  skill: Skill

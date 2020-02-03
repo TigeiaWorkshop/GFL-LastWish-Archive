@@ -1,4 +1,3 @@
-import glob
 import os
 import time
 from sys import exit
@@ -26,15 +25,11 @@ def mainMenu(window_x,window_y,lang,mode=""):
         text_dlc = fontRenderPro(lang_cn['main_menu']['text_dlc'],"disable")
         text_workshop = fontRenderPro(lang_cn['main_menu']['text_workshop'],"disable")
         text_exit = fontRenderPro(lang_cn['main_menu']['text_exit'],"enable")
-        c1 = fontRenderPro(lang_cn['chapter']['c1'],"enable")
-        c2 = fontRenderPro(lang_cn['chapter']['c2'],"disable")
-        c3 = fontRenderPro(lang_cn['chapter']['c3'],"disable")
-        c4 = fontRenderPro(lang_cn['chapter']['c4'],"disable")
-        c5 = fontRenderPro(lang_cn['chapter']['c5'],"disable")
-        c6 = fontRenderPro(lang_cn['chapter']['c6'],"disable")
-        c7 = fontRenderPro(lang_cn['chapter']['c7'],"disable")
-        c8 = fontRenderPro(lang_cn['chapter']['c8'],"disable")
-        back_button = fontRenderPro(lang_cn['chapter']['back'],"enable")
+        chapter_select = lang_cn['chapter']
+    
+    #加载菜单选择页面的文字
+    for i in range(len(chapter_select)):
+        chapter_select[i] = fontRenderPro(chapter_select[i],"disable")
 
     # 创建窗口
     screen = pygame.display.set_mode((window_x, window_y))
@@ -56,23 +51,23 @@ def mainMenu(window_x,window_y,lang,mode=""):
             if event.type == KEYDOWN and event.key == K_s:
                 pygame.display.toggle_fullscreen()
             elif event.type == MOUSEBUTTONDOWN:
-                #退出
-                if isGetClick(text_exit.b, (txt_location,750)):
-                    if menu_type == 0:
+                if menu_type == 0:
+                    #退出
+                    if isGetClick(text_exit.b, (txt_location,750)):
                         exit()
-                #选择章节
-                elif isGetClick(text_chooseChapter.b, (txt_location,350)):
-                    if menu_type == 0:
+                    #选择章节
+                    elif isGetClick(text_chooseChapter.b, (txt_location,350)):
                         menu_type = 1
-                #返回
-                elif isGetClick(back_button.b, (txt_location,window_y-150)):
-                    if menu_type == 1:
+                elif menu_type == 1:
+                    #返回
+                    if isGetClick(chapter_select[0-1].b, (txt_location,(window_y-200)/9*(len(chapter_select)))):
                         menu_type = 0
-                #章节选择
-                elif isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
-                    if menu_type == 1:
-                        dialog_display_function("chapter1",window_x,window_y,screen,lang)
-                        
+                    #章节选择
+                    else:
+                        for i in range(len(chapter_select)-1):
+                            if isGetClick(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1))) and i != len(chapter_select)-1:
+                                dialog_display_function("chapter"+str(i+1),window_x,window_y,screen,lang)
+                                break
         #背景图片
         if videoCapture.isOpened():
             ret, frame = videoCapture.read()
@@ -88,7 +83,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
             frame = pygame.transform.scale(frame, (1920,1080))
             printf(frame, (0,0),screen)
         
-        if isGetClick(c1.b, (txt_location,(window_y-200)/9*1)):
+        if isGetClick(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
                 cover_alpha+=10
         else:
@@ -114,24 +109,11 @@ def mainMenu(window_x,window_y,lang,mode=""):
             else:
                 printf(text_exit.n, (txt_location,750),screen)
         elif menu_type == 1:
-            if isGetClick(c1.n, (txt_location,(window_y-200)/9*1)):
-                printf(c1.b, (txt_location,(window_y-200)/9*1),screen)
-            else:
-                printf(c1.n, (txt_location,(window_y-200)/9*1),screen)
-            if isGetClick (c2.n, (txt_location,(window_y-200)/9*2)):
-                printf(c2.b, (txt_location,(window_y-200)/9*2),screen)
-            else:
-                printf(c2.n, (txt_location,(window_y-200)/9*2),screen)
-            printf(c3.n, (txt_location,(window_y-200)/9*3),screen)
-            printf(c4.n, (txt_location,(window_y-200)/9*4),screen)
-            printf(c5.n, (txt_location,(window_y-200)/9*5),screen)
-            printf(c6.n, (txt_location,(window_y-200)/9*6),screen)
-            printf(c7.n, (txt_location,(window_y-200)/9*7),screen)
-            printf(c8.n, (txt_location,(window_y-200)/9*8),screen)
-            if isGetClick(back_button.n, (txt_location,window_y-150)):
-                printf(back_button.b, (txt_location,window_y-150),screen)
-            else:
-                printf(back_button.n, (txt_location,window_y-150),screen)
+            for i in range(len(chapter_select)):
+                if isGetClick(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1))):
+                    printf(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1)),screen)
+                else:
+                    printf(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1)),screen)
 
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')

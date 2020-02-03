@@ -1,33 +1,29 @@
-main_menu: {
-    now_loading: "正在加载",
-    text_title: "少女前线-遗愿",
-    text_continue: "继续游戏",
-    text_chooseChapter: "选择章节",
-    text_setting: "设置",
-    text_dlc: "可下载内容",
-    text_workshop: "创意工坊",
-    text_exit: "退出",
-    }
-chapter: {
-    c1: "第一章",
-    c2: "第二章",
-    c3: "第三章",
-    c4: "第四章",
-    c5: "第五章",
-    c6: "第六章",
-    c7: "第七章",
-    c8: "第八章",
-    back: "返回",
-    }
-Battle_UI: {
-    yourRound: "你的回合",
-    enemyRound: "敌方回合",
-    numRound: "第NaN回合",
-    numChapter: "第NaN章"
-}
-select_menu: {
-    attack: "攻击",
-    move: "移动",
-    skill: "技能",
-    reload: "换弹",
-    }
+Battle_UI:
+  enemyRound: 敌方回合
+  numChapter: 第NaN章
+  numRound: 第NaN回合
+  yourRound: 你的回合
+chapter:
+- 第一章
+- 第二章
+- 第三章
+- 第四章
+- 第五章
+- 第六章
+- 第七章
+- 第八章
+- 返回
+main_menu:
+  now_loading: 正在加载
+  text_chooseChapter: 选择章节
+  text_continue: 继续游戏
+  text_dlc: 可下载内容
+  text_exit: 退出
+  text_setting: 设置
+  text_title: 少女前线-遗愿
+  text_workshop: 创意工坊
+select_menu:
+  attack: 攻击
+  move: 移动
+  reload: 换弹
+  skill: 技能
