@@ -228,6 +228,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
         "total_time" : time.time(),
         "times_characters_down" : 0
     }
+    #行走的声音
+    walk_on_snow_sound = pygame.mixer.Sound("Assets/sound/snow/Snowrunning1.wav")
+
     # 游戏主循环
     while battle==True:
         #加载地图
@@ -286,6 +289,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 if isHover(end_round_button):
                     whose_round = "playerToSangvisFerris"
                     the_character_get_click = ""
+                    green_hide = True
                 #是否在显示移动范围后点击了且点击区域在移动范围内
                 elif the_route != [] and [block_get_click_x,block_get_click_y] in the_route:
                     isWaiting = "MOVING"
@@ -458,6 +462,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 if isWaiting == "MOVING":
                     green_hide=True
                     if the_route != []:
+                        if pygame.mixer.get_busy() == False:
+                            walk_on_snow_sound.play()
                         if characters_data[the_character_get_click].x < the_route[0][0]:
                             characters_data[the_character_get_click].x+=0.125
                             action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
@@ -483,6 +489,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                                 characters_data[the_character_get_click].y = the_route[0][1]
                                 the_route.pop(0)
                     else:
+                        walk_on_snow_sound.stop()
                         isWaiting =True
                         the_character_get_click = ""
                     light_area = calculate_darkness(characters_data)
@@ -595,6 +602,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             elif enemy_action[0] == "move":
                 the_route = enemy_action[1]
                 if the_route != []:
+                    if pygame.mixer.get_busy() == False:
+                            walk_on_snow_sound.play()
                     if sangvisFerris_data[enemies_in_control].x < the_route[0][0]:
                         sangvisFerris_data[enemies_in_control].x+=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
@@ -624,6 +633,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                             sangvisFerris_data[enemies_in_control].y = the_route[0][1]
                             the_route.pop(0)
                 else:
+                    walk_on_snow_sound.stop()
                     enemies_in_control_id +=1
                     if enemies_in_control_id == len(sangvisFerris_data):
                         whose_round = "sangvisFerrisToPlayer"
@@ -730,6 +740,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load("Assets/music/"+bg_music)
             pygame.mixer.music.play(loops=9999, start=0.0)
+            pygame.mixer.music.set_volume(0.1)
 
         points_left_txt = fontRender("剩余行动值："+str(action_points),"white")
         printf(points_left_txt,(0,0),screen)
