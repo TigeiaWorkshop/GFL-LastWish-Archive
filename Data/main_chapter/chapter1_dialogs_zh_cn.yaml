@@ -1,40 +1,35 @@
 title: 雪上之路
-dialog:
+dialog_before_battle:
 - - - NAR
   - - research
     - Room_1
     - 
-
   - - test testASSsaS
     - 旁白 test l1
     - 旁白 test l2
     - qqqqq旁白 test 
-
 - - - helianthus_1
     - kryuger_dark
   - - duel
     - Room_1
     - Helianthus
   - - 报告，一切正常
-
 - - - kalina_1
     - helianthus_dark_1
   - - duel
     - First_Kiss
     - Kryuger
   - - 我怎么知道
-
-dialog2:
+dialog_during_battle: None
+dialog_after_battle:
 - - - NAR
   - - research
     - Room_1
     - 
-
   - - test testASSsaS
     - 旁白 test l1
     - 旁白 test l2
     - qqqqq旁白 test 
-
 - - - helianthus_1
     - kryuger_dark
   - - duel

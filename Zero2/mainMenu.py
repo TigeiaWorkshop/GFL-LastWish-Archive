@@ -66,7 +66,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
                     else:
                         for i in range(len(chapter_select)-1):
                             if isGetClick(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1))) and i != len(chapter_select)-1:
-                                dialog_display_function("chapter"+str(i+1),window_x,window_y,screen,lang)
+                                dialog("chapter"+str(i+1),window_x,window_y,screen,lang)
                                 break
         #背景图片
         if videoCapture.isOpened():

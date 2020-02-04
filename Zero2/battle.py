@@ -6,6 +6,7 @@ from sys import exit
 import pygame
 import yaml
 from pygame.locals import *
+import gc
 
 from Zero2.basic import *
 from Zero2.characterDataManager import *
@@ -20,14 +21,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     def action_displayer(chara_name,action,x,y,isContinue=True,ifFlip=False):
         hidden = False
         hp_img = hp_green
-        if chara_name in sangvisFerris_name_list:
+        if chara_name in sangvisFerris_data:
             gif_dic = sangvisFerris_data[chara_name].gif
             if sangvisFerris_data[chara_name].current_hp < 0:
                 sangvisFerris_data[chara_name].current_hp = 0
             current_hp_to_display = fontRender(str(sangvisFerris_data[chara_name].current_hp)+"/"+str(sangvisFerris_data[chara_name].max_hp),"black",10)
             percent_of_hp = sangvisFerris_data[chara_name].current_hp/sangvisFerris_data[chara_name].max_hp
             current_bullets_situation = fontRender(str(sangvisFerris_data[chara_name].current_bullets)+"/"+str(sangvisFerris_data[chara_name].maximum_bullets),"black",10)
-        elif chara_name in characters_name_list:
+        elif chara_name in characters_data:
             hidden = characters_data[chara_name].undetected
             gif_dic = characters_data[chara_name].gif
             if characters_data[chara_name].current_hp<=0:
@@ -78,7 +79,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
         img_name = all_env_file_list[i].replace("Assets","").replace("img","").replace("environment","").replace(".png","").replace("\\","").replace("/","")
         env_img_list[img_name] = loadImg(all_env_file_list[i])
 
-    my_font =pygame.font.SysFont('simsunnsimsun',25)
     #读取并初始化章节信息
     with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
         chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -132,39 +132,30 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     for snowflake in all_snow_img:
         snow_list.append(loadImg(snowflake))
 
-    snow_width = int(window_x/200)
     all_snow_img_len = len(snow_list)-1
     all_snow_on_screen = []
-
-    class theImg:
-        def __init__(self,x,y,img):
-            self.x = x
-            self.y = y 
-            self.img = img
-
     for i in range(100):
         the_snow_add_y = random.randint(1,window_y)
         the_snow_add_x = random.randint(1,window_x*1.5)
-        the_snow_add_img = pygame.transform.scale(snow_list[random.randint(0,all_snow_img_len)], (snow_width,snow_width))
-        all_snow_on_screen.append(theImg(the_snow_add_x,the_snow_add_y,the_snow_add_img))
-    
+        the_snow_add_img = snow_list[random.randint(0,all_snow_img_len)]
+        all_snow_on_screen.append(loadImage(the_snow_add_img,the_snow_add_x,the_snow_add_y,int(window_x/200),int(window_x/200)))
+
+    del all_snow_img,snow_list,all_snow_img_len
+    gc.collect()
+
     #初始化角色信息
     #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
-    characters_name_list = []
     characters_data = {}
     for jiaose in characters:
         characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
-        characters_name_list.append(jiaose)
 
-    sangvisFerris_name_list = []
     sangvisFerris_data = {}
     for enemy in sangvisFerris:
         sangvisFerris_data[enemy] = sangvisFerriDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(enemy,perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
-        sangvisFerris_name_list.append(enemy)
 
     #加载UI
     #加载结束回合的图片
-    end_round_button = loadImg("Assets/img/UI/endRound.png", perBlockWidth*2*28/15, perBlockWidth*2)
+    end_round_button = loadImage("Assets/img/UI/endRound.png",window_x*0.9,window_y*0.9,perBlockWidth*2*28/15, perBlockWidth*2)
     #加载选择菜单的图片
     select_menu_button_original = loadImg("Assets/img/UI/menu.png")
     #加载子弹图片
@@ -182,8 +173,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     black_original = loadImg("Assets/img/UI/black.png")
     black_original.set_alpha(100)
     new_block_type = 0
-    #回合结束
-    score_original = loadImage("Assets/img/UI/score.png",300,600,200,200)
+    #计分板
+    score_original = loadImage("Assets/img/UI/score.png",200,200,300,600)
     #文字
     text_of_endround_move = 0
     text_of_endround_alpha = 400
@@ -220,7 +211,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     enemies_in_control_id= 0
     the_character_get_click_moving_range = 0
     #行动点数
-    action_points = len(characters_name_list)*7
+    action_points = len(characters_data)*7
     #放大倍数
     zoom_in = 1
     #计算光亮区域
@@ -249,6 +240,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
         green = pygame.transform.scale(green_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
         red = pygame.transform.scale(red_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
         black = pygame.transform.scale(black_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+        
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[i])):
                 if (x,y) not in light_area and dark_mode == True:
@@ -256,7 +248,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
         #加载玩家回合
         if whose_round == "player":
             #加载结束回合的按钮
-            printf(end_round_button,(window_x-end_round_button.get_width()*2,window_y-400),screen)
+            printIn(end_round_button,screen)
             #玩家输入按键判定
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
@@ -265,7 +257,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 elif event.type == MOUSEBUTTONDOWN:
                     mouse_x,mouse_y=pygame.mouse.get_pos()
                     if pygame.mouse.get_pressed()[0]:
-                        if isGetClick(end_round_button,(window_x-end_round_button.get_width()*2,window_y-400))==True:
+                        if isHover(end_round_button):
                             whose_round = "playerToSangvisFerris"
                             the_character_get_click = ""
                             break
@@ -453,7 +445,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                         action_points -= math.ceil((characters_data[the_character_get_click].maximum_bullets-characters_data[the_character_get_click].current_bullets)/2)
                         characters_data[the_character_get_click].current_bullets = characters_data[the_character_get_click].maximum_bullets
                     else:
-                        #无需换弹
+                        #无需换弹                                      
                         pass
             
             #当有角色被点击时
@@ -463,25 +455,25 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                     green_hide=True
                     if the_route != []:
                         if characters_data[the_character_get_click].x < the_route[0][0]:
-                            characters_data[the_character_get_click].x+=0.1
+                            characters_data[the_character_get_click].x+=0.125
                             action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
                             if characters_data[the_character_get_click].x >= the_route[0][0]:
                                 characters_data[the_character_get_click].x = the_route[0][0]
                                 the_route.pop(0)
                         elif characters_data[the_character_get_click].x > the_route[0][0]:
-                            characters_data[the_character_get_click].x-=0.1
+                            characters_data[the_character_get_click].x-=0.125
                             action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,True,True)
                             if characters_data[the_character_get_click].x <= the_route[0][0]:
                                 characters_data[the_character_get_click].x = the_route[0][0]
                                 the_route.pop(0)
                         elif characters_data[the_character_get_click].y < the_route[0][1]:
-                            characters_data[the_character_get_click].y+=0.1
+                            characters_data[the_character_get_click].y+=0.125
                             action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
                             if characters_data[the_character_get_click].y >= the_route[0][1]:
                                 characters_data[the_character_get_click].y = the_route[0][1]
                                 the_route.pop(0)
                         elif characters_data[the_character_get_click].y > the_route[0][1]:
-                            characters_data[the_character_get_click].y-=0.1
+                            characters_data[the_character_get_click].y-=0.125
                             action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
                             if characters_data[the_character_get_click].y <= the_route[0][1]:
                                 characters_data[the_character_get_click].y = the_route[0][1]
@@ -554,6 +546,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 printf(enemy_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
             if text_of_endround_alpha <=0:
                 if whose_round == "playerToSangvisFerris":
+                    sangvisFerris_name_list = []
+                    for every_chara in sangvisFerris_data:
+                        sangvisFerris_name_list.append(every_chara)
                     for every_chara in characters_data:
                         if characters_data[every_chara].dying != False:
                             characters_data[every_chara].dying -= 1
@@ -564,7 +559,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                     for key in characters_data:
                         if characters_data[key].undetected == False:
                             characters_detect_this_round[key] = [characters_data[key].x,characters_data[key].y]
-                    action_points = len(characters_name_list)*7
+                    action_points = len(characters_data)*7
                     whose_round = "player"
                 text_of_endround_alpha = 400
                 text_of_endround_move = 0
@@ -573,7 +568,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 enemy_round_txt.set_alpha(text_of_endround_alpha)
 
         #检测所有敌人是否都已经被消灭
-        if len(sangvisFerris_name_list) == 0 and whose_round != "result":
+        if len(sangvisFerris_data) == 0 and whose_round != "result":
             whose_round = "result_win"
         
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑中间检测区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
@@ -592,7 +587,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
                     the_characters_attacking["attack"][1] = 0
                     enemies_in_control_id +=1
-                    if enemies_in_control_id == len(sangvisFerris_name_list):
+                    if enemies_in_control_id == len(sangvisFerris_data):
                         whose_round = "sangvisFerrisToPlayer"
                         total_rounds += 1
                     enemy_action = None
@@ -601,28 +596,28 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 the_route = enemy_action[1]
                 if the_route != []:
                     if sangvisFerris_data[enemies_in_control].x < the_route[0][0]:
-                        sangvisFerris_data[enemies_in_control].x+=0.1
+                        sangvisFerris_data[enemies_in_control].x+=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
                             action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
                         if sangvisFerris_data[enemies_in_control].x >= the_route[0][0]:
                             sangvisFerris_data[enemies_in_control].x = the_route[0][0]
                             the_route.pop(0)
                     elif sangvisFerris_data[enemies_in_control].x > the_route[0][0]:
-                        sangvisFerris_data[enemies_in_control].x-=0.1
+                        sangvisFerris_data[enemies_in_control].x-=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
                             action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
                         if sangvisFerris_data[enemies_in_control].x <= the_route[0][0]:
                             sangvisFerris_data[enemies_in_control].x = the_route[0][0]
                             the_route.pop(0)
                     elif sangvisFerris_data[enemies_in_control].y < the_route[0][1]:
-                        sangvisFerris_data[enemies_in_control].y+=0.1
+                        sangvisFerris_data[enemies_in_control].y+=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
                             action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
                         if sangvisFerris_data[enemies_in_control].y >= the_route[0][1]:
                             sangvisFerris_data[enemies_in_control].y = the_route[0][1]
                             the_route.pop(0)
                     elif sangvisFerris_data[enemies_in_control].y > the_route[0][1]:
-                        sangvisFerris_data[enemies_in_control].y-=0.1
+                        sangvisFerris_data[enemies_in_control].y-=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
                             action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,True,True)
                         if sangvisFerris_data[enemies_in_control].y <= the_route[0][1]:
@@ -630,14 +625,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                             the_route.pop(0)
                 else:
                     enemies_in_control_id +=1
-                    if enemies_in_control_id == len(sangvisFerris_name_list):
+                    if enemies_in_control_id == len(sangvisFerris_data):
                         whose_round = "sangvisFerrisToPlayer"
                         total_rounds += 1
                     enemy_action = None
                     enemies_in_control = ""
             elif enemy_action[0] == "stay":
                 enemies_in_control_id +=1
-                if enemies_in_control_id == len(sangvisFerris_name_list):
+                if enemies_in_control_id == len(sangvisFerris_data):
                     whose_round = "sangvisFerrisToPlayer"
                     total_rounds += 1
                 enemy_action = None
@@ -690,7 +685,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             the_characters_attacking = sangvisFerris_data[the_dead_one].gif
             if the_characters_attacking["die"][1] == the_characters_attacking["die"][0][1]-1:
                 sangvisFerris_data.pop(the_dead_one)
-                sangvisFerris_name_list.remove(the_dead_one)
                 result_of_round["total_kills"]+=1
             the_dead_one=""
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
@@ -722,7 +716,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
 
         #加载雪花
         for i in range(len(all_snow_on_screen)):
-            printf(all_snow_on_screen[i].img,(all_snow_on_screen[i].x,all_snow_on_screen[i].y),screen,local_x,local_y)
+            printIn(all_snow_on_screen[i],screen,local_x,local_y)
             all_snow_on_screen[i].x -= 10*zoom_in
             all_snow_on_screen[i].y += 20*zoom_in
             if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
