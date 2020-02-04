@@ -245,60 +245,64 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             for x in range(len(map_img_list[i])):
                 if (x,y) not in light_area and dark_mode == True:
                     printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-        #加载玩家回合
+
+        #玩家输入按键判定-任何情况
+        for event in pygame.event.get():
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    exit()
+            elif event.type == MOUSEBUTTONDOWN:
+                #上下滚轮-放大和缩小图片
+                if event.button == 4:
+                    if zoom_in < 2:
+                        zoom_in += 0.25
+                        perBlockWidth = window_x/block_x*zoom_in
+                        perBlockHeight = window_y/block_y*zoom_in
+                        local_x -= window_x/block_x*0.25*len(map_img_list[0])
+                        local_y -= window_y/block_y*0.25*len(map_img_list)
+                elif event.button == 5:
+                    if zoom_in > 1:
+                        zoom_in -= 0.25
+                        perBlockWidth = window_x/block_x*zoom_in
+                        perBlockHeight = window_y/block_y*zoom_in
+                        local_x += window_x/block_x*0.25*len(map_img_list[0])
+                        if local_x >0:
+                            local_x=0
+                        local_y += window_y/block_y*0.25*len(map_img_list)
+                        if local_y>0:
+                            local_y = 0
+        
+        #玩家回合
         if whose_round == "player":
             #加载结束回合的按钮
             printIn(end_round_button,screen)
-            #玩家输入按键判定
-            for event in pygame.event.get():
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        exit()
-                elif event.type == MOUSEBUTTONDOWN:
-                    mouse_x,mouse_y=pygame.mouse.get_pos()
-                    if pygame.mouse.get_pressed()[0]:
-                        if isHover(end_round_button):
-                            whose_round = "playerToSangvisFerris"
-                            the_character_get_click = ""
-                            break
-                        #获取角色坐标
-                        block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
-                        block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
-                        #控制选择菜单的显示与隐藏
-                        for key in characters_data:
-                            if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill":
-                                if key != the_character_get_click:
-                                    the_character_get_click = key
-                                    green_hide = "SelectMenu"
-                                    break
-                                else:
-                                    green_hide = True
-                                    the_character_get_click = ""
-                        #是否在显示移动范围后点击了
-                        if the_route != []:
-                            if [block_get_click_x,block_get_click_y] in the_route:
-                                isWaiting = "MOVING"
+            #玩家输入按键判定-玩家回合限定
+            if pygame.mouse.get_pressed()[0]:
+                mouse_x,mouse_y=pygame.mouse.get_pos()
+                #获取角色坐标
+                block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
+                block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
+                #如果点击了回合结束的按钮
+                if isHover(end_round_button):
+                    whose_round = "playerToSangvisFerris"
+                    the_character_get_click = ""
+                #是否在显示移动范围后点击了且点击区域在移动范围内
+                elif the_route != [] and [block_get_click_x,block_get_click_y] in the_route:
+                    isWaiting = "MOVING"
+                    green_hide = True
+                    action_points -= len(the_route)
+                else:
+                    #控制选择菜单的显示与隐藏
+                    for key in characters_data:
+                        if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill":
+                            if key != the_character_get_click:
+                                the_character_get_click = key
+                                green_hide = "SelectMenu"
+                                break
+                            else:
                                 green_hide = True
-                                action_points -= len(the_route)
-                    if event.button == 4:
-                        if zoom_in < 2:
-                            zoom_in += 0.25
-                            perBlockWidth = window_x/block_x*zoom_in
-                            perBlockHeight = window_y/block_y*zoom_in
-                            local_x -= window_x/block_x*0.25*len(map_img_list[0])
-                            local_y -= window_y/block_y*0.25*len(map_img_list)
-                    if event.button == 5:
-                        if zoom_in > 1:
-                            zoom_in -= 0.25
-                            perBlockWidth = window_x/block_x*zoom_in
-                            perBlockHeight = window_y/block_y*zoom_in
-                            local_x += window_x/block_x*0.25*len(map_img_list[0])
-                            if local_x >0:
-                                local_x=0
-                            local_y += window_y/block_y*0.25*len(map_img_list)
-                            if local_y>0:
-                                local_y = 0
-            
+                                the_character_get_click = ""
+
             #显示选择菜单
             if green_hide == "SelectMenu":
                 attack_button_txt = fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/2))
@@ -525,10 +529,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
-            for event in pygame.event.get():
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        exit()
             text_now_total_rounds = text_now_total_rounds_original
             text_now_total_rounds = fontRender(text_now_total_rounds.replace("NaN",str(total_rounds)), "white")
             if text_of_endround_move < (window_x-your_round_txt.get_width()*2)/2:
@@ -639,6 +639,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 enemies_in_control = ""
             else:
                 print("warning: not choice")
+        
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         # 我方角色动画
         for every_chara in characters_data:
@@ -689,6 +690,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             the_dead_one=""
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
 
+        #↓↓↓↓↓↓↓↓↓↓↓↓↓↓所有回合可进行的操作↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
+        #移动屏幕
         if pygame.mouse.get_pressed()[1]:
             mouse_x,mouse_y=pygame.mouse.get_pos()
             if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
@@ -713,7 +716,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
         else:
             mouse_move_temp_x = -1
             mouse_move_temp_y = -1
-
+        #↑↑↑↑↑↑↑↑↑↑↑↑↑↑所有回合可进行的操作↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
         #加载雪花
         for i in range(len(all_snow_on_screen)):
             printIn(all_snow_on_screen[i],screen,local_x,local_y)
