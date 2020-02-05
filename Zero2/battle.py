@@ -238,21 +238,21 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     # 游戏主循环
     while battle==True:
         #加载地图
-        for i in range(len(map_img_list)):
-            for a in range(len(map_img_list[i])):
-                img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                printf(img_display,(a*perBlockWidth,(i+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
+        for y in range(len(map_img_list)):
+            for x in range(len(map_img_list[y])):
+                img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                printf(img_display,(x*perBlockWidth,(y+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
+                if (x,y-1) not in light_area and dark_mode == True:
+                    printf(black,(x*perBlockWidth,(y-1)*perBlockHeight),screen,local_x,local_y)
+        for x in range(len(map_img_list[y])):
+            if (x,y) not in light_area and dark_mode == True:
+                printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
 
         #加载UI
         if green.get_width() != math.ceil(perBlockWidth) and green.get_height() != math.ceil(perBlockHeight):
             green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
             red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
             black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-
-        for y in range(len(map_img_list)):
-            for x in range(len(map_img_list[i])):
-                if (x,y) not in light_area and dark_mode == True:
-                    printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
 
         #玩家输入按键判定-任何情况
         for event in pygame.event.get():

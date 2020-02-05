@@ -2,7 +2,6 @@ import os
 import time
 from sys import exit
 
-import numpy as np
 import cv2
 import pygame
 import yaml
@@ -69,20 +68,16 @@ def mainMenu(window_x,window_y,lang,mode=""):
                                 dialog("chapter"+str(i+1),window_x,window_y,screen,lang)
                                 break
         #背景图片
-        if videoCapture.isOpened():
-            ret, frame = videoCapture.read()
-            try:
-                frame = np.rot90(frame,k=-1)
-            except:
-                continue
-            if videoCapture.get(1) >= 3105:
-                videoCapture.set(1, 935)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame = pygame.surfarray.make_surface(frame)
-            frame = pygame.transform.flip(frame,False,True)
-            frame = pygame.transform.scale(frame, (1920,1080))
-            printf(frame, (0,0),screen)
-        
+        ret, frame = videoCapture.read()
+        if videoCapture.get(1) >= 3105:
+            videoCapture.set(1, 935)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = pygame.surfarray.make_surface(frame)
+        frame = pygame.transform.rotate(frame,90)
+        frame = pygame.transform.flip(frame,False,True)
+        frame = pygame.transform.scale(frame, (1920,1080))
+        printf(frame, (0,0),screen)
+
         if isGetClick(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
                 cover_alpha+=10
