@@ -20,7 +20,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     #加载动作：接受角色名，动作，方位，完成对应的指令
     def action_displayer(chara_name,action,x,y,isContinue=True,ifFlip=False):
         hidden = False
-        hp_img = hp_green
+        hp_img = original_UI_img["hp_green"]
+        hp_empty = pygame.transform.scale(original_UI_img["hp_empty"], (int(perBlockWidth), int(perBlockHeight/5)))
         if chara_name in sangvisFerris_data:
             gif_dic = sangvisFerris_data[chara_name].gif
             if sangvisFerris_data[chara_name].current_hp < 0:
@@ -37,7 +38,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                     characters_data[chara_name].dying = 3
                 current_hp_to_display = fontRender(str(characters_data[chara_name].dying)+"/3","black",10)
                 percent_of_hp = characters_data[chara_name].dying/3
-                hp_img = hp_red
+                hp_img = original_UI_img["hp_red"]
             else:
                 if characters_data[chara_name].dying != False:
                     characters_data[chara_name].dying = False
@@ -45,7 +46,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 current_hp_to_display = fontRender(str(characters_data[chara_name].current_hp)+"/"+str(characters_data[chara_name].max_hp),"black",10)
                 percent_of_hp = characters_data[chara_name].current_hp/characters_data[chara_name].max_hp
             current_bullets_situation = fontRender(str(characters_data[chara_name].current_bullets)+"/"+str(characters_data[chara_name].maximum_bullets),"black",10)
-
+            printf(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98-hp_empty.get_height()),screen,local_x,local_y)
+            if characters_data[chara_name].current_action_point != 0:
+                printf(pygame.transform.scale(original_UI_img["action_point_blue"],(int(perBlockWidth*characters_data[chara_name].current_action_point/characters_data[chara_name].max_action_point),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98-hp_empty.get_height()),screen,local_x,local_y)
+        
         if percent_of_hp<0:
             percent_of_hp=0
 
@@ -147,7 +151,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
     characters_data = {}
     for jiaose in characters:
-        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["move_range"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
+        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["action_point"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
 
     sangvisFerris_data = {}
     for enemy in sangvisFerris:
@@ -161,20 +165,22 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     #加载子弹图片
     bullet_img = loadImg("Assets/img/UI/bullet.png", perBlockWidth/6, perBlockHeight/12)
     bullets_list = []
-    #加载血条
-    hp_empty = loadImg("Assets/img/UI/hp_empty.png", perBlockWidth, perBlockHeight/5)
-    hp_red = loadImg("Assets/img/UI/hp_red.png", perBlockWidth, perBlockHeight/5)
-    hp_green = loadImg("Assets/img/UI/hp_green.png", perBlockWidth, perBlockHeight/5)
-    #各色方块/方块标准
-    green_original = loadImg("Assets/img/UI/green.png")
-    green_original.set_alpha(100)
-    red_original = loadImg("Assets/img/UI/red.png")
-    red_original.set_alpha(100)
-    black_original = loadImg("Assets/img/UI/black.png")
-    black_original.set_alpha(100)
-    new_block_type = 0
-    #计分板
-    score_original = loadImage("Assets/img/UI/score.png",200,200,300,600)
+    #加载血条,各色方块等UI图片 size:perBlockWidth, perBlockHeight/5
+    original_UI_img = {
+        "hp_empty" : loadImg("Assets/img/UI/hp_empty.png"),
+        "hp_red" : loadImg("Assets/img/UI/hp_red.png"),
+        "hp_green" : loadImg("Assets/img/UI/hp_green.png"),
+        "action_point_blue" : loadImg("Assets/img/UI/action_point.png"),
+        "green" : loadImg("Assets/img/UI/green.png",None,None,100),
+        "red" : loadImg("Assets/img/UI/red.png",None,None,100),
+        "black" : loadImg("Assets/img/UI/black.png",None,None,100),
+        #计分板
+        "score" : loadImage("Assets/img/UI/score.png",200,200,300,600),
+    }
+    green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+    red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+    black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+
     #文字
     text_of_endround_move = 0
     text_of_endround_alpha = 400
@@ -209,9 +215,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     mouse_move_temp_y = -1
     total_rounds = 1
     enemies_in_control_id= 0
-    the_character_get_click_moving_range = 0
-    #行动点数
-    action_points = len(characters_data)*7
     #放大倍数
     zoom_in = 1
     #计算光亮区域
@@ -230,7 +233,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     }
     #行走的声音
     walk_on_snow_sound = pygame.mixer.Sound("Assets/sound/snow/Snowrunning1.wav")
-
+    #帧数控制器
+    fpsClock = pygame.time.Clock()
     # 游戏主循环
     while battle==True:
         #加载地图
@@ -238,12 +242,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             for a in range(len(map_img_list[i])):
                 img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(perBlockWidth), int(perBlockHeight*1.5)))
                 printf(img_display,(a*perBlockWidth,(i+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
-        
-        #加载阴环境
-        green = pygame.transform.scale(green_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-        red = pygame.transform.scale(red_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-        black = pygame.transform.scale(black_original, (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-        
+
+        #加载UI
+        if green.get_width() != math.ceil(perBlockWidth) and green.get_height() != math.ceil(perBlockHeight):
+            green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[i])):
                 if (x,y) not in light_area and dark_mode == True:
@@ -294,7 +299,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 elif the_route != [] and [block_get_click_x,block_get_click_y] in the_route:
                     isWaiting = "MOVING"
                     green_hide = True
-                    action_points -= len(the_route)
+                    characters_data[the_character_get_click].current_action_point -= len(the_route)
                 else:
                     #控制选择菜单的显示与隐藏
                     for key in characters_data:
@@ -341,16 +346,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                         block_get_click_y = -100
                         green_hide = False
             #显示攻击或移动范围
-            if green_hide == False and action_points > 0 and the_character_get_click != "":
+            if green_hide == False and characters_data[the_character_get_click].current_action_point > 0 and the_character_get_click != "":
                 #显示移动范围
                 if action_choice == "move":
                     mouse_x,mouse_y=pygame.mouse.get_pos()
                     block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
                     block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
-                    if characters_data[the_character_get_click].move_range < action_points:
-                        the_character_get_click_moving_range = characters_data[the_character_get_click].move_range
-                    elif characters_data[the_character_get_click].move_range > action_points:
-                        the_character_get_click_moving_range = action_points
                     #建立地图
                     map2d=Array2D(len(theMap[0]),len(theMap))
                     #历遍地图，设置障碍方块
@@ -370,8 +371,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                     #遍历路径点,讲指定数量的点放到路径列表中
                     the_route = []
                     if pathList != None:
-                        if len(pathList)>the_character_get_click_moving_range:
-                            route_len = the_character_get_click_moving_range
+                        if len(pathList)>characters_data[the_character_get_click].current_action_point:
+                            route_len = characters_data[the_character_get_click].current_action_point
                         else:
                             route_len = len(pathList)
                         for i in range(route_len):
@@ -450,7 +451,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 elif action_choice == "reload":
                     if characters_data[the_character_get_click].maximum_bullets-characters_data[the_character_get_click].current_bullets > 0:
                         #向上取整
-                        action_points -= math.ceil((characters_data[the_character_get_click].maximum_bullets-characters_data[the_character_get_click].current_bullets)/2)
+                        characters_data[the_character_get_click].current_action_point -= math.ceil((characters_data[the_character_get_click].maximum_bullets-characters_data[the_character_get_click].current_bullets)/2)
                         characters_data[the_character_get_click].current_bullets = characters_data[the_character_get_click].maximum_bullets
                     else:
                         #无需换弹                                      
@@ -523,16 +524,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                             action_choice = ""
                 elif isWaiting == True:
                     action_displayer(characters_data[the_character_get_click].name,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
-            
-            #子弹
-            for per_bullet in bullets_list:
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_1]:
-                    new_block_type = 0
-                printf(bullet_img, (per_bullet.x,per_bullet.y))
-                per_bullet.x += 100
-                if per_bullet.x > window_x:
-                    bullets_list.remove(per_bullet)
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
@@ -564,9 +555,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                     enemies_in_control_id = 0
                     characters_detect_this_round = {}
                     for key in characters_data:
+                        characters_data[key].current_action_point = characters_data[key].max_action_point
                         if characters_data[key].undetected == False:
                             characters_detect_this_round[key] = [characters_data[key].x,characters_data[key].y]
-                    action_points = len(characters_data)*7
                     whose_round = "player"
                 text_of_endround_alpha = 400
                 text_of_endround_move = 0
@@ -584,7 +575,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]
             if enemy_action == None:
                 enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting)
-                print(enemy_action)
+                print(enemies_in_control+"choses"+enemy_action[0]+":"+enemy_action[1])
             if enemy_action[0] == "attack":
                 if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
                     action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
@@ -742,9 +733,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             pygame.mixer.music.play(loops=9999, start=0.0)
             pygame.mixer.music.set_volume(0.1)
 
-        points_left_txt = fontRender("剩余行动值："+str(action_points),"white")
-        printf(points_left_txt,(0,0),screen)
-
         #结束动画
         if whose_round == "result_win":
             total_kills = fontRender("总杀敌："+str(result_of_round["total_kills"]),"white",20)
@@ -760,7 +748,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
                 if event.type == KEYDOWN:
                     if event.key == K_SPACE:
                         battle = False
-            printIn(score_original,screen)
+            printIn(original_UI_img["score"],screen)
             printf(total_kills,(250,300),screen)
             printf(total_time,(250,350),screen)
             printf(total_rounds_txt,(250,400),screen)
@@ -768,5 +756,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             printf(player_rate,(250,500),screen)
             printf(press_space,(250,700),screen)
         #画面更新
+        fpsClock.tick(60)
         pygame.display.update()
 

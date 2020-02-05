@@ -32,7 +32,7 @@ def mainMenu(window_x,window_y,lang,mode=""):
         chapter_select[i] = fontRenderPro(chapter_select[i],"disable")
 
     # 创建窗口
-    screen = pygame.display.set_mode((window_x, window_y))
+    screen = pygame.display.set_mode((window_x, window_y),pygame.SCALED)
     pygame.display.set_caption(text_title) #窗口标题
 
     #加载主菜单背景

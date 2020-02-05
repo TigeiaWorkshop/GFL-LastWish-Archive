@@ -2,12 +2,15 @@ import os
 import pygame
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
-def loadImg(path,length=None,height=None,ifConvertAlpha=True):
+def loadImg(path,length=None,height=None,setAlpha=None,ifConvertAlpha=True):
     if length == None and height== None:
         if ifConvertAlpha == False:
-            return pygame.image.load(os.path.join(path))
+            img = pygame.image.load(os.path.join(path))
         else:
-            return pygame.image.load(os.path.join(path)).convert_alpha()
+            img = pygame.image.load(os.path.join(path)).convert_alpha()
+        if setAlpha != None:
+            img.set_alpha(setAlpha)
+        return img
     else:
         if length == None:
             raise Exception('Length is required')
@@ -15,9 +18,12 @@ def loadImg(path,length=None,height=None,ifConvertAlpha=True):
             raise Exception('Height is required')
         elif length >= 0 and height >= 0:
             if ifConvertAlpha == False:
-                pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(length), int(height)))
+                img = pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(length), int(height)))
             else:
-                return pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (int(length), int(height)))
+                img = pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (int(length), int(height)))
+            if setAlpha != None:
+                img.set_alpha(setAlpha)
+            return img
         elif length < 0 or height < 0:
             raise Exception('Both length and height must be positive')
 

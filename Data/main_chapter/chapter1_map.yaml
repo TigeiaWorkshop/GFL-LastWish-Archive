@@ -8,7 +8,7 @@ character:
     max_hp: 5500
     maximum_bullets: 20
     min_damage: 250
-    move_range: 4
+    action_point: 10
     undetected: false
     x: 7
     y: 5
@@ -20,7 +20,7 @@ character:
     max_hp: 3500
     maximum_bullets: 18
     min_damage: 100
-    move_range: 3
+    action_point: 10
     undetected: false
     x: 3
     y: 4
@@ -32,7 +32,7 @@ character:
     max_hp: 8000
     maximum_bullets: 30
     min_damage: 150
-    move_range: 2
+    action_point: 15
     undetected: false
     x: 6
     y: 3
@@ -44,7 +44,7 @@ character:
     max_hp: 2500
     maximum_bullets: 10
     min_damage: 400
-    move_range: 20
+    action_point: 20
     undetected: false
     x: 10
     y: 8

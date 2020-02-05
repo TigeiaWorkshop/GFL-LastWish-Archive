@@ -1,7 +1,7 @@
 import random
 
 class characterDataManager:
-    def __init__(self, name, min_damage,max_damage,max_hp,current_hp,x,y,attack_range,move_range,detect,gif_dic,current_bullets,maximum_bullets):
+    def __init__(self, name, min_damage,max_damage,max_hp,current_hp,x,y,attack_range,action_point,detect,gif_dic,current_bullets,maximum_bullets):
         self.name = name
         self.min_damage = min_damage
         self.max_damage = max_damage
@@ -10,7 +10,8 @@ class characterDataManager:
         self.x = x
         self.y = y
         self.attack_range = attack_range
-        self.move_range = move_range
+        self.current_action_point = action_point
+        self.max_action_point = action_point
         self.dying = False
         self.undetected = detect
         self.gif = gif_dic
