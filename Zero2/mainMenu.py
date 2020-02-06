@@ -1,4 +1,3 @@
-import os
 import time
 from sys import exit
 
@@ -12,7 +11,7 @@ from Zero2.dialog import *
 
 pygame.init()
 
-def mainMenu(window_x,window_y,lang,mode=""):
+def mainMenu(window_x,window_y,lang,fps,mode=""):
     #加载主菜单文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         lang_cn = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -43,6 +42,9 @@ def mainMenu(window_x,window_y,lang,mode=""):
     txt_location = int(window_x*2/3)
     #关卡选择的封面
     cover_img = loadImg("Assets/img/covers/chapter1.png",window_x,window_y)
+    #帧数控制器
+    surface = pygame.surface.Surface((window_x, window_y))
+    fpsClock = pygame.time.Clock()
     
     # 游戏主循环
     while True:
@@ -65,18 +67,18 @@ def mainMenu(window_x,window_y,lang,mode=""):
                     else:
                         for i in range(len(chapter_select)-1):
                             if isGetClick(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1))) and i != len(chapter_select)-1:
-                                dialog("chapter"+str(i+1),window_x,window_y,screen,lang)
+                                dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_before_battle")
+                                battle("chapter"+str(i+1),window_x,window_y,screen,lang,fps)
+                                dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_after_battle")
                                 break
         #背景图片
-        ret, frame = videoCapture.read()
         if videoCapture.get(1) >= 3105:
             videoCapture.set(1, 935)
+        ret, frame = videoCapture.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = pygame.surfarray.make_surface(frame)
-        frame = pygame.transform.rotate(frame,90)
-        frame = pygame.transform.flip(frame,False,True)
-        frame = pygame.transform.scale(frame, (1920,1080))
-        printf(frame, (0,0),screen)
+        frame = cv2.transpose(frame)
+        pygame.surfarray.blit_array(surface, frame)
+        screen.blit(surface, (0,0))
 
         if isGetClick(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
@@ -113,4 +115,6 @@ def mainMenu(window_x,window_y,lang,mode=""):
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')
             pygame.mixer.music.play(loops=9999, start=0.0)
+
+        fpsClock.tick(fps)
         pygame.display.update()

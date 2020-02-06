@@ -13,7 +13,7 @@ from Zero2.characterDataManager import *
 from Zero2.characterAnimation import *
 from Zero2.map import *
 from Zero2.AI import *
-def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
+def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #卸载音乐
     pygame.mixer.music.unload()
 
@@ -235,6 +235,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
     walk_on_snow_sound = pygame.mixer.Sound("Assets/sound/snow/Snowrunning1.wav")
     #帧数控制器
     fpsClock = pygame.time.Clock()
+    
     # 游戏主循环
     while battle==True:
         #加载地图
@@ -756,6 +757,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,dark_mode=True):
             printf(player_rate,(250,500),screen)
             printf(press_space,(250,700),screen)
         #画面更新
-        fpsClock.tick(60)
+        fpsClock.tick(fps)
         pygame.display.update()
 
