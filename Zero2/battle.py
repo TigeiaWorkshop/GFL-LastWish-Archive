@@ -238,23 +238,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     
     # 游戏主循环
     while battle==True:
-        #加载地图
-        for y in range(len(map_img_list)):
-            for x in range(len(map_img_list[y])):
-                img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                printf(img_display,(x*perBlockWidth,(y+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
-                if (x,y-1) not in light_area and dark_mode == True:
-                    printf(black,(x*perBlockWidth,(y-1)*perBlockHeight),screen,local_x,local_y)
-        for x in range(len(map_img_list[y])):
-            if (x,y) not in light_area and dark_mode == True:
-                printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-
-        #加载UI
-        if green.get_width() != math.ceil(perBlockWidth) and green.get_height() != math.ceil(perBlockHeight):
-            green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-
         #玩家输入按键判定-任何情况
         for event in pygame.event.get():
             if event.type == KEYDOWN:
@@ -280,7 +263,23 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         local_y += window_y/block_y*0.25*len(map_img_list)
                         if local_y>0:
                             local_y = 0
-        
+        #加载UI
+        if green.get_width() != math.ceil(perBlockWidth) and green.get_height() != math.ceil(perBlockHeight):
+            green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+
+        #加载地图
+        for y in range(len(map_img_list)):
+            for x in range(len(map_img_list[y])):
+                img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                printf(img_display,(x*perBlockWidth,(y+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
+                if (x,y-1) not in light_area and dark_mode == True:
+                    printf(black,(x*perBlockWidth,(y-1)*perBlockHeight),screen,local_x,local_y)
+        for x in range(len(map_img_list[y])):
+            if (x,y) not in light_area and dark_mode == True:
+                printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+
         #玩家回合
         if whose_round == "player":
             #加载结束回合的按钮
@@ -297,7 +296,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     the_character_get_click = ""
                     green_hide = True
                 #是否在显示移动范围后点击了且点击区域在移动范围内
-                elif the_route != [] and [block_get_click_x,block_get_click_y] in the_route:
+                elif the_route != [] and [block_get_click_x,block_get_click_y] in the_route and green_hide==False:
                     isWaiting = "MOVING"
                     green_hide = True
                     characters_data[the_character_get_click].current_action_point -= len(the_route)
@@ -576,7 +575,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]
             if enemy_action == None:
                 enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting)
-                print(enemies_in_control+"choses"+enemy_action[0]+":"+enemy_action[1])
+                print(enemies_in_control+"choses"+enemy_action[0])
             if enemy_action[0] == "attack":
                 if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
                     action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
