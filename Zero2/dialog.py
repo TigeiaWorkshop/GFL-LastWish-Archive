@@ -27,7 +27,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
 
     #读取章节信息
     with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
-        dialog_before_battle = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
+        dialog_content = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
     
     #加载npc立绘
     all_npc_file_list = glob.glob(r'Assets/img/npc/*.png')
@@ -57,43 +57,43 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     
     #渐入效果
     for i in range(100,-1,-1):
-        printIn(dialog_bg_img_dic[dialog_before_battle[display_num][1][0]],screen)
+        printIn(dialog_bg_img_dic[dialog_content[display_num][1][0]],screen)
         printf(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         printf(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         fpsClock.tick(fps)
         pygame.display.update()
     
-    the_bg_music = dialog_before_battle[display_num][1][1]
+    the_bg_music = dialog_content[display_num][1][1]
     pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
     pygame.mixer.music.play(loops=9999, start=0.0)
 
     #主循环
-    while len(dialog_before_battle)!=0 and display_num<len(dialog_before_battle):
+    while len(dialog_content)!=0 and display_num<len(dialog_content):
         #背景
-        printIn(dialog_bg_img_dic[dialog_before_battle[display_num][1][0]],screen)
+        printIn(dialog_bg_img_dic[dialog_content[display_num][1][0]],screen)
         #加载对话任务
-        if len(dialog_before_battle[display_num][0])==2:
-            printf(npc_img_dic[dialog_before_battle[display_num][0][0]],(-100,100),screen)
-            printf(npc_img_dic[dialog_before_battle[display_num][0][1]],(window_x-1000,100),screen)
-        elif len(dialog_before_battle[display_num][0])==1:
-            if dialog_before_battle[display_num][0][0] != "NAR":
-                big_img_x = (window_x - npc_img_dic[dialog_before_battle[display_num][0][0]].get_width())/2
-                printf(npc_img_dic[dialog_before_battle[display_num][0][0]],(big_img_x,100),screen)
+        if len(dialog_content[display_num][0])==2:
+            printf(npc_img_dic[dialog_content[display_num][0][0]],(-100,100),screen)
+            printf(npc_img_dic[dialog_content[display_num][0][1]],(window_x-1000,100),screen)
+        elif len(dialog_content[display_num][0])==1:
+            if dialog_content[display_num][0][0] != "NAR":
+                big_img_x = (window_x - npc_img_dic[dialog_content[display_num][0][0]].get_width())/2
+                printf(npc_img_dic[dialog_content[display_num][0][0]],(big_img_x,100),screen)
         # 对话框图片
         printf(dialoguebox,(100,window_y-dialoguebox.get_height()-50),screen)
         #讲述者名称
-        printf(fontRender(dialog_before_battle[display_num][1][2],"white",25),(500,window_y-dialoguebox.get_height()),screen)
+        printf(fontRender(dialog_content[display_num][1][2],"white",25),(500,window_y-dialoguebox.get_height()),screen)
         #对话框内容
         if displayed_line >= 0:
             for i in range(displayed_line+1):
-                printf(fontRender(dialog_before_battle[display_num][2][i],"white",25),(440,window_y-dialoguebox.get_height()+55+30*i),screen)
+                printf(fontRender(dialog_content[display_num][2][i],"white",25),(440,window_y-dialoguebox.get_height()+55+30*i),screen)
 
-        printf(fontRender(dialog_before_battle[display_num][2][displayed_line+1][0:dialog_content_id],"white",25),(440,window_y-dialoguebox.get_height()+55+30*(displayed_line+1)),screen)
+        printf(fontRender(dialog_content[display_num][2][displayed_line+1][0:dialog_content_id],"white",25),(440,window_y-dialoguebox.get_height()+55+30*(displayed_line+1)),screen)
         #检测所有字是否都已经播出
-        if dialog_content_id < len(dialog_before_battle[display_num][2][displayed_line+1]):
+        if dialog_content_id < len(dialog_content[display_num][2][displayed_line+1]):
             dialog_content_id +=1
         else:
-            if displayed_line < len(dialog_before_battle[display_num][2])-2:
+            if displayed_line < len(dialog_content[display_num][2])-2:
                 dialog_content_id = 1
                 displayed_line += 1
 
@@ -118,9 +118,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                     display_num += 1
                     dialog_content_id = 1
                     displayed_line = -1
-                    if display_num<len(dialog_before_battle):
-                        if dialog_before_battle[display_num][1][1] != the_bg_music and dialog_before_battle[display_num][1][1] != "":
-                            the_bg_music = dialog_before_battle[display_num][1][1]
+                    if display_num<len(dialog_content):
+                        if the_bg_music != dialog_content[display_num][1][1] and dialog_content[display_num][1][1] != "":
+                            the_bg_music = dialog_content[display_num][1][1]
                             pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
                             pygame.mixer.music.play(loops=9999, start=0.0)
                 elif pygame.mouse.get_pressed()[2]:
@@ -128,8 +128,8 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                         display_num -= 1
                         dialog_content_id = 1
                         displayed_line = -1
-                        if dialog_before_battle[display_num][1][1] != the_bg_music and dialog_before_battle[display_num][1][1] != "":
-                            the_bg_music = dialog_before_battle[display_num][1][1]
+                        if the_bg_music != dialog_content[display_num][1][1] and dialog_content[display_num][1][1] != "":
+                            the_bg_music = dialog_content[display_num][1][1]
                             pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
                             pygame.mixer.music.play(loops=9999, start=0.0)
         
@@ -137,7 +137,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         pygame.display.update()
     
     #淡出
+    pygame.mixer.music.fadeout(1000)
     for i in range(0,55,2):
         the_black.set_alpha(i)
         printf(the_black,(0,0),screen)
+        fpsClock.tick(fps)
         pygame.display.update()

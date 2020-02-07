@@ -184,18 +184,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #文字
     text_of_endround_move = 0
     text_of_endround_alpha = 400
-    #章节标题淡出
-    for t in range(250,200,-1):
-        for i in range(len(map_img_list)):
-            for a in range(len(map_img_list[i])):
-                img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                img_display.set_alpha(250-t)
-                printf(img_display,(a*perBlockWidth,(i+1)*perBlockHeight-int(perBlockHeight*1.5)),screen)
-        title_number_display.set_alpha(i)
-        title_main_display.set_alpha(i)
-        printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-        printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-        pygame.display.update()
     
     #部分设定初始化
     the_character_get_click = ""
@@ -232,10 +220,27 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         "times_characters_down" : 0
     }
     #行走的声音
-    walk_on_snow_sound = pygame.mixer.Sound("Assets/sound/snow/Snowrunning1.wav")
+    all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
+    walk_on_snow_sound = []
+    for i in range(len(all_walking_sounds)):
+        walk_on_snow_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
+    the_sound_id = None
     #帧数控制器
     fpsClock = pygame.time.Clock()
     
+    #加载完成，章节标题淡出
+    for t in range(250,200,-1):
+        for i in range(len(map_img_list)):
+            for a in range(len(map_img_list[i])):
+                img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                img_display.set_alpha(250-t)
+                printf(img_display,(a*perBlockWidth,(i+1)*perBlockHeight-int(perBlockHeight*1.5)),screen)
+        title_number_display.set_alpha(i)
+        title_main_display.set_alpha(i)
+        printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+        printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        pygame.display.update()
+
     # 游戏主循环
     while battle==True:
         #玩家输入按键判定-任何情况
@@ -263,12 +268,38 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         local_y += window_y/block_y*0.25*len(map_img_list)
                         if local_y>0:
                             local_y = 0
+        #移动屏幕
+        if pygame.mouse.get_pressed()[1]:
+            mouse_x,mouse_y=pygame.mouse.get_pos()
+            if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
+                mouse_move_temp_x = mouse_x
+                mouse_move_temp_y = mouse_y
+            else:
+                if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
+                    if mouse_move_temp_x > mouse_x:
+                        if local_x+mouse_move_temp_x-mouse_x <= 0:
+                            local_x += mouse_move_temp_x-mouse_x
+                    elif mouse_move_temp_x < mouse_x:
+                        if local_x-(mouse_x - mouse_move_temp_x) >= 0 - perBlockWidth*len(map_img_list[0]) + window_x:
+                            local_x -= mouse_x-mouse_move_temp_x
+                    if mouse_move_temp_y > mouse_y:
+                        if local_y+mouse_move_temp_y-mouse_y <= 0:
+                            local_y += mouse_move_temp_y-mouse_y
+                    elif mouse_move_temp_y < mouse_y:
+                        if local_y-(mouse_y-mouse_move_temp_y) >= 0 - perBlockHeight*len(map_img_list) + window_y:
+                            local_y -= mouse_y-mouse_move_temp_y
+                    mouse_move_temp_x = mouse_x
+                    mouse_move_temp_y = mouse_y
+        else:
+            mouse_move_temp_x = -1
+            mouse_move_temp_y = -1
+        
         #加载UI
         if green.get_width() != math.ceil(perBlockWidth) and green.get_height() != math.ceil(perBlockHeight):
             green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
             red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
             black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-
+        
         #加载地图
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[y])):
@@ -314,29 +345,28 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
             #显示选择菜单
             if green_hide == "SelectMenu":
-                attack_button_txt = fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/2))
-                move_button_txt = fontRender(selectMenuButtons_dic["move"],"black",int(perBlockWidth/2))
-                skill_button_txt = fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/2))
-                reload_button_txt = fontRender(selectMenuButtons_dic["reload"],"black",int(perBlockWidth/2))
                 select_menu_button = pygame.transform.scale(select_menu_button_original, (int(perBlockWidth*2), int(perBlockWidth/1.3)))
-                displayInCenter(attack_button_txt,select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight,screen,local_x,local_y)
-                displayInCenter(move_button_txt,select_menu_button,characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight,screen,local_x,local_y)
-                displayInCenter(skill_button_txt,select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5,screen,local_x,local_y)
-                displayInCenter(reload_button_txt,select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5,screen,local_x,local_y)
+                displayInCenter(fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight,screen,local_x,local_y)
+                displayInCenter(fontRender(selectMenuButtons_dic["move"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight,screen,local_x,local_y)
+                displayInCenter(fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5,screen,local_x,local_y)
+                displayInCenter(fontRender(selectMenuButtons_dic["reload"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5,screen,local_x,local_y)
                 if pygame.mouse.get_pressed()[0]:
                     if isGetClick(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         if characters_data[the_character_get_click].current_bullets > 0:
+                            time.sleep(0.02)
                             action_choice = "attack"
                             block_get_click_x = -100
                             block_get_click_y = -100
                             green_hide = False
                     elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         action_choice = "move"
+                        time.sleep(0.02)
                         block_get_click_x = -100
                         block_get_click_y = -100
                         green_hide = False
                     elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y):
                         action_choice = "skill"
+                        time.sleep(0.02)
                         block_get_click_x = -100
                         block_get_click_y = -100
                         green_hide = False
@@ -346,7 +376,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         block_get_click_y = -100
                         green_hide = False
             #显示攻击或移动范围
-            if green_hide == False and characters_data[the_character_get_click].current_action_point > 0 and the_character_get_click != "":
+            elif green_hide == False and characters_data[the_character_get_click].current_action_point > 0 and the_character_get_click != "":
                 #显示移动范围
                 if action_choice == "move":
                     mouse_x,mouse_y=pygame.mouse.get_pos()
@@ -388,12 +418,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 #快速跳出
                                 break
                             the_route.append([star_point_x,star_point_y])
-                    
+                    #显示路径
                     for i in range(len(the_route)):
                         printf(green,(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
 
                 #显示攻击范围        
-                elif action_choice == "attack":
+                if action_choice == "attack":
                     attacking_range = []
                     for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range):
                         if y < characters_data[the_character_get_click].y:
@@ -464,7 +494,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     green_hide=True
                     if the_route != []:
                         if pygame.mixer.get_busy() == False:
-                            walk_on_snow_sound.play()
+                            the_sound_id = random.randint(0,len(walk_on_snow_sound)-1)
+                            walk_on_snow_sound[the_sound_id].play()
                         if characters_data[the_character_get_click].x < the_route[0][0]:
                             characters_data[the_character_get_click].x+=0.125
                             action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
@@ -490,7 +521,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 characters_data[the_character_get_click].y = the_route[0][1]
                                 the_route.pop(0)
                     else:
-                        walk_on_snow_sound.stop()
+                        walk_on_snow_sound[the_sound_id].stop()
                         isWaiting =True
                         the_character_get_click = ""
                     light_area = calculate_darkness(characters_data)
@@ -640,7 +671,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 enemies_in_control = ""
             else:
                 print("warning: not choice")
-        
+
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         # 我方角色动画
         for every_chara in characters_data:
@@ -691,33 +722,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             the_dead_one=""
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
 
-        #↓↓↓↓↓↓↓↓↓↓↓↓↓↓所有回合可进行的操作↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
-        #移动屏幕
-        if pygame.mouse.get_pressed()[1]:
-            mouse_x,mouse_y=pygame.mouse.get_pos()
-            if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
-                mouse_move_temp_x = mouse_x
-                mouse_move_temp_y = mouse_y
-            else:
-                if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
-                    if mouse_move_temp_x > mouse_x:
-                        if local_x+mouse_move_temp_x-mouse_x <= 0:
-                            local_x += mouse_move_temp_x-mouse_x
-                    elif mouse_move_temp_x < mouse_x:
-                        if local_x-(mouse_x - mouse_move_temp_x) >= 0 - perBlockWidth*len(map_img_list[0]) + window_x:
-                            local_x -= mouse_x-mouse_move_temp_x
-                    if mouse_move_temp_y > mouse_y:
-                        if local_y+mouse_move_temp_y-mouse_y <= 0:
-                            local_y += mouse_move_temp_y-mouse_y
-                    elif mouse_move_temp_y < mouse_y:
-                        if local_y-(mouse_y-mouse_move_temp_y) >= 0 - perBlockHeight*len(map_img_list) + window_y:
-                            local_y -= mouse_y-mouse_move_temp_y
-                    mouse_move_temp_x = mouse_x
-                    mouse_move_temp_y = mouse_y
-        else:
-            mouse_move_temp_x = -1
-            mouse_move_temp_y = -1
-        #↑↑↑↑↑↑↑↑↑↑↑↑↑↑所有回合可进行的操作↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
         #加载雪花
         for i in range(len(all_snow_on_screen)):
             printIn(all_snow_on_screen[i],screen,local_x,local_y)

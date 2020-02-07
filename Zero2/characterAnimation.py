@@ -19,8 +19,8 @@ def character_gif_dic(character_name,block_x_length,block_y_length,kind="charact
             "die":[character_creator(character_name,"die",block_x_length,block_y_length),0],
             "move":[character_creator(character_name,"move",block_x_length,block_y_length),0],
             "skill":[character_creator(character_name,"skill",block_x_length,block_y_length),0],
-            "victory":[character_creator(character_name,"victory",block_x_length,block_y_length),0],
-            "victoryloop":[character_creator(character_name,"victoryloop",block_x_length,block_y_length),0],
+            #"victory":[character_creator(character_name,"victory",block_x_length,block_y_length),0],
+            #"victoryloop":[character_creator(character_name,"victoryloop",block_x_length,block_y_length),0],
             "wait":[character_creator(character_name,"wait",block_x_length,block_y_length),0],
         }
     else:
