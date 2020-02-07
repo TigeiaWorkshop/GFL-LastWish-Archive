@@ -31,8 +31,10 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
 
     # 创建窗口
     screen = pygame.display.set_mode((window_x, window_y),pygame.SCALED)
+    icon_img = loadImg("Assets/img/UI/icon.png")
+    pygame.display.set_icon(icon_img)
     pygame.display.set_caption(text_title) #窗口标题
-
+    
     #加载主菜单背景
     videoCapture = cv2.VideoCapture("Assets/movie/SquadAR.mp4")
     #数值初始化
@@ -43,8 +45,12 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     #关卡选择的封面
     cover_img = loadImg("Assets/img/covers/chapter1.png",window_x,window_y)
     #帧数控制器
-    surface = pygame.surface.Surface((window_x, window_y))
     fpsClock = pygame.time.Clock()
+    #视频面
+    ret, img = videoCapture.read()
+    img = cv2.transpose(img)
+    surface = pygame.surface.Surface((img.shape[0], img.shape[1]))
+    
     
     # 游戏主循环
     while True:
@@ -78,7 +84,11 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.transpose(frame)
         pygame.surfarray.blit_array(surface, frame)
-        screen.blit(surface, (0,0))
+        if surface.get_width() != window_x or surface.get_height() != window_y:
+            img = pygame.transform.scale(surface,(window_x,window_y))
+            screen.blit(img, (0,0))
+        else:
+            screen.blit(surface, (0,0))
 
         if isGetClick(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:

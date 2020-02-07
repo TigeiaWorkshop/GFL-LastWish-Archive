@@ -17,8 +17,8 @@ print('shape:', img.shape)
 
 pygame.init()
 
-screen = pygame.display.set_mode((1920, 1080),pygame.SCALED)
-surface = pygame.surface.Surface((1920, 1080))
+screen = pygame.display.set_mode((800, 600))
+surface = pygame.surface.Surface((img.shape[0], img.shape[1]))
 
 running = True
 while running:
@@ -27,12 +27,17 @@ while running:
             running = False
 
     ret, img = cap.read()
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = cv2.transpose(img)
-    pygame.surfarray.blit_array(surface, img)
-    screen.blit(surface, (0,0))
+    if not ret:
+        running = False
+        break
+    else:
+        #img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+        #img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        img = cv2.transpose(img)
 
-    pygame.display.update()
+        pygame.surfarray.blit_array(surface, img)
+        screen.blit(surface, (0,0))
+
+    pygame.display.flip()
 
 pygame.quit()
-
