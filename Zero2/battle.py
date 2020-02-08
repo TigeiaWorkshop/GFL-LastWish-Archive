@@ -311,10 +311,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #加载地图
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
-                    img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                    printf(img_display,(x*perBlockWidth,(y+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
-                    if (x,y-1) not in light_area and dark_mode == True:
-                        printf(black,(x*perBlockWidth,(y-1)*perBlockHeight),screen,local_x,local_y)
+                    if x*perBlockWidth+local_x < window_x and (y+1)*perBlockHeight-perBlockHeight*1.5+local_y < window_y:
+                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                        printf(img_display,(x*perBlockWidth,(y+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
+                        if (x,y-1) not in light_area and dark_mode == True:
+                            printf(black,(x*perBlockWidth,(y-1)*perBlockHeight),screen,local_x,local_y)
+                            
             for x in range(len(map_img_list[y])):
                 if (x,y) not in light_area and dark_mode == True:
                     printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
