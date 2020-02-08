@@ -76,6 +76,7 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
                                 dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_before_battle")
                                 battle("chapter"+str(i+1),window_x,window_y,screen,lang,fps)
                                 dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_after_battle")
+                                videoCapture.set(1,1)
                                 break
         #背景图片
         if videoCapture.get(1) >= 3105:
@@ -84,11 +85,7 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.transpose(frame)
         pygame.surfarray.blit_array(surface, frame)
-        if surface.get_width() != window_x or surface.get_height() != window_y:
-            img = pygame.transform.scale(surface,(window_x,window_y))
-            screen.blit(img, (0,0))
-        else:
-            screen.blit(surface, (0,0))
+        screen.blit(surface, (0,0))
 
         if isGetClick(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:

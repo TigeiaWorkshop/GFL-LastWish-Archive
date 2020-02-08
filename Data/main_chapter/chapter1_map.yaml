@@ -1,4 +1,7 @@
 background_music: Snowflake.mp3
+local_x: 0
+local_y: 0
+zoom_in: 2
 character:
   asval:
     attack_range: 5
@@ -10,6 +13,7 @@ character:
     min_damage: 250
     action_point: 10
     undetected: false
+    start_position: [1,1]
     x: 7
     y: 5
   gsh-18:
@@ -22,6 +26,7 @@ character:
     min_damage: 100
     action_point: 10
     undetected: false
+    start_position: [1,2]
     x: 3
     y: 4
   pp1901:
@@ -34,6 +39,7 @@ character:
     min_damage: 150
     action_point: 15
     undetected: false
+    start_position: [1,2]
     x: 6
     y: 3
   sv-98:
@@ -46,6 +52,7 @@ character:
     min_damage: 400
     action_point: 20
     undetected: false
+    start_position: [1,3]
     x: 10
     y: 8
 map:

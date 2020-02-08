@@ -16,6 +16,8 @@ from Zero2.AI import *
 def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #卸载音乐
     pygame.mixer.music.unload()
+    #帧数控制器
+    fpsClock = pygame.time.Clock()
 
     #加载动作：接受角色名，动作，方位，完成对应的指令
     def action_displayer(chara_name,action,x,y,isContinue=True,ifFlip=False):
@@ -35,6 +37,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             if characters_data[chara_name].current_hp<=0:
                 characters_data[chara_name].current_hp = 0
                 if characters_data[chara_name].dying == False:
+                    result_of_round["times_characters_down"] += 1
                     characters_data[chara_name].dying = 3
                 current_hp_to_display = fontRender(str(characters_data[chara_name].dying)+"/3","black",10)
                 percent_of_hp = characters_data[chara_name].dying/3
@@ -76,6 +79,36 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             if gif_dic[action][1] == gif_dic[action][0][1]:
                 gif_dic[action][1]-=1
 
+    #加载按钮的文字
+    with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        selectMenuButtons_dic = loadData["select_menu"]
+        your_round_txt = fontRender(loadData["Battle_UI"]["yourRound"], "white")
+        enemy_round_txt = fontRender(loadData["Battle_UI"]["enemyRound"], "white")
+        text_now_total_rounds_original = loadData["Battle_UI"]["numRound"]
+        chapter_no = loadData["Battle_UI"]["numChapter"]
+    
+    with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        chapter_title = loadData["title"]
+        battle_info = loadData["battle_info"]
+        dialog_during_battle = loadData["dialog_during_battle"]
+
+    #章节标题显示
+    the_black = loadImg("Assets/img/UI/black.png",window_x,window_y)
+    title_number_display = fontRender(chapter_no.replace("NaN",chapter_name.replace("chapter","")),"white")
+    title_main_display = fontRender(chapter_title,"white")
+
+    #渐入效果
+    for i in range(0,250,2):
+        printf(the_black,(0,0),screen)
+        title_number_display.set_alpha(i)
+        title_main_display.set_alpha(i)
+        printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+        printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        fpsClock.tick(fps)
+        pygame.display.update()
+
     #加载背景图片
     all_env_file_list = glob.glob(r'Assets/img/environment/*.png')
     env_img_list={}
@@ -85,51 +118,38 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
     #读取并初始化章节信息
     with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
-        chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
-        block_y = len(chapter_info["map"])
-        block_x = len(chapter_info["map"][0])
-        characters = chapter_info["character"]
-        sangvisFerris = chapter_info["sangvisFerri"]
-        theMap = chapter_info["map"]
-        bg_music = chapter_info["background_music"]
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        block_y = len(loadData["map"])
+        block_x = len(loadData["map"][0])
+        zoom_in = loadData["zoom_in"]
+        local_x = loadData["local_x"]
+        local_y = loadData["local_y"]
+        characters = loadData["character"]
+        sangvisFerris = loadData["sangvisFerri"]
+        theMap = loadData["map"]
+        bg_music = loadData["background_music"]
 
+    if zoom_in < 1:
+        zoom_in = 1
+    elif zoom_in > 2:
+        zoom_in = 2
+    perBlockWidth = window_x/block_x*zoom_in
+    perBlockHeight = window_y/block_y*zoom_in
+    local_x += window_x/block_x*0.25*len(theMap[0])
+    if local_x >0:
+        local_x=0
+    local_y += window_y/block_y*0.25*len(theMap)
+    if local_y>0:
+        local_y = 0
+    
     #地图方块图片随机化
     with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
-        chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
-        blocks_setting = chapter_info["blocks"]
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        blocks_setting = loadData["blocks"]
     
-    with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
-        chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
-        chapter_title = chapter_info["title"]
-
     map_img_list = randomBlock(theMap,blocks_setting)
-    #一个方块的长
-    perBlockWidth = window_x/block_x
-    #一个方块的高
-    perBlockHeight = window_y/block_y
-
-    #加载按钮的文字
-    with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
-        chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
-        selectMenuButtons_dic = chapter_info["select_menu"]
-        your_round_txt = fontRender(chapter_info["Battle_UI"]["yourRound"], "white")
-        enemy_round_txt = fontRender(chapter_info["Battle_UI"]["enemyRound"], "white")
-        text_now_total_rounds_original = chapter_info["Battle_UI"]["numRound"]
-        chapter_no = chapter_info["Battle_UI"]["numChapter"]
     
-    #章节标题显示
-    the_black = loadImg("Assets/img/UI/black.png",window_x,window_y)
-    title_number_display = fontRender(chapter_no.replace("NaN",chapter_name.replace("chapter","")),"white")
-    title_main_display = fontRender(chapter_title,"white")
 
-    for i in range(0,600,1):
-        printf(the_black,(0,0),screen)
-        title_number_display.set_alpha(i)
-        title_main_display.set_alpha(i)
-        printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-        printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-        pygame.display.update()
-    
     #加载雪花
     all_snow_img = glob.glob(r'Assets/img/environment/snow/*.png')
     snow_list = []
@@ -151,7 +171,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
     characters_data = {}
     for jiaose in characters:
-        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["action_point"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
+        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["start_position"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["action_point"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
 
     sangvisFerris_data = {}
     for enemy in sangvisFerris:
@@ -197,14 +217,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     isWaiting = True
     the_dead_one = ""
     whose_round = "sangvisFerrisToPlayer"
-    local_x = 0
-    local_y = 0
     mouse_move_temp_x = -1
     mouse_move_temp_y = -1
     total_rounds = 1
     enemies_in_control_id= 0
-    #放大倍数
-    zoom_in = 1
     #计算光亮区域
     light_area = calculate_darkness(characters_data)
     # 移动路径
@@ -225,21 +241,153 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     for i in range(len(all_walking_sounds)):
         walk_on_snow_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
     the_sound_id = None
-    #帧数控制器
-    fpsClock = pygame.time.Clock()
+    
+
+    battle_info_line1 = fontRender(battle_info[0],"white",25)
+    battle_info_line2 = fontRender(battle_info[1],"white",25)
+    #显示章节信息
+    for i in range(0,250,2):
+        printf(the_black,(0,0),screen)
+        battle_info_line1.set_alpha(i)
+        battle_info_line2.set_alpha(i)
+        printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+        printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
+        printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+        fpsClock.tick(fps)
+        pygame.display.update()
     
     #加载完成，章节标题淡出
-    for t in range(250,200,-1):
-        for i in range(len(map_img_list)):
-            for a in range(len(map_img_list[i])):
-                img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                img_display.set_alpha(250-t)
-                printf(img_display,(a*perBlockWidth,(i+1)*perBlockHeight-int(perBlockHeight*1.5)),screen)
+    for i in range(600,0,-2):
+        printf(the_black,(0,0),screen)
         title_number_display.set_alpha(i)
         title_main_display.set_alpha(i)
         printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        battle_info_line1.set_alpha(i)
+        battle_info_line2.set_alpha(i)
+        printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
+        printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+        fpsClock.tick(fps)
         pygame.display.update()
+
+    if dialog_during_battle != None:
+        #建立地图
+        map2d=Array2D(len(theMap[0]),len(theMap))
+        #历遍地图，设置障碍方块
+        for y in range(len(theMap)):
+            for x in range(len(theMap[y])):
+                if blocks_setting[theMap[y][x]][1] == False:
+                    map2d[x][y]=1
+        # 历遍所有角色，将角色的坐标点设置为障碍方块
+        for every_chara in sangvisFerris_data:
+            map2d[sangvisFerris_data[every_chara].x][sangvisFerris_data[every_chara].y] = 1
+        
+        all_characters_path = {}
+        for every_chara in characters_data:
+            #创建AStar对象,并设置起点和终点为
+            star_point_x = characters_data[every_chara].start_position[0]
+            star_point_y = characters_data[every_chara].start_position[1]
+            aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(characters_data[every_chara].x,characters_data[every_chara].y))
+            #开始寻路
+            pathList=aStar.start()
+            #遍历路径点,讲指定数量的点放到路径列表中
+            the_route = []
+            if pathList != None:
+                for i in range(len(pathList)):
+                    if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
+                        star_point_x+=1
+                    elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
+                        star_point_x-=1
+                    elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
+                        star_point_y+=1
+                    elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
+                        star_point_y-=1
+                    the_route.append([star_point_x,star_point_y])
+            else:
+                raise Exception('Waring: '+every_chara+" cannot find her path, please rewrite her start position!")
+            all_characters_path[every_chara] = the_route
+        while len(all_characters_path)>0:
+            #加载地图
+            for y in range(len(map_img_list)):
+                for x in range(len(map_img_list[y])):
+                    img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                    printf(img_display,(x*perBlockWidth,(y+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
+                    if (x,y-1) not in light_area and dark_mode == True:
+                        printf(black,(x*perBlockWidth,(y-1)*perBlockHeight),screen,local_x,local_y)
+            for x in range(len(map_img_list[y])):
+                if (x,y) not in light_area and dark_mode == True:
+                    printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+
+            key_to_remove = []
+            for every_chara in all_characters_path:
+                if all_characters_path[every_chara] != []:
+                    if pygame.mixer.get_busy() == False:
+                        the_sound_id = random.randint(0,len(walk_on_snow_sound)-1)
+                        walk_on_snow_sound[the_sound_id].play()
+                    if characters_data[every_chara].start_position[0] < all_characters_path[every_chara][0][0]:
+                        characters_data[every_chara].start_position[0]+=0.125
+                        action_displayer(every_chara,"move",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+                        if characters_data[every_chara].start_position[0] >= all_characters_path[every_chara][0][0]:
+                            characters_data[every_chara].start_position[0] = all_characters_path[every_chara][0][0]
+                            all_characters_path[every_chara].pop(0)
+                    elif characters_data[every_chara].start_position[0] > all_characters_path[every_chara][0][0]:
+                        characters_data[every_chara].start_position[0]-=0.125
+                        action_displayer(every_chara,"move",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1],True,True)
+                        if characters_data[every_chara].start_position[0] <= all_characters_path[every_chara][0][0]:
+                            characters_data[every_chara].start_position[0] = all_characters_path[every_chara][0][0]
+                            all_characters_path[every_chara].pop(0)
+                    elif characters_data[every_chara].start_position[1] < all_characters_path[every_chara][0][1]:
+                        characters_data[every_chara].start_position[1]+=0.125
+                        action_displayer(every_chara,"move",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+                        if characters_data[every_chara].start_position[1] >= all_characters_path[every_chara][0][1]:
+                            characters_data[every_chara].start_position[1] = all_characters_path[every_chara][0][1]
+                            all_characters_path[every_chara].pop(0)
+                    elif characters_data[every_chara].start_position[1] > all_characters_path[every_chara][0][1]:
+                        characters_data[every_chara].start_position[1]-=0.125
+                        action_displayer(every_chara,"move",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+                        if characters_data[every_chara].start_position[1] <= all_characters_path[every_chara][0][1]:
+                            characters_data[every_chara].start_position[1] = all_characters_path[every_chara][0][1]
+                            all_characters_path[every_chara].pop(0)
+                    light_area = calculate_darkness(characters_data)
+                else:
+                    key_to_remove.append(every_chara)
+            
+            for i in range(len(key_to_remove)):
+                all_characters_path.pop(key_to_remove[i])
+            
+            #角色动画
+            for every_chara in characters_data:
+                if every_chara not in all_characters_path:
+                    if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                        characters_data[every_chara].undetected = True
+                    else:
+                        characters_data[every_chara].undetected = False
+                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+            for enemies in sangvisFerris_data:
+                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
+                    action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+
+            #加载雪花
+            for i in range(len(all_snow_on_screen)):
+                printIn(all_snow_on_screen[i],screen,local_x,local_y)
+                all_snow_on_screen[i].x -= 10*zoom_in
+                all_snow_on_screen[i].y += 20*zoom_in
+                if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
+                    all_snow_on_screen[i].y = random.randint(-100,0)
+                    all_snow_on_screen[i].x = random.randint(0,window_x*2)
+            
+            #加载音乐
+            while pygame.mixer.music.get_busy() != 1:
+                pygame.mixer.music.load("Assets/music/"+bg_music)
+                pygame.mixer.music.play(loops=9999, start=0.0)
+                pygame.mixer.music.set_volume(0.5)
+            
+            #画面更新
+            fpsClock.tick(fps)
+            pygame.display.update()
+            
+    walk_on_snow_sound[the_sound_id].stop()
 
     # 游戏主循环
     while battle==True:
@@ -625,7 +773,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 the_route = enemy_action[1]
                 if the_route != []:
                     if pygame.mixer.get_busy() == False:
-                            walk_on_snow_sound.play()
+                        the_sound_id = random.randint(0,len(walk_on_snow_sound)-1)
+                        walk_on_snow_sound[the_sound_id].play()
                     if sangvisFerris_data[enemies_in_control].x < the_route[0][0]:
                         sangvisFerris_data[enemies_in_control].x+=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
@@ -655,7 +804,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             sangvisFerris_data[enemies_in_control].y = the_route[0][1]
                             the_route.pop(0)
                 else:
-                    walk_on_snow_sound.stop()
+                    walk_on_snow_sound[the_sound_id].stop()
                     enemies_in_control_id +=1
                     if enemies_in_control_id == len(sangvisFerris_data):
                         whose_round = "sangvisFerrisToPlayer"
@@ -735,7 +884,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load("Assets/music/"+bg_music)
             pygame.mixer.music.play(loops=9999, start=0.0)
-            pygame.mixer.music.set_volume(0.1)
+            pygame.mixer.music.set_volume(0.5)
 
         #结束动画
         if whose_round == "result_win":
