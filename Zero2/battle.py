@@ -254,6 +254,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         fpsClock.tick(fps)
         pygame.display.update()
     
+    #加载音乐
+    pygame.mixer.music.load("Assets/music/"+bg_music)
+    pygame.mixer.music.play(loops=9999, start=0.0)
+    pygame.mixer.music.set_volume(0.5)
+    
     #加载完成，章节标题淡出
     if dialog_during_battle == None:
         for i in range(250,0,-5):
@@ -278,6 +283,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for enemies in sangvisFerris_data:
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
                     action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+            #加载雪花
+            for i in range(len(all_snow_on_screen)):
+                printIn(all_snow_on_screen[i],screen,local_x,local_y)
+                all_snow_on_screen[i].x -= 10*zoom_in
+                all_snow_on_screen[i].y += 20*zoom_in
+                if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
+                    all_snow_on_screen[i].y = random.randint(-100,0)
+                    all_snow_on_screen[i].x = random.randint(0,window_x*2)
             the_black.set_alpha(i)
             printf(the_black,(0,0),screen)
             title_number_display.set_alpha(i)
@@ -408,18 +421,72 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
                 printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
                 txt_alpha -= 5
-
-            #加载音乐
-            while pygame.mixer.music.get_busy() != 1:
-                pygame.mixer.music.load("Assets/music/"+bg_music)
-                pygame.mixer.music.play(loops=9999, start=0.0)
-                pygame.mixer.music.set_volume(0.5)
-            
             #画面更新
             fpsClock.tick(fps)
             pygame.display.update()
-            
+        #脚步停止
         walk_on_snow_sound[the_sound_id].stop()
+        #加载对话框图片
+        dialoguebox_up = loadImage("Assets/img/UI/dialoguebox.png",window_x,window_y/5,window_x/2,window_y/5)
+        dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),-dialoguebox_up.img.get_width()+dialoguebox_up.img.get_width()/4,window_y/2+dialoguebox_up.img.get_height(),window_x/2,window_y/5)
+        #设定初始化
+        display_num = 0
+        dialog_content_id = 1
+        displayed_line = -1
+        #开始对话
+        while True:
+            #玩家输入按键判定
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        exit()
+            if pygame.mouse.get_pressed()[1]:
+                display_num += 1
+            #加载地图
+            for y in range(len(map_img_list)):
+                for x in range(len(map_img_list[y])):
+                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
+                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                        printf(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+            #加载阴影区
+            for y in range(len(map_img_list)):
+                for x in range(len(map_img_list[y])):
+                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
+                        printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                
+            #角色动画
+            for every_chara in characters_data:
+                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                    characters_data[every_chara].undetected = True
+                else:
+                    characters_data[every_chara].undetected = False
+                action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+            for enemies in sangvisFerris_data:
+                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
+                    action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+
+            #加载雪花
+            for i in range(len(all_snow_on_screen)):
+                printIn(all_snow_on_screen[i],screen,local_x,local_y)
+                all_snow_on_screen[i].x -= 10*zoom_in
+                all_snow_on_screen[i].y += 20*zoom_in
+                if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
+                    all_snow_on_screen[i].y = random.randint(-100,0)
+                    all_snow_on_screen[i].x = random.randint(0,window_x*2)
+                
+            if dialoguebox_up.x > window_x/2:
+                dialoguebox_up.x -= 150
+            if dialoguebox_down.x < window_x/2-dialoguebox_down.img.get_width()+dialoguebox_down.img.get_width()/4:
+                dialoguebox_down.x += 150
+
+            name = fontRender(dialog_during_battle[display_num][0],"white",25)
+            content = fontRender(dialog_during_battle[display_num][1],"white",25)
+            printIn(dialoguebox_up,screen)
+            printf(name,(dialoguebox_up.x+dialoguebox_up.img.get_width()/6,dialoguebox_up.y+dialoguebox_up.img.get_height()/10),screen)
+            printIn(dialoguebox_down,screen)
+            #画面更新
+            fpsClock.tick(fps)
+            pygame.display.update()
 
     # 游戏主循环
     while battle==True:
