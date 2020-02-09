@@ -255,20 +255,42 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         pygame.display.update()
     
     #加载完成，章节标题淡出
-    for i in range(600,0,-2):
-        printf(the_black,(0,0),screen)
-        title_number_display.set_alpha(i)
-        title_main_display.set_alpha(i)
-        printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-        printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-        battle_info_line1.set_alpha(i)
-        battle_info_line2.set_alpha(i)
-        printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
-        printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
-        fpsClock.tick(fps)
-        pygame.display.update()
-
-    if dialog_during_battle != None:
+    if dialog_during_battle == None:
+        for i in range(250,0,-5):
+            #加载地图
+            for y in range(len(map_img_list)):
+                for x in range(len(map_img_list[y])):
+                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
+                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                        printf(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+            #加载阴影区
+            for y in range(len(map_img_list)):
+                for x in range(len(map_img_list[y])):
+                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
+                        printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+            #角色动画
+            for every_chara in characters_data:
+                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                    characters_data[every_chara].undetected = True
+                else:
+                    characters_data[every_chara].undetected = False
+                action_displayer(every_chara,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+            for enemies in sangvisFerris_data:
+                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
+                    action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+            the_black.set_alpha(i)
+            printf(the_black,(0,0),screen)
+            title_number_display.set_alpha(i)
+            title_main_display.set_alpha(i)
+            printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+            printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+            battle_info_line1.set_alpha(i)
+            battle_info_line2.set_alpha(i)
+            printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
+            printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+            fpsClock.tick(fps)
+            pygame.display.update()
+    elif dialog_during_battle != None:
         #建立地图
         map2d=Array2D(len(theMap[0]),len(theMap))
         #历遍地图，设置障碍方块
@@ -279,7 +301,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         # 历遍所有角色，将角色的坐标点设置为障碍方块
         for every_chara in sangvisFerris_data:
             map2d[sangvisFerris_data[every_chara].x][sangvisFerris_data[every_chara].y] = 1
-        
         all_characters_path = {}
         for every_chara in characters_data:
             #创建AStar对象,并设置起点和终点为
@@ -304,6 +325,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             else:
                 raise Exception('Waring: '+every_chara+" cannot find her path, please rewrite her start position!")
             all_characters_path[every_chara] = the_route
+
+        txt_alpha = 250
         while len(all_characters_path)>0:
             #加载地图
             for y in range(len(map_img_list)):
@@ -373,6 +396,19 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     all_snow_on_screen[i].y = random.randint(-100,0)
                     all_snow_on_screen[i].x = random.randint(0,window_x*2)
             
+            if txt_alpha >= 0:
+                the_black.set_alpha(txt_alpha)
+                printf(the_black,(0,0),screen)
+                title_number_display.set_alpha(txt_alpha)
+                title_main_display.set_alpha(txt_alpha)
+                printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+                printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+                battle_info_line1.set_alpha(txt_alpha)
+                battle_info_line2.set_alpha(txt_alpha)
+                printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
+                printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+                txt_alpha -= 5
+
             #加载音乐
             while pygame.mixer.music.get_busy() != 1:
                 pygame.mixer.music.load("Assets/music/"+bg_music)
@@ -383,7 +419,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             fpsClock.tick(fps)
             pygame.display.update()
             
-    walk_on_snow_sound[the_sound_id].stop()
+        walk_on_snow_sound[the_sound_id].stop()
 
     # 游戏主循环
     while battle==True:
