@@ -28,6 +28,20 @@ def calculate_darkness(characters_data):
                         light_area.append((x,y))
     return light_area
 
+def calculate_darkness_before_battle(characters_data):
+    light_area = []
+    for each_chara in characters_data:
+        for y in range(int(characters_data[each_chara].start_position[1]-characters_data[each_chara].attack_range),int(characters_data[each_chara].start_position[1]+characters_data[each_chara].attack_range)):
+            if y < characters_data[each_chara].start_position[1]:
+                for x in range(int(characters_data[each_chara].start_position[0]-characters_data[each_chara].attack_range-(y-characters_data[each_chara].start_position[1])+1),int(characters_data[each_chara].start_position[0]+characters_data[each_chara].attack_range+(y-characters_data[each_chara].start_position[1]))):
+                    if (x,y) not in light_area:
+                        light_area.append((x,y))
+            else:
+                for x in range(int(characters_data[each_chara].start_position[0]-characters_data[each_chara].attack_range+(y-characters_data[each_chara].start_position[1])+1),int(characters_data[each_chara].start_position[0]+characters_data[each_chara].attack_range-(y-characters_data[each_chara].start_position[1]))):
+                    if (x,y) not in light_area:
+                        light_area.append((x,y))
+    return light_area
+
 class Array2D:
     """
         说明：

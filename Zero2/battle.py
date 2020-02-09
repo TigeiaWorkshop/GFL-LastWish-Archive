@@ -347,13 +347,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         if characters_data[every_chara].start_position[1] <= all_characters_path[every_chara][0][1]:
                             characters_data[every_chara].start_position[1] = all_characters_path[every_chara][0][1]
                             all_characters_path[every_chara].pop(0)
-                    light_area = calculate_darkness(characters_data)
                 else:
                     key_to_remove.append(every_chara)
-            
+            light_area = calculate_darkness_before_battle(characters_data)
             for i in range(len(key_to_remove)):
                 all_characters_path.pop(key_to_remove[i])
-            
             #角色动画
             for every_chara in characters_data:
                 if every_chara not in all_characters_path:
