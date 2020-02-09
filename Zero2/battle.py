@@ -135,12 +135,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         zoom_in = 2
     perBlockWidth = window_x/block_x*zoom_in
     perBlockHeight = window_y/block_y*zoom_in
-    local_x += window_x/block_x*0.25*len(theMap[0])
-    if local_x >0:
+
+    if local_x+window_x/block_x*0.25*len(theMap[0]) >0:
         local_x=0
-    local_y += window_y/block_y*0.25*len(theMap)
-    if local_y>0:
-        local_y = 0
+    if local_y+window_y/block_y*0.25*len(theMap)>0:
+        local_y=0
     
     #地图方块图片随机化
     with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
@@ -149,7 +148,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     
     map_img_list = randomBlock(theMap,blocks_setting)
     
-
     #加载雪花
     all_snow_img = glob.glob(r'Assets/img/environment/snow/*.png')
     snow_list = []
@@ -242,7 +240,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         walk_on_snow_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
     the_sound_id = None
     
-
     battle_info_line1 = fontRender(battle_info[0],"white",25)
     battle_info_line2 = fontRender(battle_info[1],"white",25)
     #显示章节信息
@@ -311,15 +308,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #加载地图
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
-                    if x*perBlockWidth+local_x < window_x and (y+1)*perBlockHeight-perBlockHeight*1.5+local_y < window_y:
+                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
                         img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                        printf(img_display,(x*perBlockWidth,(y+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
-                        if (x,y-1) not in light_area and dark_mode == True:
-                            printf(black,(x*perBlockWidth,(y-1)*perBlockHeight),screen,local_x,local_y)
-                            
-            for x in range(len(map_img_list[y])):
-                if (x,y) not in light_area and dark_mode == True:
-                    printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        printf(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+            #加载阴影区
+            for y in range(len(map_img_list)):
+                for x in range(len(map_img_list[y])):
+                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
+                        printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
 
             key_to_remove = []
             for every_chara in all_characters_path:
@@ -453,13 +449,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #加载地图
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[y])):
-                img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                printf(img_display,(x*perBlockWidth,(y+1)*perBlockHeight-perBlockHeight*1.5),screen,local_x,local_y)
-                if (x,y-1) not in light_area and dark_mode == True:
-                    printf(black,(x*perBlockWidth,(y-1)*perBlockHeight),screen,local_x,local_y)
-        for x in range(len(map_img_list[y])):
-            if (x,y) not in light_area and dark_mode == True:
-                printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
+                    img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                    printf(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+        #加载阴影区
+        for y in range(len(map_img_list)):
+            for x in range(len(map_img_list[y])):
+                if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
+                    printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
 
         #玩家回合
         if whose_round == "player":
