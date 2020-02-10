@@ -34,7 +34,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     npc_img_dic={}
     for i in range(len(all_npc_file_list)):
         img_name = all_npc_file_list[i].replace("Assets","").replace("img","").replace("npc","").replace(".png","").replace("\\","").replace("/","")
-        npc_img_dic[img_name] = loadImg(all_npc_file_list[i])
+        npc_img_dic[img_name] = loadImg(all_npc_file_list[i],window_x/2,window_x/2)
     #加载对话的背景图片（注意是jpg）
     all_dialog_bg_file_list = glob.glob(r'Assets/img/dialog_background/*.jpg')
     dialog_bg_img_dic={}
@@ -73,12 +73,10 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         printIn(dialog_bg_img_dic[dialog_content[display_num][1][0]],screen)
         #加载对话任务
         if len(dialog_content[display_num][0])==2:
-            printf(npc_img_dic[dialog_content[display_num][0][0]],(-100,100),screen)
-            printf(npc_img_dic[dialog_content[display_num][0][1]],(window_x-1000,100),screen)
-        elif len(dialog_content[display_num][0])==1:
-            if dialog_content[display_num][0][0] != "NAR":
-                big_img_x = (window_x - npc_img_dic[dialog_content[display_num][0][0]].get_width())/2
-                printf(npc_img_dic[dialog_content[display_num][0][0]],(big_img_x,100),screen)
+            printf(npc_img_dic[dialog_content[display_num][0][0]],(0,window_y-window_x/2),screen)
+            printf(npc_img_dic[dialog_content[display_num][0][1]],(window_x/2,window_y-window_x/2),screen)
+        elif len(dialog_content[display_num][0])==1 and dialog_content[display_num][0][0] != "NAR":
+            printf(npc_img_dic[dialog_content[display_num][0][0]],(window_x/4,window_y-window_x/2),screen)
         # 对话框图片
         printIn(dialoguebox,screen)
         #讲述者名称
