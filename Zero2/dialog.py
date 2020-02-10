@@ -43,7 +43,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         dialog_bg_img_dic[img_name] = loadImage(all_dialog_bg_file_list[i],0,0,window_x,window_y)
     
     #加载对话框
-    dialoguebox = loadImg("Assets/img/UI/dialoguebox.png",window_x/1.2,window_y/3.6)
+    dialoguebox = loadImage("Assets/img/UI/dialoguebox.png",(window_x-window_x/1.4)/2,window_y*0.65,window_x/1.4,window_y/4)
     #鼠标图标
     mouse_none = loadImg("Assets/img/UI/mouse_none.png",window_x/65,window_x/65)
     mouse_click = loadImg("Assets/img/UI/mouse.png",window_x/65,window_x/65)
@@ -80,15 +80,15 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                 big_img_x = (window_x - npc_img_dic[dialog_content[display_num][0][0]].get_width())/2
                 printf(npc_img_dic[dialog_content[display_num][0][0]],(big_img_x,100),screen)
         # 对话框图片
-        printf(dialoguebox,(100,window_y-dialoguebox.get_height()-50),screen)
+        printIn(dialoguebox,screen)
         #讲述者名称
-        printf(fontRender(dialog_content[display_num][1][2],"white",25),(500,window_y-dialoguebox.get_height()),screen)
+        printf(fontRender(dialog_content[display_num][1][2],"white",window_x/64),(dialoguebox.x+dialoguebox.width/8,dialoguebox.y+dialoguebox.height/8),screen)
         #对话框内容
         if displayed_line >= 0:
             for i in range(displayed_line+1):
-                printf(fontRender(dialog_content[display_num][2][i],"white",25),(440,window_y-dialoguebox.get_height()+55+30*i),screen)
+                printf(fontRender(dialog_content[display_num][2][i],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.35+window_x/65*i),screen)
 
-        printf(fontRender(dialog_content[display_num][2][displayed_line+1][0:dialog_content_id],"white",25),(440,window_y-dialoguebox.get_height()+55+30*(displayed_line+1)),screen)
+        printf(fontRender(dialog_content[display_num][2][displayed_line+1][0:dialog_content_id],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.35+window_x/65*(displayed_line+1)),screen)
         #检测所有字是否都已经播出
         if dialog_content_id < len(dialog_content[display_num][2][displayed_line+1]):
             dialog_content_id +=1
@@ -100,13 +100,13 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         #鼠标gif
         if mouse_gif_id<=20:
             mouse_gif_id+=1
-            printf(mouse_click,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.48),screen)
+            printf(mouse_click,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
         elif mouse_gif_id==40:
             mouse_gif_id=1
-            printf(mouse_none,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.48),screen)
+            printf(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
         else:
             mouse_gif_id+=1
-            printf(mouse_none,(dialoguebox.get_width()*0.85,window_y-dialoguebox.get_height()*0.48),screen)
+            printf(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
 
         #按键判定
         for event in pygame.event.get():
