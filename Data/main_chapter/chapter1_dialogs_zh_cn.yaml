@@ -38,29 +38,39 @@ dialog_before_battle:
     - Kryuger
   - - 我怎么知道
 dialog_during_battle:
-- dialoguebox_down:
+- dialoguebox_down: 
     character_name: sv-98
     content:
-    - content line1 down down down
-    - 开始测试
-    - content line3 down down down
-    - 开始测试
-    - 开始测试
+    - 终于逃出来了
+    - 大家没事吧
     image_name: sv-98
-  dialoguebox_up:
-    character_name: 名字
+  dialoguebox_up: null
+- dialoguebox_down: 
+    character_name: sv-98
     content:
-    - content line1 up up up up
-    - 开始测试
-    - content line3 up up up up
-    - 开始测试
-    - 开始测试
+    - asval, 这里离据点还有多远？
     image_name: sv-98
-- dialoguebox_down:
-    character_name: 旁白
+  dialoguebox_up: null
+- dialoguebox_down: 
+    character_name: sv-98
     content:
-    - content line1
-    - content line2
-    image_name: null
+    - asval, 这里离据点还有多远？
+    image_name: sv-98
+  dialoguebox_up: 
+    character_name: asval
+    content:
+    - 还有3公里。
+    image_name: asval
+- dialoguebox_down: 
+    character_name: sv-98
+    content:
+    - 那好吧，我们应该在这休息一下
+    image_name: sv-98
+  dialoguebox_up: null
+- dialoguebox_down: 
+    character_name: gsh18
+    content:
+    - 小心，我感觉这里还有敌人
+    image_name: gsh18
   dialoguebox_up: null
 title: 雪上之路

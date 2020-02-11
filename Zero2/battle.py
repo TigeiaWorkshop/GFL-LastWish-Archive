@@ -452,25 +452,37 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             if pygame.mouse.get_pressed()[0]:
                 if display_num < len(dialog_during_battle)-1:
                     display_num += 1
-                    dialog_up_content_id = 0
-                    dialog_down_content_id = 0
-                    dialog_up_displayed_line = 0
-                    dialog_down_displayed_line = 0
+                    #检测上方对话框
                     if dialog_during_battle[display_num]["dialoguebox_up"] != None:
                         if dialog_during_battle[display_num-1]["dialoguebox_up"] != None:
                             if dialog_during_battle[display_num]["dialoguebox_up"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_up"]["character_name"]:
                                 dialoguebox_up.x = window_x
+                                dialog_up_content_id = 0
+                                dialog_up_displayed_line = 0
+                            elif dialog_during_battle[display_num]["dialoguebox_up"]["content"] != dialog_during_battle[display_num-1]["dialoguebox_up"]["content"]:
+                                dialog_up_content_id = 0
+                                dialog_up_displayed_line = 0
                     else:
                         dialoguebox_up.x = window_x
+                        dialog_up_content_id = 0
+                        dialog_up_displayed_line = 0
+                    #检测下方对话框    
                     if dialog_during_battle[display_num]["dialoguebox_down"] != None:
                         if dialog_during_battle[display_num-1]["dialoguebox_down"] != None:
                             if dialog_during_battle[display_num]["dialoguebox_down"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_down"]["character_name"]:
                                 dialoguebox_down.x = -window_x*0.3
+                                dialog_down_content_id = 0
+                                dialog_down_displayed_line = 0
+                            elif dialog_during_battle[display_num]["dialoguebox_down"]["content"] != dialog_during_battle[display_num-1]["dialoguebox_down"]["content"]:
+                                dialog_down_content_id = 0
+                                dialog_down_displayed_line = 0
                     else:
                         dialoguebox_down.x = -window_x*0.3
+                        dialog_down_content_id = 0
+                        dialog_down_displayed_line = 0
                 else:
                     break
-                time.sleep(0.02)
+                time.sleep(0.05)
 
             #加载地图
             for y in range(len(map_img_list)):
@@ -667,20 +679,20 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if pygame.mouse.get_pressed()[0]:
                     if isGetClick(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         if characters_data[the_character_get_click].current_bullets > 0:
-                            time.sleep(0.02)
+                            time.sleep(0.05)
                             action_choice = "attack"
                             block_get_click_x = -100
                             block_get_click_y = -100
                             green_hide = False
                     elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         action_choice = "move"
-                        time.sleep(0.02)
+                        time.sleep(0.05)
                         block_get_click_x = -100
                         block_get_click_y = -100
                         green_hide = False
                     elif isGetClick(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y):
                         action_choice = "skill"
-                        time.sleep(0.02)
+                        time.sleep(0.05)
                         block_get_click_x = -100
                         block_get_click_y = -100
                         green_hide = False
