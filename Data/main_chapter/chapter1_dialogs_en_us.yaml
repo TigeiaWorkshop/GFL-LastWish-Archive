@@ -37,5 +37,30 @@ dialog_before_battle:
     - First_Kiss
     - Kryuger
   - - 我怎么知道
-dialog_during_battle: None
+dialog_during_battle:
+- dialoguebox_down:
+    character_name: sv-98
+    content:
+    - content line1 down down down
+    - 开始测试
+    - content line3 down down down
+    - 开始测试
+    - 开始测试
+    image_name: sv-98
+  dialoguebox_up:
+    character_name: 名字
+    content:
+    - content line1 up up up up
+    - 开始测试
+    - content line3 up up up up
+    - 开始测试
+    - 开始测试
+    image_name: sv-98
+- dialoguebox_down:
+    character_name: 旁白
+    content:
+    - content line1
+    - content line2
+    image_name: null
+  dialoguebox_up: null
 title: 雪上之路

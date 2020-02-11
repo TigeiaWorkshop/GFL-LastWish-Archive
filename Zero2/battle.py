@@ -427,12 +427,21 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #脚步停止
         walk_on_snow_sound[the_sound_id].stop()
         #加载对话框图片
-        dialoguebox_up = loadImage("Assets/img/UI/dialoguebox.png",window_x,window_y/5,window_x/2,window_y/5)
-        dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),-dialoguebox_up.img.get_width()+dialoguebox_up.img.get_width()/4,window_y/2+dialoguebox_up.img.get_height(),window_x/2,window_y/5)
+        dialoguebox_up = loadImage("Assets/img/UI/dialoguebox.png",window_x,window_y/2-window_y*0.35,window_x*0.3,window_y*0.15)
+        dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),-window_x*0.3,window_y/2+window_y*0.2,window_x*0.3,window_y*0.15)
         #设定初始化
         display_num = 0
-        dialog_content_id = 1
-        displayed_line = -1
+        dialog_up_content_id = 0
+        dialog_down_content_id = 0
+        dialog_up_displayed_line = 0
+        dialog_down_displayed_line = 0
+        #加载对话时角色的图标
+        all_icon_file_list = glob.glob(r'Assets/img/npc_icon/*.png')
+        character_icon_img_list={}
+        for i in range(len(all_icon_file_list)):
+            img_name = all_icon_file_list[i].replace("Assets","").replace("img","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
+            character_icon_img_list[img_name] = loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
+        
         #开始对话
         while True:
             #玩家输入按键判定
@@ -440,8 +449,29 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         exit()
-            if pygame.mouse.get_pressed()[1]:
-                display_num += 1
+            if pygame.mouse.get_pressed()[0]:
+                if display_num < len(dialog_during_battle)-1:
+                    display_num += 1
+                    dialog_up_content_id = 0
+                    dialog_down_content_id = 0
+                    dialog_up_displayed_line = 0
+                    dialog_down_displayed_line = 0
+                    if dialog_during_battle[display_num]["dialoguebox_up"] != None:
+                        if dialog_during_battle[display_num-1]["dialoguebox_up"] != None:
+                            if dialog_during_battle[display_num]["dialoguebox_up"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_up"]["character_name"]:
+                                dialoguebox_up.x = window_x
+                    else:
+                        dialoguebox_up.x = window_x
+                    if dialog_during_battle[display_num]["dialoguebox_down"] != None:
+                        if dialog_during_battle[display_num-1]["dialoguebox_down"] != None:
+                            if dialog_during_battle[display_num]["dialoguebox_down"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_down"]["character_name"]:
+                                dialoguebox_down.x = -window_x*0.3
+                    else:
+                        dialoguebox_down.x = -window_x*0.3
+                else:
+                    break
+                time.sleep(0.02)
+
             #加载地图
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
@@ -474,16 +504,52 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     all_snow_on_screen[i].y = random.randint(-100,0)
                     all_snow_on_screen[i].x = random.randint(0,window_x*2)
                 
-            if dialoguebox_up.x > window_x/2:
+            if dialoguebox_up.x > window_x/2+dialoguebox_up.width*0.4:
                 dialoguebox_up.x -= 150
-            if dialoguebox_down.x < window_x/2-dialoguebox_down.img.get_width()+dialoguebox_down.img.get_width()/4:
+            if dialoguebox_down.x < window_x/2-dialoguebox_down.width*1.4:
                 dialoguebox_down.x += 150
 
-            name = fontRender(dialog_during_battle[display_num][0],"white",25)
-            content = fontRender(dialog_during_battle[display_num][1],"white",25)
-            printIn(dialoguebox_up,screen)
-            printf(name,(dialoguebox_up.x+dialoguebox_up.img.get_width()/6,dialoguebox_up.y+dialoguebox_up.img.get_height()/10),screen)
-            printIn(dialoguebox_down,screen)
+            #上方对话框
+            if dialog_during_battle[display_num]["dialoguebox_up"] != None:
+                #对话框图片
+                printIn(dialoguebox_up,screen)
+                #名字
+                printf(fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["character_name"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
+                #正在播放的行
+                content = fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line][:dialog_up_content_id],"white",window_x/80)
+                printf(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
+                if dialog_up_content_id < len(dialog_during_battle[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line]):
+                    dialog_up_content_id+=1
+                elif dialog_up_displayed_line < len(dialog_during_battle[display_num]["dialoguebox_up"]["content"])-1:
+                    dialog_up_displayed_line += 1
+                    dialog_up_content_id = 0
+                for i in range(dialog_up_displayed_line):
+                    content = fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["content"][i],"white",window_x/80)
+                    printf(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
+                #角色图标
+                if dialog_during_battle[display_num]["dialoguebox_up"]["image_name"] != None:
+                    printf(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_up"]["image_name"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
+            #下方对话框
+            if dialog_during_battle[display_num]["dialoguebox_down"] != None:
+                #对话框图片
+                printIn(dialoguebox_down,screen)
+                #名字
+                printf(fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["character_name"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
+                #正在播放的行
+                content = fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line][:dialog_down_content_id],"white",window_x/80)
+                printf(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
+                if dialog_down_content_id < len(dialog_during_battle[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line]):
+                    dialog_down_content_id+=1
+                elif dialog_down_displayed_line < len(dialog_during_battle[display_num]["dialoguebox_down"]["content"])-1:
+                    dialog_down_displayed_line += 1
+                    dialog_down_content_id = 0
+                for i in range(dialog_down_displayed_line):
+                    content = fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["content"][i],"white",window_x/80)
+                    printf(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
+                #角色图标
+                if dialog_during_battle[display_num]["dialoguebox_down"]["image_name"] != None:
+                    printf(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_down"]["image_name"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
+
             #画面更新
             fpsClock.tick(fps)
             pygame.display.update()
