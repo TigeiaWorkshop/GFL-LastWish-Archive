@@ -27,7 +27,10 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     
     #加载菜单选择页面的文字
     for i in range(len(chapter_select)):
-        chapter_select[i] = fontRenderPro(chapter_select[i],"disable")
+        if i == 0 or i == len(chapter_select)-1:
+            chapter_select[i] = fontRenderPro(chapter_select[i],"enable")
+        else:
+            chapter_select[i] = fontRenderPro(chapter_select[i],"disable")
 
     # 创建窗口
     screen = pygame.display.set_mode((window_x, window_y),pygame.SCALED)
@@ -50,8 +53,28 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     ret, img = videoCapture.read()
     img = cv2.transpose(img)
     surface = pygame.surface.Surface((img.shape[0], img.shape[1]))
+
+    the_black = loadImage("Assets/img/UI/black.png",0,0,window_x,window_y)
+    t1 = fontRender("缇吉娅工坊 呈现","white",30)
+    t2 = fontRender("警告：所有内容仍处于研发阶段，不代表最终效果","white",30)
+    for i in range(0,250,2):
+        printIn(the_black,screen)
+        t1.set_alpha(i)
+        printf(t1,(30,window_y-130),screen)
+        t2.set_alpha(i)
+        printf(t2,(30,window_y-80),screen)
+        time.sleep(0.01)
+        pygame.display.flip()
     
-    
+    for i in range(250,0,-2):
+        printIn(the_black,screen)
+        t1.set_alpha(i)
+        printf(t1,(30,window_y-130),screen)
+        t2.set_alpha(i)
+        printf(t2,(30,window_y-80),screen)
+        time.sleep(0.01)
+        pygame.display.flip()
+
     # 游戏主循环
     while True:
         for event in pygame.event.get():

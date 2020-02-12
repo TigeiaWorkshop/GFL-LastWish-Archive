@@ -258,6 +258,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         fpsClock.tick(fps)
         pygame.display.update()
     
+    #加载音乐
+    pygame.mixer.music.load("Assets/music/"+bg_music)
+    pygame.mixer.music.play(loops=9999, start=0.0)
+    pygame.mixer.music.set_volume(0.5)
+
     #加载完成，章节标题淡出
     if dialog_during_battle == None:
         for a in range(250,0,-5):
@@ -519,7 +524,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 #对话框图片
                 printIn(dialoguebox_up,screen)
                 #名字
-                printf(fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["character_name"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
+                if dialog_during_battle[display_num]["dialoguebox_up"]["character_name"] != None:
+                    printf(fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["character_name"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
                 #正在播放的行
                 content = fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line][:dialog_up_content_id],"white",window_x/80)
                 printf(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
@@ -539,7 +545,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 #对话框图片
                 printIn(dialoguebox_down,screen)
                 #名字
-                printf(fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["character_name"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
+                if dialog_during_battle[display_num]["dialoguebox_down"]["character_name"] != None:
+                    printf(fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["character_name"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
                 #正在播放的行
                 content = fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line][:dialog_down_content_id],"white",window_x/80)
                 printf(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
@@ -558,11 +565,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #画面更新
             fpsClock.tick(fps)
             pygame.display.update()
-
-    #加载音乐
-    pygame.mixer.music.load("Assets/music/"+bg_music)
-    pygame.mixer.music.play(loops=9999, start=0.0)
-    pygame.mixer.music.set_volume(0.5)
 
     # 游戏主循环
     while battle==True:
@@ -701,7 +703,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
                 block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
                 #如果点击了回合结束的按钮
-                if isHover(end_round_button):
+                if isHover(end_round_button) and isWaiting == True:
                     whose_round = "playerToSangvisFerris"
                     the_character_get_click = ""
                     green_hide = True
