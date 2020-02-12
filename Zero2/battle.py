@@ -258,11 +258,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         fpsClock.tick(fps)
         pygame.display.update()
     
-    #加载音乐
-    pygame.mixer.music.load("Assets/music/"+bg_music)
-    pygame.mixer.music.play(loops=9999, start=0.0)
-    pygame.mixer.music.set_volume(0.5)
-    
     #加载完成，章节标题淡出
     if dialog_during_battle == None:
         for a in range(250,0,-5):
@@ -564,6 +559,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             fpsClock.tick(fps)
             pygame.display.update()
 
+    #加载音乐
+    pygame.mixer.music.load("Assets/music/"+bg_music)
+    pygame.mixer.music.play(loops=9999, start=0.0)
+    pygame.mixer.music.set_volume(0.5)
+
     # 游戏主循环
     while battle==True:
         #玩家输入按键判定-任何情况
@@ -572,6 +572,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if event.key == K_ESCAPE:
                     green_hide = True
                     the_character_get_click = ""
+                    isWaiting = True
+                    action_choice = ""
                 if event.key == K_m:
                     exit()
             elif event.type == MOUSEBUTTONDOWN:
@@ -711,11 +713,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 else:
                     #控制选择菜单的显示与隐藏
                     for key in characters_data:
-                        if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill":
-                            if key != the_character_get_click:
-                                the_character_get_click = key
-                                green_hide = "SelectMenu"
-                                break
+                        if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False:
+                            the_character_get_click = key
+                            green_hide = "SelectMenu"
+                            break
 
             #显示选择菜单
             if green_hide == "SelectMenu":

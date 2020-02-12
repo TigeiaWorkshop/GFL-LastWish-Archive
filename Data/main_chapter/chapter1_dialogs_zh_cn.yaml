@@ -71,6 +71,6 @@ dialog_during_battle:
     character_name: gsh-18
     content:
     - 小心，我感觉这里还有敌人
-    image_name: gsh18
+    image_name: gsh-18
   dialoguebox_up: null
 title: 雪上之路
