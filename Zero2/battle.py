@@ -48,11 +48,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     gif_dic["die"][1] = 0
                 current_hp_to_display = fontRender(str(characters_data[chara_name].current_hp)+"/"+str(characters_data[chara_name].max_hp),"black",10)
                 percent_of_hp = characters_data[chara_name].current_hp/characters_data[chara_name].max_hp
-            current_bullets_situation = fontRender(str(characters_data[chara_name].current_bullets)+"/"+str(characters_data[chara_name].maximum_bullets),"black",10)
-            printf(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98-hp_empty.get_height()),screen,local_x,local_y)
-            if characters_data[chara_name].current_action_point != 0:
-                printf(pygame.transform.scale(original_UI_img["action_point_blue"],(int(perBlockWidth*characters_data[chara_name].current_action_point/characters_data[chara_name].max_action_point),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98-hp_empty.get_height()),screen,local_x,local_y)
-        
+            
         if percent_of_hp<0:
             percent_of_hp=0
 
@@ -69,8 +65,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             printf(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
             printf(pygame.transform.scale(hp_img,(int(perBlockWidth*percent_of_hp),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
             printf(current_hp_to_display,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
-            printf(current_bullets_situation,(x*perBlockWidth+current_hp_to_display.get_width()-current_bullets_situation.get_width(),y*perBlockHeight*0.98-current_bullets_situation.get_height()),screen,local_x,local_y)
-        
+            
         gif_dic[action][1]+=1
         if isContinue==True:
             if gif_dic[action][1] == gif_dic[action][0][1]:
@@ -175,9 +170,16 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     for enemy in sangvisFerris:
         sangvisFerris_data[enemy] = sangvisFerriDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(enemy,perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
 
+    #加载对话时角色的图标
+    all_icon_file_list = glob.glob(r'Assets/img/npc_icon/*.png')
+    character_icon_img_list={}
+    for i in range(len(all_icon_file_list)):
+        img_name = all_icon_file_list[i].replace("Assets","").replace("img","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
+        character_icon_img_list[img_name] = loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
+
     #加载UI
     #加载结束回合的图片
-    end_round_button = loadImage("Assets/img/UI/endRound.png",window_x*0.9,window_y*0.9,perBlockWidth*2*28/15, perBlockWidth*2)
+    end_round_button = loadImage("Assets/img/UI/endRound.png",window_x*0.8,window_y*0.7,window_x/10, window_y/10)
     #加载选择菜单的图片
     select_menu_button_original = loadImg("Assets/img/UI/menu.png")
     #加载子弹图片
@@ -189,12 +191,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         "hp_red" : loadImg("Assets/img/UI/hp_red.png"),
         "hp_green" : loadImg("Assets/img/UI/hp_green.png"),
         "action_point_blue" : loadImg("Assets/img/UI/action_point.png"),
+        "bullets_number_brown" : loadImg("Assets/img/UI/bullets_number.png"),
         "green" : loadImg("Assets/img/UI/green.png",None,None,100),
         "red" : loadImg("Assets/img/UI/red.png",None,None,100),
         "black" : loadImg("Assets/img/UI/black.png",None,None,100),
         #计分板
         "score" : loadImage("Assets/img/UI/score.png",200,200,300,600),
     }
+    the_character_get_click_info_board = loadImage("Assets/img/UI/score.png",0,window_y-window_y/6,window_x/5,window_y/6)
     green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
     red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
     black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
@@ -261,7 +265,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     
     #加载完成，章节标题淡出
     if dialog_during_battle == None:
-        for i in range(250,0,-5):
+        for a in range(250,0,-5):
             #加载地图
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
@@ -291,18 +295,18 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
                     all_snow_on_screen[i].y = random.randint(-100,0)
                     all_snow_on_screen[i].x = random.randint(0,window_x*2)
-            the_black.set_alpha(i)
+            the_black.set_alpha(a)
             printf(the_black,(0,0),screen)
-            title_number_display.set_alpha(i)
-            title_main_display.set_alpha(i)
+            title_number_display.set_alpha(a)
+            title_main_display.set_alpha(a)
             printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
             printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-            battle_info_line1.set_alpha(i)
-            battle_info_line2.set_alpha(i)
+            battle_info_line1.set_alpha(a)
+            battle_info_line2.set_alpha(a)
             printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
             printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
             fpsClock.tick(fps)
-            pygame.display.update()
+            pygame.display.flip()
     elif dialog_during_battle != None:
         #建立地图
         map2d=Array2D(len(theMap[0]),len(theMap))
@@ -435,12 +439,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         dialog_down_content_id = 0
         dialog_up_displayed_line = 0
         dialog_down_displayed_line = 0
-        #加载对话时角色的图标
-        all_icon_file_list = glob.glob(r'Assets/img/npc_icon/*.png')
-        character_icon_img_list={}
-        for i in range(len(all_icon_file_list)):
-            img_name = all_icon_file_list[i].replace("Assets","").replace("img","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
-            character_icon_img_list[img_name] = loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
         
         #开始对话
         while True:
@@ -572,6 +570,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
+                    green_hide = True
+                    the_character_get_click = ""
+                if event.key == K_m:
                     exit()
             elif event.type == MOUSEBUTTONDOWN:
                 #上下滚轮-放大和缩小图片
@@ -637,6 +638,56 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
                     printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
 
+        #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
+        # 我方角色动画
+        for every_chara in characters_data:
+            if every_chara != the_character_get_click:
+                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                    characters_data[every_chara].undetected = True
+                else:
+                    characters_data[every_chara].undetected = False
+                if characters_data[every_chara].dying == False:
+                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+                else:
+                    action_displayer(characters_data[every_chara].name,"die",characters_data[every_chara].x,characters_data[every_chara].y,False)
+        #敌方动画
+        for enemies in sangvisFerris_data:
+            if enemies != enemies_in_control:
+                if sangvisFerris_data[enemies].current_hp>0:
+                    if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
+                        if green_hide == True and pygame.mouse.get_pressed()[2]:
+                            mouse_x,mouse_y=pygame.mouse.get_pos()
+                            block_get_click_x2 = int((mouse_x-local_x)/perBlockWidth)
+                            block_get_click_y2 = int((mouse_y-local_y)/perBlockHeight)
+                            if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
+                                for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].attack_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].attack_range):
+                                    if y < sangvisFerris_data[enemies].y:
+                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)):
+                                            if blocks_setting[theMap[y][x]][1] == True:
+                                                printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            else:
+                                                printf(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                    else:
+                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)):
+                                            if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
+                                                pass
+                                            else:
+                                                if blocks_setting[theMap[y][x]][1] == True:
+                                                    printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                else:
+                                                    printf(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+                elif sangvisFerris_data[enemies].current_hp<=0:
+                    action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
+                    the_dead_one = enemies
+        if the_dead_one != "":
+            the_characters_attacking = sangvisFerris_data[the_dead_one].gif
+            if the_characters_attacking["die"][1] == the_characters_attacking["die"][0][1]-1:
+                sangvisFerris_data.pop(the_dead_one)
+                result_of_round["total_kills"]+=1
+            the_dead_one=""
+        #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
+
         #玩家回合
         if whose_round == "player":
             #加载结束回合的按钮
@@ -665,13 +716,35 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 the_character_get_click = key
                                 green_hide = "SelectMenu"
                                 break
-                            else:
-                                green_hide = True
-                                the_character_get_click = ""
 
             #显示选择菜单
             if green_hide == "SelectMenu":
+                #左下角的角色信息
+                text_size = 20
+                printIn(the_character_get_click_info_board,screen)
+                padding = (the_character_get_click_info_board.height-character_icon_img_list[the_character_get_click].get_height())/2
+                printf(character_icon_img_list[the_character_get_click],(padding,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                tcgc_hp1 = fontRender("HP: ","white",20)
+                tcgc_hp2 = fontRender(str(characters_data[the_character_get_click].current_hp)+"/"+str(characters_data[the_character_get_click].max_hp),"black",20)
+                tcgc_action_point1 = fontRender("AP: ","white",20)
+                tcgc_action_point2 = fontRender(str(characters_data[the_character_get_click].current_action_point)+"/"+str(characters_data[the_character_get_click].max_action_point),"black",20)
+                tcgc_bullets_situation1 = fontRender("BP: ","white",20)
+                tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].maximum_bullets),"black",20)
+                printf(tcgc_hp1,(character_icon_img_list[the_character_get_click].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(tcgc_action_point1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(tcgc_bullets_situation1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                hp_empty = pygame.transform.scale(original_UI_img["hp_empty"],(int(the_character_get_click_info_board.width/3),int(text_size)))
+                printf(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(pygame.transform.scale(original_UI_img["hp_green"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_hp/characters_data[the_character_get_click].max_hp),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(pygame.transform.scale(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_action_point/characters_data[the_character_get_click].max_action_point),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(pygame.transform.scale(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].maximum_bullets),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(tcgc_hp2,(character_icon_img_list[the_character_get_click].get_width()*2.4+(hp_empty.get_width()-tcgc_hp2.get_width())/2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(tcgc_action_point2,(character_icon_img_list[the_character_get_click].get_width()*2.4+(hp_empty.get_width()-tcgc_action_point2.get_width())/2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                printf(tcgc_bullets_situation2,(character_icon_img_list[the_character_get_click].get_width()*2.4+(hp_empty.get_width()-tcgc_bullets_situation2.get_width())/2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 select_menu_button = pygame.transform.scale(select_menu_button_original, (int(perBlockWidth*2), int(perBlockWidth/1.3)))
+                #选择菜单
                 displayInCenter(fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight,screen,local_x,local_y)
                 displayInCenter(fontRender(selectMenuButtons_dic["move"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight,screen,local_x,local_y)
                 displayInCenter(fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5,screen,local_x,local_y)
@@ -998,56 +1071,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 enemies_in_control = ""
             else:
                 print("warning: not choice")
-
-        #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
-        # 我方角色动画
-        for every_chara in characters_data:
-            if every_chara != the_character_get_click:
-                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
-                    characters_data[every_chara].undetected = True
-                else:
-                    characters_data[every_chara].undetected = False
-                if characters_data[every_chara].dying == False:
-                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
-                else:
-                    action_displayer(characters_data[every_chara].name,"die",characters_data[every_chara].x,characters_data[every_chara].y,False)
-        #敌方动画
-        for enemies in sangvisFerris_data:
-            if enemies != enemies_in_control:
-                if sangvisFerris_data[enemies].current_hp>0:
-                    if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
-                        if green_hide == True and pygame.mouse.get_pressed()[2]:
-                            mouse_x,mouse_y=pygame.mouse.get_pos()
-                            block_get_click_x2 = int((mouse_x-local_x)/perBlockWidth)
-                            block_get_click_y2 = int((mouse_y-local_y)/perBlockHeight)
-                            if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
-                                for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].attack_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].attack_range):
-                                    if y < sangvisFerris_data[enemies].y:
-                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)):
-                                            if blocks_setting[theMap[y][x]][1] == True:
-                                                printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                            else:
-                                                printf(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                    else:
-                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)):
-                                            if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
-                                                pass
-                                            else:
-                                                if blocks_setting[theMap[y][x]][1] == True:
-                                                    printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                else:
-                                                    printf(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
-                elif sangvisFerris_data[enemies].current_hp<=0:
-                    action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
-                    the_dead_one = enemies
-        if the_dead_one != "":
-            the_characters_attacking = sangvisFerris_data[the_dead_one].gif
-            if the_characters_attacking["die"][1] == the_characters_attacking["die"][0][1]-1:
-                sangvisFerris_data.pop(the_dead_one)
-                result_of_round["total_kills"]+=1
-            the_dead_one=""
-        #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
 
         #加载雪花
         for i in range(len(all_snow_on_screen)):

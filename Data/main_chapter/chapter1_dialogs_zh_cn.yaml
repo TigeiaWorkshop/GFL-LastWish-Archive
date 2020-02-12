@@ -68,7 +68,7 @@ dialog_during_battle:
     image_name: sv-98
   dialoguebox_up: null
 - dialoguebox_down: 
-    character_name: gsh18
+    character_name: gsh-18
     content:
     - 小心，我感觉这里还有敌人
     image_name: gsh18

@@ -11,6 +11,7 @@
         "numpy",
         "printf",
         "sangvis",
-        "strftime"
+        "strftime",
+        "tcgc"
     ]
 }
