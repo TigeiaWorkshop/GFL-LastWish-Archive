@@ -84,9 +84,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         #对话框内容
         if displayed_line >= 0:
             for i in range(displayed_line+1):
-                drawImg(fontRender(dialog_content[display_num][2][i],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.35+window_x/65*i),screen)
+                drawImg(fontRender(dialog_content[display_num][2][i],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.34+window_x/60*i),screen)
 
-        drawImg(fontRender(dialog_content[display_num][2][displayed_line+1][0:dialog_content_id],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.35+window_x/65*(displayed_line+1)),screen)
+        drawImg(fontRender(dialog_content[display_num][2][displayed_line+1][0:dialog_content_id],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.34+window_x/60*(displayed_line+1)),screen)
         #检测所有字是否都已经播出
         if dialog_content_id < len(dialog_content[display_num][2][displayed_line+1]):
             dialog_content_id +=1

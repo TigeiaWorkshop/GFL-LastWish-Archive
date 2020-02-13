@@ -1,42 +1,120 @@
 battle_info:
 - 206X年7月3日
-- 据点以东约250公里
+- 临时据点以东约50公里
 dialog_after_battle:
 - - - NAR
-  - - research
+  - - duel
     - Room_1
     - null
-  - - test testASSsaS
-    - 旁白 test l1
-    - 旁白 test l2
-    - qqqqq旁白 test
+  - - 会议室内
+- - - helianthus_dark_1
+    - kryuger
+  - - duel
+    - Room_1
+    - 克鲁格
+  - - 你来了，指挥官，请坐吧
+- - - helianthus_dark_1
+    - kryuger
+  - - duel
+    - Room_1
+    - 克鲁格
+  - - 你知道我找你来是为什么吧
+- - - helianthus_dark_1
+    - kryuger_dark
+  - - duel
+    - Room_1
+    - 我
+  - - 您也知道我不会轻易抛弃任何一名人形
 - - - helianthus_1
     - kryuger_dark
   - - duel
     - Room_1
-    - Helianthus
-  - - 感谢游玩
+    - 赫丽安
+  - - 抱歉，你没有选择的权利。时间一到，你和你的人形就必须掩护大部队撤离
+    - 等回到总部后我会让I.O.P补发给你人形的素体
+- - - helianthus_dark_1
+    - kryuger_dark
+  - - duel
+    - Room_1
+    - 我
+  - - 这...
+- - - helianthus_dark_1
+    - kryuger
+  - - duel
+    - Room_1
+    - 赫丽安
+  - - 留给你的时间不多了，请好好利用，指挥官先生
+- - - helianthus_dark_1
+    - kryuger_dark
+  - - duel
+    - Room_1
+    - null
+  - - 未完待续
+- - - helianthus_dark_1
+    - kryuger_dark
+  - - duel
+    - Room_1
+    - null
+  - - 感谢试玩《少女前线-遗愿》，更多内容仍在研发当中，敬请期待
 dialog_before_battle:
 - - - NAR
   - - research
     - Room_1
     - null
-  - - test testASSsaS
-    - 旁白 test l1
-    - 旁白 test l2
-    - qqqqq旁白 test
-- - - helianthus_1
-    - kryuger_dark
-  - - duel
+  - - 撤离前一星期，临时据点内
+- - - kalina_dark_5
+  - - research
     - Room_1
-    - Helianthus
-  - - 报告，一切正常
-- - - kalina_1
-    - helianthus_dark_1
-  - - duel
-    - First_Kiss
-    - Kryuger
-  - - 我怎么知道
+    - 我
+  - - 格林娜，撤离情况怎么样了？
+- - - kalina_5
+  - - research
+    - Room_1
+    - 格林娜
+  - - 已经准备就绪了，只要她们一到就可以立马开始撤离了
+- - - kalina_dark_5
+  - - research
+    - Room_1
+    - 我
+  - - 还是没有一点关于她们的消息吗
+    - 后勤第十小队...
+- - - kalina_8
+  - - research
+    - Room_1
+    - 格林娜
+  - - 一直联系不上，也不知道发生了什么...真让人担心啊
+    - 再这样拖下去，这里迟早会被铁血包围起来的
+- - - kalina_dark_8
+  - - research
+    - Room_1
+    - 我
+  - - 我相信她们，她们一定会没事的
+- - - NAR
+  - - research
+    - Room_1
+    - null
+  - - 滴滴滴...
+- - - kalina_5
+  - - research
+    - Room_1
+    - 格林娜
+  - - 你好，临时指挥部，请讲...
+- - - kalina_5
+  - - research
+    - Room_1
+    - 格林娜
+  - - 指挥官，克鲁格先生希望您去见他
+- - - kalina_dark_5
+  - - research
+    - Room_1
+    - 我
+  - - 好的，我知道了
+- - - kalina_dark_5
+  - - research
+    - Room_1
+    - null
+  - - 我知道克鲁格想告诉我什么
+    - 但此时，我是多么希望她们能出现在我的面前
 dialog_during_battle:
 - dialoguebox_down: 
     character_name: null
@@ -77,8 +155,14 @@ dialog_during_battle:
   dialoguebox_up: 
     character_name: asval
     content:
-    - 还有约3公里。
+    - 还有约50公里。
     image_name: asval
+- dialoguebox_down: 
+    character_name: gsh-18
+    content:
+    - 还有好长的路要走啊...
+    image_name: gsh-18
+  dialoguebox_up: null
 - dialoguebox_down: 
     character_name: pp1901
     content:
@@ -86,9 +170,9 @@ dialog_during_battle:
     image_name: pp1901
   dialoguebox_up: null
 - dialoguebox_down: 
-    character_name: asval
+    character_name: sv-98
     content:
-    - 准备战斗！
-    image_name: asval
+    - 该死...子弹上膛，准备战斗！
+    image_name: sv-98
   dialoguebox_up: null
 title: 雪上之路

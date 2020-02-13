@@ -1,13 +1,39 @@
 #image purchased from unity store and internet
-import pygame
-import time
-from pygame.locals import *
-from sys import exit
-import os
 import glob
+import os
+import time
+from sys import exit
+
+import pygame
 import yaml
-from map import *
+from pygame.locals import *
+
+from Zero2.basic import *
+from Zero2.characterAnimation import *
+from Zero2.characterDataManager import *
+from Zero2.map import *
+
 pygame.init()
+
+#加载动作：接受角色名，动作，方位，完成对应的指令
+def action_displayer(chara_name,action,x,y,isContinue=True,ifFlip=False):
+    hidden = False
+    if chara_name in sangvisFerris_data:
+        gif_dic = sangvisFerris_data[chara_name].gif
+    elif chara_name in characters_data:
+        gif_dic = characters_data[chara_name].gif
+    img_of_char = pygame.transform.scale(gif_dic[action][0][0][gif_dic[action][1]], (int(perBlockWidth*2), int(perBlockHeight*2)))
+    if ifFlip == True:
+        drawImg(pygame.transform.flip(img_of_char,True,False),(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen)
+    else:
+        drawImg(img_of_char,(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen)
+    gif_dic[action][1]+=1
+    if isContinue==True:
+        if gif_dic[action][1] == gif_dic[action][0][1]:
+            gif_dic[action][1] = 0
+    elif isContinue==False:
+        if gif_dic[action][1] == gif_dic[action][0][1]:
+            gif_dic[action][1]-=1
 
 #加载设置
 with open("../Data/setting.yaml", "r", encoding='utf-8') as f:
@@ -29,12 +55,28 @@ for i in range(len(all_env_file_list)):
 
 #读取地图
 with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
-    chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
-    map = chapter_info["map"]
+    loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+    map = loadData["map"]
+    characters = loadData["character"]
+    sangvisFerris = loadData["sangvisFerri"]
+
 block_x = 48
 block_y = 24
-block_x_length = int(window_x*4/5/block_x)
+block_x_length = int(window_x/block_x)
 block_y_length = int(window_y/block_y)
+
+perBlockWidth = block_x_length
+perBlockHeight = block_y_length
+
+#初始化角色信息
+#hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
+characters_data = {}
+for jiaose in characters:
+    characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["start_position"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["action_point"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
+
+sangvisFerris_data = {}
+for enemy in sangvisFerris:
+    sangvisFerris_data[enemy] = sangvisFerriDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(enemy,perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
 
 #初始化地图
 if len(map) == 0:
@@ -68,9 +110,10 @@ map_img_list = randomBlock(map,blocks_setting)
 green = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/img/UI/green.png")), (block_x_length, int(block_y_length)))
 green.set_alpha(100)
 new_block_type = 0
-
+img_name_list = ["mountainSnow0","plainsColdSnowCovered0","forestPineSnowCovered0","ocean0"]
 # 游戏主循环
 while True:
+    mouse_x,mouse_y=pygame.mouse.get_pos()
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
@@ -81,18 +124,17 @@ while True:
                     yaml.dump(chapter_info, f)
                 exit()
         elif event.type == MOUSEBUTTONDOWN:
-            mouse_x,mouse_y=pygame.mouse.get_pos()
             block_get_click_x = int(mouse_x/green.get_width())
             block_get_click_y = int(mouse_y/green.get_height())
             map[block_get_click_y][block_get_click_x] = new_block_type
             if new_block_type == 0:
-                img_name = "mountainSnow"+str(random.randint(0,7))
+                img_name = "mountainSnow0"
             elif new_block_type == 1:
-                img_name = "plainsColdSnowCovered"+str(random.randint(0,3))
+                img_name = "plainsColdSnowCovered0"
             elif new_block_type == 2:
-                img_name = "forestPineSnowCovered"+str(random.randint(0,4))
+                img_name = "forestPineSnowCovered0"
             elif new_block_type == 3:
-                img_name = "ocean"+str(random.randint(0,4))
+                img_name = "ocean0"
             map_img_list[block_get_click_y][block_get_click_x] = img_name
 
     #场景加载
@@ -100,9 +142,7 @@ while True:
         for a in range(len(map_img_list[i])):
             img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
             screen.blit(img_display,(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
-    for y in range(block_y):
-        for x in range(block_x):
-            screen.blit(green,(x*block_x_length,y*block_y_length))
+    
     keys = pygame.key.get_pressed()
     if keys[pygame.K_1]:
         new_block_type = 0
@@ -113,5 +153,17 @@ while True:
     elif keys[pygame.K_4]:
         new_block_type = 3
 
-    time.sleep(0.025)
-    pygame.display.update()
+    #角色动画
+    for every_chara in characters_data:
+        if map[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+            characters_data[every_chara].undetected = True
+        else:
+            characters_data[every_chara].undetected = False
+        action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+    for enemies in sangvisFerris_data:
+        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+
+    img_will_be_placed = pygame.transform.scale(env_img_list[img_name_list[new_block_type]], (int(block_x_length), int(block_y_length*1.5)))
+    screen.blit(img_will_be_placed,(mouse_x-block_x_length*0.5,mouse_y-block_y_length*0.5))
+
+    pygame.display.flip()
