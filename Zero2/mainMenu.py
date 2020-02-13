@@ -58,20 +58,20 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     t1 = fontRender("缇吉娅工坊 呈现","white",30)
     t2 = fontRender("警告：所有内容仍处于研发阶段，不代表最终效果","white",30)
     for i in range(0,250,2):
-        printIn(the_black,screen)
+        drawImage(the_black,screen)
         t1.set_alpha(i)
-        printf(t1,(30,window_y-130),screen)
+        drawImg(t1,(30,window_y-130),screen)
         t2.set_alpha(i)
-        printf(t2,(30,window_y-80),screen)
+        drawImg(t2,(30,window_y-80),screen)
         time.sleep(0.01)
         pygame.display.flip()
     
     for i in range(250,0,-2):
-        printIn(the_black,screen)
+        drawImage(the_black,screen)
         t1.set_alpha(i)
-        printf(t1,(30,window_y-130),screen)
+        drawImg(t1,(30,window_y-130),screen)
         t2.set_alpha(i)
-        printf(t2,(30,window_y-80),screen)
+        drawImg(t2,(30,window_y-80),screen)
         time.sleep(0.01)
         pygame.display.flip()
 
@@ -119,28 +119,28 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
 
         if menu_type == 1:
             cover_img.set_alpha(cover_alpha)
-            printf(cover_img, (0,0),screen)
+            drawImg(cover_img, (0,0),screen)
 
         #菜单选项
         if menu_type == 0:
-            printf(text_continue.n, (txt_location,250),screen)
+            drawImg(text_continue.n, (txt_location,250),screen)
             if isGetClick(text_chooseChapter.n, (txt_location,350)):
-                printf(text_chooseChapter.b, (txt_location,350),screen)
+                drawImg(text_chooseChapter.b, (txt_location,350),screen)
             else:
-                printf(text_chooseChapter.n, (txt_location,350),screen)
-            printf(text_setting.n, (txt_location,450),screen)
-            printf(text_dlc.n, (txt_location,550),screen)
-            printf(text_workshop.n, (txt_location,650),screen)
+                drawImg(text_chooseChapter.n, (txt_location,350),screen)
+            drawImg(text_setting.n, (txt_location,450),screen)
+            drawImg(text_dlc.n, (txt_location,550),screen)
+            drawImg(text_workshop.n, (txt_location,650),screen)
             if isGetClick(text_exit.n, (txt_location,750)):
-                printf(text_exit.b, (txt_location,750),screen)
+                drawImg(text_exit.b, (txt_location,750),screen)
             else:
-                printf(text_exit.n, (txt_location,750),screen)
+                drawImg(text_exit.n, (txt_location,750),screen)
         elif menu_type == 1:
             for i in range(len(chapter_select)):
                 if isGetClick(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1))):
-                    printf(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1)),screen)
+                    drawImg(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1)),screen)
                 else:
-                    printf(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1)),screen)
+                    drawImg(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1)),screen)
 
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')

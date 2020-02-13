@@ -99,11 +99,11 @@ def displayInCenter(item1,item2,x,y,screen,local_x=0,local_y=0):
     screen.blit(item1,(x+added_x+local_x,y+added_y+local_y))
 
 #图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
-def printf(img,position,screen,local_x=0,local_y=0):
+def drawImg(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))
 
 #高级图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
-def printIn(theImgClass,screen,local_x=0,local_y=0):
+def drawImage(theImgClass,screen,local_x=0,local_y=0):
     if theImgClass.img.get_width() == theImgClass.width and  theImgClass.img.get_height() == theImgClass.height or theImgClass.width == None and theImgClass.height ==None:
         screen.blit(theImgClass.img,(theImgClass.x+local_x,theImgClass.y+local_y))
     else:

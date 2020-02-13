@@ -59,13 +59,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         else:
             img_of_char.set_alpha(300)
         if ifFlip == True:
-            printf(pygame.transform.flip(img_of_char,True,False),(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
+            drawImg(pygame.transform.flip(img_of_char,True,False),(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
         else:
-            printf(img_of_char,(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
+            drawImg(img_of_char,(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
         if percent_of_hp>0:
-            printf(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
-            printf(pygame.transform.scale(hp_img,(int(perBlockWidth*percent_of_hp),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
-            printf(current_hp_to_display,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
+            drawImg(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
+            drawImg(pygame.transform.scale(hp_img,(int(perBlockWidth*percent_of_hp),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
+            drawImg(current_hp_to_display,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
             
         gif_dic[action][1]+=1
         if isContinue==True:
@@ -97,11 +97,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
     #渐入效果
     for i in range(0,250,2):
-        printf(the_black,(0,0),screen)
+        drawImg(the_black,(0,0),screen)
         title_number_display.set_alpha(i)
         title_main_display.set_alpha(i)
-        printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-        printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+        drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
         fpsClock.tick(fps)
         pygame.display.update()
 
@@ -249,13 +249,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     battle_info_line2 = fontRender(battle_info[1],"white",25)
     #显示章节信息
     for i in range(0,250,2):
-        printf(the_black,(0,0),screen)
+        drawImg(the_black,(0,0),screen)
         battle_info_line1.set_alpha(i)
         battle_info_line2.set_alpha(i)
-        printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-        printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-        printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
-        printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+        drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+        drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        drawImg(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
+        drawImg(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
         fpsClock.tick(fps)
         pygame.display.update()
     
@@ -272,12 +272,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
                         img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                        printf(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+                        drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
             #加载阴影区
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        drawImg(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
             #角色动画
             for every_chara in characters_data:
                 if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
@@ -290,22 +290,22 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
             #加载雪花
             for i in range(len(all_snow_on_screen)):
-                printIn(all_snow_on_screen[i],screen,local_x,local_y)
+                drawImage(all_snow_on_screen[i],screen,local_x,local_y)
                 all_snow_on_screen[i].x -= 10*zoom_in
                 all_snow_on_screen[i].y += 20*zoom_in
                 if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
                     all_snow_on_screen[i].y = random.randint(-100,0)
                     all_snow_on_screen[i].x = random.randint(0,window_x*2)
             the_black.set_alpha(a)
-            printf(the_black,(0,0),screen)
+            drawImg(the_black,(0,0),screen)
             title_number_display.set_alpha(a)
             title_main_display.set_alpha(a)
-            printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-            printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+            drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+            drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
             battle_info_line1.set_alpha(a)
             battle_info_line2.set_alpha(a)
-            printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
-            printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+            drawImg(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
+            drawImg(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
             fpsClock.tick(fps)
             pygame.display.flip()
     elif dialog_during_battle != None:
@@ -351,12 +351,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
                         img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                        printf(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+                        drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
             #加载阴影区
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        drawImg(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
 
             key_to_remove = []
             for every_chara in all_characters_path:
@@ -407,7 +407,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
             #加载雪花
             for i in range(len(all_snow_on_screen)):
-                printIn(all_snow_on_screen[i],screen,local_x,local_y)
+                drawImage(all_snow_on_screen[i],screen,local_x,local_y)
                 all_snow_on_screen[i].x -= 10*zoom_in
                 all_snow_on_screen[i].y += 20*zoom_in
                 if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
@@ -416,15 +416,15 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             
             if txt_alpha >= 0:
                 the_black.set_alpha(txt_alpha)
-                printf(the_black,(0,0),screen)
+                drawImg(the_black,(0,0),screen)
                 title_number_display.set_alpha(txt_alpha)
                 title_main_display.set_alpha(txt_alpha)
-                printf(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-                printf(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+                drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+                drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
                 battle_info_line1.set_alpha(txt_alpha)
                 battle_info_line2.set_alpha(txt_alpha)
-                printf(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
-                printf(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+                drawImg(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
+                drawImg(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
                 txt_alpha -= 5
             #画面更新
             fpsClock.tick(fps)
@@ -495,12 +495,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
                         img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                        printf(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+                        drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
             #加载阴影区
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        drawImg(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                 
             #角色动画
             for every_chara in characters_data:
@@ -515,7 +515,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
             #加载雪花
             for i in range(len(all_snow_on_screen)):
-                printIn(all_snow_on_screen[i],screen,local_x,local_y)
+                drawImage(all_snow_on_screen[i],screen,local_x,local_y)
                 all_snow_on_screen[i].x -= 10*zoom_in
                 all_snow_on_screen[i].y += 20*zoom_in
                 if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
@@ -530,13 +530,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #上方对话框
             if dialog_during_battle[display_num]["dialoguebox_up"] != None:
                 #对话框图片
-                printIn(dialoguebox_up,screen)
+                drawImage(dialoguebox_up,screen)
                 #名字
                 if dialog_during_battle[display_num]["dialoguebox_up"]["character_name"] != None:
-                    printf(fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["character_name"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
+                    drawImg(fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["character_name"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
                 #正在播放的行
                 content = fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line][:dialog_up_content_id],"white",window_x/80)
-                printf(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
+                drawImg(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
                 if dialog_up_content_id < len(dialog_during_battle[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line]):
                     dialog_up_content_id+=1
                 elif dialog_up_displayed_line < len(dialog_during_battle[display_num]["dialoguebox_up"]["content"])-1:
@@ -544,20 +544,20 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     dialog_up_content_id = 0
                 for i in range(dialog_up_displayed_line):
                     content = fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["content"][i],"white",window_x/80)
-                    printf(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
+                    drawImg(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
                 #角色图标
                 if dialog_during_battle[display_num]["dialoguebox_up"]["image_name"] != None:
-                    printf(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_up"]["image_name"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
+                    drawImg(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_up"]["image_name"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
             #下方对话框
             if dialog_during_battle[display_num]["dialoguebox_down"] != None:
                 #对话框图片
-                printIn(dialoguebox_down,screen)
+                drawImage(dialoguebox_down,screen)
                 #名字
                 if dialog_during_battle[display_num]["dialoguebox_down"]["character_name"] != None:
-                    printf(fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["character_name"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
+                    drawImg(fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["character_name"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
                 #正在播放的行
                 content = fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line][:dialog_down_content_id],"white",window_x/80)
-                printf(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
+                drawImg(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
                 if dialog_down_content_id < len(dialog_during_battle[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line]):
                     dialog_down_content_id+=1
                 elif dialog_down_displayed_line < len(dialog_during_battle[display_num]["dialoguebox_down"]["content"])-1:
@@ -565,10 +565,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     dialog_down_content_id = 0
                 for i in range(dialog_down_displayed_line):
                     content = fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["content"][i],"white",window_x/80)
-                    printf(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
+                    drawImg(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
                 #角色图标
                 if dialog_during_battle[display_num]["dialoguebox_down"]["image_name"] != None:
-                    printf(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_down"]["image_name"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
+                    drawImg(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_down"]["image_name"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
 
             #画面更新
             fpsClock.tick(fps)
@@ -643,12 +643,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for x in range(len(map_img_list[y])):
                 if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
                     img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
-                    printf(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+                    drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
         #加载阴影区
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[y])):
                 if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                    printf(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                    drawImg(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         # 我方角色动画
@@ -676,18 +676,18 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     if y < sangvisFerris_data[enemies].y:
                                         for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)):
                                             if blocks_setting[theMap[y][x]][1] == True:
-                                                printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             else:
-                                                printf(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     else:
                                         for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)):
                                             if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
                                                 pass
                                             else:
                                                 if blocks_setting[theMap[y][x]][1] == True:
-                                                    printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                 else:
-                                                    printf(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                         action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
                 elif sangvisFerris_data[enemies].current_hp<=0:
                     action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
@@ -703,7 +703,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #玩家回合
         if whose_round == "player":
             #加载结束回合的按钮
-            printIn(end_round_button,screen)
+            drawImage(end_round_button,screen)
             #玩家输入按键判定-玩家回合限定
             if pygame.mouse.get_pressed()[0]:
                 mouse_x,mouse_y=pygame.mouse.get_pos()
@@ -732,28 +732,28 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             if green_hide == "SelectMenu":
                 #左下角的角色信息
                 text_size = 20
-                printIn(the_character_get_click_info_board,screen)
+                drawImage(the_character_get_click_info_board,screen)
                 padding = (the_character_get_click_info_board.height-character_icon_img_list[the_character_get_click].get_height())/2
-                printf(character_icon_img_list[the_character_get_click],(padding,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(character_icon_img_list[the_character_get_click],(padding,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 tcgc_hp1 = fontRender("HP: ","white",20)
                 tcgc_hp2 = fontRender(str(characters_data[the_character_get_click].current_hp)+"/"+str(characters_data[the_character_get_click].max_hp),"black",20)
                 tcgc_action_point1 = fontRender("AP: ","white",20)
                 tcgc_action_point2 = fontRender(str(characters_data[the_character_get_click].current_action_point)+"/"+str(characters_data[the_character_get_click].max_action_point),"black",20)
                 tcgc_bullets_situation1 = fontRender("BP: ","white",20)
                 tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].maximum_bullets),"black",20)
-                printf(tcgc_hp1,(character_icon_img_list[the_character_get_click].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(tcgc_action_point1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(tcgc_bullets_situation1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(tcgc_hp1,(character_icon_img_list[the_character_get_click].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(tcgc_action_point1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(tcgc_bullets_situation1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 hp_empty = pygame.transform.scale(original_UI_img["hp_empty"],(int(the_character_get_click_info_board.width/3),int(text_size)))
-                printf(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(pygame.transform.scale(original_UI_img["hp_green"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_hp/characters_data[the_character_get_click].max_hp),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(pygame.transform.scale(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_action_point/characters_data[the_character_get_click].max_action_point),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(pygame.transform.scale(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].maximum_bullets),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(tcgc_hp2,(character_icon_img_list[the_character_get_click].get_width()*2.4+(hp_empty.get_width()-tcgc_hp2.get_width())/2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(tcgc_action_point2,(character_icon_img_list[the_character_get_click].get_width()*2.4+(hp_empty.get_width()-tcgc_action_point2.get_width())/2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                printf(tcgc_bullets_situation2,(character_icon_img_list[the_character_get_click].get_width()*2.4+(hp_empty.get_width()-tcgc_bullets_situation2.get_width())/2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(pygame.transform.scale(original_UI_img["hp_green"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_hp/characters_data[the_character_get_click].max_hp),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(pygame.transform.scale(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_action_point/characters_data[the_character_get_click].max_action_point),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(pygame.transform.scale(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].maximum_bullets),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(tcgc_hp2,(character_icon_img_list[the_character_get_click].get_width()*2.4+(hp_empty.get_width()-tcgc_hp2.get_width())/2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(tcgc_action_point2,(character_icon_img_list[the_character_get_click].get_width()*2.4+(hp_empty.get_width()-tcgc_action_point2.get_width())/2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(tcgc_bullets_situation2,(character_icon_img_list[the_character_get_click].get_width()*2.4+(hp_empty.get_width()-tcgc_bullets_situation2.get_width())/2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 select_menu_button = pygame.transform.scale(select_menu_button_original, (int(perBlockWidth*2), int(perBlockWidth/1.3)))
                 #选择菜单
                 displayInCenter(fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight,screen,local_x,local_y)
@@ -830,7 +830,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             the_route.append([star_point_x,star_point_y])
                     #显示路径
                     for i in range(len(the_route)):
-                        printf(green,(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
+                        drawImg(green,(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
 
                 #显示攻击范围        
                 if action_choice == "attack":
@@ -839,7 +839,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         if y < characters_data[the_character_get_click].y:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]][1] == True:
-                                    printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                    drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     attacking_range.append([x,y])
                         else:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)):
@@ -847,7 +847,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     pass
                                 else:
                                     if blocks_setting[theMap[y][x]][1] == True:
-                                        printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range.append([x,y])
                     if [block_get_click_x,block_get_click_y] in attacking_range:
                         for enemies in sangvisFerris_data:
@@ -863,7 +863,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         if y < characters_data[the_character_get_click].y:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]][1] == True:
-                                    printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                    drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     skill_range.append([x,y])
                         else:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)):
@@ -871,7 +871,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     pass
                                 else:
                                     if blocks_setting[theMap[y][x]][1] == True:
-                                        printf(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         skill_range.append([x,y])
                     if [block_get_click_x,block_get_click_y] in skill_range:
                         if the_character_get_click == "gsh-18":
@@ -978,11 +978,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 enemy_round_txt.set_alpha(text_of_endround_alpha)
                 text_of_endround_alpha -= 5
             
-            printf(text_now_total_rounds,(text_of_endround_move,(window_y-your_round_txt.get_height()*2.5)/2),screen)
+            drawImg(text_now_total_rounds,(text_of_endround_move,(window_y-your_round_txt.get_height()*2.5)/2),screen)
             if whose_round == "sangvisFerrisToPlayer":
-                printf(your_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
+                drawImg(your_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
             if whose_round == "playerToSangvisFerris":
-                printf(enemy_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
+                drawImg(enemy_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
             if text_of_endround_alpha <=0:
                 if whose_round == "playerToSangvisFerris":
                     sangvisFerris_name_list = []
@@ -1085,7 +1085,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
         #加载雪花
         for i in range(len(all_snow_on_screen)):
-            printIn(all_snow_on_screen[i],screen,local_x,local_y)
+            drawImage(all_snow_on_screen[i],screen,local_x,local_y)
             all_snow_on_screen[i].x -= 10*zoom_in
             all_snow_on_screen[i].y += 20*zoom_in
             if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
@@ -1113,13 +1113,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if event.type == KEYDOWN:
                     if event.key == K_SPACE:
                         battle = False
-            printIn(original_UI_img["score"],screen)
-            printf(total_kills,(250,300),screen)
-            printf(total_time,(250,350),screen)
-            printf(total_rounds_txt,(250,400),screen)
-            printf(times_characters_down,(250,450),screen)
-            printf(player_rate,(250,500),screen)
-            printf(press_space,(250,700),screen)
+            drawImage(original_UI_img["score"],screen)
+            drawImg(total_kills,(250,300),screen)
+            drawImg(total_time,(250,350),screen)
+            drawImg(total_rounds_txt,(250,400),screen)
+            drawImg(times_characters_down,(250,450),screen)
+            drawImg(player_rate,(250,500),screen)
+            drawImg(press_space,(250,700),screen)
         #画面更新
         fpsClock.tick(fps)
         pygame.display.update()

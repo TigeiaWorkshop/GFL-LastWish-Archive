@@ -17,8 +17,8 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
 
     #开始加载
     for i in range(101):
-        printf(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
-        printf(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
+        drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
+        drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         fpsClock.tick(fps)
         pygame.display.update()
     
@@ -57,9 +57,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     
     #渐入效果
     for i in range(100,-1,-1):
-        printIn(dialog_bg_img_dic[dialog_content[display_num][1][0]],screen)
-        printf(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
-        printf(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
+        drawImage(dialog_bg_img_dic[dialog_content[display_num][1][0]],screen)
+        drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
+        drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         fpsClock.tick(fps)
         pygame.display.update()
     
@@ -70,23 +70,23 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     #主循环
     while len(dialog_content)!=0 and display_num<len(dialog_content):
         #背景
-        printIn(dialog_bg_img_dic[dialog_content[display_num][1][0]],screen)
+        drawImage(dialog_bg_img_dic[dialog_content[display_num][1][0]],screen)
         #加载对话任务
         if len(dialog_content[display_num][0])==2:
-            printf(npc_img_dic[dialog_content[display_num][0][0]],(0,window_y-window_x/2),screen)
-            printf(npc_img_dic[dialog_content[display_num][0][1]],(window_x/2,window_y-window_x/2),screen)
+            drawImg(npc_img_dic[dialog_content[display_num][0][0]],(0,window_y-window_x/2),screen)
+            drawImg(npc_img_dic[dialog_content[display_num][0][1]],(window_x/2,window_y-window_x/2),screen)
         elif len(dialog_content[display_num][0])==1 and dialog_content[display_num][0][0] != "NAR":
-            printf(npc_img_dic[dialog_content[display_num][0][0]],(window_x/4,window_y-window_x/2),screen)
+            drawImg(npc_img_dic[dialog_content[display_num][0][0]],(window_x/4,window_y-window_x/2),screen)
         # 对话框图片
-        printIn(dialoguebox,screen)
+        drawImage(dialoguebox,screen)
         #讲述者名称
-        printf(fontRender(dialog_content[display_num][1][2],"white",window_x/64),(dialoguebox.x+dialoguebox.width/8,dialoguebox.y+dialoguebox.height/8),screen)
+        drawImg(fontRender(dialog_content[display_num][1][2],"white",window_x/64),(dialoguebox.x+dialoguebox.width/8,dialoguebox.y+dialoguebox.height/8),screen)
         #对话框内容
         if displayed_line >= 0:
             for i in range(displayed_line+1):
-                printf(fontRender(dialog_content[display_num][2][i],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.35+window_x/65*i),screen)
+                drawImg(fontRender(dialog_content[display_num][2][i],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.35+window_x/65*i),screen)
 
-        printf(fontRender(dialog_content[display_num][2][displayed_line+1][0:dialog_content_id],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.35+window_x/65*(displayed_line+1)),screen)
+        drawImg(fontRender(dialog_content[display_num][2][displayed_line+1][0:dialog_content_id],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.35+window_x/65*(displayed_line+1)),screen)
         #检测所有字是否都已经播出
         if dialog_content_id < len(dialog_content[display_num][2][displayed_line+1]):
             dialog_content_id +=1
@@ -98,13 +98,13 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         #鼠标gif
         if mouse_gif_id<=20:
             mouse_gif_id+=1
-            printf(mouse_click,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
+            drawImg(mouse_click,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
         elif mouse_gif_id==40:
             mouse_gif_id=1
-            printf(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
+            drawImg(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
         else:
             mouse_gif_id+=1
-            printf(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
+            drawImg(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
 
         #按键判定
         for event in pygame.event.get():
@@ -138,6 +138,6 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     pygame.mixer.music.fadeout(1000)
     for i in range(0,55,2):
         the_black.set_alpha(i)
-        printf(the_black,(0,0),screen)
+        drawImg(the_black,(0,0),screen)
         fpsClock.tick(fps)
         pygame.display.update()
