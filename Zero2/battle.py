@@ -13,6 +13,7 @@ from Zero2.characterDataManager import *
 from Zero2.characterAnimation import *
 from Zero2.map import *
 from Zero2.AI import *
+
 def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #卸载音乐
     pygame.mixer.music.unload()
@@ -439,48 +440,55 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         dialog_down_content_id = 0
         dialog_up_displayed_line = 0
         dialog_down_displayed_line = 0
-        
+        dialog = True
         #开始对话
-        while True:
+        while dialog == True:
             #玩家输入按键判定
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         exit()
-            if pygame.mouse.get_pressed()[0]:
-                if display_num < len(dialog_during_battle)-1:
-                    display_num += 1
-                    #检测上方对话框
-                    if dialog_during_battle[display_num]["dialoguebox_up"] != None:
-                        if dialog_during_battle[display_num-1]["dialoguebox_up"] != None:
-                            if dialog_during_battle[display_num]["dialoguebox_up"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_up"]["character_name"]:
+                elif event.type == MOUSEBUTTONDOWN and event.button == 1:
+                    if display_num < len(dialog_during_battle)-1:
+                        display_num += 1
+                        #检测上方对话框
+                        if dialog_during_battle[display_num]["dialoguebox_up"] != None:
+                            if dialog_during_battle[display_num-1]["dialoguebox_up"] != None:
+                                if dialog_during_battle[display_num]["dialoguebox_up"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_up"]["character_name"]:
+                                    dialoguebox_up.x = window_x
+                                    dialog_up_content_id = 0
+                                    dialog_up_displayed_line = 0
+                                elif dialog_during_battle[display_num]["dialoguebox_up"]["content"] != dialog_during_battle[display_num-1]["dialoguebox_up"]["content"]:
+                                    dialog_up_content_id = 0
+                                    dialog_up_displayed_line = 0
+                            else:
                                 dialoguebox_up.x = window_x
                                 dialog_up_content_id = 0
                                 dialog_up_displayed_line = 0
-                            elif dialog_during_battle[display_num]["dialoguebox_up"]["content"] != dialog_during_battle[display_num-1]["dialoguebox_up"]["content"]:
-                                dialog_up_content_id = 0
-                                dialog_up_displayed_line = 0
-                    else:
-                        dialoguebox_up.x = window_x
-                        dialog_up_content_id = 0
-                        dialog_up_displayed_line = 0
-                    #检测下方对话框    
-                    if dialog_during_battle[display_num]["dialoguebox_down"] != None:
-                        if dialog_during_battle[display_num-1]["dialoguebox_down"] != None:
-                            if dialog_during_battle[display_num]["dialoguebox_down"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_down"]["character_name"]:
+                        else:
+                            dialoguebox_up.x = window_x
+                            dialog_up_content_id = 0
+                            dialog_up_displayed_line = 0
+                        #检测下方对话框    
+                        if dialog_during_battle[display_num]["dialoguebox_down"] != None:
+                            if dialog_during_battle[display_num-1]["dialoguebox_down"] != None:
+                                if dialog_during_battle[display_num]["dialoguebox_down"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_down"]["character_name"]:
+                                    dialoguebox_down.x = -window_x*0.3
+                                    dialog_down_content_id = 0
+                                    dialog_down_displayed_line = 0
+                                elif dialog_during_battle[display_num]["dialoguebox_down"]["content"] != dialog_during_battle[display_num-1]["dialoguebox_down"]["content"]:
+                                    dialog_down_content_id = 0
+                                    dialog_down_displayed_line = 0
+                            else:
                                 dialoguebox_down.x = -window_x*0.3
                                 dialog_down_content_id = 0
                                 dialog_down_displayed_line = 0
-                            elif dialog_during_battle[display_num]["dialoguebox_down"]["content"] != dialog_during_battle[display_num-1]["dialoguebox_down"]["content"]:
-                                dialog_down_content_id = 0
-                                dialog_down_displayed_line = 0
+                        else:
+                            dialoguebox_down.x = -window_x*0.3
+                            dialog_down_content_id = 0
+                            dialog_down_displayed_line = 0
                     else:
-                        dialoguebox_down.x = -window_x*0.3
-                        dialog_down_content_id = 0
-                        dialog_down_displayed_line = 0
-                else:
-                    break
-                time.sleep(0.05)
+                        dialog = False
 
             #加载地图
             for y in range(len(map_img_list)):
@@ -598,31 +606,31 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         local_y += window_y/block_y*0.25*len(map_img_list)
                         if local_y>0:
                             local_y = 0
-        #移动屏幕
-        if pygame.mouse.get_pressed()[1]:
-            mouse_x,mouse_y=pygame.mouse.get_pos()
-            if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
-                mouse_move_temp_x = mouse_x
-                mouse_move_temp_y = mouse_y
-            else:
-                if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
-                    if mouse_move_temp_x > mouse_x:
-                        if local_x+mouse_move_temp_x-mouse_x <= 0:
-                            local_x += mouse_move_temp_x-mouse_x
-                    elif mouse_move_temp_x < mouse_x:
-                        if local_x-(mouse_x - mouse_move_temp_x) >= 0 - perBlockWidth*len(map_img_list[0]) + window_x:
-                            local_x -= mouse_x-mouse_move_temp_x
-                    if mouse_move_temp_y > mouse_y:
-                        if local_y+mouse_move_temp_y-mouse_y <= 0:
-                            local_y += mouse_move_temp_y-mouse_y
-                    elif mouse_move_temp_y < mouse_y:
-                        if local_y-(mouse_y-mouse_move_temp_y) >= 0 - perBlockHeight*len(map_img_list) + window_y:
-                            local_y -= mouse_y-mouse_move_temp_y
+            #移动屏幕
+            if pygame.mouse.get_pressed()[2]:
+                mouse_x,mouse_y=pygame.mouse.get_pos()
+                if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
                     mouse_move_temp_x = mouse_x
                     mouse_move_temp_y = mouse_y
-        else:
-            mouse_move_temp_x = -1
-            mouse_move_temp_y = -1
+                else:
+                    if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
+                        if mouse_move_temp_x > mouse_x:
+                            if local_x+mouse_move_temp_x-mouse_x <= 0:
+                                local_x += mouse_move_temp_x-mouse_x
+                        elif mouse_move_temp_x < mouse_x:
+                            if local_x-(mouse_x - mouse_move_temp_x) >= 0 - perBlockWidth*len(map_img_list[0]) + window_x:
+                                local_x -= mouse_x-mouse_move_temp_x
+                        if mouse_move_temp_y > mouse_y:
+                            if local_y+mouse_move_temp_y-mouse_y <= 0:
+                                local_y += mouse_move_temp_y-mouse_y
+                        elif mouse_move_temp_y < mouse_y:
+                            if local_y-(mouse_y-mouse_move_temp_y) >= 0 - perBlockHeight*len(map_img_list) + window_y:
+                                local_y -= mouse_y-mouse_move_temp_y
+                        mouse_move_temp_x = mouse_x
+                        mouse_move_temp_y = mouse_y
+            else:
+                mouse_move_temp_x = -1
+                mouse_move_temp_y = -1
         
         #加载UI
         if green.get_width() != math.ceil(perBlockWidth) and green.get_height() != math.ceil(perBlockHeight):
