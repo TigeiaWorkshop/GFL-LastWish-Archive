@@ -165,11 +165,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
     characters_data = {}
     for jiaose in characters:
-        characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["start_position"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["action_point"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
+        characters_data[jiaose] = characterDataManager(characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["start_position"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["action_point"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
 
     sangvisFerris_data = {}
     for enemy in sangvisFerris:
-        sangvisFerris_data[enemy] = sangvisFerriDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(enemy,perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
+        sangvisFerris_data[enemy] = sangvisFerriDataManager(sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(sangvisFerris[enemy]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
 
     #加载对话时角色的图标
     all_icon_file_list = glob.glob(r'Assets/img/npc_icon/*.png')
@@ -231,7 +231,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #上个回合因为暴露被敌人发现的角色
     #格式：角色：[x,y]
     the_characters_detected_last_round = {}
-    all_characters_data = dicMerge(characters_data,sangvisFerris_data)
     enemy_action = None
     result_of_round = {
         "total_kills" : 0,
@@ -400,7 +399,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         characters_data[every_chara].undetected = True
                     else:
                         characters_data[every_chara].undetected = False
-                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+                    action_displayer(every_chara,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
             for enemies in sangvisFerris_data:
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
                     action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
@@ -508,7 +507,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     characters_data[every_chara].undetected = True
                 else:
                     characters_data[every_chara].undetected = False
-                action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+                action_displayer(every_chara,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
             for enemies in sangvisFerris_data:
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
                     action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
@@ -659,9 +658,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 else:
                     characters_data[every_chara].undetected = False
                 if characters_data[every_chara].dying == False:
-                    action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+                    action_displayer(every_chara,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
                 else:
-                    action_displayer(characters_data[every_chara].name,"die",characters_data[every_chara].x,characters_data[every_chara].y,False)
+                    action_displayer(every_chara,"die",characters_data[every_chara].x,characters_data[every_chara].y,False)
         #敌方动画
         for enemies in sangvisFerris_data:
             if enemies != enemies_in_control:
@@ -800,6 +799,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             if blocks_setting[theMap[y][x]][1] == False:
                                 map2d[x][y]=1
                     # 历遍所有角色，将角色的坐标点设置为障碍方块
+                    all_characters_data = dicMerge(characters_data,sangvisFerris_data)
                     for every_chara in all_characters_data:
                         map2d[all_characters_data[every_chara].x][all_characters_data[every_chara].y] = 1
                     #创建AStar对象,并设置起点和终点为
@@ -914,19 +914,19 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 the_route.pop(0)
                         elif characters_data[the_character_get_click].x > the_route[0][0]:
                             characters_data[the_character_get_click].x-=0.125
-                            action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,True,True)
+                            action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,True,True)
                             if characters_data[the_character_get_click].x <= the_route[0][0]:
                                 characters_data[the_character_get_click].x = the_route[0][0]
                                 the_route.pop(0)
                         elif characters_data[the_character_get_click].y < the_route[0][1]:
                             characters_data[the_character_get_click].y+=0.125
-                            action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                            action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
                             if characters_data[the_character_get_click].y >= the_route[0][1]:
                                 characters_data[the_character_get_click].y = the_route[0][1]
                                 the_route.pop(0)
                         elif characters_data[the_character_get_click].y > the_route[0][1]:
                             characters_data[the_character_get_click].y-=0.125
-                            action_displayer(characters_data[the_character_get_click].name,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                            action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
                             if characters_data[the_character_get_click].y <= the_route[0][1]:
                                 characters_data[the_character_get_click].y = the_route[0][1]
                                 the_route.pop(0)
@@ -938,7 +938,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 elif isWaiting == "ATTACKING":
                     green_hide=True
                     if action_choice == "attack":
-                        action_displayer(characters_data[the_character_get_click].name,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
+                        action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
                         if characters_data[the_character_get_click].gif["attack"][1] == characters_data[the_character_get_click].gif["attack"][0][1]-2:
                             sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
                         the_characters_attacking = characters_data[the_character_get_click].gif
@@ -949,7 +949,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             the_character_get_click = ""
                             action_choice = ""
                     if action_choice == "skill":
-                        action_displayer(characters_data[the_character_get_click].name,"skill",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
+                        action_displayer(the_character_get_click,"skill",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
                         if characters_data[the_character_get_click].gif["skill"][1] == characters_data[the_character_get_click].gif["skill"][0][1]-2:
                             if the_character_get_click == "gsh-18":
                                 characters_data[enemies_get_attack].heal(characters_data[the_character_get_click].min_damage)
@@ -964,7 +964,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             the_character_get_click = ""
                             action_choice = ""
                 elif isWaiting == True:
-                    action_displayer(characters_data[the_character_get_click].name,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                    action_displayer(the_character_get_click,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":

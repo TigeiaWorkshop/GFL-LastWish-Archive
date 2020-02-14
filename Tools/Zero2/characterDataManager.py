@@ -1,8 +1,7 @@
 import random
 
 class characterDataManager:
-    def __init__(self, name, min_damage,max_damage,max_hp,current_hp,start_position,x,y,attack_range,action_point,detect,gif_dic,current_bullets,maximum_bullets):
-        self.name = name
+    def __init__(self, min_damage,max_damage,max_hp,current_hp,start_position,x,y,attack_range,action_point,detect,gif_dic,current_bullets,maximum_bullets):
         self.min_damage = min_damage
         self.max_damage = max_damage
         self.max_hp = max_hp
@@ -27,8 +26,7 @@ class characterDataManager:
         self.current_hp+=hpHealed
 
 class sangvisFerriDataManager:
-    def __init__(self, name, min_damage,max_damage,max_hp,current_hp,x,y,attack_range,move_range,gif_dic,current_bullets,maximum_bullets,patrol_path):
-        self.name = name
+    def __init__(self, min_damage,max_damage,max_hp,current_hp,x,y,attack_range,move_range,gif_dic,current_bullets,maximum_bullets,patrol_path):
         self.min_damage = min_damage
         self.max_damage = max_damage
         self.max_hp = max_hp

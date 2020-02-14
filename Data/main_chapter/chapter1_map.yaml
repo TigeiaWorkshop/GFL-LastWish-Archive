@@ -49,7 +49,7 @@ character:
     action_point: 20
     attack_range: 7
     current_bullets: 1
-    current_hp: 100
+    current_hp: 2500
     max_damage: 650
     max_hp: 2500
     maximum_bullets: 10
@@ -1217,6 +1217,7 @@ map:
   - 0
 sangvisFerri:
   guard:
+    type: guard
     attack_range: 3
     current_bullets: 20
     current_hp: 1000
@@ -1228,7 +1229,8 @@ sangvisFerri:
     patrol_path: []
     x: 28
     y: 9
-  jaeger:
+  jaeger1:
+    type: jaeger
     attack_range: 6
     current_bullets: 20
     current_hp: 200
@@ -1240,7 +1242,21 @@ sangvisFerri:
     patrol_path: []
     x: 9
     y: 10
+  jaeger2:
+    type: jaeger
+    attack_range: 6
+    current_bullets: 20
+    current_hp: 200
+    max_damage: 500
+    max_hp: 200
+    maximum_bullets: 20
+    min_damage: 450
+    move_range: 2
+    patrol_path: []
+    x: 9
+    y: 11
   prowler:
+    type: prowler
     attack_range: 2
     current_bullets: 20
     current_hp: 250
@@ -1253,6 +1269,7 @@ sangvisFerri:
     x: 28
     y: 11
   ripper:
+    type: ripper
     attack_range: 4
     current_bullets: 20
     current_hp: 400
@@ -1269,6 +1286,7 @@ sangvisFerri:
     x: 28
     y: 12
   vespid:
+    type: vespid
     attack_range: 5
     current_bullets: 20
     current_hp: 350

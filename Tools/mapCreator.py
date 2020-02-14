@@ -62,21 +62,20 @@ with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
 
 block_x = 48
 block_y = 24
-block_x_length = int(window_x/block_x)
-block_y_length = int(window_y/block_y)
+block_x_length = int(window_x/block_x*0.9)
+block_y_length = int(window_y/block_y*0.9)
 
 perBlockWidth = block_x_length
 perBlockHeight = block_y_length
-
 #初始化角色信息
 #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
 characters_data = {}
 for jiaose in characters:
-    characters_data[jiaose] = characterDataManager(jiaose,characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["start_position"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["action_point"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
+    characters_data[jiaose] = characterDataManager(characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["start_position"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["action_point"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
 
 sangvisFerris_data = {}
 for enemy in sangvisFerris:
-    sangvisFerris_data[enemy] = sangvisFerriDataManager(enemy,sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(enemy,perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
+    sangvisFerris_data[enemy] = sangvisFerriDataManager(sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(sangvisFerris[enemy]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
 
 #初始化地图
 if len(map) == 0:
@@ -113,6 +112,7 @@ new_block_type = 0
 img_name_list = ["mountainSnow0","plainsColdSnowCovered0","forestPineSnowCovered0","ocean0"]
 # 游戏主循环
 while True:
+    pygame.draw.rect(screen,(255,255,255),(0,0,window_x,window_y))
     mouse_x,mouse_y=pygame.mouse.get_pos()
     for event in pygame.event.get():
         if event.type == KEYDOWN:
@@ -159,7 +159,7 @@ while True:
             characters_data[every_chara].undetected = True
         else:
             characters_data[every_chara].undetected = False
-        action_displayer(characters_data[every_chara].name,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+        action_displayer(every_chara,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
     for enemies in sangvisFerris_data:
         action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
 
