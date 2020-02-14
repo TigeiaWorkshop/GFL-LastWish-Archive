@@ -83,19 +83,19 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
             elif event.type == MOUSEBUTTONDOWN:
                 if menu_type == 0:
                     #退出
-                    if isGetClick(text_exit.b, (txt_location,750)):
+                    if isHoverOn(text_exit.b, (txt_location,750)):
                         exit()
                     #选择章节
-                    elif isGetClick(text_chooseChapter.b, (txt_location,350)):
+                    elif isHoverOn(text_chooseChapter.b, (txt_location,350)):
                         menu_type = 1
                 elif menu_type == 1:
                     #返回
-                    if isGetClick(chapter_select[0-1].b, (txt_location,(window_y-200)/9*(len(chapter_select)))):
+                    if isHoverOn(chapter_select[0-1].b, (txt_location,(window_y-200)/9*(len(chapter_select)))):
                         menu_type = 0
                     #章节选择
                     else:
                         for i in range(len(chapter_select)-1):
-                            if isGetClick(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1))) and i != len(chapter_select)-1:
+                            if isHoverOn(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1))) and i != len(chapter_select)-1:
                                 dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_before_battle")
                                 battle("chapter"+str(i+1),window_x,window_y,screen,lang,fps)
                                 dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_after_battle")
@@ -110,7 +110,7 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
         pygame.surfarray.blit_array(surface, frame)
         screen.blit(surface, (0,0))
 
-        if isGetClick(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
+        if isHoverOn(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
                 cover_alpha+=10
         else:
@@ -124,20 +124,20 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
         #菜单选项
         if menu_type == 0:
             drawImg(text_continue.n, (txt_location,250),screen)
-            if isGetClick(text_chooseChapter.n, (txt_location,350)):
+            if isHoverOn(text_chooseChapter.n, (txt_location,350)):
                 drawImg(text_chooseChapter.b, (txt_location,350),screen)
             else:
                 drawImg(text_chooseChapter.n, (txt_location,350),screen)
             drawImg(text_setting.n, (txt_location,450),screen)
             drawImg(text_dlc.n, (txt_location,550),screen)
             drawImg(text_workshop.n, (txt_location,650),screen)
-            if isGetClick(text_exit.n, (txt_location,750)):
+            if isHoverOn(text_exit.n, (txt_location,750)):
                 drawImg(text_exit.b, (txt_location,750),screen)
             else:
                 drawImg(text_exit.n, (txt_location,750),screen)
         elif menu_type == 1:
             for i in range(len(chapter_select)):
-                if isGetClick(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1))):
+                if isHoverOn(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1))):
                     drawImg(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1)),screen)
                 else:
                     drawImg(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1)),screen)
