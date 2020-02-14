@@ -93,11 +93,11 @@ if len(map) == 0:
         default_map.append(map_per_line)
 
     with open("../Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
-        chapter_info["map"] = default_map
+        loadData["map"] = default_map
         yaml.dump(chapter_info, f)
 
     with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
-        map = chapter_info["map"]
+        map = loadData["map"]
 
 #生存随机方块名
 with open("../Data/blocks.yaml", "r", encoding='utf-8') as f:
@@ -120,8 +120,8 @@ while True:
                 exit()
             if event.key == K_s:
                 with open("../Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
-                    chapter_info["map"] = map
-                    yaml.dump(chapter_info, f)
+                    loadData["map"] = map
+                    yaml.dump(loadData, f)
                 exit()
         elif event.type == MOUSEBUTTONDOWN:
             block_get_click_x = int(mouse_x/green.get_width())
