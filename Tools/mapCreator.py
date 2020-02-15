@@ -77,6 +77,19 @@ sangvisFerris_data = {}
 for enemy in sangvisFerris:
     sangvisFerris_data[enemy] = sangvisFerriDataManager(sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(sangvisFerris[enemy]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
 
+#所有的角色文件
+all_characters_list  = glob.glob(r'../Assets/img/character/*')
+all_characters_img_list={}
+for i in range(len(all_characters_list)):
+    img_name = all_characters_list[i].replace(".","").replace("Assets","").replace("img","").replace("character","").replace("\\","").replace("/","")
+    all_characters_img_list[img_name] = loadImg(all_characters_list[i]+"/wait/"+img_name+"_wait_0.png",perBlockWidth*2.5,perBlockHeight*2.5)
+
+all_sangvisFerris_list  = glob.glob(r'../Assets/img/sangvisFerri/*')
+all_sangvisFerris_img_list={}
+for i in range(len(all_sangvisFerris_list)):
+    img_name = all_sangvisFerris_list[i].replace(".","").replace("Assets","").replace("img","").replace("sangvisFerri","").replace("\\","").replace("/","")
+    all_sangvisFerris_img_list[img_name] = loadImg(all_sangvisFerris_list[i]+"/wait/"+img_name+"_wait_0.png",perBlockWidth*2.5,perBlockHeight*2.5)
+
 #初始化地图
 if len(map) == 0:
     default_map = []
@@ -110,6 +123,7 @@ green = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/img/UI/
 green.set_alpha(100)
 new_block_type = 0
 img_name_list = ["mountainSnow0","plainsColdSnowCovered0","forestPineSnowCovered0","ocean0"]
+object_to_put_down = {type:"block",name:"mountainSnow0"}
 # 游戏主循环
 while True:
     pygame.draw.rect(screen,(255,255,255),(0,0,window_x,window_y))
@@ -126,23 +140,44 @@ while True:
         elif event.type == MOUSEBUTTONDOWN:
             block_get_click_x = int(mouse_x/green.get_width())
             block_get_click_y = int(mouse_y/green.get_height())
-            map[block_get_click_y][block_get_click_x] = new_block_type
-            if new_block_type == 0:
-                img_name = "mountainSnow0"
-            elif new_block_type == 1:
-                img_name = "plainsColdSnowCovered0"
-            elif new_block_type == 2:
-                img_name = "forestPineSnowCovered0"
-            elif new_block_type == 3:
-                img_name = "ocean0"
-            map_img_list[block_get_click_y][block_get_click_x] = img_name
+            if block_get_click_y < len(map) and block_get_click_x < len(map[block_get_click_y]):
+                map[block_get_click_y][block_get_click_x] = new_block_type
+                if new_block_type == 0:
+                    img_name = "mountainSnow0"
+                elif new_block_type == 1:
+                    img_name = "plainsColdSnowCovered0"
+                elif new_block_type == 2:
+                    img_name = "forestPineSnowCovered0"
+                elif new_block_type == 3:
+                    img_name = "ocean0"
+                map_img_list[block_get_click_y][block_get_click_x] = img_name
 
     #场景加载
     for i in range(len(map_img_list)):
         for a in range(len(map_img_list[i])):
             img_display = pygame.transform.scale(env_img_list[map_img_list[i][a]], (int(block_x_length), int(block_y_length*1.5)))
             screen.blit(img_display,(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
+    #角色动画
+    for every_chara in characters_data:
+        if map[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+            characters_data[every_chara].undetected = True
+        else:
+            characters_data[every_chara].undetected = False
+        action_displayer(every_chara,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+    for enemies in sangvisFerris_data:
+        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
     
+
+    #显示所有可放置的友方角色
+    i=1
+    for every_chara in all_characters_img_list:
+        drawImg(all_characters_img_list[every_chara],(perBlockWidth*i,window_y*0.9-perBlockHeight*0.9),screen)
+        i+=2
+    i=1
+    for enemies in all_sangvisFerris_img_list:
+        drawImg(all_sangvisFerris_img_list[enemies],(perBlockWidth*i,window_y*0.9+perBlockHeight*0.7),screen)
+        i+=2
+
     keys = pygame.key.get_pressed()
     if keys[pygame.K_1]:
         new_block_type = 0
@@ -153,16 +188,7 @@ while True:
     elif keys[pygame.K_4]:
         new_block_type = 3
 
-    #角色动画
-    for every_chara in characters_data:
-        if map[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
-            characters_data[every_chara].undetected = True
-        else:
-            characters_data[every_chara].undetected = False
-        action_displayer(every_chara,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
-    for enemies in sangvisFerris_data:
-        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
-
+    
     img_will_be_placed = pygame.transform.scale(env_img_list[img_name_list[new_block_type]], (int(block_x_length), int(block_y_length*1.5)))
     screen.blit(img_will_be_placed,(mouse_x-block_x_length*0.5,mouse_y-block_y_length*0.5))
 

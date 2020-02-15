@@ -15,7 +15,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     #帧数控制器
     fpsClock = pygame.time.Clock()
 
-    #开始加载
+    #开始加载-渐入效果
     for i in range(101):
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
@@ -52,46 +52,48 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     #设定初始化
     display_num = 0
     dialog_content_id = 1
-    displayed_line = -1
+    displayed_line = 0
     mouse_gif_id=1
     
-    #渐入效果
+    #加载完成-淡出效果
     for i in range(100,-1,-1):
-        drawImage(dialog_bg_img_dic[dialog_content[display_num][1][0]],screen)
+        drawImage(dialog_bg_img_dic[dialog_content[display_num]["background_img"]],screen)
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         fpsClock.tick(fps)
         pygame.display.update()
     
-    the_bg_music = dialog_content[display_num][1][1]
+    the_bg_music = dialog_content[display_num]["background_music"]
     pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
     pygame.mixer.music.play(loops=9999, start=0.0)
 
     #主循环
     while len(dialog_content)!=0 and display_num<len(dialog_content):
         #背景
-        drawImage(dialog_bg_img_dic[dialog_content[display_num][1][0]],screen)
-        #加载对话任务
-        if len(dialog_content[display_num][0])==2:
-            drawImg(npc_img_dic[dialog_content[display_num][0][0]],(0,window_y-window_x/2),screen)
-            drawImg(npc_img_dic[dialog_content[display_num][0][1]],(window_x/2,window_y-window_x/2),screen)
-        elif len(dialog_content[display_num][0])==1 and dialog_content[display_num][0][0] != "NAR":
-            drawImg(npc_img_dic[dialog_content[display_num][0][0]],(window_x/4,window_y-window_x/2),screen)
+        drawImage(dialog_bg_img_dic[dialog_content[display_num]["background_img"]],screen)
+        #加载对话人物立绘
+        if dialog_content[display_num]["characters_img"] != None:
+            if len(dialog_content[display_num]["characters_img"])==2:
+                drawImg(npc_img_dic[dialog_content[display_num]["characters_img"][0]],(0,window_y-window_x/2),screen)
+                drawImg(npc_img_dic[dialog_content[display_num]["characters_img"][1]],(window_x/2,window_y-window_x/2),screen)
+            elif len(dialog_content[display_num]["characters_img"])==1:
+                drawImg(npc_img_dic[dialog_content[display_num]["characters_img"][0]],(window_x/4,window_y-window_x/2),screen)
         # 对话框图片
         drawImage(dialoguebox,screen)
+        
         #讲述者名称
-        drawImg(fontRender(dialog_content[display_num][1][2],"white",window_x/64),(dialoguebox.x+dialoguebox.width/8,dialoguebox.y+dialoguebox.height/8),screen)
-        #对话框内容
-        if displayed_line >= 0:
-            for i in range(displayed_line+1):
-                drawImg(fontRender(dialog_content[display_num][2][i],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.34+window_x/60*i),screen)
-
-        drawImg(fontRender(dialog_content[display_num][2][displayed_line+1][0:dialog_content_id],"white",window_x/70),(dialoguebox.x+dialoguebox.width/10,dialoguebox.y+dialoguebox.height*0.34+window_x/60*(displayed_line+1)),screen)
+        if dialog_content[display_num]["narrator"] != None:
+            drawImg(fontRender(dialog_content[display_num]["narrator"],"white",window_x/64),(dialoguebox.width/8,dialoguebox.height/8),screen,dialoguebox.x,dialoguebox.y)
+        #对话框已播放的内容
+        for i in range(displayed_line):
+            drawImg(fontRender(dialog_content[display_num]["content"][i],"white",window_x/70),(dialoguebox.width/10,dialoguebox.height*0.34+window_x/55*i),screen,dialoguebox.x,dialoguebox.y)
+        #对话框正在播放的内容
+        drawImg(fontRender(dialog_content[display_num]["content"][displayed_line][0:dialog_content_id],"white",window_x/70),(dialoguebox.width/10,dialoguebox.height*0.34+window_x/55*displayed_line),screen,dialoguebox.x,dialoguebox.y)
         #检测所有字是否都已经播出
-        if dialog_content_id < len(dialog_content[display_num][2][displayed_line+1]):
+        if dialog_content_id < len(dialog_content[display_num]["content"][displayed_line]):
             dialog_content_id +=1
         else:
-            if displayed_line < len(dialog_content[display_num][2])-2:
+            if displayed_line < len(dialog_content[display_num]["content"])-1:
                 dialog_content_id = 1
                 displayed_line += 1
 
@@ -115,19 +117,19 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                 if pygame.mouse.get_pressed()[0]:
                     display_num += 1
                     dialog_content_id = 1
-                    displayed_line = -1
+                    displayed_line = 0
                     if display_num<len(dialog_content):
-                        if the_bg_music != dialog_content[display_num][1][1] and dialog_content[display_num][1][1] != "":
-                            the_bg_music = dialog_content[display_num][1][1]
+                        if the_bg_music != dialog_content[display_num]["background_music"]:
+                            the_bg_music = dialog_content[display_num]["background_music"]
                             pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
                             pygame.mixer.music.play(loops=9999, start=0.0)
                 elif pygame.mouse.get_pressed()[2]:
                     if display_num>0:
                         display_num -= 1
                         dialog_content_id = 1
-                        displayed_line = -1
-                        if the_bg_music != dialog_content[display_num][1][1] and dialog_content[display_num][1][1] != "":
-                            the_bg_music = dialog_content[display_num][1][1]
+                        displayed_line = 0
+                        if the_bg_music != dialog_content[display_num]["background_music"]:
+                            the_bg_music = dialog_content[display_num]["background_music"]
                             pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
                             pygame.mixer.music.play(loops=9999, start=0.0)
         

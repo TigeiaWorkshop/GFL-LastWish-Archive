@@ -453,7 +453,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         #检测上方对话框
                         if dialog_during_battle[display_num]["dialoguebox_up"] != None:
                             if dialog_during_battle[display_num-1]["dialoguebox_up"] != None:
-                                if dialog_during_battle[display_num]["dialoguebox_up"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_up"]["character_name"]:
+                                if dialog_during_battle[display_num]["dialoguebox_up"]["speaker"] != dialog_during_battle[display_num-1]["dialoguebox_up"]["speaker"]:
                                     dialoguebox_up.x = window_x
                                     dialog_up_content_id = 0
                                     dialog_up_displayed_line = 0
@@ -471,7 +471,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         #检测下方对话框    
                         if dialog_during_battle[display_num]["dialoguebox_down"] != None:
                             if dialog_during_battle[display_num-1]["dialoguebox_down"] != None:
-                                if dialog_during_battle[display_num]["dialoguebox_down"]["character_name"] != dialog_during_battle[display_num-1]["dialoguebox_down"]["character_name"]:
+                                if dialog_during_battle[display_num]["dialoguebox_down"]["speaker"] != dialog_during_battle[display_num-1]["dialoguebox_down"]["speaker"]:
                                     dialoguebox_down.x = -window_x*0.3
                                     dialog_down_content_id = 0
                                     dialog_down_displayed_line = 0
@@ -531,8 +531,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 #对话框图片
                 drawImage(dialoguebox_up,screen)
                 #名字
-                if dialog_during_battle[display_num]["dialoguebox_up"]["character_name"] != None:
-                    drawImg(fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["character_name"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
+                if dialog_during_battle[display_num]["dialoguebox_up"]["speaker"] != None:
+                    drawImg(fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["speaker"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
                 #正在播放的行
                 content = fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line][:dialog_up_content_id],"white",window_x/80)
                 drawImg(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
@@ -545,15 +545,15 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     content = fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["content"][i],"white",window_x/80)
                     drawImg(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
                 #角色图标
-                if dialog_during_battle[display_num]["dialoguebox_up"]["image_name"] != None:
-                    drawImg(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_up"]["image_name"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
+                if dialog_during_battle[display_num]["dialoguebox_up"]["speaker_icon"] != None:
+                    drawImg(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_up"]["speaker_icon"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
             #下方对话框
             if dialog_during_battle[display_num]["dialoguebox_down"] != None:
                 #对话框图片
                 drawImage(dialoguebox_down,screen)
                 #名字
-                if dialog_during_battle[display_num]["dialoguebox_down"]["character_name"] != None:
-                    drawImg(fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["character_name"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
+                if dialog_during_battle[display_num]["dialoguebox_down"]["speaker"] != None:
+                    drawImg(fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["speaker"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
                 #正在播放的行
                 content = fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line][:dialog_down_content_id],"white",window_x/80)
                 drawImg(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
@@ -566,8 +566,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     content = fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["content"][i],"white",window_x/80)
                     drawImg(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
                 #角色图标
-                if dialog_during_battle[display_num]["dialoguebox_down"]["image_name"] != None:
-                    drawImg(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_down"]["image_name"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
+                if dialog_during_battle[display_num]["dialoguebox_down"]["speaker_icon"] != None:
+                    drawImg(character_icon_img_list[dialog_during_battle[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
 
             #画面更新
             fpsClock.tick(fps)
