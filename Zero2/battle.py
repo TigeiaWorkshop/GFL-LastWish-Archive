@@ -1104,8 +1104,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #结束动画
         if whose_round == "result_win":
             total_kills = fontRender("总杀敌："+str(result_of_round["total_kills"]),"white",20)
-            total_time = fontRender("通关时间："+str(time.strftime('%M:%S',time.localtime(time.time()-result_of_round["total_time"]))),"white",20)
-            total_rounds_txt = fontRender("通关回合数："+str(total_rounds),"white",20)
+            result_of_round["total_time"] = time.localtime(time.time()-result_of_round["total_time"])
+            total_time = fontRender("通关时间："+str(time.strftime('%M:%S',result_of_round["total_time"])),"white",20)
+            result_of_round["total_rounds"] = total_rounds
+            total_rounds_txt = fontRender("通关回合数："+str(result_of_round["total_rounds"]),"white",20)
             times_characters_down = fontRender("友方角色被击倒："+str(result_of_round["times_characters_down"]),"white",20)
             player_rate = fontRender("评价：A","white",20)
             press_space = fontRender("按空格继续","white",20)
@@ -1127,3 +1129,4 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         fpsClock.tick(fps)
         pygame.display.update()
 
+    return result_of_round    

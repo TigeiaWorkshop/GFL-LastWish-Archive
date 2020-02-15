@@ -67,6 +67,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
     pygame.mixer.music.play(loops=9999, start=0.0)
 
+    #玩家在对话时做出的选择
+    dialog_options = {}
+
     #主循环
     while len(dialog_content)!=0 and display_num<len(dialog_content):
         #背景
@@ -143,3 +146,8 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         drawImg(the_black,(0,0),screen)
         fpsClock.tick(fps)
         pygame.display.update()
+
+    if len(dialog_options) == 0:
+        return True
+    else:
+        return dialog_options
