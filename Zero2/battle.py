@@ -26,15 +26,15 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         hp_img = original_UI_img["hp_green"]
         hp_empty = pygame.transform.scale(original_UI_img["hp_empty"], (int(perBlockWidth), int(perBlockHeight/5)))
         if chara_name in sangvisFerris_data:
-            gif_dic = sangvisFerris_data[chara_name].gif
+            gif_dic = sangvisFerris_data[chara_name].gif_dic
             if sangvisFerris_data[chara_name].current_hp < 0:
                 sangvisFerris_data[chara_name].current_hp = 0
             current_hp_to_display = fontRender(str(sangvisFerris_data[chara_name].current_hp)+"/"+str(sangvisFerris_data[chara_name].max_hp),"black",10)
             percent_of_hp = sangvisFerris_data[chara_name].current_hp/sangvisFerris_data[chara_name].max_hp
-            current_bullets_situation = fontRender(str(sangvisFerris_data[chara_name].current_bullets)+"/"+str(sangvisFerris_data[chara_name].maximum_bullets),"black",10)
+            current_bullets_situation = fontRender(str(sangvisFerris_data[chara_name].current_bullets)+"/"+str(sangvisFerris_data[chara_name].max_bullets),"black",10)
         elif chara_name in characters_data:
             hidden = characters_data[chara_name].undetected
-            gif_dic = characters_data[chara_name].gif
+            gif_dic = characters_data[chara_name].gif_dic
             if characters_data[chara_name].current_hp<=0:
                 characters_data[chara_name].current_hp = 0
                 if characters_data[chara_name].dying == False:
@@ -164,12 +164,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #初始化角色信息
     #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
     characters_data = {}
-    for jiaose in characters:
-        characters_data[jiaose] = characterDataManager(characters[jiaose]["min_damage"],characters[jiaose]["max_damage"],characters[jiaose]["max_hp"],characters[jiaose]["current_hp"],characters[jiaose]["start_position"],characters[jiaose]["x"],characters[jiaose]["y"],characters[jiaose]["attack_range"],characters[jiaose]["action_point"],characters[jiaose]["undetected"],character_gif_dic(jiaose,perBlockWidth,perBlockHeight),characters[jiaose]["current_bullets"],characters[jiaose]["maximum_bullets"])
+    for each_character in characters:
+        characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],character_gif_dic(each_character,perBlockWidth,perBlockHeight),characters[each_character]["max_bullets"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["start_position"],characters[each_character]["undetected"])
 
     sangvisFerris_data = {}
-    for enemy in sangvisFerris:
-        sangvisFerris_data[enemy] = sangvisFerriDataManager(sangvisFerris[enemy]["min_damage"],sangvisFerris[enemy]["max_damage"],sangvisFerris[enemy]["max_hp"],sangvisFerris[enemy]["current_hp"],sangvisFerris[enemy]["x"],sangvisFerris[enemy]["y"],sangvisFerris[enemy]["attack_range"],sangvisFerris[enemy]["move_range"],character_gif_dic(sangvisFerris[enemy]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[enemy]["current_bullets"],sangvisFerris[enemy]["maximum_bullets"],sangvisFerris[enemy]["patrol_path"])
+    for each_character in sangvisFerris:
+        sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],character_gif_dic(sangvisFerris[each_character]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[each_character]["max_bullets"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
 
     #加载对话时角色的图标
     all_icon_file_list = glob.glob(r'Assets/img/npc_icon/*.png')
@@ -671,15 +671,15 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             block_get_click_x2 = int((mouse_x-local_x)/perBlockWidth)
                             block_get_click_y2 = int((mouse_y-local_y)/perBlockHeight)
                             if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
-                                for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].attack_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].attack_range):
+                                for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].effective_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].effective_range):
                                     if y < sangvisFerris_data[enemies].y:
-                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)):
+                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)):
                                             if blocks_setting[theMap[y][x]][1] == True:
                                                 drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             else:
                                                 drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     else:
-                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].attack_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].attack_range-(y-sangvisFerris_data[enemies].y)):
+                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)):
                                             if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
                                                 pass
                                             else:
@@ -692,7 +692,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
                     the_dead_one = enemies
         if the_dead_one != "":
-            the_characters_attacking = sangvisFerris_data[the_dead_one].gif
+            the_characters_attacking = sangvisFerris_data[the_dead_one].gif_dic
             if the_characters_attacking["die"][1] == the_characters_attacking["die"][0][1]-1:
                 sangvisFerris_data.pop(the_dead_one)
                 result_of_round["total_kills"]+=1
@@ -739,7 +739,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 tcgc_action_point1 = fontRender("AP: ","white",20)
                 tcgc_action_point2 = fontRender(str(characters_data[the_character_get_click].current_action_point)+"/"+str(characters_data[the_character_get_click].max_action_point),"black",20)
                 tcgc_bullets_situation1 = fontRender("BP: ","white",20)
-                tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].maximum_bullets),"black",20)
+                tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].max_bullets),"black",20)
                 drawImg(tcgc_hp1,(character_icon_img_list[the_character_get_click].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(tcgc_action_point1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(tcgc_bullets_situation1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
@@ -749,7 +749,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 drawImg(hp_empty,(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(pygame.transform.scale(original_UI_img["hp_green"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_hp/characters_data[the_character_get_click].max_hp),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(pygame.transform.scale(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_action_point/characters_data[the_character_get_click].max_action_point),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(pygame.transform.scale(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].maximum_bullets),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(pygame.transform.scale(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].max_bullets),int(text_size))),(character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_hp2,hp_empty,character_icon_img_list[the_character_get_click].get_width()*2.4,padding,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_action_point2,hp_empty,character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*1.5,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
@@ -835,14 +835,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 #显示攻击范围        
                 if action_choice == "attack":
                     attacking_range = []
-                    for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range):
+                    for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].effective_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].effective_range):
                         if y < characters_data[the_character_get_click].y:
-                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)):
+                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].effective_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]][1] == True:
                                     drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     attacking_range.append([x,y])
                         else:
-                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)):
+                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].effective_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].effective_range-(y-characters_data[the_character_get_click].y)):
                                 if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
                                     pass
                                 else:
@@ -859,14 +859,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 #显示技能范围        
                 elif action_choice == "skill":
                     skill_range = []
-                    for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].attack_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].attack_range):
+                    for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].effective_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].effective_range):
                         if y < characters_data[the_character_get_click].y:
-                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)):
+                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].effective_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]][1] == True:
                                     drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     skill_range.append([x,y])
                         else:
-                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].attack_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].attack_range-(y-characters_data[the_character_get_click].y)):
+                            for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].effective_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].effective_range-(y-characters_data[the_character_get_click].y)):
                                 if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
                                     pass
                                 else:
@@ -889,10 +889,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     green_hide = True
                                     break
                 elif action_choice == "reload":
-                    if characters_data[the_character_get_click].maximum_bullets-characters_data[the_character_get_click].current_bullets > 0:
+                    if characters_data[the_character_get_click].max_bullets-characters_data[the_character_get_click].current_bullets > 0:
                         #向上取整
-                        characters_data[the_character_get_click].current_action_point -= math.ceil((characters_data[the_character_get_click].maximum_bullets-characters_data[the_character_get_click].current_bullets)/2)
-                        characters_data[the_character_get_click].current_bullets = characters_data[the_character_get_click].maximum_bullets
+                        characters_data[the_character_get_click].current_action_point -= math.ceil((characters_data[the_character_get_click].max_bullets-characters_data[the_character_get_click].current_bullets)/2)
+                        characters_data[the_character_get_click].current_bullets = characters_data[the_character_get_click].max_bullets
                     else:
                         #无需换弹                                      
                         pass
@@ -942,9 +942,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False,True)
                         else:
                             action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
-                        if characters_data[the_character_get_click].gif["attack"][1] == characters_data[the_character_get_click].gif["attack"][0][1]-2:
+                        if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-2:
                             sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                        the_characters_attacking = characters_data[the_character_get_click].gif
+                        the_characters_attacking = characters_data[the_character_get_click].gif_dic
                         if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
                             the_characters_attacking["attack"][1] = 0
                             characters_data[the_character_get_click].current_bullets -= 1
@@ -953,14 +953,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             action_choice = ""
                     if action_choice == "skill":
                         action_displayer(the_character_get_click,"skill",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
-                        if characters_data[the_character_get_click].gif["skill"][1] == characters_data[the_character_get_click].gif["skill"][0][1]-2:
+                        if characters_data[the_character_get_click].gif_dic["skill"][1] == characters_data[the_character_get_click].gif_dic["skill"][0][1]-2:
                             if the_character_get_click == "gsh-18":
                                 characters_data[enemies_get_attack].heal(characters_data[the_character_get_click].min_damage)
                                 if characters_data[enemies_get_attack].current_hp > characters_data[enemies_get_attack].max_hp:
                                     characters_data[enemies_get_attack].current_hp = characters_data[enemies_get_attack].max_hp
                             else:
                                 sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                        the_characters_attacking = characters_data[the_character_get_click].gif
+                        the_characters_attacking = characters_data[the_character_get_click].gif_dic
                         if the_characters_attacking["skill"][1] == the_characters_attacking["skill"][0][1]-1:
                             the_characters_attacking["skill"][1] = 0
                             isWaiting =True
@@ -1023,9 +1023,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             if enemy_action[0] == "attack":
                 if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
                     action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
-                if sangvisFerris_data[enemies_in_control].gif["attack"][1] == sangvisFerris_data[enemies_in_control].gif["attack"][0][1]-2:
+                if sangvisFerris_data[enemies_in_control].gif_dic["attack"][1] == sangvisFerris_data[enemies_in_control].gif_dic["attack"][0][1]-2:
                     characters_data[enemy_action[1]].decreaseHp(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
-                the_characters_attacking = sangvisFerris_data[enemies_in_control].gif
+                the_characters_attacking = sangvisFerris_data[enemies_in_control].gif_dic
                 if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
                     the_characters_attacking["attack"][1] = 0
                     enemies_in_control_id +=1

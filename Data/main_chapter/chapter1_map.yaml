@@ -2,12 +2,13 @@ background_music: BGM_Danger_1.ogg
 character:
   asval:
     action_point: 10
-    attack_range: 5
+    attack_range: 1
     current_bullets: 20
     current_hp: 5500
+    effective_range: 5
+    max_bullets: 20
     max_damage: 350
     max_hp: 5500
-    maximum_bullets: 20
     min_damage: 250
     start_position:
     - 1
@@ -17,12 +18,13 @@ character:
     y: 5
   gsh-18:
     action_point: 10
-    attack_range: 4
+    attack_range: 1
     current_bullets: 18
     current_hp: 3500
+    effective_range: 4
+    max_bullets: 18
     max_damage: 150
     max_hp: 3500
-    maximum_bullets: 18
     min_damage: 100
     start_position:
     - 1
@@ -32,12 +34,13 @@ character:
     y: 4
   pp1901:
     action_point: 15
-    attack_range: 3
+    attack_range: 1
     current_bullets: 30
     current_hp: 8000
+    effective_range: 3
+    max_bullets: 30
     max_damage: 200
     max_hp: 8000
-    maximum_bullets: 30
     min_damage: 150
     start_position:
     - 1
@@ -47,12 +50,13 @@ character:
     y: 3
   sv-98:
     action_point: 20
-    attack_range: 7
+    attack_range: 1
     current_bullets: 1
     current_hp: 2500
+    effective_range: 7
+    max_bullets: 10
     max_damage: 650
     max_hp: 2500
-    maximum_bullets: 10
     min_damage: 400
     start_position:
     - 1
@@ -1217,66 +1221,71 @@ map:
   - 0
 sangvisFerri:
   guard:
-    attack_range: 3
+    action_point: 2
+    attack_range: 1
     current_bullets: 20
     current_hp: 1000
+    effective_range: 3
+    max_bullets: 20
     max_damage: 100
     max_hp: 1000
-    maximum_bullets: 20
     min_damage: 50
-    move_range: 2
     patrol_path: []
     type: guard
     x: 28
     y: 9
   jaeger1:
-    attack_range: 6
+    action_point: 2
+    attack_range: 1
     current_bullets: 20
     current_hp: 200
+    effective_range: 6
+    max_bullets: 20
     max_damage: 500
     max_hp: 200
-    maximum_bullets: 20
     min_damage: 450
-    move_range: 2
     patrol_path: []
     type: jaeger
     x: 9
     y: 10
   jaeger2:
-    attack_range: 6
+    action_point: 2
+    attack_range: 1
     current_bullets: 20
     current_hp: 200
+    effective_range: 6
+    max_bullets: 20
     max_damage: 500
     max_hp: 200
-    maximum_bullets: 20
     min_damage: 450
-    move_range: 2
     patrol_path: []
     type: jaeger
     x: 9
     y: 11
   prowler:
-    attack_range: 2
+    action_point: 10
+    attack_range: 1
     current_bullets: 20
     current_hp: 250
+    effective_range: 2
+    max_bullets: 20
     max_damage: 200
     max_hp: 250
-    maximum_bullets: 20
     min_damage: 100
-    move_range: 10
     patrol_path: []
     type: prowler
     x: 28
     y: 11
   ripper:
-    attack_range: 4
+    action_point: 5
+    attack_range: 1
     current_bullets: 20
     current_hp: 400
+    effective_range: 4
+    max_bullets: 20
     max_damage: 400
     max_hp: 400
-    maximum_bullets: 20
     min_damage: 300
-    move_range: 5
     patrol_path:
     - - 4
       - 1
@@ -1286,14 +1295,15 @@ sangvisFerri:
     x: 28
     y: 12
   vespid:
-    attack_range: 5
+    action_point: 4
+    attack_range: 1
     current_bullets: 20
     current_hp: 350
+    effective_range: 5
+    max_bullets: 20
     max_damage: 450
     max_hp: 350
-    maximum_bullets: 20
     min_damage: 400
-    move_range: 4
     patrol_path: []
     type: vespid
     x: 28

@@ -69,7 +69,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                     pathList=aStar.start()
                     #遍历路径点,讲指定数量的点放到路径列表中
                     the_route = []
-                    for i in range(sangvisFerris_data[aiInControl].move_range):
+                    for i in range(sangvisFerris_data[aiInControl].max_action_point):
                         if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
                             star_point_x+=1
                         elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
@@ -100,7 +100,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                 pathList=aStar.start()
                 #遍历路径点,讲指定数量的点放到路径列表中
                 the_route = []
-                for i in range(sangvisFerris_data[aiInControl].move_range):
+                for i in range(sangvisFerris_data[aiInControl].max_action_point):
                     if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
                         star_point_x+=1
                     elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
@@ -122,7 +122,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
             pathList=aStar.start()
             #遍历路径点,讲指定数量的点放到路径列表中
             the_route = []
-            for i in range(sangvisFerris_data[aiInControl].move_range):
+            for i in range(sangvisFerris_data[aiInControl].max_action_point):
                 if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
                     star_point_x+=1
                 elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:

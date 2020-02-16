@@ -155,62 +155,62 @@ dialog_before_battle:
   narrator: null
 dialog_during_battle:
 - dialoguebox_down:
-    speaker: null
     content:
     - 另一头，以sv-98为队长的第十后勤小
     - 队正在拼命赶往撤离点。
+    speaker: null
     speaker_icon: null
   dialoguebox_up: null
 - dialoguebox_down:
-    speaker: sv-98
     content:
     - 终于逃出来了
     - 大家没事吧
+    speaker: sv-98
     speaker_icon: sv-98
   dialoguebox_up: null
 - dialoguebox_down:
-    speaker: sv-98
     content:
     - 终于逃出来了
     - 大家没事吧
+    speaker: sv-98
     speaker_icon: sv-98
   dialoguebox_up:
-    speaker: 众人
     content:
     - 没事
+    speaker: 众人
     speaker_icon: null
 - dialoguebox_down:
-    speaker: sv-98
     content:
     - asval, 这里离撤离点还有多远？
+    speaker: sv-98
     speaker_icon: sv-98
   dialoguebox_up: null
 - dialoguebox_down:
-    speaker: sv-98
     content:
     - asval, 这里离撤离点还有多远？
+    speaker: sv-98
     speaker_icon: sv-98
   dialoguebox_up:
-    speaker: asval
     content:
     - 还有约50公里。
+    speaker: asval
     speaker_icon: asval
 - dialoguebox_down:
-    speaker: gsh-18
     content:
     - 还有好长的路要走啊...
+    speaker: gsh-18
     speaker_icon: gsh-18
   dialoguebox_up: null
 - dialoguebox_down:
-    speaker: pp1901
     content:
     - 大家小心，前方200米有敌人活动的痕迹
+    speaker: pp1901
     speaker_icon: pp1901
   dialoguebox_up: null
 - dialoguebox_down:
-    speaker: sv-98
     content:
     - 该死...子弹上膛，准备战斗！
+    speaker: sv-98
     speaker_icon: sv-98
   dialoguebox_up: null
 title: 雪上之路

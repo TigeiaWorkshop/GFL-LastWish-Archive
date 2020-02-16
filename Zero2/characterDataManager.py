@@ -1,48 +1,34 @@
 import random
 
-class characterDataManager:
-    def __init__(self, min_damage,max_damage,max_hp,current_hp,start_position,x,y,attack_range,action_point,detect,gif_dic,current_bullets,maximum_bullets):
-        self.min_damage = min_damage
-        self.max_damage = max_damage
-        self.max_hp = max_hp
-        self.current_hp = current_hp
-        self.start_position = start_position
-        self.x = x
-        self.y = y
-        self.attack_range = attack_range
+class Doll:
+    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,gif_dic,max_bullets,max_damage,max_hp,min_damage,x,y):
         self.current_action_point = action_point
         self.max_action_point = action_point
-        self.dying = False
-        self.undetected = detect
-        self.gif = gif_dic
+        self.attack_range = attack_range
         self.current_bullets = current_bullets
-        self.maximum_bullets = maximum_bullets
-        
-    def decreaseHp(self,min_damage,max_damage):
-        damage = random.randint(min_damage,max_damage)
-        self.current_hp-=damage
-
-    def heal(self,hpHealed):
-        self.current_hp+=hpHealed
-
-class sangvisFerriDataManager:
-    def __init__(self, min_damage,max_damage,max_hp,current_hp,x,y,attack_range,move_range,gif_dic,current_bullets,maximum_bullets,patrol_path):
-        self.min_damage = min_damage
+        self.current_hp = current_hp
+        self.effective_range = effective_range
+        self.gif_dic = gif_dic
+        self.max_bullets = max_bullets
         self.max_damage = max_damage
         self.max_hp = max_hp
-        self.current_hp = current_hp
+        self.min_damage = min_damage
         self.x = x
         self.y = y
-        self.attack_range = attack_range
-        self.move_range = move_range
-        self.gif = gif_dic
-        self.current_bullets = current_bullets
-        self.maximum_bullets = maximum_bullets
-        self.patrol_path = patrol_path
-        
     def decreaseHp(self,min_damage,max_damage):
         damage = random.randint(min_damage,max_damage)
         self.current_hp-=damage
-
     def heal(self,hpHealed):
         self.current_hp+=hpHealed
+
+class characterDataManager(Doll):
+    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,gif_dic,max_bullets,max_damage,max_hp,min_damage,x,y,start_position,detect):
+        Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,gif_dic,max_bullets,max_damage,max_hp,min_damage,x,y)
+        self.start_position = start_position
+        self.undetected = detect
+        self.dying = False
+
+class sangvisFerriDataManager(Doll):
+    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,gif_dic,max_bullets,max_damage,max_hp,min_damage,x,y,patrol_path):
+        Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,gif_dic,max_bullets,max_damage,max_hp,min_damage,x,y)
+        self.patrol_path = patrol_path
