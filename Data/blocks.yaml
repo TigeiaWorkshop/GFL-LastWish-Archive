@@ -1,17 +1,109 @@
 blocks:
   0:
-  - mountainSnow
-  - false
-  - 7
+    canPassThrough: false
+    imgNum: 7
+    name: mountainSnow
   1:
-  - plainsColdSnowCovered
-  - true
-  - 3
+    canPassThrough: true
+    imgNum: 3
+    name: plainsColdSnowCovered
   2:
-  - forestPineSnowCovered
-  - true
-  - 4
+    canPassThrough: true
+    imgNum: 4
+    name: forestPineSnowCovered
   3:
-  - ocean
-  - false
-  - 4
+    canPassThrough: false
+    imgNum: 4
+    name: ocean
+  4:
+    canPassThrough: true
+    imgNum: 1
+    name: base
+  5:
+    canPassThrough: false
+    imgNum: 1
+    name: void
+  6:
+    canPassThrough: true
+    imgNum: 1
+    name: desert_oasis
+  7:
+    canPassThrough: true
+    imgNum: 1
+    name: desertDunes
+  8:
+    canPassThrough: true
+    imgNum: 1
+    name: dirt
+  9:
+    canPassThrough: true
+    imgNum: 1
+    name: dirt_village
+  10:
+    canPassThrough: true
+    imgNum: 4
+    name: dirtCold
+  11:
+    canPassThrough: true
+    imgNum: 1
+    name: forest_forester
+  12:
+    canPassThrough: true
+    imgNum: 1
+    name: forestBroadleaf
+  13:
+    canPassThrough: true
+    imgNum: 5
+    name: forestPine
+  14:
+    canPassThrough: true
+    imgNum: 5
+    name: forestPineSnowTransition
+  15:
+    canPassThrough: false
+    imgNum: 1
+    name: hills
+  16:
+    canPassThrough: false
+    imgNum: 5
+    name: hillsCold
+  17:
+    canPassThrough: false
+    imgNum: 5
+    name: hillsColdSnowCovered
+  18:
+    canPassThrough: true
+    imgNum: 5
+    name: hillsColdSnowTransition
+  19:
+    canPassThrough: true
+    imgNum: 1
+    name: marsh
+  20:
+    canPassThrough: false
+    imgNum: 1
+    name: mountain
+  21:
+    canPassThrough: false
+    imgNum: 1
+    name: mountain_castle
+  22:
+    canPassThrough: false
+    imgNum: 1
+    name: plains
+  23:
+    canPassThrough: true
+    imgNum: 1
+    name: plains_farm
+  24:
+    canPassThrough: true
+    imgNum: 5
+    name: plainsCold
+  25:
+    canPassThrough: true
+    imgNum: 5
+    name: plainsColdSnowTransition
+  25:
+    canPassThrough: true
+    imgNum: 4
+    name: snowField

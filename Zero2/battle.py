@@ -313,7 +313,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #历遍地图，设置障碍方块
         for y in range(len(theMap)):
             for x in range(len(theMap[y])):
-                if blocks_setting[theMap[y][x]][1] == False:
+                if blocks_setting[theMap[y][x]]["canPassThrough"] == False:
                     map2d[x][y]=1
         # 历遍所有角色，将角色的坐标点设置为障碍方块
         for every_chara in sangvisFerris_data:
@@ -674,7 +674,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].effective_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].effective_range):
                                     if y < sangvisFerris_data[enemies].y:
                                         for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)):
-                                            if blocks_setting[theMap[y][x]][1] == True:
+                                            if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                                 drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             else:
                                                 drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
@@ -683,7 +683,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                             if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
                                                 pass
                                             else:
-                                                if blocks_setting[theMap[y][x]][1] == True:
+                                                if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                                     drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                 else:
                                                     drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
@@ -796,7 +796,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     #历遍地图，设置障碍方块
                     for y in range(len(theMap)):
                         for x in range(len(theMap[y])):
-                            if blocks_setting[theMap[y][x]][1] == False:
+                            if blocks_setting[theMap[y][x]]["canPassThrough"] == False:
                                 map2d[x][y]=1
                     # 历遍所有角色，将角色的坐标点设置为障碍方块
                     all_characters_data = dicMerge(characters_data,sangvisFerris_data)
@@ -838,7 +838,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].effective_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].effective_range):
                         if y < characters_data[the_character_get_click].y:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].effective_range+(y-characters_data[the_character_get_click].y)):
-                                if blocks_setting[theMap[y][x]][1] == True:
+                                if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                     drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     attacking_range.append([x,y])
                         else:
@@ -846,7 +846,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
                                     pass
                                 else:
-                                    if blocks_setting[theMap[y][x]][1] == True:
+                                    if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                         drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range.append([x,y])
                     if [block_get_click_x,block_get_click_y] in attacking_range:
@@ -862,7 +862,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].effective_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].effective_range):
                         if y < characters_data[the_character_get_click].y:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].effective_range+(y-characters_data[the_character_get_click].y)):
-                                if blocks_setting[theMap[y][x]][1] == True:
+                                if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                     drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     skill_range.append([x,y])
                         else:
@@ -870,7 +870,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
                                     pass
                                 else:
-                                    if blocks_setting[theMap[y][x]][1] == True:
+                                    if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                         drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         skill_range.append([x,y])
                     if [block_get_click_x,block_get_click_y] in skill_range:
@@ -1019,7 +1019,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]
             if enemy_action == None:
                 enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting)
-                print(enemies_in_control+"choses"+enemy_action[0])
+                print(enemies_in_control+" choses "+enemy_action[0])
             if enemy_action[0] == "attack":
                 if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
                     action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
