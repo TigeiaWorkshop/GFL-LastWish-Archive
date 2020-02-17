@@ -1,109 +1,131 @@
 blocks:
   0:
     canPassThrough: false
-    imgNum: 7
+    imgNum: 8
     name: mountainSnow
+    type: null
   1:
     canPassThrough: true
-    imgNum: 3
+    imgNum: 4
     name: plainsColdSnowCovered
+    type: snow
   2:
     canPassThrough: true
     imgNum: 4
     name: forestPineSnowCovered
+    type: snow
   3:
     canPassThrough: false
     imgNum: 4
     name: ocean
+    type: null
   4:
     canPassThrough: true
     imgNum: 1
     name: base
+    type: grass
   5:
     canPassThrough: false
     imgNum: 1
     name: void
+    type: null
   6:
     canPassThrough: true
     imgNum: 1
     name: desert_oasis
+    type: grass
   7:
     canPassThrough: true
     imgNum: 1
     name: desertDunes
+    type: grass
   8:
     canPassThrough: true
     imgNum: 1
     name: dirt
+    type: grass
   9:
     canPassThrough: true
     imgNum: 1
     name: dirt_village
+    type: grass
   10:
     canPassThrough: true
     imgNum: 4
     name: dirtCold
+    type: grass
   11:
     canPassThrough: true
     imgNum: 1
     name: forest_forester
+    type: grass
   12:
     canPassThrough: true
     imgNum: 1
     name: forestBroadleaf
+    type: grass
   13:
     canPassThrough: true
     imgNum: 5
     name: forestPine
+    type: grass
   14:
     canPassThrough: true
     imgNum: 5
     name: forestPineSnowTransition
+    type: grass
   15:
     canPassThrough: false
     imgNum: 1
     name: hills
+    type: null
   16:
     canPassThrough: false
     imgNum: 5
     name: hillsCold
+    type: null
   17:
     canPassThrough: false
     imgNum: 5
     name: hillsColdSnowCovered
+    type: null
   18:
-    canPassThrough: true
+    canPassThrough: false
     imgNum: 5
     name: hillsColdSnowTransition
+    type: null
   19:
     canPassThrough: true
     imgNum: 1
     name: marsh
+    type: grass
   20:
     canPassThrough: false
     imgNum: 1
     name: mountain
+    type: null
   21:
     canPassThrough: false
     imgNum: 1
     name: mountain_castle
+    type: null
   22:
-    canPassThrough: false
+    canPassThrough: true
     imgNum: 1
     name: plains
+    type: grass
   23:
     canPassThrough: true
     imgNum: 1
     name: plains_farm
+    type: grass
   24:
     canPassThrough: true
     imgNum: 5
     name: plainsCold
-  25:
-    canPassThrough: true
-    imgNum: 5
-    name: plainsColdSnowTransition
+    type: grass
   25:
     canPassThrough: true
     imgNum: 4
     name: snowField
+    type: snow

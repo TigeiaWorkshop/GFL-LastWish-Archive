@@ -239,9 +239,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     }
     #行走的声音
     all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
-    walk_on_snow_sound = []
+    walking_sound = []
     for i in range(len(all_walking_sounds)):
-        walk_on_snow_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
+        walking_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
     the_sound_id = None
     
     battle_info_line1 = fontRender(battle_info[0],"white",25)
@@ -361,8 +361,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for every_chara in all_characters_path:
                 if all_characters_path[every_chara] != []:
                     if pygame.mixer.get_busy() == False:
-                        the_sound_id = random.randint(0,len(walk_on_snow_sound)-1)
-                        walk_on_snow_sound[the_sound_id].play()
+                        the_sound_id = random.randint(0,len(walking_sound)-1)
+                        walking_sound[the_sound_id].play()
                     if characters_data[every_chara].start_position[0] < all_characters_path[every_chara][0][0]:
                         characters_data[every_chara].start_position[0]+=0.125
                         action_displayer(every_chara,"move",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
@@ -429,7 +429,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             fpsClock.tick(fps)
             pygame.display.update()
         #脚步停止
-        walk_on_snow_sound[the_sound_id].stop()
+        walking_sound[the_sound_id].stop()
         #加载对话框图片
         dialoguebox_up = loadImage("Assets/img/UI/dialoguebox.png",window_x,window_y/2-window_y*0.35,window_x*0.3,window_y*0.15)
         dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),-window_x*0.3,window_y/2+window_y*0.2,window_x*0.3,window_y*0.15)
@@ -904,8 +904,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     green_hide=True
                     if the_route != []:
                         if pygame.mixer.get_busy() == False:
-                            the_sound_id = random.randint(0,len(walk_on_snow_sound)-1)
-                            walk_on_snow_sound[the_sound_id].play()
+                            the_sound_id = random.randint(0,len(walking_sound)-1)
+                            walking_sound[the_sound_id].play()
                         if characters_data[the_character_get_click].x < the_route[0][0]:
                             characters_data[the_character_get_click].x+=0.125
                             action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
@@ -931,7 +931,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 characters_data[the_character_get_click].y = the_route[0][1]
                                 the_route.pop(0)
                     else:
-                        walk_on_snow_sound[the_sound_id].stop()
+                        walking_sound[the_sound_id].stop()
                         isWaiting =True
                         the_character_get_click = ""
                     light_area = calculate_darkness(characters_data)
@@ -1038,8 +1038,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 the_route = enemy_action[1]
                 if the_route != []:
                     if pygame.mixer.get_busy() == False:
-                        the_sound_id = random.randint(0,len(walk_on_snow_sound)-1)
-                        walk_on_snow_sound[the_sound_id].play()
+                        the_sound_id = random.randint(0,len(walking_sound)-1)
+                        walking_sound[the_sound_id].play()
                     if sangvisFerris_data[enemies_in_control].x < the_route[0][0]:
                         sangvisFerris_data[enemies_in_control].x+=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
@@ -1069,7 +1069,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             sangvisFerris_data[enemies_in_control].y = the_route[0][1]
                             the_route.pop(0)
                 else:
-                    walk_on_snow_sound[the_sound_id].stop()
+                    walking_sound[the_sound_id].stop()
                     enemies_in_control_id +=1
                     if enemies_in_control_id == len(sangvisFerris_data):
                         whose_round = "sangvisFerrisToPlayer"
