@@ -162,7 +162,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     gc.collect()
 
     #初始化角色信息
-    #hpManager(名字, 最小攻击力, 最大攻击力, 血量上限 , 当前血量, x轴位置，y轴位置，攻击范围，移动范围,gif字典)
     characters_data = {}
     for each_character in characters:
         characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],character_gif_dic(each_character,perBlockWidth,perBlockHeight),characters[each_character]["max_bullets"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["start_position"],characters[each_character]["undetected"])
@@ -571,7 +570,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
             #画面更新
             fpsClock.tick(fps)
-            pygame.display.update()
+            pygame.display.flip()
 
     # 游戏主循环
     while battle==True:
@@ -648,57 +647,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for x in range(len(map_img_list[y])):
                 if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
                     drawImg(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-
-        #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
-        # 我方角色动画
-        for every_chara in characters_data:
-            if every_chara != the_character_get_click:
-                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
-                    characters_data[every_chara].undetected = True
-                else:
-                    characters_data[every_chara].undetected = False
-                if characters_data[every_chara].dying == False:
-                    action_displayer(every_chara,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
-                else:
-                    action_displayer(every_chara,"die",characters_data[every_chara].x,characters_data[every_chara].y,False)
-        #敌方动画
-        for enemies in sangvisFerris_data:
-            if enemies != enemies_in_control:
-                if sangvisFerris_data[enemies].current_hp>0:
-                    if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
-                        if green_hide == True and pygame.mouse.get_pressed()[2]:
-                            mouse_x,mouse_y=pygame.mouse.get_pos()
-                            block_get_click_x2 = int((mouse_x-local_x)/perBlockWidth)
-                            block_get_click_y2 = int((mouse_y-local_y)/perBlockHeight)
-                            if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
-                                for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].effective_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].effective_range):
-                                    if y < sangvisFerris_data[enemies].y:
-                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)):
-                                            if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                                drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                            else:
-                                                drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                    else:
-                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)):
-                                            if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
-                                                pass
-                                            else:
-                                                if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                                    drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                else:
-                                                    drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
-                elif sangvisFerris_data[enemies].current_hp<=0:
-                    action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
-                    the_dead_one = enemies
-        if the_dead_one != "":
-            the_characters_attacking = sangvisFerris_data[the_dead_one].gif_dic
-            if the_characters_attacking["die"][1] == the_characters_attacking["die"][0][1]-1:
-                sangvisFerris_data.pop(the_dead_one)
-                result_of_round["total_kills"]+=1
-            the_dead_one=""
-        #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
-
+        
         #玩家回合
         if whose_round == "player":
             #加载结束回合的按钮
@@ -1086,6 +1035,56 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             else:
                 print("warning: not choice")
 
+        #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
+        # 我方角色动画
+        for every_chara in characters_data:
+            if every_chara != the_character_get_click:
+                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                    characters_data[every_chara].undetected = True
+                else:
+                    characters_data[every_chara].undetected = False
+                if characters_data[every_chara].dying == False:
+                    action_displayer(every_chara,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+                else:
+                    action_displayer(every_chara,"die",characters_data[every_chara].x,characters_data[every_chara].y,False)
+        #敌方动画
+        for enemies in sangvisFerris_data:
+            if enemies != enemies_in_control:
+                if sangvisFerris_data[enemies].current_hp>0:
+                    if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
+                        if green_hide == True and pygame.mouse.get_pressed()[2]:
+                            mouse_x,mouse_y=pygame.mouse.get_pos()
+                            block_get_click_x2 = int((mouse_x-local_x)/perBlockWidth)
+                            block_get_click_y2 = int((mouse_y-local_y)/perBlockHeight)
+                            if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
+                                for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].effective_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].effective_range):
+                                    if y < sangvisFerris_data[enemies].y:
+                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)):
+                                            if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                                drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            else:
+                                                drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                    else:
+                                        for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)):
+                                            if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
+                                                pass
+                                            else:
+                                                if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                                    drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                else:
+                                                    drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+                elif sangvisFerris_data[enemies].current_hp<=0:
+                    action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
+                    the_dead_one = enemies
+        if the_dead_one != "":
+            the_characters_attacking = sangvisFerris_data[the_dead_one].gif_dic
+            if the_characters_attacking["die"][1] == the_characters_attacking["die"][0][1]-1:
+                sangvisFerris_data.pop(the_dead_one)
+                result_of_round["total_kills"]+=1
+            the_dead_one=""
+        #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
+
         #加载雪花
         for i in range(len(all_snow_on_screen)):
             drawImage(all_snow_on_screen[i],screen,local_x,local_y)
@@ -1127,6 +1126,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             drawImg(press_space,(250,700),screen)
         #画面更新
         fpsClock.tick(fps)
-        pygame.display.update()
+        pygame.display.flip()
 
     return result_of_round    
