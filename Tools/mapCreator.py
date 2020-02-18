@@ -70,7 +70,7 @@ perBlockHeight = block_y_length
 #初始化角色信息
 characters_data = {}
 for each_character in characters:
-    characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],character_gif_dic(each_character,perBlockWidth,perBlockHeight),characters[each_character]["max_bullets"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["start_position"],characters[each_character]["undetected"])
+    characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],character_gif_dic(characters[each_character]["type"],perBlockWidth,perBlockHeight),characters[each_character]["max_bullets"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["start_position"],characters[each_character]["undetected"])
 
 sangvisFerris_data = {}
 for each_character in sangvisFerris:
@@ -120,7 +120,7 @@ map_img_list = randomBlock(map,blocks_setting)
 #绿色方块/方块标准
 green = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/img/UI/green.png")), (block_x_length, int(block_y_length)))
 green.set_alpha(100)
-object_to_put_down = {"type":"block","id":0,"name":"mountainSnow0"}
+object_to_put_down = None
 #帧数控制器
 fpsClock = pygame.time.Clock()
 
@@ -131,21 +131,64 @@ while True:
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
-                exit()
-            if event.key == K_s:
+                object_to_put_down = None
+            elif event.key == K_m:
+                exit()    
+            elif event.key == K_s:
                 with open("../Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
                     loadData["map"] = map
+                    loadData["character"] = characters
+                    loadData["sangvisFerri"] = sangvisFerris
                     yaml.dump(loadData, f)
                 exit()
         elif event.type == MOUSEBUTTONDOWN:
+            all_characters_data = dicMerge(characters_data,sangvisFerris_data)
             block_get_click_x = int(mouse_x/green.get_width())
             block_get_click_y = int(mouse_y/green.get_height())
             if block_get_click_y < len(map) and block_get_click_x < len(map[block_get_click_y]):
-                if object_to_put_down["type"] == "block":
-                    map[block_get_click_y][block_get_click_x] = object_to_put_down["id"]
-                    map_img_list[block_get_click_y][block_get_click_x] = object_to_put_down["name"]
-
-    #场景加载
+                if pygame.mouse.get_pressed()[0]:
+                    if object_to_put_down != None:
+                        if object_to_put_down["type"] == "block":
+                            map[block_get_click_y][block_get_click_x] = object_to_put_down["id"]
+                            map_img_list[block_get_click_y][block_get_click_x] = object_to_put_down["name"]
+                        elif object_to_put_down["type"] == "character" or object_to_put_down["type"] == "sangvisFerri":
+                            any_chara_replace = None
+                            for chara in all_characters_data:
+                                if all_characters_data[chara].x == block_get_click_x and all_characters_data[chara].y == block_get_click_y:
+                                    any_chara_replace = chara
+                                    break
+                            if any_chara_replace != None:
+                                if any_chara_replace in characters_data:
+                                    characters_data.pop(any_chara_replace)
+                                    characters.pop(any_chara_replace)
+                                elif any_chara_replace in sangvisFerris_data:
+                                    sangvisFerris_data.pop(any_chara_replace)
+                                    sangvisFerris.pop(any_chara_replace)
+                            the_id = 0
+                            if object_to_put_down["type"] == "character":
+                                while object_to_put_down["id"]+"_"+str(the_id) in characters_data:
+                                    the_id+=1
+                                characters_data[object_to_put_down["id"]+"_"+str(the_id)] = characterDataManager(1,1,1,1,1,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight),1,1,1,1,block_get_click_x,block_get_click_y,[],False)
+                                characters[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"max_bullets": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"start_position": [],"type": object_to_put_down["id"],"undetected": False,"x": block_get_click_x,"y": block_get_click_y}
+                            elif object_to_put_down["type"] == "sangvisFerri":
+                                while object_to_put_down["id"]+"_"+str(the_id) in sangvisFerris_data:
+                                    the_id+=1
+                                sangvisFerris_data[object_to_put_down["id"]+"_"+str(the_id)] = sangvisFerriDataManager(1,1,1,1,1,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"sangvisFerri"),1,1,1,1,block_get_click_x,block_get_click_y,[])
+                                sangvisFerris[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"max_bullets": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"type": object_to_put_down["id"],"patrol_path": [],"x": block_get_click_x,"y": block_get_click_y}
+                if pygame.mouse.get_pressed()[2]:
+                    any_chara_replace = None
+                    for chara in all_characters_data:
+                        if all_characters_data[chara].x == block_get_click_x and all_characters_data[chara].y == block_get_click_y:
+                            any_chara_replace = chara
+                            break
+                    if any_chara_replace != None:
+                        if any_chara_replace in characters_data:
+                            characters_data.pop(any_chara_replace)
+                            characters.pop(any_chara_replace)
+                        elif any_chara_replace in sangvisFerris_data:
+                            sangvisFerris_data.pop(any_chara_replace)
+                            sangvisFerris.pop(any_chara_replace)
+#场景加载
     for i in range(len(map_img_list)):
         for a in range(len(map_img_list[i])):
             screen.blit(env_img_list[map_img_list[i][a]],(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
@@ -155,7 +198,7 @@ while True:
             characters_data[every_chara].undetected = True
         else:
             characters_data[every_chara].undetected = False
-        action_displayer(every_chara,"wait",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
+        action_displayer(every_chara,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
     for enemies in sangvisFerris_data:
         action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
     
@@ -164,10 +207,14 @@ while True:
     i=1
     for every_chara in all_characters_img_list:
         drawImg(all_characters_img_list[every_chara],(perBlockWidth*i,window_y*0.9-perBlockHeight*0.9),screen)
+        if pygame.mouse.get_pressed()[0] and isHoverOn(all_characters_img_list[every_chara],(perBlockWidth*i,window_y*0.9-perBlockHeight*0.9)):
+            object_to_put_down = {"type":"character","id":every_chara}
         i+=2
     i=1
     for enemies in all_sangvisFerris_img_list:
         drawImg(all_sangvisFerris_img_list[enemies],(perBlockWidth*i,window_y*0.9+perBlockHeight*0.7),screen)
+        if pygame.mouse.get_pressed()[0] and isHoverOn(all_sangvisFerris_img_list[enemies],(perBlockWidth*i,window_y*0.9+perBlockHeight*0.7)):
+            object_to_put_down = {"type":"sangvisFerri","id":enemies}
         i+=2
     
     #显示所有可放置的友方角色
@@ -182,8 +229,12 @@ while True:
             object_to_put_down = {"type":"block","id":the_block_id,"name":img_name}
         i+=1
     
-    if object_to_put_down["type"] == "block":
-        screen.blit(env_img_list[object_to_put_down["name"]],(mouse_x-block_x_length*0.5,mouse_y-block_y_length*0.5))
-
+    if object_to_put_down != None:
+        if object_to_put_down["type"] == "block":
+            drawImg(env_img_list[object_to_put_down["name"]],(mouse_x-block_x_length*0.5,mouse_y-block_y_length*0.5),screen)
+        elif object_to_put_down["type"] == "character":
+            drawImg(all_characters_img_list[object_to_put_down["id"]],(mouse_x-block_x_length,mouse_y-block_y_length),screen)
+        elif object_to_put_down["type"] == "sangvisFerri":
+            drawImg(all_sangvisFerris_img_list[object_to_put_down["id"]],(mouse_x-block_x_length,mouse_y-block_y_length),screen)
     fpsClock.tick(60)
     pygame.display.flip()

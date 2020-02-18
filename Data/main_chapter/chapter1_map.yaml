@@ -13,6 +13,7 @@ character:
     start_position:
     - 1
     - 1
+    type: asval
     undetected: false
     x: 7
     y: 5
@@ -29,6 +30,7 @@ character:
     start_position:
     - 1
     - 2
+    type: gsh-18
     undetected: false
     x: 3
     y: 4
@@ -45,6 +47,7 @@ character:
     start_position:
     - 1
     - 2
+    type: pp1901
     undetected: false
     x: 6
     y: 3
@@ -61,6 +64,7 @@ character:
     start_position:
     - 1
     - 3
+    type: sv-98
     undetected: false
     x: 10
     y: 8
@@ -1234,21 +1238,7 @@ sangvisFerri:
     type: guard
     x: 28
     y: 9
-  jaeger1:
-    action_point: 2
-    attack_range: 1
-    current_bullets: 20
-    current_hp: 200
-    effective_range: 6
-    max_bullets: 20
-    max_damage: 500
-    max_hp: 200
-    min_damage: 450
-    patrol_path: []
-    type: jaeger
-    x: 9
-    y: 10
-  jaeger2:
+  jaeger_2:
     action_point: 2
     attack_range: 1
     current_bullets: 20
