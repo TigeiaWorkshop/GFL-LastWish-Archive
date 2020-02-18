@@ -70,11 +70,11 @@ perBlockHeight = block_y_length
 #初始化角色信息
 characters_data = {}
 for each_character in characters:
-    characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],character_gif_dic(characters[each_character]["type"],perBlockWidth,perBlockHeight),characters[each_character]["max_bullets"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["start_position"],characters[each_character]["undetected"])
+    characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],character_gif_dic(characters[each_character]["type"],perBlockWidth,perBlockHeight),characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["start_position"],characters[each_character]["undetected"])
 
 sangvisFerris_data = {}
 for each_character in sangvisFerris:
-    sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],character_gif_dic(sangvisFerris[each_character]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[each_character]["max_bullets"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
+    sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],character_gif_dic(sangvisFerris[each_character]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
 
 #所有的角色文件
 all_characters_list  = glob.glob(r'../Assets/img/character/*')
@@ -124,6 +124,8 @@ object_to_put_down = None
 #帧数控制器
 fpsClock = pygame.time.Clock()
 
+data_to_edit = None
+
 # 游戏主循环
 while True:
     pygame.draw.rect(screen,(255,255,255),(0,0,window_x,window_y))
@@ -132,6 +134,7 @@ while True:
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 object_to_put_down = None
+                data_to_edit = None
             elif event.key == K_m:
                 exit()    
             elif event.key == K_s:
@@ -169,7 +172,7 @@ while True:
                                 while object_to_put_down["id"]+"_"+str(the_id) in characters_data:
                                     the_id+=1
                                 characters_data[object_to_put_down["id"]+"_"+str(the_id)] = characterDataManager(1,1,1,1,1,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight),1,1,1,1,block_get_click_x,block_get_click_y,[],False)
-                                characters[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"max_bullets": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"start_position": [],"type": object_to_put_down["id"],"undetected": False,"x": block_get_click_x,"y": block_get_click_y}
+                                characters[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"bullets_carried": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"magazine_capacity": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"start_position": [],"type": object_to_put_down["id"],"undetected": False,"x": block_get_click_x,"y": block_get_click_y}
                             elif object_to_put_down["type"] == "sangvisFerri":
                                 while object_to_put_down["id"]+"_"+str(the_id) in sangvisFerris_data:
                                     the_id+=1
@@ -188,7 +191,7 @@ while True:
                         elif any_chara_replace in sangvisFerris_data:
                             sangvisFerris_data.pop(any_chara_replace)
                             sangvisFerris.pop(any_chara_replace)
-#场景加载
+    #场景加载
     for i in range(len(map_img_list)):
         for a in range(len(map_img_list[i])):
             screen.blit(env_img_list[map_img_list[i][a]],(a*block_x_length,(i+1)*block_y_length-int(block_y_length*1.5)))
@@ -199,10 +202,13 @@ while True:
         else:
             characters_data[every_chara].undetected = False
         action_displayer(every_chara,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
+        if object_to_put_down == None and pygame.mouse.get_pressed()[0] and isHoverOn(all_characters_img_list[characters[every_chara]["type"]],(characters_data[every_chara].x*perBlockWidth-perBlockWidth/2,characters_data[every_chara].y*perBlockHeight-perBlockHeight/2)):
+            data_to_edit = characters_data[every_chara]
     for enemies in sangvisFerris_data:
         action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+        if object_to_put_down == None and pygame.mouse.get_pressed()[0] and isHoverOn(all_sangvisFerris_img_list[sangvisFerris[enemies]["type"]],(sangvisFerris_data[enemies].x*perBlockWidth-perBlockWidth/2,sangvisFerris_data[enemies].y*perBlockHeight-perBlockHeight/2)):
+            data_to_edit = sangvisFerris_data[enemies]
     
-
     #显示所有可放置的友方角色
     i=1
     for every_chara in all_characters_img_list:
@@ -217,7 +223,7 @@ while True:
             object_to_put_down = {"type":"sangvisFerri","id":enemies}
         i+=2
     
-    #显示所有可放置的友方角色
+    #显示所有可放置的环境方块
     i=0
     for the_block_id in blocks_setting:
         if blocks_setting[the_block_id]["imgNum"] > 1:
@@ -229,6 +235,7 @@ while True:
             object_to_put_down = {"type":"block","id":the_block_id,"name":img_name}
         i+=1
     
+    #跟随鼠标显示即将被放下的物品
     if object_to_put_down != None:
         if object_to_put_down["type"] == "block":
             drawImg(env_img_list[object_to_put_down["name"]],(mouse_x-block_x_length*0.5,mouse_y-block_y_length*0.5),screen)
@@ -236,5 +243,20 @@ while True:
             drawImg(all_characters_img_list[object_to_put_down["id"]],(mouse_x-block_x_length,mouse_y-block_y_length),screen)
         elif object_to_put_down["type"] == "sangvisFerri":
             drawImg(all_sangvisFerris_img_list[object_to_put_down["id"]],(mouse_x-block_x_length,mouse_y-block_y_length),screen)
+
+    #显示即将被编辑的数据
+    object_edit_id = 0
+    if data_to_edit != None:
+        drawImg(fontRender("action points: "+str(data_to_edit.max_action_point),"black",15),(window_x*0.91,window_y*0.8),screen)
+        drawImg(fontRender("attack range: "+str(data_to_edit.attack_range),"black",15),(window_x*0.91,window_y*0.8+20),screen)
+        drawImg(fontRender("current bullets: "+str(data_to_edit.current_bullets),"black",15),(window_x*0.91,window_y*0.8+20*2),screen)
+        drawImg(fontRender("magazine capacity: "+str(data_to_edit.magazine_capacity),"black",15),(window_x*0.91,window_y*0.8+20*3),screen)
+        drawImg(fontRender("max hp: "+str(data_to_edit.max_hp),"black",15),(window_x*0.91,window_y*0.8+20*4),screen)
+        drawImg(fontRender("effective range: "+str(data_to_edit.effective_range),"black",15),(window_x*0.91,window_y*0.8+20*5),screen)
+        drawImg(fontRender("max damage: "+str(data_to_edit.max_damage),"black",15),(window_x*0.91,window_y*0.8+20*6),screen)
+        drawImg(fontRender("min damage: "+str(data_to_edit.min_damage),"black",15),(window_x*0.91,window_y*0.8+20*7),screen)
+        drawImg(fontRender("x: "+str(data_to_edit.x),"black",15),(window_x*0.91,window_y*0.8+20*8),screen)
+        drawImg(fontRender("y: "+str(data_to_edit.y),"black",15),(window_x*0.91,window_y*0.8+20*9),screen)
+
     fpsClock.tick(60)
     pygame.display.flip()

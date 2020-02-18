@@ -3,10 +3,11 @@ character:
   asval:
     action_point: 10
     attack_range: 1
+    bullets_carried: 200
     current_bullets: 20
     current_hp: 5500
     effective_range: 5
-    max_bullets: 20
+    magazine_capacity: 20
     max_damage: 350
     max_hp: 5500
     min_damage: 250
@@ -20,10 +21,11 @@ character:
   gsh-18:
     action_point: 10
     attack_range: 1
+    bullets_carried: 200
     current_bullets: 18
     current_hp: 3500
     effective_range: 4
-    max_bullets: 18
+    magazine_capacity: 18
     max_damage: 150
     max_hp: 3500
     min_damage: 100
@@ -37,16 +39,17 @@ character:
   pp1901:
     action_point: 15
     attack_range: 1
+    bullets_carried: 200
     current_bullets: 30
     current_hp: 8000
     effective_range: 3
-    max_bullets: 30
+    magazine_capacity: 30
     max_damage: 200
     max_hp: 8000
     min_damage: 150
     start_position:
     - 1
-    - 2
+    - 3
     type: pp1901
     undetected: false
     x: 6
@@ -54,16 +57,17 @@ character:
   sv-98:
     action_point: 20
     attack_range: 1
+    bullets_carried: 200
     current_bullets: 1
     current_hp: 2500
     effective_range: 7
-    max_bullets: 10
+    magazine_capacity: 10
     max_damage: 650
     max_hp: 2500
     min_damage: 400
     start_position:
     - 1
-    - 3
+    - 4
     type: sv-98
     undetected: false
     x: 10
@@ -1230,7 +1234,7 @@ sangvisFerri:
     current_bullets: 20
     current_hp: 1000
     effective_range: 3
-    max_bullets: 20
+    magazine_capacity: 20
     max_damage: 100
     max_hp: 1000
     min_damage: 50
@@ -1244,7 +1248,7 @@ sangvisFerri:
     current_bullets: 20
     current_hp: 200
     effective_range: 6
-    max_bullets: 20
+    magazine_capacity: 20
     max_damage: 500
     max_hp: 200
     min_damage: 450
@@ -1258,7 +1262,7 @@ sangvisFerri:
     current_bullets: 20
     current_hp: 250
     effective_range: 2
-    max_bullets: 20
+    magazine_capacity: 20
     max_damage: 200
     max_hp: 250
     min_damage: 100
@@ -1272,7 +1276,7 @@ sangvisFerri:
     current_bullets: 20
     current_hp: 400
     effective_range: 4
-    max_bullets: 20
+    magazine_capacity: 20
     max_damage: 400
     max_hp: 400
     min_damage: 300
@@ -1290,7 +1294,7 @@ sangvisFerri:
     current_bullets: 20
     current_hp: 350
     effective_range: 5
-    max_bullets: 20
+    magazine_capacity: 20
     max_damage: 450
     max_hp: 350
     min_damage: 400
