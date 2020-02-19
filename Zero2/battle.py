@@ -706,10 +706,26 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 select_menu_button = pygame.transform.scale(select_menu_button_original, (int(perBlockWidth*2), int(perBlockWidth/1.3)))
                 #选择菜单
-                displayWithInCenter(fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight,screen,local_x,local_y)
-                displayWithInCenter(fontRender(selectMenuButtons_dic["move"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight,screen,local_x,local_y)
-                displayWithInCenter(fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5,screen,local_x,local_y)
-                displayWithInCenter(fontRender(selectMenuButtons_dic["reload"],"black",int(perBlockWidth/2)),select_menu_button,characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5,screen,local_x,local_y)
+                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
+                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
+                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),screen,local_x,local_y)
+                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),screen,local_x,local_y)
+                txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/3))
+                txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
+                drawImg(txt_temp,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
+                drawImg(txt_temp2,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
+                txt_temp = fontRender(selectMenuButtons_dic["move"],"black",int(perBlockWidth/3))
+                txt_temp2 = fontRender("2N AP","black",int(perBlockWidth/5))
+                drawImg(txt_temp,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
+                drawImg(txt_temp2,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
+                txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/3))
+                txt_temp2 = fontRender("7 AP","black",int(perBlockWidth/5))
+                drawImg(txt_temp,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.35)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+                drawImg(txt_temp2,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",int(perBlockWidth/3))
+                txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
+                drawImg(txt_temp,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.55)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
+                drawImg(txt_temp2,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.85)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
                 if pygame.mouse.get_pressed()[0]:
                     if isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         if characters_data[the_character_get_click].current_bullets > 0:
@@ -863,9 +879,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     else:
                         print(the_character_get_click+" is causing trouble, please double check the files or reporting this issue")
                         break
-                    isWaiting =True
-                    the_character_get_click = ""
-
+                    action_choice = ""
             
             #当有角色被点击时
             if the_character_get_click != "":
