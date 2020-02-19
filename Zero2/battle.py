@@ -83,6 +83,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         enemy_round_txt = fontRender(loadData["Battle_UI"]["enemyRound"], "white")
         text_now_total_rounds_original = loadData["Battle_UI"]["numRound"]
         chapter_no = loadData["Battle_UI"]["numChapter"]
+        warnings_info = loadData["warnings"]
     
     with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -223,6 +224,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     mouse_move_temp_y = -1
     total_rounds = 1
     enemies_in_control_id= 0
+    warnings_to_display = []
     #计算光亮区域
     light_area = calculate_darkness(characters_data)
     # 移动路径
@@ -688,7 +690,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 tcgc_action_point1 = fontRender("AP: ","white",20)
                 tcgc_action_point2 = fontRender(str(characters_data[the_character_get_click].current_action_point)+"/"+str(characters_data[the_character_get_click].max_action_point),"black",20)
                 tcgc_bullets_situation1 = fontRender("BP: ","white",20)
-                tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].magazine_capacity),"black",20)
+                tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].bullets_carried),"black",20)
                 drawImg(tcgc_hp1,(character_icon_img_list[the_character_get_click].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(tcgc_action_point1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(tcgc_bullets_situation1,(character_icon_img_list[the_character_get_click].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
@@ -734,7 +736,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         block_get_click_y = -100
                         green_hide = False
             #显示攻击或移动范围
-            elif green_hide == False and characters_data[the_character_get_click].current_action_point > 0 and the_character_get_click != "":
+            elif green_hide == False and the_character_get_click != "" and characters_data[the_character_get_click].current_action_point > 0:
                 #显示移动范围
                 if action_choice == "move":
                     mouse_x,mouse_y=pygame.mouse.get_pos()
@@ -838,13 +840,32 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     green_hide = True
                                     break
                 elif action_choice == "reload":
-                    if characters_data[the_character_get_click].magazine_capacity-characters_data[the_character_get_click].current_bullets > 0:
-                        #向上取整
-                        characters_data[the_character_get_click].current_action_point -= math.ceil((characters_data[the_character_get_click].magazine_capacity-characters_data[the_character_get_click].current_bullets)/2)
-                        characters_data[the_character_get_click].current_bullets = characters_data[the_character_get_click].magazine_capacity
+                    bullets_to_add = characters_data[the_character_get_click].magazine_capacity-characters_data[the_character_get_click].current_bullets
+                    if bullets_to_add > 0 and characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
+                        characters_data[the_character_get_click].current_action_point -= 5
+                        #当所剩子弹足够换弹的时候
+                        if bullets_to_add <= characters_data[the_character_get_click].bullets_carried:
+                            characters_data[the_character_get_click].bullets_carried -= bullets_to_add
+                            characters_data[the_character_get_click].current_bullets += bullets_to_add
+                        #当所剩子弹不足以换弹的时候
+                        else:
+                            characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
+                            characters_data[the_character_get_click].bullets_carried = 0
+                    elif bullets_to_add <= 0:
+                        #无需换弹
+                        warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_full"],"red",30))
+                    elif characters_data[the_character_get_click].current_action_point < 5:
+                        #没有足够的AP换弹
+                        warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_reload"],"red",30))
+                    elif characters_data[the_character_get_click].bullets_carried <= 0:
+                        #当前角色已经没有子弹了
+                        warnings_to_display.insert(0,fontRender(warnings_info["no_bullets_left"],"red",30))
                     else:
-                        #无需换弹                                      
-                        pass
+                        print(the_character_get_click+" is causing trouble, please double check the files or reporting this issue")
+                        break
+                    isWaiting =True
+                    the_character_get_click = ""
+
             
             #当有角色被点击时
             if the_character_get_click != "":
@@ -1091,8 +1112,17 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             all_snow_on_screen[i].x -= 10*zoom_in
             all_snow_on_screen[i].y += 20*zoom_in
             if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
-                all_snow_on_screen[i].y = random.randint(-100,0)
+                all_snow_on_screen[i].y = random.randint(-100,0)  
                 all_snow_on_screen[i].x = random.randint(0,window_x*2)
+
+        #显示警告
+        for i in range(len(warnings_to_display)):
+            img_alpha = warnings_to_display[i].get_alpha()
+            if img_alpha > 0:
+                warnings_to_display[i].set_alpha(img_alpha-2)
+                drawImg(warnings_to_display[i],((window_x-warnings_to_display[i].get_width())/2,(window_y-warnings_to_display[i].get_height())/2+i*warnings_to_display[i].get_height()*1.2),screen)
+            else:
+                del warnings_to_display[i]
 
         #加载音乐
         while pygame.mixer.music.get_busy() != 1:

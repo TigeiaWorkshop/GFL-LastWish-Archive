@@ -54,6 +54,8 @@ def fontRender(txt,color,size=50,font="simsunnsimsun",mode=True):
         text_out = normal_font.render(txt, mode, (255, 255, 255))
     elif color == "black":
         text_out = normal_font.render(txt, mode, (0, 0, 0))
+    elif color == "red":
+        text_out = normal_font.render(txt, mode, (255, 0, 0))
     else:
         text_out = normal_font.render(txt, mode, color)
     return text_out

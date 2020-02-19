@@ -27,3 +27,7 @@ select_menu:
   move: 移动
   reload: 换弹
   skill: 技能
+warnings:
+  magazine_is_full: 当前弹夹已满，无需换弹
+  no_bullets_left: 当前角色已经没有备弹
+  no_enough_ap_to_reload: 你没有足够的行动值用于换弹

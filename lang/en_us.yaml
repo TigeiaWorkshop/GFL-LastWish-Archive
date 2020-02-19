@@ -27,3 +27,7 @@ select_menu:
   move: Move
   reload: Reload
   skill: Skill
+warnings:
+  magazine_is_full: Current character has a full magazine, no need to reload.
+  no_bullets_left: Current character has no bullet left.
+  no_enough_ap_to_reload: You don't have enough action points for reloading.
