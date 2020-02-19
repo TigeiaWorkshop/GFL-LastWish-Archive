@@ -712,47 +712,65 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),screen,local_x,local_y)
                 txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/3))
                 txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
-                drawImg(txt_temp,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp2,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
+                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
+                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
                 txt_temp = fontRender(selectMenuButtons_dic["move"],"black",int(perBlockWidth/3))
                 txt_temp2 = fontRender("2N AP","black",int(perBlockWidth/5))
-                drawImg(txt_temp,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp2,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
+                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
+                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
                 txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/3))
-                txt_temp2 = fontRender("7 AP","black",int(perBlockWidth/5))
-                drawImg(txt_temp,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.35)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
-                drawImg(txt_temp2,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+                txt_temp2 = fontRender("8 AP","black",int(perBlockWidth/5))
+                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.35)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
                 txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",int(perBlockWidth/3))
                 txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
-                drawImg(txt_temp,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.55)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
-                drawImg(txt_temp2,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.85)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
+                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.55)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
+                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.85)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
                 if pygame.mouse.get_pressed()[0]:
                     if isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
-                        if characters_data[the_character_get_click].current_bullets > 0:
-                            time.sleep(0.05)
+                        if characters_data[the_character_get_click].current_bullets > 0 and characters_data[the_character_get_click].current_action_point >= 5:
                             action_choice = "attack"
                             block_get_click_x = -100
                             block_get_click_y = -100
                             green_hide = False
+                        if characters_data[the_character_get_click].current_bullets <= 0:
+                            warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_empty"],"red",30))
+                            green_hide = False
+                        if characters_data[the_character_get_click].current_action_point < 5:
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_attack"],"red",30))
+                            green_hide = False
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
-                        action_choice = "move"
-                        time.sleep(0.05)
-                        block_get_click_x = -100
-                        block_get_click_y = -100
-                        green_hide = False
+                        if characters_data[the_character_get_click].current_action_point >= 2:
+                            action_choice = "move"
+                            block_get_click_x = -100
+                            block_get_click_y = -100
+                            green_hide = False
+                        else:
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_move"],"red",30))
+                            green_hide = False
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y):
-                        action_choice = "skill"
-                        time.sleep(0.05)
-                        block_get_click_x = -100
-                        block_get_click_y = -100
-                        green_hide = False
+                        if characters_data[the_character_get_click].current_action_point >= 8:
+                            action_choice = "skill"
+                            block_get_click_x = -100
+                            block_get_click_y = -100
+                            green_hide = False
+                        else:
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_use_skill"],"red",30))
+                            green_hide = False
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),local_x,local_y):
-                        action_choice = "reload"
-                        block_get_click_x = -100
-                        block_get_click_y = -100
-                        green_hide = False
+                        if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
+                            action_choice = "reload"
+                            block_get_click_x = -100
+                            block_get_click_y = -100
+                            green_hide = False
+                        if characters_data[the_character_get_click].bullets_carried <= 0:
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_bullets_left"],"red",30))
+                            green_hide = False
+                        if characters_data[the_character_get_click].current_action_point < 5:
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_reload"],"red",30))
+                            green_hide = False
             #显示攻击或移动范围
-            elif green_hide == False and the_character_get_click != "" and characters_data[the_character_get_click].current_action_point > 0:
+            elif green_hide == False and the_character_get_click != "":
                 #显示移动范围
                 if action_choice == "move":
                     mouse_x,mouse_y=pygame.mouse.get_pos()
@@ -798,9 +816,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     #显示路径
                     for i in range(len(the_route)):
                         drawImg(green,(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
-
                 #显示攻击范围        
-                if action_choice == "attack":
+                elif action_choice == "attack":
                     attacking_range = []
                     for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].effective_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].effective_range):
                         if y < characters_data[the_character_get_click].y:
@@ -857,7 +874,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     break
                 elif action_choice == "reload":
                     bullets_to_add = characters_data[the_character_get_click].magazine_capacity-characters_data[the_character_get_click].current_bullets
-                    if bullets_to_add > 0 and characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
+                    if bullets_to_add > 0:
                         characters_data[the_character_get_click].current_action_point -= 5
                         #当所剩子弹足够换弹的时候
                         if bullets_to_add <= characters_data[the_character_get_click].bullets_carried:
@@ -870,12 +887,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     elif bullets_to_add <= 0:
                         #无需换弹
                         warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_full"],"red",30))
-                    elif characters_data[the_character_get_click].current_action_point < 5:
-                        #没有足够的AP换弹
-                        warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_reload"],"red",30))
-                    elif characters_data[the_character_get_click].bullets_carried <= 0:
-                        #当前角色已经没有子弹了
-                        warnings_to_display.insert(0,fontRender(warnings_info["no_bullets_left"],"red",30))
                     else:
                         print(the_character_get_click+" is causing trouble, please double check the files or reporting this issue")
                         break
