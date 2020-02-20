@@ -669,7 +669,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 elif the_route != [] and [block_get_click_x,block_get_click_y] in the_route and green_hide==False:
                     isWaiting = "MOVING"
                     green_hide = True
-                    characters_data[the_character_get_click].current_action_point -= len(the_route)
+                    characters_data[the_character_get_click].current_action_point -= len(the_route)*2
                 else:
                     #控制选择菜单的显示与隐藏
                     for key in characters_data:
@@ -728,6 +728,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.85)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
                 if pygame.mouse.get_pressed()[0]:
                     if isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
+                        time.sleep(0.05)
                         if characters_data[the_character_get_click].current_bullets > 0 and characters_data[the_character_get_click].current_action_point >= 5:
                             action_choice = "attack"
                             block_get_click_x = -100
@@ -740,6 +741,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_attack"],"red",30))
                             green_hide = False
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
+                        time.sleep(0.05)
                         if characters_data[the_character_get_click].current_action_point >= 2:
                             action_choice = "move"
                             block_get_click_x = -100
@@ -749,6 +751,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_move"],"red",30))
                             green_hide = False
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y):
+                        time.sleep(0.05)
                         if characters_data[the_character_get_click].current_action_point >= 8:
                             action_choice = "skill"
                             block_get_click_x = -100
@@ -796,8 +799,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     #遍历路径点,讲指定数量的点放到路径列表中
                     the_route = []
                     if pathList != None:
-                        if len(pathList)>characters_data[the_character_get_click].current_action_point:
-                            route_len = characters_data[the_character_get_click].current_action_point
+                        if len(pathList)>int(characters_data[the_character_get_click].current_action_point/2):
+                            route_len = int(characters_data[the_character_get_click].current_action_point/2)
                         else:
                             route_len = len(pathList)
                         for i in range(route_len):
@@ -836,6 +839,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     if [block_get_click_x,block_get_click_y] in attacking_range:
                         for enemies in sangvisFerris_data:
                             if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                                characters_data[the_character_get_click].current_action_point -= 5
                                 isWaiting = "ATTACKING"
                                 enemies_get_attack = enemies
                                 green_hide = True
@@ -861,6 +865,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         if the_character_get_click == "gsh-18":
                             for character in characters_data:
                                 if block_get_click_x == characters_data[character].x and  block_get_click_y == characters_data[character].y:
+                                    characters_data[the_character_get_click].current_action_point -= 8
                                     isWaiting = "ATTACKING"
                                     enemies_get_attack = character
                                     green_hide = True
@@ -868,6 +873,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         else:
                             for enemies in sangvisFerris_data:
                                 if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                                    characters_data[the_character_get_click].current_action_point -= 8
                                     isWaiting = "ATTACKING"
                                     enemies_get_attack = enemies
                                     green_hide = True
