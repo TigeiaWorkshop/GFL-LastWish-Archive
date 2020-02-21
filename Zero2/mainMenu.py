@@ -54,7 +54,7 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     img = cv2.transpose(img)
     surface = pygame.surface.Surface((img.shape[0], img.shape[1]))
 
-    the_black = loadImage("Assets/img/UI/black.png",0,0,window_x,window_y)
+    the_black = loadImage("Assets/img/UI/black.png",(0,0),window_x,window_y)
     t1 = fontRender("缇吉娅工坊 呈现","white",30)
     t2 = fontRender("警告：所有内容仍处于研发阶段，不代表最终效果","white",30)
     for i in range(0,250,2):

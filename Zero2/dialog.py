@@ -40,13 +40,16 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     dialog_bg_img_dic={}
     for i in range(len(all_dialog_bg_file_list)):
         img_name = all_dialog_bg_file_list[i].replace("Assets","").replace("img","").replace("dialog_background","").replace(".jpg","").replace("\\","").replace("/","")
-        dialog_bg_img_dic[img_name] = loadImage(all_dialog_bg_file_list[i],0,0,window_x,window_y)
+        dialog_bg_img_dic[img_name] = loadImage(all_dialog_bg_file_list[i],(0,0),window_x,window_y)
     
     #加载对话框
-    dialoguebox = loadImage("Assets/img/UI/dialoguebox.png",(window_x-window_x/1.4)/2,window_y*0.65,window_x/1.4,window_y/4)
+    dialoguebox = loadImage("Assets/img/UI/dialoguebox.png",((window_x-window_x/1.4)/2,window_y*0.65),window_x/1.4,window_y/4)
     #鼠标图标
     mouse_none = loadImg("Assets/img/UI/mouse_none.png",window_x/65,window_x/65)
     mouse_click = loadImg("Assets/img/UI/mouse.png",window_x/65,window_x/65)
+    #跳过按钮
+    skip_button = loadImage("Assets/img/UI/skip.png",(window_x*0.92,window_y*0.05),window_x*0.055,window_x*0.025)
+    if_skip = False
     #黑色帘幕
     the_black = loadImg("Assets/img/UI/black.png",window_x,window_y)
     #设定初始化
@@ -71,7 +74,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     dialog_options = {}
 
     #主循环
-    while len(dialog_content)!=0 and display_num<len(dialog_content):
+    while len(dialog_content)!=0 and display_num<len(dialog_content) and if_skip == False:
         #背景
         drawImage(dialog_bg_img_dic[dialog_content[display_num]["background_img"]],screen)
         #加载对话人物立绘
@@ -83,7 +86,8 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                 drawImg(npc_img_dic[dialog_content[display_num]["characters_img"][0]],(window_x/4,window_y-window_x/2),screen)
         # 对话框图片
         drawImage(dialoguebox,screen)
-        
+        #跳过按钮
+        drawImage(skip_button,screen)
         #讲述者名称
         if dialog_content[display_num]["narrator"] != None:
             drawImg(fontRender(dialog_content[display_num]["narrator"],"white",window_x/64),(dialoguebox.width/8,dialoguebox.height/8),screen,dialoguebox.x,dialoguebox.y)
@@ -118,14 +122,17 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                     exit()
             elif event.type == MOUSEBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0]:
-                    display_num += 1
-                    dialog_content_id = 1
-                    displayed_line = 0
-                    if display_num<len(dialog_content):
-                        if the_bg_music != dialog_content[display_num]["background_music"]:
-                            the_bg_music = dialog_content[display_num]["background_music"]
-                            pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
-                            pygame.mixer.music.play(loops=9999, start=0.0)
+                    if isHover(skip_button):
+                        if_skip = True
+                    else:
+                        display_num += 1
+                        dialog_content_id = 1
+                        displayed_line = 0
+                        if display_num<len(dialog_content):
+                            if the_bg_music != dialog_content[display_num]["background_music"]:
+                                the_bg_music = dialog_content[display_num]["background_music"]
+                                pygame.mixer.music.load("Assets/music/"+the_bg_music+".mp3")
+                                pygame.mixer.music.play(loops=9999, start=0.0)
                 elif pygame.mouse.get_pressed()[2]:
                     if display_num>0:
                         display_num -= 1

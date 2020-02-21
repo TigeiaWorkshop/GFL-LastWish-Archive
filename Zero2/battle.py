@@ -157,7 +157,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         the_snow_add_y = random.randint(1,window_y)
         the_snow_add_x = random.randint(1,window_x*1.5)
         the_snow_add_img = snow_list[random.randint(0,all_snow_img_len)]
-        all_snow_on_screen.append(loadImage(the_snow_add_img,the_snow_add_x,the_snow_add_y,int(window_x/200),int(window_x/200)))
+        all_snow_on_screen.append(loadImage(the_snow_add_img,(the_snow_add_x,the_snow_add_y),int(window_x/200),int(window_x/200)))
 
     del all_snow_img,snow_list,all_snow_img_len
     gc.collect()
@@ -180,7 +180,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
     #加载UI
     #加载结束回合的图片
-    end_round_button = loadImage("Assets/img/UI/endRound.png",window_x*0.8,window_y*0.7,window_x/10, window_y/10)
+    end_round_button = loadImage("Assets/img/UI/endRound.png",(window_x*0.8,window_y*0.7),window_x/10, window_y/10)
     #加载选择菜单的图片
     select_menu_button_original = loadImg("Assets/img/UI/menu.png")
     #加载子弹图片
@@ -197,9 +197,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         "red" : loadImg("Assets/img/UI/red.png",None,None,100),
         "black" : loadImg("Assets/img/UI/black.png",None,None,100),
         #计分板
-        "score" : loadImage("Assets/img/UI/score.png",200,200,300,600),
+        "score" : loadImage("Assets/img/UI/score.png",(200,200),300,600),
     }
-    the_character_get_click_info_board = loadImage("Assets/img/UI/score.png",0,window_y-window_y/6,window_x/5,window_y/6)
+    the_character_get_click_info_board = loadImage("Assets/img/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
     green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
     red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
     black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
@@ -432,8 +432,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #脚步停止
         walking_sound[the_sound_id].stop()
         #加载对话框图片
-        dialoguebox_up = loadImage("Assets/img/UI/dialoguebox.png",window_x,window_y/2-window_y*0.35,window_x*0.3,window_y*0.15)
-        dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),-window_x*0.3,window_y/2+window_y*0.2,window_x*0.3,window_y*0.15)
+        dialoguebox_up = loadImage("Assets/img/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
+        dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
         #设定初始化
         display_num = 0
         dialog_up_content_id = 0
@@ -652,8 +652,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         
         #玩家回合
         if whose_round == "player":
-            #加载结束回合的按钮
-            drawImage(end_round_button,screen)
             #玩家输入按键判定-玩家回合限定
             if pygame.mouse.get_pressed()[0]:
                 mouse_x,mouse_y=pygame.mouse.get_pos()
@@ -1145,6 +1143,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
                 all_snow_on_screen[i].y = random.randint(-100,0)  
                 all_snow_on_screen[i].x = random.randint(0,window_x*2)
+        
+        if whose_round == "player":
+            #加载结束回合的按钮
+            drawImage(end_round_button,screen)
 
         #显示警告
         for i in range(len(warnings_to_display)):
