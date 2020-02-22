@@ -53,8 +53,33 @@ with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
     characters = loadData["character"]
     sangvisFerris = loadData["sangvisFerri"]
 
-block_x = len(map[0])
-block_y = len(map)
+#初始化地图
+if len(map) == 0:
+    block_y = 36
+    block_x = 64
+    default_map = []
+    for i in range(block_y):
+        map_per_line = []
+        for a in range(block_x):
+            if i == 0 or i == block_y-1:
+                map_per_line.append(0)
+            else:
+                if a == 0 or a == block_x-1:
+                    map_per_line.append(0)
+                else:
+                    map_per_line.append(1)
+        default_map.append(map_per_line)
+
+    with open("../Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
+        loadData["map"] = default_map
+        yaml.dump(loadData, f)
+
+    with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
+        map = loadData["map"]
+else:
+    block_x = len(map[0])
+    block_y = len(map)
+
 block_x_length = int(window_x/block_x*0.9)
 block_y_length = int(window_y/block_y*0.9)
 
@@ -88,28 +113,6 @@ all_sangvisFerris_img_list={}
 for i in range(len(all_sangvisFerris_list)):
     img_name = all_sangvisFerris_list[i].replace(".","").replace("Assets","").replace("img","").replace("sangvisFerri","").replace("\\","").replace("/","")
     all_sangvisFerris_img_list[img_name] = loadImg(all_sangvisFerris_list[i]+"/wait/"+img_name+"_wait_0.png",perBlockWidth*2.5,perBlockHeight*2.5)
-
-#初始化地图
-if len(map) == 0:
-    default_map = []
-    for i in range(block_y):
-        map_per_line = []
-        for a in range(block_x):
-            if i == 0 or i == block_y-1:
-                map_per_line.append(0)
-            else:
-                if a == 0 or a ==block_x-1:
-                    map_per_line.append(0)
-                else:
-                    map_per_line.append(1)
-        default_map.append(map_per_line)
-
-    with open("../Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
-        loadData["map"] = default_map
-        yaml.dump(loadData, f)
-
-    with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
-        map = loadData["map"]
 
 #生存随机方块名
 with open("../Data/blocks.yaml", "r", encoding='utf-8') as f:
@@ -238,7 +241,7 @@ while True:
     #跟随鼠标显示即将被放下的物品
     if object_to_put_down != None:
         if object_to_put_down["type"] == "block":
-            drawImg(env_img_list[object_to_put_down["name"]],(mouse_x-block_x_length*0.5,mouse_y-block_y_length*0.5),screen)
+            drawImg(env_img_list[object_to_put_down["name"]],(mouse_x-block_x_length*0.5,mouse_y-block_y_length),screen)
         elif object_to_put_down["type"] == "character":
             drawImg(all_characters_img_list[object_to_put_down["id"]],(mouse_x-block_x_length,mouse_y-block_y_length),screen)
         elif object_to_put_down["type"] == "sangvisFerri":

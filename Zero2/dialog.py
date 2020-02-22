@@ -76,7 +76,10 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     #主循环
     while len(dialog_content)!=0 and display_num<len(dialog_content) and if_skip == False:
         #背景
-        drawImage(dialog_bg_img_dic[dialog_content[display_num]["background_img"]],screen)
+        if dialog_content[display_num]["background_img"] == None:
+            drawImg(black,(0,0),screen)
+        else:
+            drawImage(dialog_bg_img_dic[dialog_content[display_num]["background_img"]],screen)
         #加载对话人物立绘
         if dialog_content[display_num]["characters_img"] != None:
             if len(dialog_content[display_num]["characters_img"])==2:
@@ -90,12 +93,12 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         drawImage(skip_button,screen)
         #讲述者名称
         if dialog_content[display_num]["narrator"] != None:
-            drawImg(fontRender(dialog_content[display_num]["narrator"],"white",window_x/64),(dialoguebox.width/8,dialoguebox.height/8),screen,dialoguebox.x,dialoguebox.y)
+            drawImg(fontRender(dialog_content[display_num]["narrator"],"white",window_x*0.017),(dialoguebox.width*0.1,dialoguebox.height/8),screen,dialoguebox.x,dialoguebox.y)
         #对话框已播放的内容
         for i in range(displayed_line):
-            drawImg(fontRender(dialog_content[display_num]["content"][i],"white",window_x/70),(dialoguebox.width/10,dialoguebox.height*0.34+window_x/55*i),screen,dialoguebox.x,dialoguebox.y)
+            drawImg(fontRender(dialog_content[display_num]["content"][i],"white",window_x*0.015),(dialoguebox.width*0.075,dialoguebox.height*0.33+window_x*0.02*i),screen,dialoguebox.x,dialoguebox.y)
         #对话框正在播放的内容
-        drawImg(fontRender(dialog_content[display_num]["content"][displayed_line][0:dialog_content_id],"white",window_x/70),(dialoguebox.width/10,dialoguebox.height*0.34+window_x/55*displayed_line),screen,dialoguebox.x,dialoguebox.y)
+        drawImg(fontRender(dialog_content[display_num]["content"][displayed_line][0:dialog_content_id],"white",window_x*0.015),(dialoguebox.width*0.075,dialoguebox.height*0.33+window_x*0.02*displayed_line),screen,dialoguebox.x,dialoguebox.y)
         #检测所有字是否都已经播出
         if dialog_content_id < len(dialog_content[display_num]["content"][displayed_line]):
             dialog_content_id +=1
