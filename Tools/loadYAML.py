@@ -1,7 +1,7 @@
 import yaml
 #读取地图
-path = "../lang/zh_cn.yaml"
-#path = "../Data/main_chapter/chapter1_map.yaml"
+#path = "../lang/zh_cn.yaml"
+path = "../Data/main_chapter/chapter1_dialogs_zh_cn.yaml"
 
 with open(path, "r", encoding='utf-8') as f:
     chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
