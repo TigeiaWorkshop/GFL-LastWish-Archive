@@ -126,8 +126,10 @@ dialog_before_battle:
     last_dialog_id: null
     narrator: null
     next_dialog_id:
-    - default
-    - 1
+    - option
+    - ["choice1",1]
+    - ["choice2",2]
+    - ["choice3",3]
   1:
     background_img: research
     background_music: Room_1
