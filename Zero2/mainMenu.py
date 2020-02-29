@@ -14,29 +14,30 @@ pygame.init()
 def mainMenu(window_x,window_y,lang,fps,mode=""):
     #加载主菜单文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
-        lang_cn = yaml.load(f.read(),Loader=yaml.FullLoader)
-        now_loading = lang_cn['main_menu']['now_loading']
-        text_title =  lang_cn['main_menu']['text_title']
-        text_continue = fontRenderPro(lang_cn['main_menu']['text_continue'],"disable")
-        text_chooseChapter = fontRenderPro(lang_cn['main_menu']['text_chooseChapter'],"enable")
-        text_setting = fontRenderPro(lang_cn['main_menu']['text_setting'],"disable")
-        text_dlc = fontRenderPro(lang_cn['main_menu']['text_dlc'],"disable")
-        text_workshop = fontRenderPro(lang_cn['main_menu']['text_workshop'],"disable")
-        text_exit = fontRenderPro(lang_cn['main_menu']['text_exit'],"enable")
-        chapter_select = lang_cn['chapter']
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        game_title = loadData['game_title']
+        main_menu_txt = loadData['main_menu']
+        chapter_select = loadData['chapter']
     
-    #加载菜单选择页面的文字
+    #加载主菜单选择页面的文字
+    for txt in main_menu_txt:
+        if txt == "text_exit" or txt == "text_chooseChapter":
+            main_menu_txt[txt] = fontRenderPro(main_menu_txt[txt],"enable",window_x/38)
+        else:
+            main_menu_txt[txt] = fontRenderPro(main_menu_txt[txt],"disable",window_x/38)
+    
+    #加载菜单章节选择页面的文字
     for i in range(len(chapter_select)):
         if i == 0 or i == len(chapter_select)-1:
-            chapter_select[i] = fontRenderPro(chapter_select[i],"enable")
+            chapter_select[i] = fontRenderPro(chapter_select[i],"enable",window_x/38)
         else:
-            chapter_select[i] = fontRenderPro(chapter_select[i],"disable")
+            chapter_select[i] = fontRenderPro(chapter_select[i],"disable",window_x/38)
 
     # 创建窗口
     screen = pygame.display.set_mode((window_x, window_y),pygame.SCALED)
     icon_img = loadImg("Assets/img/UI/icon.png")
     pygame.display.set_icon(icon_img)
-    pygame.display.set_caption(text_title) #窗口标题
+    pygame.display.set_caption(game_title) #窗口标题
     
     #加载主菜单背景
     videoCapture = cv2.VideoCapture("Assets/movie/SquadAR.mp4")
@@ -45,14 +46,15 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     background_img_id = 0
     menu_type = 0
     txt_location = int(window_x*2/3)
+    main_menu_txt_start_height = (window_y-len(main_menu_txt)*window_x/38*2)/2
+    chapter_select_txt_start_height = (window_y-len(chapter_select)*window_x/38*2)/2
     #关卡选择的封面
     cover_img = loadImg("Assets/img/covers/chapter1.png",window_x,window_y)
     #帧数控制器
     fpsClock = pygame.time.Clock()
+    video_fps = videoCapture.get(cv2.CAP_PROP_FPS)
     #视频面
-    ret, img = videoCapture.read()
-    img = cv2.transpose(img)
-    surface = pygame.surface.Surface((img.shape[0], img.shape[1]))
+    surface = pygame.surface.Surface((window_x, window_y))
 
     the_black = loadImage("Assets/img/UI/black.png",(0,0),window_x,window_y)
     t1 = fontRender("缇吉娅工坊 呈现","white",30)
@@ -77,34 +79,12 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
 
     # 游戏主循环
     while True:
-        for event in pygame.event.get():
-            if event.type == KEYDOWN and event.key == K_s:
-                pygame.display.toggle_fullscreen()
-            elif event.type == MOUSEBUTTONDOWN:
-                if menu_type == 0:
-                    #退出
-                    if isHoverOn(text_exit.b, (txt_location,750)):
-                        exit()
-                    #选择章节
-                    elif isHoverOn(text_chooseChapter.b, (txt_location,350)):
-                        menu_type = 1
-                elif menu_type == 1:
-                    #返回
-                    if isHoverOn(chapter_select[0-1].b, (txt_location,(window_y-200)/9*(len(chapter_select)))):
-                        menu_type = 0
-                    #章节选择
-                    else:
-                        for i in range(len(chapter_select)-1):
-                            if isHoverOn(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1))) and i != len(chapter_select)-1:
-                                dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_before_battle")
-                                battle("chapter"+str(i+1),window_x,window_y,screen,lang,fps)
-                                dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_after_battle")
-                                videoCapture.set(1,1)
-                                break
         #背景图片
         if videoCapture.get(1) >= 3105:
             videoCapture.set(1, 935)
         ret, frame = videoCapture.read()
+        if frame.shape[0] != window_x or frame.shape[1] != window_y:
+            frame = cv2.resize(frame,(window_x,window_y))
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.transpose(frame)
         pygame.surfarray.blit_array(surface, frame)
@@ -123,28 +103,46 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
 
         #菜单选项
         if menu_type == 0:
-            drawImg(text_continue.n, (txt_location,250),screen)
-            if isHoverOn(text_chooseChapter.n, (txt_location,350)):
-                drawImg(text_chooseChapter.b, (txt_location,350),screen)
-            else:
-                drawImg(text_chooseChapter.n, (txt_location,350),screen)
-            drawImg(text_setting.n, (txt_location,450),screen)
-            drawImg(text_dlc.n, (txt_location,550),screen)
-            drawImg(text_workshop.n, (txt_location,650),screen)
-            if isHoverOn(text_exit.n, (txt_location,750)):
-                drawImg(text_exit.b, (txt_location,750),screen)
-            else:
-                drawImg(text_exit.n, (txt_location,750),screen)
+            i=0
+            for txt in main_menu_txt:
+                if isHoverOn(main_menu_txt[txt].n, (txt_location,main_menu_txt_start_height+window_x/38*2*i)):
+                    drawImg(main_menu_txt[txt].b, (txt_location,main_menu_txt_start_height+window_x/38*2*i),screen)
+                else:
+                    drawImg(main_menu_txt[txt].n, (txt_location,main_menu_txt_start_height+window_x/38*2*i),screen)
+                i+=1
         elif menu_type == 1:
             for i in range(len(chapter_select)):
-                if isHoverOn(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1))):
-                    drawImg(chapter_select[i].b, (txt_location,(window_y-200)/9*(i+1)),screen)
+                if isHoverOn(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+                    drawImg(chapter_select[i].b, (txt_location,chapter_select_txt_start_height+window_x/38*2*i),screen)
                 else:
-                    drawImg(chapter_select[i].n, (txt_location,(window_y-200)/9*(i+1)),screen)
-
+                    drawImg(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i),screen)
+        
+        for event in pygame.event.get():
+            if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
+                if menu_type == 0:
+                    i=0
+                    for txt in main_menu_txt:
+                        if txt == "text_exit" and isHoverOn(main_menu_txt["text_exit"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
+                            exit()
+                        #选择章节
+                        elif txt == "text_chooseChapter" and isHoverOn(main_menu_txt["text_chooseChapter"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
+                            menu_type = 1
+                        i+=1
+                elif menu_type == 1:
+                    for i in range(len(chapter_select)):
+                        if i == len(chapter_select)-1 and isHoverOn(chapter_select[-1].b,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+                            menu_type = 0
+                        #章节选择
+                        elif isHoverOn(chapter_select[i].b,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+                            dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_before_battle")
+                            battle("chapter"+str(i+1),window_x,window_y,screen,lang,fps)
+                            dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_after_battle")
+                            videoCapture.set(1,1)
+                            break
+            
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')
             pygame.mixer.music.play(loops=9999, start=0.0)
 
-        fpsClock.tick(fps)
+        fpsClock.tick(video_fps)
         pygame.display.update()

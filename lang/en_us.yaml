@@ -13,15 +13,15 @@ chapter:
 - chapter7
 - chapter8
 - back
+game_title: Girls' Frontline-Last wish
 main_menu:
-  now_loading: Loading
-  text_chooseChapter: Select Chapter
   text_continue: Continue
+  text_chooseChapter: Select Chapter
   text_dlc: DLC
-  text_exit: Exit
-  text_setting: setting
-  text_title: Girls' Frontline-Last wish
   text_workshop: Workshop
+  text_setting: setting
+  text_exit: Exit
+now_loading: Loading...
 select_menu:
   attack: Attack
   move: Move

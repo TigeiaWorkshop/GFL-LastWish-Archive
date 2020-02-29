@@ -63,7 +63,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     displayed_line = 0
     mouse_gif_id = 1
     videoCapture = None
-    
+    surface = pygame.surface.Surface((window_x,window_y))
+    the_FPS = fps
+
     #加载完成-淡出效果
     for i in range(100,-1,-1):
         if dialog_content[dialogId]["background_img"] == None:
@@ -72,22 +74,24 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
             drawImage(dialog_bg_img_dic[dialog_content[dialogId]["background_img"]],screen)
         else:
             if videoCapture == None:
+                if os.path.exists("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
+                    raise Exception('The video file is not exist')
                 videoCapture = cv2.VideoCapture("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"])
-                ret, img = videoCapture.read()
-                img = cv2.transpose(img)
-                surface = pygame.surface.Surface((img.shape[0],img.shape[1]))
                 frames_num=videoCapture.get(7)
+                the_FPS = videoCapture.get(cv2.CAP_PROP_FPS)
             else:
                 if videoCapture.get(1) >= frames_num:
                     videoCapture.set(1, frames_num)
                 ret, frame = videoCapture.read()
+                if frame.shape[0] != window_x or frame.shape[1] != window_y:
+                    frame = cv2.resize(frame,(window_x,window_y))
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.transpose(frame)
                 pygame.surfarray.blit_array(surface, frame)
                 screen.blit(surface, (0,0))
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
-        fpsClock.tick(fps)
+        fpsClock.tick(the_FPS)
         pygame.display.update()
 
     pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".mp3")
@@ -95,7 +99,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
 
     #玩家在对话时做出的选择
     dialog_options = {}
-
+    the_FPS = fps
     #主循环
     while len(dialog_content)!=0 and if_skip == False:
         #背景
@@ -105,15 +109,17 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
             drawImage(dialog_bg_img_dic[dialog_content[dialogId]["background_img"]],screen)
         else:
             if videoCapture == None:
+                if os.path.exists("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
+                    raise Exception('The video file is not exist')
                 videoCapture = cv2.VideoCapture("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"])
-                ret, img = videoCapture.read()
-                img = cv2.transpose(img)
-                surface = pygame.surface.Surface((img.shape[0],img.shape[1]))
                 frames_num=videoCapture.get(7)
+                the_FPS = videoCapture.get(cv2.CAP_PROP_FPS)
             else:
                 if videoCapture.get(1) >= frames_num:
                     videoCapture.set(1, frames_num)
                 ret, frame = videoCapture.read()
+                if frame.shape[0] != window_x or frame.shape[1] != window_y:
+                    frame = cv2.resize(frame,(window_x,window_y))
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.transpose(frame)
                 pygame.surfarray.blit_array(surface, frame)
@@ -163,7 +169,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                         if pygame.mouse.get_pressed()[0] and isHoverOn(optionBox_scaled,(optionBox_x,optionBox_y)):
                             dialog_content_id = 1
                             displayed_line = 0
-                            videoCapture = None
+                            if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_img"] != dialog_content[dialogId]["background_img"]:
+                                videoCapture = None
+                                the_FPS = fps
                             if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
                                 pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_music"]+".mp3")
                                 pygame.mixer.music.play(loops=9999, start=0.0)
@@ -200,7 +208,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                     elif dialog_content[dialogId]["next_dialog_id"][0] == "default":
                         dialog_content_id = 1
                         displayed_line = 0
-                        videoCapture = None
+                        if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_img"] != dialog_content[dialogId]["background_img"]:
+                            videoCapture = None
+                            the_FPS = fps
                         if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
                             pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".mp3")
                             pygame.mixer.music.play(loops=9999, start=0.0)
@@ -212,13 +222,15 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                     if dialog_content[dialogId]["last_dialog_id"] != None:
                         dialog_content_id = 1
                         displayed_line = 0
-                        videoCapture = None
+                        if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_img"] != dialog_content[dialogId]["background_img"]:
+                            videoCapture = None
+                            the_FPS = fps
                         if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != dialog_content[dialogId]["background_music"]:
                             pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".mp3")
                             pygame.mixer.music.play(loops=9999, start=0.0)
                         dialogId = dialog_content[dialogId]["last_dialog_id"]
         
-        fpsClock.tick(fps)
+        fpsClock.tick(the_FPS)
         pygame.display.update()
     
     #淡出

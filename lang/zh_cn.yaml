@@ -13,15 +13,15 @@ chapter:
 - 第七章
 - 第八章
 - 返回
+game_title: 少女前线-遗愿
 main_menu:
-  now_loading: 正在加载
-  text_chooseChapter: 选择章节
   text_continue: 继续游戏
+  text_chooseChapter: 选择章节
   text_dlc: 可下载内容
-  text_exit: 退出
-  text_setting: 设置
-  text_title: 少女前线-遗愿
   text_workshop: 创意工坊
+  text_setting: 设置
+  text_exit: 退出
+now_loading: 正在加载
 select_menu:
   attack: 攻击
   move: 移动
