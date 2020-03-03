@@ -93,9 +93,11 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         fpsClock.tick(the_FPS)
         pygame.display.update()
-
+    
+    #音效
     pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".mp3")
     pygame.mixer.music.play(loops=9999, start=0.0)
+    dialog_is_playing_sound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")
 
     #玩家在对话时做出的选择
     dialog_options = {}
@@ -151,14 +153,20 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
             drawImg(fontRender(dialog_content[dialogId]["content"][displayed_line][0:dialog_content_id],"white",window_x*0.015),(dialoguebox.width*0.075,dialoguebox.height*0.33+window_x*0.02*displayed_line),screen,dialoguebox.x,dialoguebox.y)
             #检测所有字是否都已经播出
             if dialog_content_id < len(dialog_content[dialogId]["content"][displayed_line]):
+                if pygame.mixer.get_busy() == False:
+                    dialog_is_playing_sound.play()
                 dialog_content_id +=1
             #当前行的所有字都播出后，播出下一行
             elif displayed_line < len(dialog_content[dialogId]["content"])-1:
+                if pygame.mixer.get_busy() == False:
+                    dialog_is_playing_sound.play()
                 dialog_content_id = 1
                 displayed_line += 1
             #当所有行都播出后
             else:
-                if dialog_content[dialogId]["next_dialog_id"][0] == "option":
+                if pygame.mixer.get_busy() == True:
+                    dialog_is_playing_sound.stop()
+                if dialog_content[dialogId]["next_dialog_id"] != None and dialog_content[dialogId]["next_dialog_id"][0] == "option":
                     optionBox_y_base = (window_y*3/4-(len(dialog_content[dialogId]["next_dialog_id"])-1)*2*window_x*0.025)/4
                     for i in range(1,len(dialog_content[dialogId]["next_dialog_id"])):
                         option_txt = fontRender(dialog_content[dialogId]["next_dialog_id"][i][0],"white",window_x*0.025)
