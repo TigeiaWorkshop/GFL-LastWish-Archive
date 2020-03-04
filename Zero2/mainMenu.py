@@ -55,10 +55,16 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     video_fps = videoCapture.get(cv2.CAP_PROP_FPS)
     #视频面
     surface = pygame.surface.Surface((window_x, window_y))
+    #音效
+    click_button_sound = pygame.mixer.Sound("Assets/sound/ui/main_menu_click_button.ogg")
+    hover_on_button_sound = pygame.mixer.Sound("Assets/sound/ui/main_menu_hover_on_button.ogg")
+    hover_sound_play_on = None
+    last_hover_sound_play_on = None
 
     the_black = loadImage("Assets/img/UI/black.png",(0,0),window_x,window_y)
     t1 = fontRender("缇吉娅工坊 呈现","white",30)
     t2 = fontRender("警告：所有内容仍处于研发阶段，不代表最终效果","white",30)
+
     for i in range(0,250,2):
         drawImage(the_black,screen)
         t1.set_alpha(i)
@@ -100,12 +106,13 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
         if menu_type == 1:
             cover_img.set_alpha(cover_alpha)
             drawImg(cover_img, (0,0),screen)
-
+        
         #菜单选项
         if menu_type == 0:
             i=0
             for txt in main_menu_txt:
                 if isHoverOn(main_menu_txt[txt].n, (txt_location,main_menu_txt_start_height+window_x/38*2*i)):
+                    hover_sound_play_on = "0_"+str(i)
                     drawImg(main_menu_txt[txt].b, (txt_location,main_menu_txt_start_height+window_x/38*2*i),screen)
                 else:
                     drawImg(main_menu_txt[txt].n, (txt_location,main_menu_txt_start_height+window_x/38*2*i),screen)
@@ -113,12 +120,19 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
         elif menu_type == 1:
             for i in range(len(chapter_select)):
                 if isHoverOn(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+                    hover_sound_play_on = "1_"+str(i)
                     drawImg(chapter_select[i].b, (txt_location,chapter_select_txt_start_height+window_x/38*2*i),screen)
                 else:
                     drawImg(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i),screen)
-        
+
+        if last_hover_sound_play_on != hover_sound_play_on:
+            hover_on_button_sound.play()
+            last_hover_sound_play_on = hover_sound_play_on
+
         for event in pygame.event.get():
             if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
+                click_button_sound.play()
+                click_button_sound
                 if menu_type == 0:
                     i=0
                     for txt in main_menu_txt:
