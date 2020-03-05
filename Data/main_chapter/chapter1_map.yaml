@@ -1,4 +1,5 @@
 background_music: BGM_Danger_1.ogg
+weather: snow
 character:
   asval:
     action_point: 10

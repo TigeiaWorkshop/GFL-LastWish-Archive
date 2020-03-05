@@ -125,6 +125,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         sangvisFerris = loadData["sangvisFerri"]
         theMap = loadData["map"]
         bg_music = loadData["background_music"]
+        environment_sound = loadData["weather"]
 
     if zoom_in < 1:
         zoom_in = 1
@@ -244,6 +245,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     for i in range(len(all_walking_sounds)):
         walking_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
     the_sound_id = None
+    #环境的声音
+    if environment_sound != None:
+        environment_sound = pygame.mixer.Sound("Assets/sound/environment/"+environment_sound+".ogg")
     
     battle_info_line1 = fontRender(battle_info[0],"white",25)
     battle_info_line2 = fontRender(battle_info[1],"white",25)
@@ -265,7 +269,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     pygame.mixer.music.set_volume(0.5)
 
     #加载完成，章节标题淡出
+    #如果战斗前无·对话
     if dialog_during_battle == None:
+        if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
+            pygame.mixer.Channel(1).play(environment_sound)
         for a in range(250,0,-5):
             #加载地图
             for y in range(len(map_img_list)):
@@ -308,6 +315,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             drawImg(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
             fpsClock.tick(fps)
             pygame.display.flip()
+    #如果战斗前有对话
     elif dialog_during_battle != None:
         #建立地图
         map2d=Array2D(len(theMap[0]),len(theMap))
@@ -346,6 +354,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
         txt_alpha = 250
         while len(all_characters_path)>0:
+            if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
+                pygame.mixer.Channel(1).play(environment_sound)
             #加载地图
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
@@ -361,9 +371,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             key_to_remove = []
             for every_chara in all_characters_path:
                 if all_characters_path[every_chara] != []:
-                    if pygame.mixer.get_busy() == False:
+                    if pygame.mixer.Channel(0).get_busy() == False:
                         the_sound_id = random.randint(0,len(walking_sound)-1)
-                        walking_sound[the_sound_id].play()
+                        pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
                     if characters_data[every_chara].start_position[0] < all_characters_path[every_chara][0][0]:
                         characters_data[every_chara].start_position[0]+=0.125
                         action_displayer(every_chara,"move",characters_data[every_chara].start_position[0],characters_data[every_chara].start_position[1])
@@ -430,7 +440,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             fpsClock.tick(fps)
             pygame.display.update()
         #脚步停止
-        walking_sound[the_sound_id].stop()
+        pygame.mixer.Channel(0).stop()
         #加载对话框图片
         dialoguebox_up = loadImage("Assets/img/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
         dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
@@ -443,6 +453,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         dialog = True
         #开始对话
         while dialog == True:
+            if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
+                pygame.mixer.Channel(1).play(environment_sound)
             #玩家输入按键判定
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
@@ -576,6 +588,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
     # 游戏主循环
     while battle==True:
+        if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
+            pygame.mixer.Channel(1).play(environment_sound)
         #玩家输入按键判定-任何情况
         for event in pygame.event.get():
             if event.type == KEYDOWN:
@@ -902,9 +916,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if isWaiting == "MOVING":
                     green_hide=True
                     if the_route != []:
-                        if pygame.mixer.get_busy() == False:
+                        if pygame.mixer.Channel(0).get_busy() == False:
                             the_sound_id = random.randint(0,len(walking_sound)-1)
-                            walking_sound[the_sound_id].play()
+                            pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
                         if characters_data[the_character_get_click].x < the_route[0][0]:
                             characters_data[the_character_get_click].x+=0.125
                             action_displayer(the_character_get_click,"move",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
@@ -930,7 +944,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 characters_data[the_character_get_click].y = the_route[0][1]
                                 the_route.pop(0)
                     else:
-                        walking_sound[the_sound_id].stop()
+                        pygame.mixer.Channel(0).stop()
                         isWaiting =True
                         the_character_get_click = ""
                     light_area = calculate_darkness(characters_data)
@@ -1036,9 +1050,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             elif enemy_action[0] == "move":
                 the_route = enemy_action[1]
                 if the_route != []:
-                    if pygame.mixer.get_busy() == False:
+                    if pygame.mixer.Channel(0).get_busy() == False:
                         the_sound_id = random.randint(0,len(walking_sound)-1)
-                        walking_sound[the_sound_id].play()
+                        pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
                     if sangvisFerris_data[enemies_in_control].x < the_route[0][0]:
                         sangvisFerris_data[enemies_in_control].x+=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
@@ -1068,7 +1082,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             sangvisFerris_data[enemies_in_control].y = the_route[0][1]
                             the_route.pop(0)
                 else:
-                    walking_sound[the_sound_id].stop()
+                    pygame.mixer.Channel(0).stop()
                     enemies_in_control_id +=1
                     if enemies_in_control_id == len(sangvisFerris_data):
                         whose_round = "sangvisFerrisToPlayer"
