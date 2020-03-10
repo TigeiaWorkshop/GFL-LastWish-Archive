@@ -1,5 +1,4 @@
 background_music: BGM_Danger_1.ogg
-weather: snow
 character:
   asval:
     action_point: 10
@@ -7,11 +6,21 @@ character:
     bullets_carried: 200
     current_bullets: 20
     current_hp: 5500
-    effective_range: 5
+    effective_range:
+      far:
+      - 6
+      - 6
+      middle:
+      - 3
+      - 5
+      near:
+      - 1
+      - 2
     magazine_capacity: 20
     max_damage: 350
     max_hp: 5500
     min_damage: 250
+    skill_effective_range: 6
     start_position:
     - 1
     - 1
@@ -25,11 +34,21 @@ character:
     bullets_carried: 200
     current_bullets: 18
     current_hp: 3500
-    effective_range: 4
+    effective_range:
+      far:
+      - 6
+      - 6
+      middle:
+      - 3
+      - 5
+      near:
+      - 1
+      - 2
     magazine_capacity: 18
     max_damage: 150
     max_hp: 3500
     min_damage: 100
+    skill_effective_range: 5
     start_position:
     - 1
     - 2
@@ -43,11 +62,21 @@ character:
     bullets_carried: 200
     current_bullets: 30
     current_hp: 8000
-    effective_range: 3
+    effective_range:
+      far:
+      - 6
+      - 6
+      middle:
+      - 3
+      - 5
+      near:
+      - 1
+      - 2
     magazine_capacity: 30
     max_damage: 200
     max_hp: 8000
     min_damage: 150
+    skill_effective_range: 4
     start_position:
     - 1
     - 3
@@ -61,11 +90,21 @@ character:
     bullets_carried: 200
     current_bullets: 1
     current_hp: 2500
-    effective_range: 7
+    effective_range:
+      far:
+      - 6
+      - 6
+      middle:
+      - 3
+      - 5
+      near:
+      - 1
+      - 2
     magazine_capacity: 10
-    max_damage: 650
+    max_damage: 65
     max_hp: 2500
-    min_damage: 400
+    min_damage: 40
+    skill_effective_range: 8
     start_position:
     - 1
     - 4
@@ -2455,4 +2494,5 @@ sangvisFerri:
     type: vespid
     x: 28
     y: 13
+weather: snow
 zoom_in: 2

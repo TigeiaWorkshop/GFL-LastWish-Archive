@@ -15,16 +15,16 @@ class Doll:
         self.min_damage = min_damage
         self.x = x
         self.y = y
-    def decreaseHp(self,min_damage,max_damage):
-        damage = random.randint(min_damage,max_damage)
+    def decreaseHp(self,damage):
         self.current_hp-=damage
     def heal(self,hpHealed):
         self.current_hp+=hpHealed
 
 class characterDataManager(Doll):
-    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,gif_dic,magazine_capacity,max_damage,max_hp,min_damage,x,y,bullets_carried,start_position,detect):
+    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,gif_dic,magazine_capacity,max_damage,max_hp,min_damage,x,y,bullets_carried,skill_effective_range,start_position,detect):
         Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,gif_dic,magazine_capacity,max_damage,max_hp,min_damage,x,y)
         self.bullets_carried = bullets_carried
+        self.skill_effective_range = skill_effective_range
         self.start_position = start_position
         self.undetected = detect
         self.dying = False
