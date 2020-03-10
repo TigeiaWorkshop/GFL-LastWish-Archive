@@ -86,9 +86,9 @@ character:
     y: 3
   sv-98:
     action_point: 20
-    attack_range: 1
+    attack_range: 3
     bullets_carried: 200
-    current_bullets: 1
+    current_bullets: 10
     current_hp: 2500
     effective_range:
       far:
@@ -2434,6 +2434,20 @@ sangvisFerri:
     type: guard
     x: 28
     y: 9
+  jaeger_1:
+    action_point: 2
+    attack_range: 1
+    current_bullets: 20
+    current_hp: 200
+    effective_range: 6
+    magazine_capacity: 20
+    max_damage: 500
+    max_hp: 200
+    min_damage: 450
+    patrol_path: []
+    type: jaeger
+    x: 9
+    y: 12
   jaeger_2:
     action_point: 2
     attack_range: 1

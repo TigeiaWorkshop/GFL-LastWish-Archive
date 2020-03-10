@@ -199,6 +199,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         "black" : loadImg("Assets/img/UI/black.png",None,None,100),
         "yellow": loadImg("Assets/img/UI/yellow.png",None,None,100),
         "blue": loadImg("Assets/img/UI/blue.png",None,None,100),
+        "orange": loadImg("Assets/img/UI/orange.png",None,None,100),
         #计分板
         "score" : loadImage("Assets/img/UI/score.png",(200,200),300,600),
     }
@@ -208,6 +209,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
     yellow = pygame.transform.scale(original_UI_img["yellow"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
     blue = pygame.transform.scale(original_UI_img["blue"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+    orange = pygame.transform.scale(original_UI_img["orange"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
 
     #文字
     text_of_endround_move = 0
@@ -215,7 +217,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     
     #部分设定初始化
     the_character_get_click = ""
-    enemies_get_attack = ""
+    enemies_get_attack = []
     enemies_in_control = ""
     action_choice =""
     green_hide = True
@@ -230,7 +232,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     total_rounds = 1
     enemies_in_control_id= 0
     warnings_to_display = []
-    damage_do_to_character = None
+    damage_do_to_character = {}
     #计算光亮区域
     light_area = calculate_darkness(characters_data)
     # 移动路径
@@ -593,6 +595,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
     # 游戏主循环
     while battle==True:
+        #获取鼠标坐标
+        mouse_x,mouse_y=pygame.mouse.get_pos()
+        #环境声音-频道1
         if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
             pygame.mixer.Channel(1).play(environment_sound)
         #玩家输入按键判定-任何情况
@@ -627,7 +632,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             local_y = 0
             #移动屏幕
             if pygame.mouse.get_pressed()[2]:
-                mouse_x,mouse_y=pygame.mouse.get_pos()
                 if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
                     mouse_move_temp_x = mouse_x
                     mouse_move_temp_y = mouse_y
@@ -658,6 +662,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
             yellow = pygame.transform.scale(original_UI_img["yellow"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
             blue = pygame.transform.scale(original_UI_img["blue"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            orange = pygame.transform.scale(original_UI_img["orange"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
         
         #加载地图
         for y in range(len(map_img_list)):
@@ -673,9 +678,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         
         #玩家回合
         if whose_round == "player":
+            block_get_click_x = None
+            block_get_click_y = None
             #玩家输入按键判定-玩家回合限定
             if pygame.mouse.get_pressed()[0]:
-                mouse_x,mouse_y=pygame.mouse.get_pos()
                 #获取角色坐标
                 block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
                 block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
@@ -750,8 +756,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         time.sleep(0.05)
                         if characters_data[the_character_get_click].current_bullets > 0 and characters_data[the_character_get_click].current_action_point >= 5:
                             action_choice = "attack"
-                            block_get_click_x = -100
-                            block_get_click_y = -100
+                            block_get_click_x = None
+                            block_get_click_y = None
                             green_hide = False
                         if characters_data[the_character_get_click].current_bullets <= 0:
                             warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_empty"],"red",30))
@@ -763,8 +769,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         time.sleep(0.05)
                         if characters_data[the_character_get_click].current_action_point >= 2:
                             action_choice = "move"
-                            block_get_click_x = -100
-                            block_get_click_y = -100
+                            block_get_click_x = None
+                            block_get_click_y = None
                             green_hide = False
                         else:
                             warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_move"],"red",30))
@@ -773,8 +779,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         time.sleep(0.05)
                         if characters_data[the_character_get_click].current_action_point >= 8:
                             action_choice = "skill"
-                            block_get_click_x = -100
-                            block_get_click_y = -100
+                            block_get_click_x = None
+                            block_get_click_y = None
                             green_hide = False
                         else:
                             warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_use_skill"],"red",30))
@@ -782,8 +788,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),local_x,local_y):
                         if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
                             action_choice = "reload"
-                            block_get_click_x = -100
-                            block_get_click_y = -100
+                            block_get_click_x = None
+                            block_get_click_y = None
                             green_hide = False
                         if characters_data[the_character_get_click].bullets_carried <= 0:
                             warnings_to_display.insert(0,fontRender(warnings_info["no_bullets_left"],"red",30))
@@ -795,9 +801,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             elif green_hide == False and the_character_get_click != "":
                 #显示移动范围
                 if action_choice == "move":
-                    mouse_x,mouse_y=pygame.mouse.get_pos()
-                    block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
-                    block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
                     #建立地图
                     map2d=Array2D(len(theMap[0]),len(theMap))
                     #历遍地图，设置障碍方块
@@ -812,7 +815,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     #创建AStar对象,并设置起点和终点为
                     star_point_x = characters_data[the_character_get_click].x
                     star_point_y = characters_data[the_character_get_click].y
-                    aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(block_get_click_x,block_get_click_y))
+                    aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(int((mouse_x-local_x)/perBlockWidth),int((mouse_y-local_y)/perBlockHeight)))
                     #开始寻路
                     pathList=aStar.start()
                     #遍历路径点,讲指定数量的点放到路径列表中
@@ -876,33 +879,34 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                         elif characters_data[the_character_get_click].effective_range["near"] != None and characters_data[the_character_get_click].effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["near"][1]:
                                             drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["near"].append([x,y])
-                    if [block_get_click_x,block_get_click_y] in attacking_range["near"]:
-                        for enemies in sangvisFerris_data:
-                            if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                                characters_data[the_character_get_click].current_action_point -= 5
-                                isWaiting = "ATTACKING"
-                                enemies_get_attack = enemies
-                                the_area_enemies_in = "near"
-                                green_hide = True
-                                break
-                    elif [block_get_click_x,block_get_click_y] in attacking_range["middle"]:
-                        for enemies in sangvisFerris_data:
-                            if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                                characters_data[the_character_get_click].current_action_point -= 5
-                                isWaiting = "ATTACKING"
-                                enemies_get_attack = enemies
-                                the_area_enemies_in = "middle"
-                                green_hide = True
-                                break
-                    elif [block_get_click_x,block_get_click_y] in attacking_range["far"]:
-                        for enemies in sangvisFerris_data:
-                            if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
-                                characters_data[the_character_get_click].current_action_point -= 5
-                                isWaiting = "ATTACKING"
-                                enemies_get_attack = enemies
-                                the_area_enemies_in = "far"
-                                green_hide = True
-                                break
+                    block_get_hover_x = int((mouse_x-local_x)/perBlockWidth)
+                    block_get_hover_y = int((mouse_y-local_y)/perBlockHeight)
+                    for area in attacking_range:
+                        if [block_get_hover_x,block_get_hover_y] in attacking_range[area]:
+                            the_attacking_range_area = []
+                            for y in range(block_get_hover_y-characters_data[the_character_get_click].attack_range,block_get_hover_y+characters_data[the_character_get_click].attack_range):
+                                if y < block_get_hover_y:
+                                    for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)):
+                                        if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                            drawImg(orange,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            the_attacking_range_area.append([x,y])
+                                else:
+                                    for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)):
+                                        if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                            drawImg(orange,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            the_attacking_range_area.append([x,y])
+                            the_area_enemies_in = area
+                            enemies_get_attack = []
+                            if pygame.mouse.get_pressed()[0]:
+                                for enemies in sangvisFerris_data:
+                                    if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in the_attacking_range_area:
+                                        enemies_get_attack.append(enemies)
+                                if len(enemies_get_attack)>0:
+                                    characters_data[the_character_get_click].current_action_point -= 5
+                                    isWaiting = "ATTACKING"
+                                    green_hide = True
+                            break
+                    
                 #显示技能范围        
                 elif action_choice == "skill":
                     skill_range = []
@@ -998,17 +1002,18 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 elif isWaiting == "ATTACKING":
                     green_hide=True
                     if action_choice == "attack":
-                        if sangvisFerris_data[enemies_get_attack].x < characters_data[the_character_get_click].x:
+                        if block_get_hover_x < characters_data[the_character_get_click].x:
                             action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False,True)
                         else:
                             action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
                         if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-2:
-                            if the_area_enemies_in == "near" and random.randint(1,100) <= 90 or the_area_enemies_in == "middle" and random.randint(1,100) <= 75 or the_area_enemies_in == "far" and random.randint(1,100) <= 60:
-                                the_damage = random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                                sangvisFerris_data[enemies_get_attack].decreaseHp(the_damage)
-                                damage_do_to_character = [enemies_get_attack,fontRender("-"+str(the_damage),"red",25)]
-                            else:
-                                damage_do_to_character = [enemies_get_attack,fontRender("miss","red",25)]
+                            for i in range(len(enemies_get_attack)):
+                                if the_area_enemies_in == "near" and random.randint(1,100) <= 90 or the_area_enemies_in == "middle" and random.randint(1,100) <= 75 or the_area_enemies_in == "far" and random.randint(1,100) <= 60:
+                                    the_damage = random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
+                                    sangvisFerris_data[enemies_get_attack[i]].decreaseHp(the_damage)
+                                    damage_do_to_character[enemies_get_attack[i]] = fontRender("-"+str(the_damage),"red",25)
+                                else:
+                                    damage_do_to_character[enemies_get_attack[i]] = fontRender("miss","red",25)
                         if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-1:
                             characters_data[the_character_get_click].gif_dic["attack"][1] = 0
                             characters_data[the_character_get_click].current_bullets -= 1
@@ -1168,7 +1173,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
                     if sangvisFerris_data[enemies].current_hp>0:
                             if green_hide == True and pygame.mouse.get_pressed()[2]:
-                                mouse_x,mouse_y=pygame.mouse.get_pos()
                                 block_get_click_x2 = int((mouse_x-local_x)/perBlockWidth)
                                 block_get_click_y2 = int((mouse_y-local_y)/perBlockHeight)
                                 if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
@@ -1192,13 +1196,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     elif sangvisFerris_data[enemies].current_hp<=0:
                         action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
                         the_dead_one = enemies
-                    if damage_do_to_character != None and enemies == damage_do_to_character[0]:
-                        the_alpha_to_check = damage_do_to_character[1].get_alpha()
+                    if enemies in damage_do_to_character:
+                        the_alpha_to_check = damage_do_to_character[enemies].get_alpha()
                         if the_alpha_to_check > 0:
-                            drawImg(damage_do_to_character[1],(sangvisFerris_data[enemies].x*perBlockWidth,sangvisFerris_data[enemies].y*perBlockHeight),screen)
-                            damage_do_to_character[1].set_alpha(the_alpha_to_check-5)
+                            drawImg(damage_do_to_character[enemies],(sangvisFerris_data[enemies].x*perBlockWidth,sangvisFerris_data[enemies].y*perBlockHeight),screen,local_x,local_y)
+                            damage_do_to_character[enemies].set_alpha(the_alpha_to_check-5)
                         else:
-                            damage_do_to_character == None
+                            del damage_do_to_character[enemies]
         if the_dead_one != "":
             the_characters_attacking = sangvisFerris_data[the_dead_one].gif_dic
             if the_characters_attacking["die"][1] == the_characters_attacking["die"][0][1]-1:
