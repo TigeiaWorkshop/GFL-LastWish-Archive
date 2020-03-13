@@ -194,22 +194,16 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         "hp_green" : loadImg("Assets/img/UI/hp_green.png"),
         "action_point_blue" : loadImg("Assets/img/UI/action_point.png"),
         "bullets_number_brown" : loadImg("Assets/img/UI/bullets_number.png"),
-        "green" : loadImg("Assets/img/UI/green.png",None,None,100),
-        "red" : loadImg("Assets/img/UI/red.png",None,None,100),
-        "black" : loadImg("Assets/img/UI/black.png",None,None,100),
-        "yellow": loadImg("Assets/img/UI/yellow.png",None,None,100),
-        "blue": loadImg("Assets/img/UI/blue.png",None,None,100),
-        "orange": loadImg("Assets/img/UI/orange.png",None,None,100),
+        "green" : loadImg("Assets/img/UI/green.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
+        "red" : loadImg("Assets/img/UI/red.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
+        "black" : loadImg("Assets/img/UI/black.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
+        "yellow": loadImg("Assets/img/UI/yellow.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
+        "blue": loadImg("Assets/img/UI/blue.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
+        "orange": loadImg("Assets/img/UI/orange.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
         #计分板
         "score" : loadImage("Assets/img/UI/score.png",(200,200),300,600),
     }
     the_character_get_click_info_board = loadImage("Assets/img/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
-    green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-    red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-    black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-    yellow = pygame.transform.scale(original_UI_img["yellow"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-    blue = pygame.transform.scale(original_UI_img["blue"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-    orange = pygame.transform.scale(original_UI_img["orange"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
 
     #文字
     text_of_endround_move = 0
@@ -291,7 +285,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        drawImg(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
             #角色动画
             for every_chara in characters_data:
                 if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
@@ -373,7 +367,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        drawImg(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
 
             key_to_remove = []
             for every_chara in all_characters_path:
@@ -519,7 +513,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        drawImg(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                 
             #角色动画
             for every_chara in characters_data:
@@ -656,13 +650,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 mouse_move_temp_y = -1
         
         #加载UI
-        if green.get_width() != math.ceil(perBlockWidth) and green.get_height() != math.ceil(perBlockHeight):
-            green = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            red = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            black = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            yellow = pygame.transform.scale(original_UI_img["yellow"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            blue = pygame.transform.scale(original_UI_img["blue"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            orange = pygame.transform.scale(original_UI_img["orange"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+        if original_UI_img["green"].get_width() != math.ceil(perBlockWidth) and original_UI_img["green"].get_height() != math.ceil(perBlockHeight):
+            original_UI_img["green"] = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            original_UI_img["red"] = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            original_UI_img["black"] = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            original_UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            original_UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
+            original_UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
         
         #加载地图
         for y in range(len(map_img_list)):
@@ -674,7 +668,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[y])):
                 if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                    drawImg(black,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                    drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
         
         #玩家回合
         if whose_round == "player":
@@ -692,7 +686,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     green_hide = True
                 #是否在显示移动范围后点击了且点击区域在移动范围内
                 elif the_route != [] and [block_get_click_x,block_get_click_y] in the_route and green_hide==False:
-                    isWaiting = "MOVING"
+                    isWaiting = False
                     green_hide = True
                     characters_data[the_character_get_click].current_action_point -= len(the_route)*2
                 else:
@@ -840,7 +834,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             the_route.append([star_point_x,star_point_y])
                     #显示路径
                     for i in range(len(the_route)):
-                        drawImg(green,(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
+                        drawImg(original_UI_img["green"],(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
                 #显示攻击范围        
                 elif action_choice == "attack":
                     attacking_range = {"near":[],"middle":[],"far":[]}
@@ -856,13 +850,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             for x in range(characters_data[the_character_get_click].x-the_character_effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+the_character_effective_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                     if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
-                                        drawImg(yellow,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(original_UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range["far"].append([x,y])
                                     elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
-                                        drawImg(blue,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(original_UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range["middle"].append([x,y])
                                     elif characters_data[the_character_get_click].effective_range["near"] != None and characters_data[the_character_get_click].effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["near"][1]:
-                                        drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range["near"].append([x,y])
                         else:
                             for x in range(characters_data[the_character_get_click].x-the_character_effective_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+the_character_effective_range-(y-characters_data[the_character_get_click].y)):
@@ -871,13 +865,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 else:
                                     if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                         if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
-                                            drawImg(yellow,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(original_UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["far"].append([x,y])
                                         elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
-                                            drawImg(blue,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(original_UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["middle"].append([x,y])
                                         elif characters_data[the_character_get_click].effective_range["near"] != None and characters_data[the_character_get_click].effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["near"][1]:
-                                            drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["near"].append([x,y])
                     block_get_hover_x = int((mouse_x-local_x)/perBlockWidth)
                     block_get_hover_y = int((mouse_y-local_y)/perBlockHeight)
@@ -888,12 +882,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 if y < block_get_hover_y:
                                     for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)):
                                         if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                            drawImg(orange,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(original_UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             the_attacking_range_area.append([x,y])
                                 else:
                                     for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)):
                                         if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                            drawImg(orange,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(original_UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             the_attacking_range_area.append([x,y])
                             the_area_enemies_in = area
                             enemies_get_attack = []
@@ -903,7 +897,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                         enemies_get_attack.append(enemies)
                                 if len(enemies_get_attack)>0:
                                     characters_data[the_character_get_click].current_action_point -= 5
-                                    isWaiting = "ATTACKING"
+                                    isWaiting = False
                                     green_hide = True
                             break
                     
@@ -914,7 +908,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         if y < characters_data[the_character_get_click].y:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].skill_effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].skill_effective_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                    drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                    drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     skill_range.append([x,y])
                         else:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].skill_effective_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].skill_effective_range-(y-characters_data[the_character_get_click].y)):
@@ -922,14 +916,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     pass
                                 else:
                                     if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                        drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         skill_range.append([x,y])
                     if [block_get_click_x,block_get_click_y] in skill_range:
                         if the_character_get_click == "gsh-18":
                             for character in characters_data:
                                 if block_get_click_x == characters_data[character].x and  block_get_click_y == characters_data[character].y:
                                     characters_data[the_character_get_click].current_action_point -= 8
-                                    isWaiting = "ATTACKING"
+                                    isWaiting = False
                                     enemies_get_attack = character
                                     green_hide = True
                                     break
@@ -937,7 +931,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             for enemies in sangvisFerris_data:
                                 if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
                                     characters_data[the_character_get_click].current_action_point -= 8
-                                    isWaiting = "ATTACKING"
+                                    isWaiting = False
                                     enemies_get_attack = enemies
                                     green_hide = True
                                     break
@@ -962,10 +956,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     action_choice = ""
             
             #当有角色被点击时
-            if the_character_get_click != "":
+            if the_character_get_click != "" and isWaiting == False:
                 #被点击的角色动画
-                if isWaiting == "MOVING":
-                    green_hide=True
+                green_hide=True
+                if action_choice == "move":
                     if the_route != []:
                         if pygame.mixer.Channel(0).get_busy() == False:
                             the_sound_id = random.randint(0,len(walking_sound)-1)
@@ -999,44 +993,42 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         isWaiting =True
                         the_character_get_click = ""
                     light_area = calculate_darkness(characters_data)
-                elif isWaiting == "ATTACKING":
-                    green_hide=True
-                    if action_choice == "attack":
-                        if block_get_hover_x < characters_data[the_character_get_click].x:
-                            action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False,True)
-                        else:
-                            action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
-                        if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-2:
-                            for i in range(len(enemies_get_attack)):
-                                if the_area_enemies_in == "near" and random.randint(1,100) <= 90 or the_area_enemies_in == "middle" and random.randint(1,100) <= 75 or the_area_enemies_in == "far" and random.randint(1,100) <= 60:
-                                    the_damage = random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                                    sangvisFerris_data[enemies_get_attack[i]].decreaseHp(the_damage)
-                                    damage_do_to_character[enemies_get_attack[i]] = fontRender("-"+str(the_damage),"red",25)
-                                else:
-                                    damage_do_to_character[enemies_get_attack[i]] = fontRender("miss","red",25)
-                        if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-1:
-                            characters_data[the_character_get_click].gif_dic["attack"][1] = 0
-                            characters_data[the_character_get_click].current_bullets -= 1
-                            isWaiting = True
-                            the_character_get_click = ""
-                            action_choice = ""
-                    if action_choice == "skill":
-                        action_displayer(the_character_get_click,"skill",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
-                        if characters_data[the_character_get_click].gif_dic["skill"][1] == characters_data[the_character_get_click].gif_dic["skill"][0][1]-2:
-                            if the_character_get_click == "gsh-18":
-                                characters_data[enemies_get_attack].heal(characters_data[the_character_get_click].min_damage)
-                                if characters_data[enemies_get_attack].current_hp > characters_data[enemies_get_attack].max_hp:
-                                    characters_data[enemies_get_attack].current_hp = characters_data[enemies_get_attack].max_hp
+                elif action_choice == "attack":
+                    if block_get_hover_x < characters_data[the_character_get_click].x:
+                        action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False,True)
+                    else:
+                        action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
+                    if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-2:
+                        for i in range(len(enemies_get_attack)):
+                            if the_area_enemies_in == "near" and random.randint(1,100) <= 90 or the_area_enemies_in == "middle" and random.randint(1,100) <= 75 or the_area_enemies_in == "far" and random.randint(1,100) <= 60:
+                                the_damage = random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
+                                sangvisFerris_data[enemies_get_attack[i]].decreaseHp(the_damage)
+                                damage_do_to_character[enemies_get_attack[i]] = fontRender("-"+str(the_damage),"red",25)
                             else:
-                                sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                        the_characters_attacking = characters_data[the_character_get_click].gif_dic
-                        if the_characters_attacking["skill"][1] == the_characters_attacking["skill"][0][1]-1:
-                            the_characters_attacking["skill"][1] = 0
-                            isWaiting =True
-                            the_character_get_click = ""
-                            action_choice = ""
-                elif isWaiting == True:
-                    action_displayer(the_character_get_click,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                                damage_do_to_character[enemies_get_attack[i]] = fontRender("miss","red",25)
+                    if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-1:
+                        characters_data[the_character_get_click].gif_dic["attack"][1] = 0
+                        characters_data[the_character_get_click].current_bullets -= 1
+                        isWaiting = True
+                        the_character_get_click = ""
+                        action_choice = ""
+                elif action_choice == "skill":
+                    action_displayer(the_character_get_click,"skill",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
+                    if characters_data[the_character_get_click].gif_dic["skill"][1] == characters_data[the_character_get_click].gif_dic["skill"][0][1]-2:
+                        if the_character_get_click == "gsh-18":
+                            characters_data[enemies_get_attack].heal(characters_data[the_character_get_click].min_damage)
+                            if characters_data[enemies_get_attack].current_hp > characters_data[enemies_get_attack].max_hp:
+                                characters_data[enemies_get_attack].current_hp = characters_data[enemies_get_attack].max_hp
+                        else:
+                            sangvisFerris_data[enemies_get_attack].decreaseHp(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
+                    the_characters_attacking = characters_data[the_character_get_click].gif_dic
+                    if the_characters_attacking["skill"][1] == the_characters_attacking["skill"][0][1]-1:
+                        the_characters_attacking["skill"][1] = 0
+                        isWaiting =True
+                        the_character_get_click = ""
+                        action_choice = ""
+            elif the_character_get_click != "" and isWaiting == True:
+                action_displayer(the_character_get_click,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
@@ -1180,18 +1172,18 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                         if y < sangvisFerris_data[enemies].y:
                                             for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)):
                                                 if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                                    drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                 else:
-                                                    drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    drawImg(original_UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         else:
                                             for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)):
                                                 if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
                                                     pass
                                                 else:
                                                     if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                                        drawImg(green,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                        drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                     else:
-                                                        drawImg(red,(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                        drawImg(original_UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                             action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
                     elif sangvisFerris_data[enemies].current_hp<=0:
                         action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
