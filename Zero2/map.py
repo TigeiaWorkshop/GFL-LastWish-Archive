@@ -20,13 +20,20 @@ def randomBlock(theMap,blocks_setting):
 def calculate_darkness(characters_data):
     light_area = []
     for each_chara in characters_data:
-        for y in range(int(characters_data[each_chara].y-characters_data[each_chara].skill_effective_range),int(characters_data[each_chara].y+characters_data[each_chara].skill_effective_range)):
+        the_character_effective_range = 0
+        if characters_data[each_chara].effective_range["far"] != None:
+            the_character_effective_range = characters_data[each_chara].effective_range["far"][1]+1
+        elif characters_data[each_chara].effective_range["middle"] != None:
+            the_character_effective_range = characters_data[each_chara].effective_range["middle"][1]+1
+        elif characters_data[each_chara].effective_range["near"] != None:
+            the_character_effective_range = characters_data[each_chara].effective_range["near"][1]+1
+        for y in range(int(characters_data[each_chara].y-the_character_effective_range),int(characters_data[each_chara].y+the_character_effective_range)):
             if y < characters_data[each_chara].y:
-                for x in range(int(characters_data[each_chara].x-characters_data[each_chara].skill_effective_range-(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+characters_data[each_chara].skill_effective_range+(y-characters_data[each_chara].y))):
+                for x in range(int(characters_data[each_chara].x-the_character_effective_range-(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range+(y-characters_data[each_chara].y))):
                     if (x,y) not in light_area:
                         light_area.append((x,y))
             else:
-                for x in range(int(characters_data[each_chara].x-characters_data[each_chara].skill_effective_range+(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+characters_data[each_chara].skill_effective_range-(y-characters_data[each_chara].y))):
+                for x in range(int(characters_data[each_chara].x-the_character_effective_range+(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range-(y-characters_data[each_chara].y))):
                     if (x,y) not in light_area:
                         light_area.append((x,y))
     return light_area
@@ -34,13 +41,20 @@ def calculate_darkness(characters_data):
 def calculate_darkness_before_battle(characters_data):
     light_area = []
     for each_chara in characters_data:
-        for y in range(int(characters_data[each_chara].start_position[1]-characters_data[each_chara].skill_effective_range),int(characters_data[each_chara].start_position[1]+characters_data[each_chara].skill_effective_range)):
+        the_character_effective_range = 0
+        if characters_data[each_chara].effective_range["far"] != None:
+            the_character_effective_range = characters_data[each_chara].effective_range["far"][1]+1
+        elif characters_data[each_chara].effective_range["middle"] != None:
+            the_character_effective_range = characters_data[each_chara].effective_range["middle"][1]+1
+        elif characters_data[each_chara].effective_range["near"] != None:
+            the_character_effective_range = characters_data[each_chara].effective_range["near"][1]+1
+        for y in range(int(characters_data[each_chara].start_position[1]-the_character_effective_range),int(characters_data[each_chara].start_position[1]+the_character_effective_range)):
             if y < characters_data[each_chara].start_position[1]:
-                for x in range(int(characters_data[each_chara].start_position[0]-characters_data[each_chara].skill_effective_range-(y-characters_data[each_chara].start_position[1])+1),int(characters_data[each_chara].start_position[0]+characters_data[each_chara].skill_effective_range+(y-characters_data[each_chara].start_position[1]))):
+                for x in range(int(characters_data[each_chara].start_position[0]-the_character_effective_range-(y-characters_data[each_chara].start_position[1])+1),int(characters_data[each_chara].start_position[0]+the_character_effective_range+(y-characters_data[each_chara].start_position[1]))):
                     if (x,y) not in light_area:
                         light_area.append((x,y))
             else:
-                for x in range(int(characters_data[each_chara].start_position[0]-characters_data[each_chara].skill_effective_range+(y-characters_data[each_chara].start_position[1])+1),int(characters_data[each_chara].start_position[0]+characters_data[each_chara].skill_effective_range-(y-characters_data[each_chara].start_position[1]))):
+                for x in range(int(characters_data[each_chara].start_position[0]-the_character_effective_range+(y-characters_data[each_chara].start_position[1])+1),int(characters_data[each_chara].start_position[0]+the_character_effective_range-(y-characters_data[each_chara].start_position[1]))):
                     if (x,y) not in light_area:
                         light_area.append((x,y))
     return light_area

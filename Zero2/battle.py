@@ -284,8 +284,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #加载阴影区
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
-                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and dark_mode == True:
+                        if (x,y) not in light_area:
+                            drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
             #角色动画
             for every_chara in characters_data:
                 if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
