@@ -211,7 +211,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     
     #部分设定初始化
     the_character_get_click = ""
-    enemies_get_attack = []
+    enemies_get_attack = {}
     enemies_in_control = ""
     action_choice =""
     green_hide = True
@@ -889,12 +889,16 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                         if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                             drawImg(original_UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             the_attacking_range_area.append([x,y])
-                            the_area_enemies_in = area
-                            enemies_get_attack = []
+                            enemies_get_attack = {}
                             if pygame.mouse.get_pressed()[0]:
                                 for enemies in sangvisFerris_data:
                                     if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in the_attacking_range_area:
-                                        enemies_get_attack.append(enemies)
+                                        if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["far"]:
+                                            enemies_get_attack[enemies] = "far"
+                                        elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["middle"]:
+                                            enemies_get_attack[enemies] = "middle"
+                                        elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["near"]:
+                                            enemies_get_attack[enemies] = "near"
                                 if len(enemies_get_attack)>0:
                                     characters_data[the_character_get_click].current_action_point -= 5
                                     isWaiting = False
@@ -999,13 +1003,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     else:
                         action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
                     if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-2:
-                        for i in range(len(enemies_get_attack)):
-                            if the_area_enemies_in == "near" and random.randint(1,100) <= 90 or the_area_enemies_in == "middle" and random.randint(1,100) <= 75 or the_area_enemies_in == "far" and random.randint(1,100) <= 60:
+                        for each_enemy in enemies_get_attack:
+                            if enemies_get_attack[each_enemy] == "near" and random.randint(1,100) <= 90 or enemies_get_attack[each_enemy] == "middle" and random.randint(1,100) <= 75 or enemies_get_attack[each_enemy] == "far" and random.randint(1,100) <= 60:
                                 the_damage = random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
-                                sangvisFerris_data[enemies_get_attack[i]].decreaseHp(the_damage)
-                                damage_do_to_character[enemies_get_attack[i]] = fontRender("-"+str(the_damage),"red",25)
+                                sangvisFerris_data[each_enemy].decreaseHp(the_damage)
+                                damage_do_to_character[each_enemy] = fontRender("-"+str(the_damage),"red",25)
                             else:
-                                damage_do_to_character[enemies_get_attack[i]] = fontRender("miss","red",25)
+                                damage_do_to_character[each_enemy] = fontRender("miss","red",25)
                     if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-1:
                         characters_data[the_character_get_click].gif_dic["attack"][1] = 0
                         characters_data[the_character_get_click].current_bullets -= 1
