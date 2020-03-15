@@ -12,23 +12,33 @@ def character_creator(character_name,action,block_x_length,block_y_length,kind="
     return [character_gif,files_amount]
 
 #动图字典制作模块：接受一个友方角色名，返回对应的动图字典：
-def character_gif_dic(character_name,block_x_length,block_y_length,kind="character"):
-    if kind == "character":
+def character_gif_dic(character_name,block_x_length,block_y_length,faction,kind):
+    if faction == "character":
+        if kind == "HOC":
+            gif_dic = {
+                "attack":[character_creator(character_name,"attack",block_x_length,block_y_length),0],
+                "die":[character_creator(character_name,"die",block_x_length,block_y_length),0],
+                "move":[character_creator(character_name,"move",block_x_length,block_y_length),0],
+                "reload":[character_creator(character_name,"reload",block_x_length,block_y_length),0],
+                "set":[character_creator(character_name,"set",block_x_length,block_y_length),0],
+                "wait":[character_creator(character_name,"wait",block_x_length,block_y_length),0],
+            }
+        else:
+            gif_dic = {
+                "attack":[character_creator(character_name,"attack",block_x_length,block_y_length),0],
+                "die":[character_creator(character_name,"die",block_x_length,block_y_length),0],
+                "move":[character_creator(character_name,"move",block_x_length,block_y_length),0],
+                "skill":[character_creator(character_name,"skill",block_x_length,block_y_length),0],
+                "victory":[character_creator(character_name,"victory",block_x_length,block_y_length),0],
+                "victoryloop":[character_creator(character_name,"victoryloop",block_x_length,block_y_length),0],
+                "wait":[character_creator(character_name,"wait",block_x_length,block_y_length),0],
+            }
+    elif faction == "sangvisFerri":
         gif_dic = {
-            "attack":[character_creator(character_name,"attack",block_x_length,block_y_length),0],
-            "die":[character_creator(character_name,"die",block_x_length,block_y_length),0],
-            "move":[character_creator(character_name,"move",block_x_length,block_y_length),0],
-            "skill":[character_creator(character_name,"skill",block_x_length,block_y_length),0],
-            #"victory":[character_creator(character_name,"victory",block_x_length,block_y_length),0],
-            #"victoryloop":[character_creator(character_name,"victoryloop",block_x_length,block_y_length),0],
-            "wait":[character_creator(character_name,"wait",block_x_length,block_y_length),0],
-        }
-    else:
-        gif_dic = {
-        "attack":[character_creator(character_name,"attack",block_x_length,block_y_length,kind),0],
-        "die":[character_creator(character_name,"die",block_x_length,block_y_length,kind),0],
-        "move":[character_creator(character_name,"move",block_x_length,block_y_length,kind),0],
-        "wait":[character_creator(character_name,"wait",block_x_length,block_y_length,kind),0],
+            "attack":[character_creator(character_name,"attack",block_x_length,block_y_length,faction),0],
+            "die":[character_creator(character_name,"die",block_x_length,block_y_length,faction),0],
+            "move":[character_creator(character_name,"move",block_x_length,block_y_length,faction),0],
+            "wait":[character_creator(character_name,"wait",block_x_length,block_y_length,faction),0],
         }
     return gif_dic
 

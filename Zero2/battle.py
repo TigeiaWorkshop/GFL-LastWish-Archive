@@ -166,11 +166,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #初始化角色信息
     characters_data = {}
     for each_character in characters:
-        characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],character_gif_dic(characters[each_character]["type"],perBlockWidth,perBlockHeight),characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["start_position"],characters[each_character]["undetected"])
+        characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],character_gif_dic(characters[each_character]["type"],perBlockWidth,perBlockHeight,"character",characters[each_character]["kind"]),characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["start_position"],characters[each_character]["undetected"])
 
     sangvisFerris_data = {}
     for each_character in sangvisFerris:
-        sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],character_gif_dic(sangvisFerris[each_character]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
+        sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],sangvisFerris[each_character]["kind"],character_gif_dic(sangvisFerris[each_character]["type"],perBlockWidth,perBlockHeight,"sangvisFerri",sangvisFerris[each_character]["kind"]),sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
 
     #加载对话时角色的图标
     all_icon_file_list = glob.glob(r'Assets/img/npc_icon/*.png')
@@ -725,27 +725,33 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 displayInCenter(tcgc_action_point2,hp_empty,character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*1.5,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[the_character_get_click].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 select_menu_button = pygame.transform.scale(select_menu_button_original, (int(perBlockWidth*2), int(perBlockWidth/1.3)))
-                #选择菜单
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),screen,local_x,local_y)
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),screen,local_x,local_y)
+                #----选择菜单----
+                #攻击按钮
                 txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/3))
                 txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
+                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
+                #移动按钮
                 txt_temp = fontRender(selectMenuButtons_dic["move"],"black",int(perBlockWidth/3))
                 txt_temp2 = fontRender("2N AP","black",int(perBlockWidth/5))
+                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
-                txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/3))
-                txt_temp2 = fontRender("8 AP","black",int(perBlockWidth/5))
-                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.35)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+                #技能按钮
+                if characters_data[the_character_get_click].kind != "HOC":
+                    txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/3))
+                    txt_temp2 = fontRender("8 AP","black",int(perBlockWidth/5))
+                    drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),screen,local_x,local_y)
+                    drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.35)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+                    drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+                #换弹按钮
                 txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",int(perBlockWidth/3))
                 txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
+                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),screen,local_x,local_y)
                 drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.55)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
                 drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.85)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
+                #按钮判定
                 if pygame.mouse.get_pressed()[0]:
                     if isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         time.sleep(0.05)
@@ -770,7 +776,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         else:
                             warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_move"],"red",30))
                             green_hide = False
-                    elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y):
+                    elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y) and characters_data[the_character_get_click].kind != "HOC":
                         time.sleep(0.05)
                         if characters_data[the_character_get_click].current_action_point >= 8:
                             action_choice = "skill"
@@ -943,22 +949,38 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 elif action_choice == "reload":
                     bullets_to_add = characters_data[the_character_get_click].magazine_capacity-characters_data[the_character_get_click].current_bullets
                     if bullets_to_add > 0:
-                        characters_data[the_character_get_click].current_action_point -= 5
-                        #当所剩子弹足够换弹的时候
-                        if bullets_to_add <= characters_data[the_character_get_click].bullets_carried:
-                            characters_data[the_character_get_click].bullets_carried -= bullets_to_add
-                            characters_data[the_character_get_click].current_bullets += bullets_to_add
-                        #当所剩子弹不足以换弹的时候
+                        if characters_data[the_character_get_click].kind == "HOC":
+                            action_displayer(the_character_get_click,"reload",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
+                            if characters_data[the_character_get_click].gif_dic["reload"][1] == characters_data[the_character_get_click].gif_dic["reload"][0][1]-2:
+                                characters_data[the_character_get_click].gif_dic["reload"][1] = 0
+                                characters_data[the_character_get_click].current_action_point -= 5
+                                #当所剩子弹足够换弹的时候
+                                if bullets_to_add <= characters_data[the_character_get_click].bullets_carried:
+                                    characters_data[the_character_get_click].bullets_carried -= bullets_to_add
+                                    characters_data[the_character_get_click].current_bullets += bullets_to_add
+                                #当所剩子弹不足以换弹的时候
+                                else:
+                                    characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
+                                    characters_data[the_character_get_click].bullets_carried = 0
+                                action_choice = ""
                         else:
-                            characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
-                            characters_data[the_character_get_click].bullets_carried = 0
+                            characters_data[the_character_get_click].current_action_point -= 5
+                            #当所剩子弹足够换弹的时候
+                            if bullets_to_add <= characters_data[the_character_get_click].bullets_carried:
+                                characters_data[the_character_get_click].bullets_carried -= bullets_to_add
+                                characters_data[the_character_get_click].current_bullets += bullets_to_add
+                            #当所剩子弹不足以换弹的时候
+                            else:
+                                characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
+                                characters_data[the_character_get_click].bullets_carried = 0
                     elif bullets_to_add <= 0:
                         #无需换弹
                         warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_full"],"red",30))
+                        action_choice = ""
                     else:
                         print(the_character_get_click+" is causing trouble, please double check the files or reporting this issue")
                         break
-                    action_choice = ""
+                    
             
             #当有角色被点击时
             if the_character_get_click != "" and isWaiting == False:
@@ -1033,7 +1055,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         the_character_get_click = ""
                         action_choice = ""
             elif the_character_get_click != "" and isWaiting == True:
-                action_displayer(the_character_get_click,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                if characters_data[the_character_get_click].kind == "HOC" and action_choice == "reload":
+                    pass
+                else:
+                    action_displayer(the_character_get_click,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
