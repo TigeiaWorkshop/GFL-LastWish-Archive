@@ -1,5 +1,34 @@
 background_music: BGM_Danger_1.ogg
 character:
+  2b14:
+    action_point: 20
+    attack_range: 3
+    bullets_carried: 20
+    current_bullets: 1
+    current_hp: 250
+    effective_range:
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
+    kind: HOC
+    magazine_capacity: 1
+    max_damage: 300
+    max_hp: 250
+    min_damage: 200
+    skill_effective_range: 8
+    start_position:
+    - 3
+    - 12
+    type: 2b14
+    undetected: false
+    x: 28
+    y: 17
   asval:
     action_point: 10
     attack_range: 1
@@ -116,35 +145,6 @@ character:
     undetected: false
     x: 10
     y: 8
-  2b14:
-    action_point: 20
-    attack_range: 3
-    bullets_carried: 20
-    current_bullets: 1
-    current_hp: 250
-    effective_range:
-      far:
-      - 8
-      - 9
-      middle:
-      - 5
-      - 7
-      near:
-      - 1
-      - 4
-    kind: HOC
-    magazine_capacity: 1
-    max_damage: 300
-    max_hp: 250
-    min_damage: 200
-    skill_effective_range: 8
-    start_position:
-    - 3
-    - 9
-    type: 2b14
-    undetected: false
-    x: 13
-    y: 9
 local_x: 0
 local_y: 0
 map:
@@ -2547,5 +2547,20 @@ sangvisFerri:
     type: vespid
     x: 28
     y: 13
+  vespid_0:
+    action_point: 4
+    attack_range: 1
+    current_bullets: 20
+    current_hp: 350
+    effective_range: 5
+    kind: AR
+    magazine_capacity: 20
+    max_damage: 450
+    max_hp: 350
+    min_damage: 400
+    patrol_path: []
+    type: vespid
+    x: 44
+    y: 15
 weather: snow
 zoom_in: 2

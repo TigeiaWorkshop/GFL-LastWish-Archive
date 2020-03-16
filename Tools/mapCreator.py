@@ -95,11 +95,11 @@ perBlockHeight = block_y_length
 #初始化角色信息
 characters_data = {}
 for each_character in characters:
-    characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],character_gif_dic(characters[each_character]["type"],perBlockWidth,perBlockHeight),characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["start_position"],characters[each_character]["undetected"])
+    characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],character_gif_dic(characters[each_character]["type"],perBlockWidth,perBlockHeight,"character",characters[each_character]["kind"]),characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["start_position"],characters[each_character]["undetected"])
 
 sangvisFerris_data = {}
 for each_character in sangvisFerris:
-    sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],character_gif_dic(sangvisFerris[each_character]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
+    sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],sangvisFerris[each_character]["kind"],character_gif_dic(sangvisFerris[each_character]["type"],perBlockWidth,perBlockHeight,"sangvisFerri",sangvisFerris[each_character]["kind"]),sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
 
 #所有的角色文件
 all_characters_list  = glob.glob(r'../Assets/img/character/*')
@@ -174,12 +174,12 @@ while True:
                             if object_to_put_down["type"] == "character":
                                 while object_to_put_down["id"]+"_"+str(the_id) in characters_data:
                                     the_id+=1
-                                characters_data[object_to_put_down["id"]+"_"+str(the_id)] = characterDataManager(1,1,1,1,1,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight),1,1,1,1,block_get_click_x,block_get_click_y,[],False)
+                                characters_data[object_to_put_down["id"]+"_"+str(the_id)] = characterDataManager(1,1,1,1,1,None,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"character",None),1,1,1,1,block_get_click_x,block_get_click_y,1,None,[],False)
                                 characters[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"bullets_carried": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"magazine_capacity": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"start_position": [],"type": object_to_put_down["id"],"undetected": False,"x": block_get_click_x,"y": block_get_click_y}
                             elif object_to_put_down["type"] == "sangvisFerri":
                                 while object_to_put_down["id"]+"_"+str(the_id) in sangvisFerris_data:
                                     the_id+=1
-                                sangvisFerris_data[object_to_put_down["id"]+"_"+str(the_id)] = sangvisFerriDataManager(1,1,1,1,1,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"sangvisFerri"),1,1,1,1,block_get_click_x,block_get_click_y,[])
+                                sangvisFerris_data[object_to_put_down["id"]+"_"+str(the_id)] = sangvisFerriDataManager(1,1,1,1,1,None,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"sangvisFerri",None),1,1,1,1,block_get_click_x,block_get_click_y,[])
                                 sangvisFerris[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"max_bullets": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"type": object_to_put_down["id"],"patrol_path": [],"x": block_get_click_x,"y": block_get_click_y}
                 if pygame.mouse.get_pressed()[2]:
                     any_chara_replace = None

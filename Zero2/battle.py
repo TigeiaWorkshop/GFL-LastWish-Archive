@@ -700,6 +700,15 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
             #显示选择菜单
             if green_hide == "SelectMenu":
+                #移动画面以使得被点击的角色可以被更好的操作
+                if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0: 
+                    local_x += (window_x*0.2-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
+                elif characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x > window_x*0.8 and local_x>=len(theMap[0])*perBlockWidth*-1:
+                    local_x += (window_x*0.8-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
+                if characters_data[the_character_get_click].y*perBlockHeight-perBlockWidth/2+local_y < window_y*0.2 and local_y<=0: 
+                    local_y += (window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
+                elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=len(theMap)*perBlockHeight*-1:
+                    local_y += (window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
                 #左下角的角色信息
                 text_size = 20
                 drawImage(the_character_get_click_info_board,screen)
