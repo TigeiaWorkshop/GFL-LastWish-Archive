@@ -1,7 +1,8 @@
 import os
-character="2b14"
-kind = "character"
-action=["attack","die","move","reload","set","wait"]
+character="jupiter"
+#kind = "character"
+kind = "sangvisFerri"
+action=["attack","attack2","die","wait","wait2"]
 #action=["attack","die","move","skill","victory","victoryloop","wait"]
 #action=["attack","die","move","wait"]
 total_img=0

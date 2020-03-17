@@ -1,6 +1,6 @@
 background_music: BGM_Danger_1.ogg
 character:
-  2b14:
+  2b14_0:
     action_point: 20
     attack_range: 3
     bullets_carried: 20
