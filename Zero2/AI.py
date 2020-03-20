@@ -1,7 +1,7 @@
 from Zero2.basic import *
 from Zero2.map import *
 
-def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting):
+def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data):
     attacking_range = []
     for y in range(sangvisFerris_data[aiInControl].y-sangvisFerris_data[aiInControl].attack_range,sangvisFerris_data[aiInControl].y+sangvisFerris_data[aiInControl].attack_range):
         if y < sangvisFerris_data[aiInControl].y:
@@ -46,7 +46,11 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
             for x in range(len(theMap[y])):
                 if blocks_setting[theMap[y][x]]["canPassThrough"] == False:
                     map2d[x][y]=1
-        #  历遍所有角色，将角色的坐标点设置为障碍方块
+        #历遍设施，设置障碍方块
+        for key1 in facilities_data:
+            for key2 in facilities_data[key1]:
+                map2d[facilities_data[key1][key2]["x"]][facilities_data[key1][key2]["y"]]=1
+        # 历遍所有角色，将角色的坐标点设置为障碍方块
         for every_chara in all_characters_data:
             if every_chara != aiInControl:
                 map2d[all_characters_data[every_chara].x][all_characters_data[every_chara].y] = 1

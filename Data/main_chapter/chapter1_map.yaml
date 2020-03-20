@@ -56,7 +56,7 @@ character:
     - 1
     type: asval
     undetected: false
-    x: 7
+    x: 18
     y: 5
   gsh-18:
     action_point: 10
@@ -2568,3 +2568,13 @@ sangvisFerri:
     y: 15
 weather: snow
 zoom_in: 2
+facility:
+  campfire:
+    campfire1:
+      x: 12
+      y: 10
+      range: 3
+    campfire2:
+      x: 15
+      y: 15
+      range: 3

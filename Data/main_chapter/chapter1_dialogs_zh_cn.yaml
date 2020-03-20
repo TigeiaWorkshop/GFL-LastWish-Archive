@@ -251,7 +251,8 @@ dialog_before_battle:
     last_dialog_id: 9
     narrator: null
     next_dialog_id: null
-dialog_during_battle:
+dialog_during_battle: null
+dialog_during_battle1:
 - dialoguebox_down:
     content:
     - 另一头，以sv-98为队长的第十后勤小
