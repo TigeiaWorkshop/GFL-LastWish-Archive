@@ -176,7 +176,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         for i in range(1,11):
             campfire_images.append(loadImg("Assets/img/environment/campfire/"+str(i)+".png"))
         for key in facilities_data["campfire"]:
-            facilities_data["campfire"][key]["img_id"] = random.randint(0,10)
+            facilities_data["campfire"][key]["img_id"] = random.randint(0,9)
 
     #初始化角色信息
     characters_data = {}
@@ -755,14 +755,22 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #显示选择菜单
             if green_hide == "SelectMenu":
                 #移动画面以使得被点击的角色可以被更好的操作
-                if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0: 
-                    local_x += (window_x*0.2-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
+                if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0:
+                    to_move = (window_x*0.2-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
+                    if local_x+to_move <= 0:
+                        local_x += to_move
                 elif characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x > window_x*0.8 and local_x>=len(theMap[0])*perBlockWidth*-1:
-                    local_x += (window_x*0.8-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
-                if characters_data[the_character_get_click].y*perBlockHeight-perBlockWidth/2+local_y < window_y*0.2 and local_y<=0: 
-                    local_y += (window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
+                    to_move = (window_x*0.8-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
+                    if local_x+to_move >= len(theMap[0])*perBlockWidth*-1:
+                        local_x += to_move
+                if characters_data[the_character_get_click].y*perBlockHeight-perBlockWidth/2+local_y < window_y*0.2 and local_y<=0:
+                    to_move = (window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
+                    if local_y+to_move <= 0:
+                        local_y += to_move
                 elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=len(theMap)*perBlockHeight*-1:
-                    local_y += (window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
+                    to_move = (window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
+                    if local_y+to_move >= len(theMap)*perBlockHeight*-1:
+                        local_y += to_move
                 #左下角的角色信息
                 text_size = 20
                 drawImage(the_character_get_click_info_board,screen)
@@ -966,7 +974,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             enemies_get_attack = {}
                             if pygame.mouse.get_pressed()[0]:
                                 for enemies in sangvisFerris_data:
-                                    if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in the_attacking_range_area:
+                                    if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in the_attacking_range_area and sangvisFerris_data[enemies].current_hp>0:
                                         if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["far"]:
                                             enemies_get_attack[enemies] = "far"
                                         elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["middle"]:
@@ -1007,7 +1015,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     break
                         else:
                             for enemies in sangvisFerris_data:
-                                if block_get_click_x == sangvisFerris_data[enemies].x and  block_get_click_y == sangvisFerris_data[enemies].y:
+                                if block_get_click_x == sangvisFerris_data[enemies].x and block_get_click_y == sangvisFerris_data[enemies].y and sangvisFerris_data[enemies].current_hp>0:
                                     characters_data[the_character_get_click].current_action_point -= 8
                                     isWaiting = False
                                     enemies_get_attack = enemies

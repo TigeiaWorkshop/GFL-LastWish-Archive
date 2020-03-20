@@ -4,7 +4,14 @@ import pygame
 def character_creator(character_name,action,block_x_length,block_y_length,kind="character"):
     character_gif=[]
     files_amount = 0
-    if os.path.exists("Assets/img/"+kind+"/"+character_name+"/"+action):
+    if os.path.exists("../Assets/img/"+kind+"/"+character_name+"/"+action):
+        for file in os.listdir("../Assets/img/"+kind+"/"+character_name+"/"+action):
+            files_amount+=1
+        for i in range(files_amount):
+            path = "../Assets/img/"+kind+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_"+str(i)+".png"
+            character_gif.append(pygame.image.load(os.path.join(path)).convert_alpha())
+        return [[character_gif,files_amount],0]
+    elif os.path.exists("Assets/img/"+kind+"/"+character_name+"/"+action):
         for file in os.listdir("Assets/img/"+kind+"/"+character_name+"/"+action):
             files_amount+=1
         for i in range(files_amount):

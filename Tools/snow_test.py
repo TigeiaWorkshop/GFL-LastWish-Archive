@@ -1,13 +1,13 @@
 import glob
 import time
-from sys import exit
+import sys
 import random
 import pygame
 import yaml
 from pygame.locals import *
 
-from basic import *
-
+sys.path.append('../')
+from Zero2.basic import *
 
 # 创建窗口
 pygame.init()
