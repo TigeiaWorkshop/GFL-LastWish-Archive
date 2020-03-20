@@ -62,14 +62,15 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 img_of_char.set_alpha(255)
         else:
             img_of_char.set_alpha(original_alpha)
-        if ifFlip == True:
-            drawImg(pygame.transform.flip(img_of_char,True,False),(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
-        else:
-            drawImg(img_of_char,(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
-        if percent_of_hp>0:
-            drawImg(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
-            drawImg(pygame.transform.scale(hp_img,(int(perBlockWidth*percent_of_hp),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
-            drawImg(current_hp_to_display,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
+        if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y:
+            if ifFlip == True:
+                drawImg(pygame.transform.flip(img_of_char,True,False),(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
+            else:
+                drawImg(img_of_char,(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
+            if percent_of_hp>0:
+                drawImg(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
+                drawImg(pygame.transform.scale(hp_img,(int(perBlockWidth*percent_of_hp),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
+                drawImg(current_hp_to_display,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
             
         gif_dic[action][1]+=1
         if isContinue==True:
@@ -297,7 +298,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
-                    drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
+                    if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
+                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
                     if facilities_data["campfire"][key]["img_id"] >= 9.0:
                         facilities_data["campfire"][key]["img_id"] = 0
                     else:
@@ -392,7 +394,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
-                    drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
+                    if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
+                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
                     if facilities_data["campfire"][key]["img_id"] >= 9.0:
                         facilities_data["campfire"][key]["img_id"] = 0
                     else:
@@ -546,7 +549,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
-                    drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
+                    if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
+                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
                     if facilities_data["campfire"][key]["img_id"] >= 9.0:
                         facilities_data["campfire"][key]["img_id"] = 0
                     else:
@@ -709,7 +713,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #加载篝火
         if facilities_data["campfire"] != None:
             for key in facilities_data["campfire"]:
-                drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
+                if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
+                    drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
                 if facilities_data["campfire"][key]["img_id"] >= 9.0:
                     facilities_data["campfire"][key]["img_id"] = 0
                 else:
