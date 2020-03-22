@@ -113,10 +113,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         pygame.display.update()
 
     #加载背景图片
-    all_env_file_list = glob.glob(r'Assets/img/environment/*.png')
+    all_env_file_list = glob.glob(r'Assets/img/environment/block/*.png')
     env_img_list={}
     for i in range(len(all_env_file_list)):
-        img_name = all_env_file_list[i].replace("Assets","").replace("img","").replace("environment","").replace(".png","").replace("\\","").replace("/","")
+        img_name = all_env_file_list[i].replace("Assets","").replace("img","").replace("environment","").replace("block","").replace(".png","").replace("\\","").replace("/","")
         env_img_list[img_name] = loadImg(all_env_file_list[i])
 
     #读取并初始化章节信息
