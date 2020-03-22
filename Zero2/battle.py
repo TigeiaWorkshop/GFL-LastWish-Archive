@@ -220,9 +220,32 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     }
     the_character_get_click_info_board = loadImage("Assets/img/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
 
-    #文字
-    text_of_endround_move = 0
-    text_of_endround_alpha = 400
+    #-----加载音效-----
+    #行走的音效 -- 频道0
+    all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
+    walking_sound = []
+    for i in range(len(all_walking_sounds)):
+        walking_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
+    the_sound_id = None
+    #环境的音效 -- 频道1
+    if environment_sound != None:
+        environment_sound = pygame.mixer.Sound("Assets/sound/environment/"+environment_sound+".ogg")
+    #攻击的音效 -- 频道2
+    all_attacking_sounds = {
+        #突击步枪
+        "AR": glob.glob(r'Assets/sound/attack/ar_*.ogg'),
+        #手枪
+        "HG": glob.glob(r'Assets/sound/attack/hg_*.ogg'),
+        #机枪
+        "MG": glob.glob(r'Assets/sound/attack/mg_*.ogg'),
+        #步枪
+        "RF": glob.glob(r'Assets/sound/attack/rf_*.ogg'),
+        #冲锋枪
+        "SMG": glob.glob(r'Assets/sound/attack/smg_*.ogg'),
+    }
+    for key in all_attacking_sounds:
+        for i in range(len(all_attacking_sounds[key])):
+            all_attacking_sounds[key][i] = pygame.mixer.Sound(all_attacking_sounds[key][i])
     
     #部分设定初始化
     the_character_get_click = ""
@@ -254,16 +277,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         "total_time" : time.time(),
         "times_characters_down" : 0
     }
-    #行走的声音
-    all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
-    walking_sound = []
-    for i in range(len(all_walking_sounds)):
-        walking_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
-    the_sound_id = None
-    #环境的声音
-    if environment_sound != None:
-        environment_sound = pygame.mixer.Sound("Assets/sound/environment/"+environment_sound+".ogg")
-    
+    #文字
+    text_of_endround_move = 0
+    text_of_endround_alpha = 400
+
+    #关卡背景介绍信息文字
     battle_info_line1 = fontRender(battle_info[0],"white",25)
     battle_info_line2 = fontRender(battle_info[1],"white",25)
     #显示章节信息
@@ -1095,6 +1113,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         the_character_get_click = ""
                     light_area = calculate_darkness(characters_data,facilities_data["campfire"])
                 elif action_choice == "attack":
+                    if characters_data[the_character_get_click].gif_dic["attack"][1] == 3:
+                        pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
                     if block_get_hover_x < characters_data[the_character_get_click].x:
                         action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False,True)
                     else:
