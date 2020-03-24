@@ -264,6 +264,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     enemies_in_control_id= 0
     warnings_to_display = []
     damage_do_to_character = {}
+    screen_to_move_x=None
+    screen_to_move_y=None
     #计算光亮区域
     light_area = calculate_darkness(characters_data,facilities_data["campfire"])
     # 移动路径
@@ -722,6 +724,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             original_UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
             original_UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
         
+        if screen_to_move_x != None and int(screen_to_move_x) != 0:
+            local_x += screen_to_move_x
+        if screen_to_move_y != None and int(screen_to_move_y) != 0:
+            local_y += screen_to_move_y
+        
         #加载地图
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[y])):
@@ -765,7 +772,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 else:
                     #控制选择菜单的显示与隐藏
                     for key in characters_data:
-                        if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False:
+                        if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False and the_character_get_click=="":
                             the_character_get_click = key
                             green_hide = "SelectMenu"
                             break
@@ -776,19 +783,31 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0:
                     to_move = (window_x*0.2-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
                     if local_x+to_move <= 0:
-                        local_x += to_move
+                        screen_to_move_x = to_move
+                    else:
+                        screen_to_move_x = None
                 elif characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x > window_x*0.8 and local_x>=len(theMap[0])*perBlockWidth*-1:
                     to_move = (window_x*0.8-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
                     if local_x+to_move >= len(theMap[0])*perBlockWidth*-1:
-                        local_x += to_move
+                        screen_to_move_x = to_move
+                    else:
+                        screen_to_move_x = None
+                else:
+                    screen_to_move_x = None
                 if characters_data[the_character_get_click].y*perBlockHeight-perBlockWidth/2+local_y < window_y*0.2 and local_y<=0:
                     to_move = (window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
                     if local_y+to_move <= 0:
-                        local_y += to_move
+                        screen_to_move_y = to_move
+                    else:
+                        screen_to_move_y = None
                 elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=len(theMap)*perBlockHeight*-1:
                     to_move = (window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
                     if local_y+to_move >= len(theMap)*perBlockHeight*-1:
-                        local_y += to_move
+                        screen_to_move_y = to_move
+                    else:
+                        screen_to_move_y = None
+                else:
+                    screen_to_move_y = None
                 #左下角的角色信息
                 text_size = 20
                 drawImage(the_character_get_click_info_board,screen)
@@ -820,26 +839,26 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
                 drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
+                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
                 #移动按钮
                 txt_temp = fontRender(selectMenuButtons_dic["move"],"black",int(perBlockWidth/3))
                 txt_temp2 = fontRender("2N AP","black",int(perBlockWidth/5))
                 drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.4)*perBlockHeight),screen,local_x,local_y)
+                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
                 #技能按钮
                 if characters_data[the_character_get_click].kind != "HOC":
                     txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/3))
                     txt_temp2 = fontRender("8 AP","black",int(perBlockWidth/5))
                     drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),screen,local_x,local_y)
-                    drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.35)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+                    drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.4)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
                     drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
                 #换弹按钮
                 txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",int(perBlockWidth/3))
                 txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
                 drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),screen,local_x,local_y)
-                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.55)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.85)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
+                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.6)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
+                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.95)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
                 #按钮判定
                 if pygame.mouse.get_pressed()[0]:
                     if isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
@@ -1042,7 +1061,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 elif action_choice == "reload":
                     bullets_to_add = characters_data[the_character_get_click].magazine_capacity-characters_data[the_character_get_click].current_bullets
                     if bullets_to_add > 0:
-                        if characters_data[the_character_get_click].kind == "HOC":
+                        if characters_data[the_character_get_click].gif_dic["reload"] != None:
                             action_displayer(the_character_get_click,"reload",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
                             if characters_data[the_character_get_click].gif_dic["reload"][1] == characters_data[the_character_get_click].gif_dic["reload"][0][1]-2:
                                 characters_data[the_character_get_click].gif_dic["reload"][1] = 0
@@ -1056,6 +1075,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
                                     characters_data[the_character_get_click].bullets_carried = 0
                                 action_choice = ""
+                                the_character_get_click=""
                         else:
                             characters_data[the_character_get_click].current_action_point -= 5
                             #当所剩子弹足够换弹的时候
@@ -1066,10 +1086,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             else:
                                 characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
                                 characters_data[the_character_get_click].bullets_carried = 0
+                            the_character_get_click=""
                     elif bullets_to_add <= 0:
                         #无需换弹
                         warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_full"],"red",30))
                         action_choice = ""
+                        the_character_get_click=""
                     else:
                         print(the_character_get_click+" is causing trouble, please double check the files or reporting this issue")
                         break
@@ -1113,7 +1135,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         the_character_get_click = ""
                     light_area = calculate_darkness(characters_data,facilities_data["campfire"])
                 elif action_choice == "attack":
-                    if characters_data[the_character_get_click].gif_dic["attack"][1] == 3:
+                    if characters_data[the_character_get_click].gif_dic["attack"][1] == 3 and characters_data[the_character_get_click].kind !="HOC":
                         pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
                     if block_get_hover_x < characters_data[the_character_get_click].x:
                         action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False,True)

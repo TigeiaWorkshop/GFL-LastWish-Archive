@@ -84,10 +84,10 @@ block_x_length = int(window_x/block_x*0.9)
 block_y_length = int(window_y/block_y*0.9)
 
 #加载背景图片
-all_env_file_list = glob.glob(r'../Assets/img/environment/*.png')
+all_env_file_list = glob.glob(r'../Assets/img/environment/block/*.png')
 env_img_list={}
 for i in range(len(all_env_file_list)):
-    img_name = all_env_file_list[i].replace(".","").replace("Assets","").replace("img","").replace("environment","").replace("png","").replace("\\","").replace("/","")
+    img_name = all_env_file_list[i].replace(".","").replace("Assets","").replace("block","").replace("img","").replace("environment","").replace("png","").replace("\\","").replace("/","")
     env_img_list[img_name] = loadImg(all_env_file_list[i],int(block_x_length), int(block_y_length*1.5))
 
 perBlockWidth = block_x_length
