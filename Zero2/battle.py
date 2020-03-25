@@ -24,7 +24,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     def action_displayer(chara_name,action,x,y,isContinue=True,ifFlip=False):
         hidden = False
         hp_img = original_UI_img["hp_green"]
-        hp_empty = pygame.transform.scale(original_UI_img["hp_empty"], (int(perBlockWidth), int(perBlockHeight/5)))
+        hp_empty = pygame.transform.scale(original_UI_img["hp_empty"], (perBlockWidth, round(perBlockHeight/5)))
         if chara_name in sangvisFerris_data:
             gif_dic = sangvisFerris_data[chara_name].gif_dic
             if sangvisFerris_data[chara_name].current_hp < 0:
@@ -54,7 +54,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         if percent_of_hp<0:
             percent_of_hp=0
         original_alpha = gif_dic[action][0][0][gif_dic[action][1]].get_alpha()
-        img_of_char = pygame.transform.scale(gif_dic[action][0][0][gif_dic[action][1]], (int(perBlockWidth*2), int(perBlockHeight*2)))
+        img_of_char = pygame.transform.scale(gif_dic[action][0][0][gif_dic[action][1]], (round(perBlockWidth*2), round(perBlockHeight*2)))
         if chara_name in characters_data:
             if hidden == True:
                 img_of_char.set_alpha(130)
@@ -69,7 +69,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 drawImg(img_of_char,(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
             if percent_of_hp>0:
                 drawImg(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
-                drawImg(pygame.transform.scale(hp_img,(int(perBlockWidth*percent_of_hp),int(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
+                drawImg(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp),round(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
                 drawImg(current_hp_to_display,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
             
         gif_dic[action][1]+=1
@@ -138,8 +138,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         zoom_in = 1
     elif zoom_in > 2:
         zoom_in = 2
-    perBlockWidth = window_x/block_x*zoom_in
-    perBlockHeight = window_y/block_y*zoom_in
+    perBlockWidth = round(window_x/block_x*zoom_in)
+    perBlockHeight = round(window_y/block_y*zoom_in)
 
     if local_x+window_x/block_x*0.25*len(theMap[0]) >0:
         local_x=0
@@ -209,14 +209,23 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         "hp_green" : loadImg("Assets/img/UI/hp_green.png"),
         "action_point_blue" : loadImg("Assets/img/UI/action_point.png"),
         "bullets_number_brown" : loadImg("Assets/img/UI/bullets_number.png"),
-        "green" : loadImg("Assets/img/UI/green.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
-        "red" : loadImg("Assets/img/UI/red.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
-        "black" : loadImg("Assets/img/UI/black.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
-        "yellow": loadImg("Assets/img/UI/yellow.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
-        "blue": loadImg("Assets/img/UI/blue.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
-        "orange": loadImg("Assets/img/UI/orange.png",math.ceil(perBlockWidth),math.ceil(perBlockHeight),100),
+        "green" : loadImg("Assets/img/UI/green.png",None,None,100),
+        "red" : loadImg("Assets/img/UI/red.png",None,None,100),
+        "black" : loadImg("Assets/img/UI/black.png",None,None,100),
+        "yellow": loadImg("Assets/img/UI/yellow.png",None,None,100),
+        "blue": loadImg("Assets/img/UI/blue.png",None,None,100),
+        "orange": loadImg("Assets/img/UI/orange.png",None,None,100),
         #计分板
         "score" : loadImage("Assets/img/UI/score.png",(200,200),300,600),
+    }
+    #UI - 变形后
+    UI_img = {
+        "green" : pygame.transform.scale(original_UI_img["green"], (perBlockWidth, perBlockHeight)),
+        "red" : pygame.transform.scale(original_UI_img["red"], (perBlockWidth, perBlockHeight)),
+        "black" : pygame.transform.scale(original_UI_img["black"], (perBlockWidth, perBlockHeight)),
+        "yellow" : pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight)),
+        "blue" : pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight)),
+        "orange": pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
     }
     the_character_get_click_info_board = loadImage("Assets/img/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
 
@@ -313,13 +322,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
-                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
                         drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
                     if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
-                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
+                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth, perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
                     if facilities_data["campfire"][key]["img_id"] >= 9.0:
                         facilities_data["campfire"][key]["img_id"] = 0
                     else:
@@ -329,7 +338,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and dark_mode == True:
                         if (x,y) not in light_area:
-                            drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                            drawImg(UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
             #角色动画
             for every_chara in characters_data:
                 if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
@@ -409,13 +418,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
-                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
                         drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
                     if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
-                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
+                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth,perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
                     if facilities_data["campfire"][key]["img_id"] >= 9.0:
                         facilities_data["campfire"][key]["img_id"] = 0
                     else:
@@ -424,7 +433,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        drawImg(UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
 
             key_to_remove = []
             for every_chara in all_characters_path:
@@ -564,13 +573,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
-                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (perBlockWidth, perBlockHeight*1.5))
                         drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
                     if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
-                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
+                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth, perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
                     if facilities_data["campfire"][key]["img_id"] >= 9.0:
                         facilities_data["campfire"][key]["img_id"] = 0
                     else:
@@ -579,7 +588,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             for y in range(len(map_img_list)):
                 for x in range(len(map_img_list[y])):
                     if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                        drawImg(UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                 
             #角色动画
             for every_chara in characters_data:
@@ -675,21 +684,35 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if event.button == 4:
                     if zoom_in < 2:
                         zoom_in += 0.25
-                        perBlockWidth = window_x/block_x*zoom_in
-                        perBlockHeight = window_y/block_y*zoom_in
+                        perBlockWidth = round(window_x/block_x*zoom_in)
+                        perBlockHeight = round(window_y/block_y*zoom_in)
                         local_x -= window_x/block_x*0.25*len(map_img_list[0])
                         local_y -= window_y/block_y*0.25*len(map_img_list)
+                        #加载UI
+                        UI_img["green"] = pygame.transform.scale(original_UI_img["green"], (perBlockWidth, perBlockHeight))
+                        UI_img["red"] = pygame.transform.scale(original_UI_img["red"], (perBlockWidth, perBlockHeight))
+                        UI_img["black"] = pygame.transform.scale(original_UI_img["black"], (perBlockWidth, perBlockHeight))
+                        UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight))
+                        UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight))
+                        UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
                 elif event.button == 5:
                     if zoom_in > 1:
                         zoom_in -= 0.25
-                        perBlockWidth = window_x/block_x*zoom_in
-                        perBlockHeight = window_y/block_y*zoom_in
+                        perBlockWidth = round(window_x/block_x*zoom_in)
+                        perBlockHeight = round(window_y/block_y*zoom_in)
                         local_x += window_x/block_x*0.25*len(map_img_list[0])
                         if local_x >0:
                             local_x=0
                         local_y += window_y/block_y*0.25*len(map_img_list)
                         if local_y>0:
                             local_y = 0
+                        #加载UI
+                        UI_img["green"] = pygame.transform.scale(original_UI_img["green"], (perBlockWidth, perBlockHeight))
+                        UI_img["red"] = pygame.transform.scale(original_UI_img["red"], (perBlockWidth, perBlockHeight))
+                        UI_img["black"] = pygame.transform.scale(original_UI_img["black"], (perBlockWidth, perBlockHeight))
+                        UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight))
+                        UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight))
+                        UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
             #移动屏幕
             if pygame.mouse.get_pressed()[2]:
                 if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
@@ -715,15 +738,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 mouse_move_temp_x = -1
                 mouse_move_temp_y = -1
         
-        #加载UI
-        if original_UI_img["green"].get_width() != math.ceil(perBlockWidth) and original_UI_img["green"].get_height() != math.ceil(perBlockHeight):
-            original_UI_img["green"] = pygame.transform.scale(original_UI_img["green"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            original_UI_img["red"] = pygame.transform.scale(original_UI_img["red"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            original_UI_img["black"] = pygame.transform.scale(original_UI_img["black"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            original_UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            original_UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-            original_UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (math.ceil(perBlockWidth), math.ceil(perBlockHeight)))
-        
         if screen_to_move_x != None and int(screen_to_move_x) != 0:
             local_x += screen_to_move_x
         if screen_to_move_y != None and int(screen_to_move_y) != 0:
@@ -733,13 +747,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[y])):
                 if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
-                    img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (int(perBlockWidth), int(perBlockHeight*1.5)))
+                    img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
                     drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
         #加载篝火
         if facilities_data["campfire"] != None:
             for key in facilities_data["campfire"]:
                 if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
-                    drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (int(perBlockWidth), int(perBlockHeight))),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
+                    drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth, perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
                 if facilities_data["campfire"][key]["img_id"] >= 9.0:
                     facilities_data["campfire"][key]["img_id"] = 0
                 else:
@@ -748,7 +762,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         for y in range(len(map_img_list)):
             for x in range(len(map_img_list[y])):
                 if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                    drawImg(original_UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                    drawImg(UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
         
         #玩家回合
         if whose_round == "player":
@@ -832,30 +846,30 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 displayInCenter(tcgc_hp2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_action_point2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                select_menu_button = pygame.transform.scale(select_menu_button_original, (int(perBlockWidth*2), int(perBlockWidth/1.3)))
+                select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth*2), round(perBlockWidth/1.3)))
                 #----选择菜单----
                 #攻击按钮
-                txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",int(perBlockWidth/3))
-                txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
+                txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",round(perBlockWidth/3))
+                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/5))
                 drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
                 #移动按钮
-                txt_temp = fontRender(selectMenuButtons_dic["move"],"black",int(perBlockWidth/3))
-                txt_temp2 = fontRender("2N AP","black",int(perBlockWidth/5))
+                txt_temp = fontRender(selectMenuButtons_dic["move"],"black",round(perBlockWidth/3))
+                txt_temp2 = fontRender("2N AP","black",round(perBlockWidth/5))
                 drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
                 drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
                 #技能按钮
                 if characters_data[the_character_get_click].kind != "HOC":
-                    txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",int(perBlockWidth/3))
-                    txt_temp2 = fontRender("8 AP","black",int(perBlockWidth/5))
+                    txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",round(perBlockWidth/3))
+                    txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/5))
                     drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),screen,local_x,local_y)
                     drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.4)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
                     drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
                 #换弹按钮
-                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",int(perBlockWidth/3))
-                txt_temp2 = fontRender("5 AP","black",int(perBlockWidth/5))
+                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(perBlockWidth/3))
+                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/5))
                 drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),screen,local_x,local_y)
                 drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.6)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
                 drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.95)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
@@ -953,7 +967,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             the_route.append([star_point_x,star_point_y])
                     #显示路径
                     for i in range(len(the_route)):
-                        drawImg(original_UI_img["green"],(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
+                        drawImg(UI_img["green"],(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
                 #显示攻击范围        
                 elif action_choice == "attack":
                     attacking_range = {"near":[],"middle":[],"far":[]}
@@ -969,13 +983,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             for x in range(characters_data[the_character_get_click].x-the_character_effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+the_character_effective_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                     if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
-                                        drawImg(original_UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range["far"].append([x,y])
                                     elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
-                                        drawImg(original_UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range["middle"].append([x,y])
                                     elif characters_data[the_character_get_click].effective_range["near"] != None and characters_data[the_character_get_click].effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["near"][1]:
-                                        drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range["near"].append([x,y])
                         else:
                             for x in range(characters_data[the_character_get_click].x-the_character_effective_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+the_character_effective_range-(y-characters_data[the_character_get_click].y)):
@@ -984,13 +998,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 else:
                                     if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                         if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
-                                            drawImg(original_UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["far"].append([x,y])
                                         elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
-                                            drawImg(original_UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["middle"].append([x,y])
                                         elif characters_data[the_character_get_click].effective_range["near"] != None and characters_data[the_character_get_click].effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["near"][1]:
-                                            drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["near"].append([x,y])
                     block_get_hover_x = int((mouse_x-local_x)/perBlockWidth)
                     block_get_hover_y = int((mouse_y-local_y)/perBlockHeight)
@@ -1001,12 +1015,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 if y < block_get_hover_y:
                                     for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)):
                                         if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                            drawImg(original_UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             the_attacking_range_area.append([x,y])
                                 else:
                                     for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)):
                                         if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                            drawImg(original_UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             the_attacking_range_area.append([x,y])
                             enemies_get_attack = {}
                             if pygame.mouse.get_pressed()[0]:
@@ -1031,7 +1045,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         if y < characters_data[the_character_get_click].y:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].skill_effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].skill_effective_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                    drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                    drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     skill_range.append([x,y])
                         else:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].skill_effective_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].skill_effective_range-(y-characters_data[the_character_get_click].y)):
@@ -1039,7 +1053,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     pass
                                 else:
                                     if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                        drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                        drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         skill_range.append([x,y])
                     if [block_get_click_x,block_get_click_y] in skill_range:
                         if the_character_get_click == "gsh-18":
@@ -1322,18 +1336,18 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                         if y < sangvisFerris_data[enemies].y:
                                             for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)):
                                                 if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                                    drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                 else:
-                                                    drawImg(original_UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    drawImg(UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         else:
                                             for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)):
                                                 if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
                                                     pass
                                                 else:
                                                     if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                                        drawImg(original_UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                        drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                     else:
-                                                        drawImg(original_UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                        drawImg(UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                             action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
                     elif sangvisFerris_data[enemies].current_hp<=0:
                         action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
