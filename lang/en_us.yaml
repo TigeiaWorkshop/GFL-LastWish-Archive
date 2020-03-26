@@ -35,3 +35,4 @@ warnings:
   no_enough_ap_to_move: You don't have enough action points for moving.
   no_enough_ap_to_reload: You don't have enough action points for reloading.
   no_enough_ap_to_use_skill: You don't have enough action points for using skill.
+  no_enemy_in_effective_range: There is no enemy in this character's attack range.

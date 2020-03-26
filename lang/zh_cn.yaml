@@ -35,3 +35,4 @@ warnings:
   no_enough_ap_to_move: 当前角色没有足够的行动值用于移动
   no_enough_ap_to_reload: 当前角色没有足够的行动值用于换弹
   no_enough_ap_to_use_skill: 当前角色没有足够的行动值用于使用技能
+  no_enemy_in_effective_range: 当前角色的攻击范围内没有敌人

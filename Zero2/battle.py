@@ -271,7 +271,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     mouse_move_temp_y = -1
     total_rounds = 1
     enemies_in_control_id= 0
-    warnings_to_display = []
+    warnings_to_display = warningSystem()
     damage_do_to_character = {}
     screen_to_move_x=None
     screen_to_move_y=None
@@ -883,13 +883,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             block_get_click_y = None
                             green_hide = False
                         if characters_data[the_character_get_click].current_bullets <= 0:
-                            if len(warnings_to_display)>5:
-                                warnings_to_display.pop()
-                            warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_empty"],"red",30,True))
+                            warnings_to_display.add(warnings_info["magazine_is_empty"])
                         if characters_data[the_character_get_click].current_action_point < 5:
-                            if len(warnings_to_display)>5:
-                                warnings_to_display.pop()
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_attack"],"red",30,True))
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_attack"])
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         time.sleep(0.05)
                         if characters_data[the_character_get_click].current_action_point >= 2:
@@ -898,9 +894,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             block_get_click_y = None
                             green_hide = False
                         else:
-                            if len(warnings_to_display)>5:
-                                warnings_to_display.pop()
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_move"],"red",30,True))
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_move"])
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y) and characters_data[the_character_get_click].kind != "HOC":
                         time.sleep(0.05)
                         if characters_data[the_character_get_click].current_action_point >= 8:
@@ -909,9 +903,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             block_get_click_y = None
                             green_hide = False
                         else:
-                            if len(warnings_to_display)>5:
-                                warnings_to_display.pop()
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_use_skill"],"red",30,True))
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_use_skill"])
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),local_x,local_y):
                         if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
                             action_choice = "reload"
@@ -919,13 +911,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             block_get_click_y = None
                             green_hide = False
                         if characters_data[the_character_get_click].bullets_carried <= 0:
-                            if len(warnings_to_display)>5:
-                                warnings_to_display.pop()
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_bullets_left"],"red",30,True))
+                            warnings_to_display.add(warnings_info["no_bullets_left"])
                         if characters_data[the_character_get_click].current_action_point < 5:
-                            if len(warnings_to_display)>5:
-                                warnings_to_display.pop()
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_reload"],"red",30,True))
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_reload"])
             #显示攻击/移动/技能范围
             elif green_hide == False and the_character_get_click != "":
                 #显示移动范围
@@ -989,13 +977,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             for x in range(characters_data[the_character_get_click].x-the_character_effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+the_character_effective_range+(y-characters_data[the_character_get_click].y)):
                                 if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                     if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
-                                        drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range["far"].append([x,y])
                                     elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
-                                        drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range["middle"].append([x,y])
                                     elif characters_data[the_character_get_click].effective_range["near"] != None and characters_data[the_character_get_click].effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["near"][1]:
-                                        drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         attacking_range["near"].append([x,y])
                         else:
                             for x in range(characters_data[the_character_get_click].x-the_character_effective_range+(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+the_character_effective_range-(y-characters_data[the_character_get_click].y)):
@@ -1004,46 +989,57 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 else:
                                     if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                                         if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
-                                            drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["far"].append([x,y])
                                         elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
-                                            drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["middle"].append([x,y])
                                         elif characters_data[the_character_get_click].effective_range["near"] != None and characters_data[the_character_get_click].effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["near"][1]:
-                                            drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                             attacking_range["near"].append([x,y])
-                    block_get_hover_x = int((mouse_x-local_x)/perBlockWidth)
-                    block_get_hover_y = int((mouse_y-local_y)/perBlockHeight)
-                    for area in attacking_range:
-                        if [block_get_hover_x,block_get_hover_y] in attacking_range[area]:
-                            the_attacking_range_area = []
-                            for y in range(block_get_hover_y-characters_data[the_character_get_click].attack_range,block_get_hover_y+characters_data[the_character_get_click].attack_range):
-                                if y < block_get_hover_y:
-                                    for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)):
-                                        if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                            drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                            the_attacking_range_area.append([x,y])
-                                else:
-                                    for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)):
-                                        if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                                            drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                            the_attacking_range_area.append([x,y])
-                            enemies_get_attack = {}
-                            if pygame.mouse.get_pressed()[0]:
-                                for enemies in sangvisFerris_data:
-                                    if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in the_attacking_range_area and sangvisFerris_data[enemies].current_hp>0:
-                                        if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["far"]:
-                                            enemies_get_attack[enemies] = "far"
-                                        elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["middle"]:
-                                            enemies_get_attack[enemies] = "middle"
-                                        elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["near"]:
-                                            enemies_get_attack[enemies] = "near"
-                                if len(enemies_get_attack)>0:
-                                    characters_data[the_character_get_click].current_action_point -= 5
-                                    isWaiting = False
-                                    green_hide = True
+                    any_character_in_attack_range = False
+                    for enemies in sangvisFerris_data:
+                        if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["near"] or [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["middle"] or [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["far"]:
+                            any_character_in_attack_range = True
                             break
-                    
+                    if any_character_in_attack_range == True:
+                        for i in range(len(attacking_range["near"])):
+                            drawImg(UI_img["green"],(attacking_range["near"][i][0]*perBlockWidth,attacking_range["near"][i][1]*perBlockHeight),screen,local_x,local_y)
+                        for i in range(len(attacking_range["middle"])):
+                            drawImg(UI_img["blue"],(attacking_range["middle"][i][0]*perBlockWidth,attacking_range["middle"][i][1]*perBlockHeight),screen,local_x,local_y)
+                        for i in range(len(attacking_range["far"])):
+                            drawImg(UI_img["yellow"],(attacking_range["far"][i][0]*perBlockWidth,attacking_range["far"][i][1]*perBlockHeight),screen,local_x,local_y)
+                        block_get_hover_x = int((mouse_x-local_x)/perBlockWidth)
+                        block_get_hover_y = int((mouse_y-local_y)/perBlockHeight)
+                        for area in attacking_range:
+                            if [block_get_hover_x,block_get_hover_y] in attacking_range[area]:
+                                the_attacking_range_area = []
+                                for y in range(block_get_hover_y-characters_data[the_character_get_click].attack_range,block_get_hover_y+characters_data[the_character_get_click].attack_range):
+                                    if y < block_get_hover_y:
+                                        for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)):
+                                            if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                                drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                the_attacking_range_area.append([x,y])
+                                    else:
+                                        for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)):
+                                            if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                                drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                the_attacking_range_area.append([x,y])
+                                enemies_get_attack = {}
+                                if pygame.mouse.get_pressed()[0]:
+                                    for enemies in sangvisFerris_data:
+                                        if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in the_attacking_range_area and sangvisFerris_data[enemies].current_hp>0:
+                                            if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["far"]:
+                                                enemies_get_attack[enemies] = "far"
+                                            elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["middle"]:
+                                                enemies_get_attack[enemies] = "middle"
+                                            elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["near"]:
+                                                enemies_get_attack[enemies] = "near"
+                                    if len(enemies_get_attack)>0:
+                                        characters_data[the_character_get_click].current_action_point -= 5
+                                        isWaiting = False
+                                        green_hide = True
+                                break
+                    else:
+                        warnings_to_display.add(warnings_info["no_enemy_in_effective_range"])
+                        action_choice = ""
                 #显示技能范围        
                 elif action_choice == "skill":
                     skill_range = []
@@ -1096,14 +1092,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             else:
                                 characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
                                 characters_data[the_character_get_click].bullets_carried = 0
-                            the_character_get_click=""
+                            action_choice = ""
                     #无需换弹
                     elif bullets_to_add <= 0:
-                        if len(warnings_to_display)>5:
-                                warnings_to_display.pop()
-                        warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_full"],"red",30))
+                        warnings_to_display.add(warnings_info["magazine_is_full"])
                         action_choice = ""
-                        the_character_get_click=""
                     else:
                         print(the_character_get_click+" is causing trouble, please double check the files or reporting this issue")
                         break
@@ -1396,13 +1389,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             drawImage(end_round_button,screen)
 
         #显示警告
-        for i in range(len(warnings_to_display)):
-            img_alpha = warnings_to_display[i].get_alpha()
-            if img_alpha > 0:
-                warnings_to_display[i].set_alpha(img_alpha-2)
-                drawImg(warnings_to_display[i],((window_x-warnings_to_display[i].get_width())/2,(window_y-warnings_to_display[i].get_height())/2+i*warnings_to_display[i].get_height()*1.2),screen)
-            else:
-                del warnings_to_display[i]
+        warnings_to_display.display(screen,window_x,window_y)
 
         #加载音乐
         while pygame.mixer.music.get_busy() != 1:
