@@ -738,10 +738,25 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 mouse_move_temp_x = -1
                 mouse_move_temp_y = -1
         
-        if screen_to_move_x != None and int(screen_to_move_x) != 0:
-            local_x += screen_to_move_x
-        if screen_to_move_y != None and int(screen_to_move_y) != 0:
-            local_y += screen_to_move_y
+        #如果需要移动屏幕
+        if screen_to_move_x != None and screen_to_move_x != 0:
+            temp_value = local_x + screen_to_move_x*0.2
+            if -1*len(theMap[0])*perBlockWidth<=temp_value<=0:
+                local_x = temp_value
+                screen_to_move_x*=0.8
+                if int(screen_to_move_x) == 0:
+                    screen_to_move_x = 0
+            else:
+                screen_to_move_x = 0
+        if screen_to_move_y != None and screen_to_move_y !=0:
+            temp_value = local_y + screen_to_move_y*0.2
+            if -1*len(theMap)*perBlockHeight<=temp_value<=0:
+                local_y = temp_value
+                screen_to_move_y*=0.8
+                if int(screen_to_move_y) == 0:
+                    screen_to_move_y = 0
+            else:
+                screen_to_move_y = 0
         
         #加载地图
         for y in range(len(map_img_list)):
@@ -786,7 +801,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 else:
                     #控制选择菜单的显示与隐藏
                     for key in characters_data:
-                        if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False and the_character_get_click=="":
+                        if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False:
+                            screen_to_move_x = None
+                            screen_to_move_y = None
                             the_character_get_click = key
                             green_hide = "SelectMenu"
                             break
@@ -794,34 +811,17 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #显示选择菜单
             if green_hide == "SelectMenu":
                 #移动画面以使得被点击的角色可以被更好的操作
-                if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0:
-                    to_move = (window_x*0.2-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
-                    if local_x+to_move <= 0:
-                        screen_to_move_x = to_move
-                    else:
-                        screen_to_move_x = None
-                elif characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x > window_x*0.8 and local_x>=len(theMap[0])*perBlockWidth*-1:
-                    to_move = (window_x*0.8-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x)*0.3
-                    if local_x+to_move >= len(theMap[0])*perBlockWidth*-1:
-                        screen_to_move_x = to_move
-                    else:
-                        screen_to_move_x = None
-                else:
-                    screen_to_move_x = None
-                if characters_data[the_character_get_click].y*perBlockHeight-perBlockWidth/2+local_y < window_y*0.2 and local_y<=0:
-                    to_move = (window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
-                    if local_y+to_move <= 0:
-                        screen_to_move_y = to_move
-                    else:
-                        screen_to_move_y = None
-                elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=len(theMap)*perBlockHeight*-1:
-                    to_move = (window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y)*0.3
-                    if local_y+to_move >= len(theMap)*perBlockHeight*-1:
-                        screen_to_move_y = to_move
-                    else:
-                        screen_to_move_y = None
-                else:
-                    screen_to_move_y = None
+                if screen_to_move_x == None:
+                    if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0:
+                        screen_to_move_x = window_x*0.2-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x
+                    elif characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x > window_x*0.8 and local_x>=len(theMap[0])*perBlockWidth*-1:
+                        screen_to_move_x = window_x*0.8-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x
+                if screen_to_move_y == None:
+                    if characters_data[the_character_get_click].y*perBlockHeight-perBlockWidth/2+local_y < window_y*0.2 and local_y<=0:
+                        screen_to_move_y = window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
+                    elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=len(theMap)*perBlockHeight*-1:
+                        screen_to_move_y = window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
+
                 #左下角的角色信息
                 text_size = 20
                 drawImage(the_character_get_click_info_board,screen)
@@ -883,11 +883,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             block_get_click_y = None
                             green_hide = False
                         if characters_data[the_character_get_click].current_bullets <= 0:
-                            warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_empty"],"red",30))
-                            green_hide = False
+                            if len(warnings_to_display)>5:
+                                warnings_to_display.pop()
+                            warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_empty"],"red",30,True))
                         if characters_data[the_character_get_click].current_action_point < 5:
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_attack"],"red",30))
-                            green_hide = False
+                            if len(warnings_to_display)>5:
+                                warnings_to_display.pop()
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_attack"],"red",30,True))
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         time.sleep(0.05)
                         if characters_data[the_character_get_click].current_action_point >= 2:
@@ -896,8 +898,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             block_get_click_y = None
                             green_hide = False
                         else:
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_move"],"red",30))
-                            green_hide = False
+                            if len(warnings_to_display)>5:
+                                warnings_to_display.pop()
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_move"],"red",30,True))
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y) and characters_data[the_character_get_click].kind != "HOC":
                         time.sleep(0.05)
                         if characters_data[the_character_get_click].current_action_point >= 8:
@@ -906,8 +909,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             block_get_click_y = None
                             green_hide = False
                         else:
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_use_skill"],"red",30))
-                            green_hide = False
+                            if len(warnings_to_display)>5:
+                                warnings_to_display.pop()
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_use_skill"],"red",30,True))
                     elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),local_x,local_y):
                         if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
                             action_choice = "reload"
@@ -915,11 +919,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             block_get_click_y = None
                             green_hide = False
                         if characters_data[the_character_get_click].bullets_carried <= 0:
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_bullets_left"],"red",30))
-                            green_hide = False
+                            if len(warnings_to_display)>5:
+                                warnings_to_display.pop()
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_bullets_left"],"red",30,True))
                         if characters_data[the_character_get_click].current_action_point < 5:
-                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_reload"],"red",30))
-                            green_hide = False
+                            if len(warnings_to_display)>5:
+                                warnings_to_display.pop()
+                            warnings_to_display.insert(0,fontRender(warnings_info["no_enough_ap_to_reload"],"red",30,True))
             #显示攻击/移动/技能范围
             elif green_hide == False and the_character_get_click != "":
                 #显示移动范围
@@ -1074,22 +1080,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     break
                 elif action_choice == "reload":
                     bullets_to_add = characters_data[the_character_get_click].magazine_capacity-characters_data[the_character_get_click].current_bullets
+                    #需要换弹
                     if bullets_to_add > 0:
+                        #如果角色有换弹动画
                         if characters_data[the_character_get_click].gif_dic["reload"] != None:
-                            action_displayer(the_character_get_click,"reload",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
-                            if characters_data[the_character_get_click].gif_dic["reload"][1] == characters_data[the_character_get_click].gif_dic["reload"][0][1]-2:
-                                characters_data[the_character_get_click].gif_dic["reload"][1] = 0
-                                characters_data[the_character_get_click].current_action_point -= 5
-                                #当所剩子弹足够换弹的时候
-                                if bullets_to_add <= characters_data[the_character_get_click].bullets_carried:
-                                    characters_data[the_character_get_click].bullets_carried -= bullets_to_add
-                                    characters_data[the_character_get_click].current_bullets += bullets_to_add
-                                #当所剩子弹不足以换弹的时候
-                                else:
-                                    characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
-                                    characters_data[the_character_get_click].bullets_carried = 0
-                                action_choice = ""
-                                the_character_get_click=""
+                                isWaiting = False
+                        #如果角色没有换弹动画
                         else:
                             characters_data[the_character_get_click].current_action_point -= 5
                             #当所剩子弹足够换弹的时候
@@ -1101,8 +1097,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
                                 characters_data[the_character_get_click].bullets_carried = 0
                             the_character_get_click=""
+                    #无需换弹
                     elif bullets_to_add <= 0:
-                        #无需换弹
+                        if len(warnings_to_display)>5:
+                                warnings_to_display.pop()
                         warnings_to_display.insert(0,fontRender(warnings_info["magazine_is_full"],"red",30))
                         action_choice = ""
                         the_character_get_click=""
@@ -1186,11 +1184,23 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         isWaiting =True
                         the_character_get_click = ""
                         action_choice = ""
+                elif action_choice == "reload":
+                    action_displayer(the_character_get_click,"reload",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
+                    if characters_data[the_character_get_click].gif_dic["reload"][1] == characters_data[the_character_get_click].gif_dic["reload"][0][1]-2:
+                        characters_data[the_character_get_click].gif_dic["reload"][1] = 0
+                        characters_data[the_character_get_click].current_action_point -= 5
+                        #当所剩子弹足够换弹的时候
+                        if bullets_to_add <= characters_data[the_character_get_click].bullets_carried:
+                            characters_data[the_character_get_click].bullets_carried -= bullets_to_add
+                            characters_data[the_character_get_click].current_bullets += bullets_to_add
+                        #当所剩子弹不足以换弹的时候
+                        else:
+                            characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
+                            characters_data[the_character_get_click].bullets_carried = 0
+                        isWaiting =True
+                        the_character_get_click = ""
             elif the_character_get_click != "" and isWaiting == True:
-                if characters_data[the_character_get_click].kind == "HOC" and action_choice == "reload":
-                    pass
-                else:
-                    action_displayer(the_character_get_click,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                action_displayer(the_character_get_click,"wait",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":

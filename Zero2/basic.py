@@ -46,8 +46,8 @@ def loadImage(path,the_object_position,width=None,height=None,description="Defau
         return theImg(path,the_object_position[0],the_object_position[1],width,height,description)
 
 #文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
-def fontRender(txt,color,size=50,font="simsunnsimsun",mode=True):
-    normal_font = pygame.font.SysFont(font,int(size))
+def fontRender(txt,color,size=50,ifBold=False,ifItalic=False,font="simsunnsimsun",mode=True):
+    normal_font = pygame.font.SysFont(font,int(size),ifBold,ifItalic)
     if color == "gray" or color == "grey" or color == "disable":
         text_out = normal_font.render(txt, mode, (105,105,105))
     elif color == "white" or color == "enable":
@@ -61,14 +61,14 @@ def fontRender(txt,color,size=50,font="simsunnsimsun",mode=True):
     return text_out
 
 #高级文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字Class，该Class具有一大一普通的字号
-def fontRenderPro(txt,color,size=50,font="simsunnsimsun",mode=True):
+def fontRenderPro(txt,color,size=50,ifBold=False,ifItalic=False,font="simsunnsimsun",mode=True):
     class the_text:
         def __init__(self, n, b):
             self.n = n
             self.b = b
     #文字设定
-    normal_font = pygame.font.SysFont(font,int(size))
-    big_font = pygame.font.SysFont(font,int(size*1.5))
+    normal_font = pygame.font.SysFont(font,int(size),ifBold,ifItalic)
+    big_font = pygame.font.SysFont(font,int(size*1.5),ifBold,ifItalic)
     if color == "gray" or color == "grey" or color == "disable":
         text_out = the_text(normal_font.render(txt, mode, (105,105,105)),big_font.render(txt, mode, (105,105,105)))
     elif color == "white" or color == "enable":
