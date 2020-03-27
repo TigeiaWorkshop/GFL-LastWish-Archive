@@ -31,7 +31,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 sangvisFerris_data[chara_name].current_hp = 0
             current_hp_to_display = fontRender(str(sangvisFerris_data[chara_name].current_hp)+"/"+str(sangvisFerris_data[chara_name].max_hp),"black",10)
             percent_of_hp = sangvisFerris_data[chara_name].current_hp/sangvisFerris_data[chara_name].max_hp
-            current_bullets_situation = fontRender(str(sangvisFerris_data[chara_name].current_bullets)+"/"+str(sangvisFerris_data[chara_name].magazine_capacity),"black",10)
         elif chara_name in characters_data:
             hidden = characters_data[chara_name].undetected
             gif_dic = characters_data[chara_name].gif_dic
@@ -42,7 +41,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     characters_data[chara_name].dying = 3
                     light_area = calculate_darkness(characters_data,facilities_data["campfire"])
                 current_hp_to_display = fontRender(str(characters_data[chara_name].dying)+"/3","black",10)
-                percent_of_hp = characters_data[chara_name].dying/3
+                if characters_data[chara_name].kind != "HOC":
+                    percent_of_hp = characters_data[chara_name].dying/3
+                else:
+                    percent_of_hp = 0
                 hp_img = original_UI_img["hp_red"]
             else:
                 if characters_data[chara_name].dying != False:
@@ -51,11 +53,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 current_hp_to_display = fontRender(str(characters_data[chara_name].current_hp)+"/"+str(characters_data[chara_name].max_hp),"black",10)
                 percent_of_hp = characters_data[chara_name].current_hp/characters_data[chara_name].max_hp
             
-        if percent_of_hp<0:
-            percent_of_hp=0
         original_alpha = gif_dic[action][0][0][gif_dic[action][1]].get_alpha()
         img_of_char = pygame.transform.scale(gif_dic[action][0][0][gif_dic[action][1]], (round(perBlockWidth*2), round(perBlockHeight*2)))
-        if chara_name in characters_data:
+        if chara_name in characters_data and characters_data[chara_name].kind != "HOC":
             if hidden == True:
                 img_of_char.set_alpha(130)
             else:
@@ -1315,6 +1315,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         # 我方角色动画
+        the_dead_one = []
         for every_chara in characters_data:
             if every_chara != the_character_get_click:
                 if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
@@ -1325,6 +1326,19 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     action_displayer(every_chara,"wait",characters_data[every_chara].x,characters_data[every_chara].y)
                 else:
                     action_displayer(every_chara,"die",characters_data[every_chara].x,characters_data[every_chara].y,False)
+            if characters_data[every_chara].kind == "HOC" and characters_data[every_chara].current_hp <= 0:
+                the_dead_one.append(every_chara)
+        if len(the_dead_one) != 0:
+            for i in range(len(the_dead_one)):
+                the_characters_attacking = characters_data[the_dead_one[i]].gif_dic
+                if the_characters_attacking["die"][1]+1 == the_characters_attacking["die"][0][1]:
+                    the_alpha = the_characters_attacking["die"][0][0][-1].get_alpha()
+                    if the_alpha > 0:
+                        the_characters_attacking["die"][0][0][-1].set_alpha(the_alpha-5)
+                    else:
+                        del characters_data[the_dead_one[i]]
+                        result_of_round["times_characters_down"]+=1
+                        light_area = calculate_darkness(characters_data,facilities_data["campfire"])
         #敌方动画
         the_dead_one = []
         for enemies in sangvisFerris_data:
