@@ -118,7 +118,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     for i in range(len(all_env_file_list)):
         img_name = all_env_file_list[i].replace("Assets","").replace("img","").replace("environment","").replace("block","").replace(".png","").replace("\\","").replace("/","")
         env_img_list[img_name] = loadImg(all_env_file_list[i])
-
+    #地图方块图片随机化
+    with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        blocks_setting = loadData["blocks"]
+    
     #读取并初始化章节信息
     with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -129,7 +133,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         local_y = loadData["local_y"]
         characters = loadData["character"]
         sangvisFerris = loadData["sangvisFerri"]
-        theMap = loadData["map"]
+        theMap = MapObject(loadData["map"],blocks_setting,env_img_list)
         bg_music = loadData["background_music"]
         environment_sound = loadData["weather"]
         facilities_data = loadData["facility"]
@@ -141,18 +145,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     perBlockWidth = round(window_x/block_x*zoom_in)
     perBlockHeight = round(window_y/block_y*zoom_in)
 
-    if local_x+window_x/block_x*0.25*len(theMap[0]) >0:
+    if local_x+window_x/block_x*0.25*theMap.column >0:
         local_x=0
-    if local_y+window_y/block_y*0.25*len(theMap)>0:
+    if local_y+window_y/block_y*0.25*theMap.row>0:
         local_y=0
-    
-    #地图方块图片随机化
-    with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
-        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        blocks_setting = loadData["blocks"]
-    
-    map_img_list = randomBlock(theMap,blocks_setting)
-    
+
     #加载雪花
     all_snow_img = glob.glob(r'Assets/img/environment/snow/*.png')
     snow_list = []
@@ -319,11 +316,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             pygame.mixer.Channel(1).play(environment_sound)
         for a in range(250,0,-5):
             #加载地图
-            for y in range(len(map_img_list)):
-                for x in range(len(map_img_list[y])):
-                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
-                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
-                        drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+            theMap.display_map(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y)
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
@@ -334,14 +327,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     else:
                         facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
-            for y in range(len(map_img_list)):
-                for x in range(len(map_img_list[y])):
-                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and dark_mode == True:
-                        if (x,y) not in light_area:
-                            drawImg(UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+            theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
             #角色动画
             for every_chara in characters_data:
-                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
                     characters_data[every_chara].undetected = True
                 else:
                     characters_data[every_chara].undetected = False
@@ -351,7 +340,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
             #加载雪花
             for i in range(len(all_snow_on_screen)):
-                drawImage(all_snow_on_screen[i],screen,local_x,local_y)
+                all_snow_on_screen[i].draw(screen,local_x,local_y)
                 all_snow_on_screen[i].x -= 10*zoom_in
                 all_snow_on_screen[i].y += 20*zoom_in
                 if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
@@ -372,11 +361,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #如果战斗前有对话
     elif dialog_during_battle != None:
         #建立地图
-        map2d=Array2D(len(theMap[0]),len(theMap))
+        map2d=Array2D(theMap.column,theMap.row)
         #历遍地图，设置障碍方块
-        for y in range(len(theMap)):
-            for x in range(len(theMap[y])):
-                if blocks_setting[theMap[y][x]]["canPassThrough"] == False:
+        for y in range(theMap.row):
+            for x in range(theMap.column):
+                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
                     map2d[x][y]=1
         #历遍设施，设置障碍方块
         for key1 in facilities_data:
@@ -415,11 +404,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
                 pygame.mixer.Channel(1).play(environment_sound)
             #加载地图
-            for y in range(len(map_img_list)):
-                for x in range(len(map_img_list[y])):
-                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
-                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
-                        drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+            theMap.display_map(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y)
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
@@ -430,10 +415,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     else:
                         facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
-            for y in range(len(map_img_list)):
-                for x in range(len(map_img_list[y])):
-                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        drawImg(UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+            theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
 
             key_to_remove = []
             for every_chara in all_characters_path:
@@ -473,7 +455,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #角色动画
             for every_chara in characters_data:
                 if every_chara not in all_characters_path:
-                    if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                    if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
                         characters_data[every_chara].undetected = True
                     else:
                         characters_data[every_chara].undetected = False
@@ -484,7 +466,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
             #加载雪花
             for i in range(len(all_snow_on_screen)):
-                drawImage(all_snow_on_screen[i],screen,local_x,local_y)
+                all_snow_on_screen[i].draw(screen,local_x,local_y)
                 all_snow_on_screen[i].x -= 10*zoom_in
                 all_snow_on_screen[i].y += 20*zoom_in
                 if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
@@ -570,11 +552,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         dialog = False
 
             #加载地图
-            for y in range(len(map_img_list)):
-                for x in range(len(map_img_list[y])):
-                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
-                        img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (perBlockWidth, perBlockHeight*1.5))
-                        drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+            theMap.display_map(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y)
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
@@ -585,14 +563,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     else:
                         facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
-            for y in range(len(map_img_list)):
-                for x in range(len(map_img_list[y])):
-                    if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                        drawImg(UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+            theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
                 
             #角色动画
             for every_chara in characters_data:
-                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
                     characters_data[every_chara].undetected = True
                 else:
                     characters_data[every_chara].undetected = False
@@ -603,7 +578,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
             #加载雪花
             for i in range(len(all_snow_on_screen)):
-                drawImage(all_snow_on_screen[i],screen,local_x,local_y)
+                all_snow_on_screen[i].draw(screen,local_x,local_y)
                 all_snow_on_screen[i].x -= 10*zoom_in
                 all_snow_on_screen[i].y += 20*zoom_in
                 if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
@@ -618,7 +593,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #上方对话框
             if dialog_during_battle[display_num]["dialoguebox_up"] != None:
                 #对话框图片
-                drawImage(dialoguebox_up,screen)
+                dialoguebox_up.draw(screen)
                 #名字
                 if dialog_during_battle[display_num]["dialoguebox_up"]["speaker"] != None:
                     drawImg(fontRender(dialog_during_battle[display_num]["dialoguebox_up"]["speaker"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
@@ -639,7 +614,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             #下方对话框
             if dialog_during_battle[display_num]["dialoguebox_down"] != None:
                 #对话框图片
-                drawImage(dialoguebox_down,screen)
+                dialoguebox_down.draw(screen)
                 #名字
                 if dialog_during_battle[display_num]["dialoguebox_down"]["speaker"] != None:
                     drawImg(fontRender(dialog_during_battle[display_num]["dialoguebox_down"]["speaker"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
@@ -680,14 +655,16 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if event.key == K_m:
                     exit()
             elif event.type == MOUSEBUTTONDOWN:
-                #上下滚轮-放大和缩小图片
+                #上下滚轮-放大和缩小地图
                 if event.button == 4:
                     if zoom_in < 2:
                         zoom_in += 0.25
                         perBlockWidth = round(window_x/block_x*zoom_in)
                         perBlockHeight = round(window_y/block_y*zoom_in)
-                        local_x -= window_x/block_x*0.25*len(map_img_list[0])
-                        local_y -= window_y/block_y*0.25*len(map_img_list)
+                        if local_x < 0 - perBlockWidth*theMap.column:
+                            local_x = 0 - perBlockWidth*theMap.column
+                        if local_y < 0 - perBlockWidth*theMap.row:
+                            local_y = 0 - perBlockWidth*theMap.row
                         #加载UI
                         UI_img["green"] = pygame.transform.scale(original_UI_img["green"], (perBlockWidth, perBlockHeight))
                         UI_img["red"] = pygame.transform.scale(original_UI_img["red"], (perBlockWidth, perBlockHeight))
@@ -700,10 +677,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         zoom_in -= 0.25
                         perBlockWidth = round(window_x/block_x*zoom_in)
                         perBlockHeight = round(window_y/block_y*zoom_in)
-                        local_x += window_x/block_x*0.25*len(map_img_list[0])
                         if local_x >0:
                             local_x=0
-                        local_y += window_y/block_y*0.25*len(map_img_list)
                         if local_y>0:
                             local_y = 0
                         #加载UI
@@ -724,13 +699,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             if local_x+mouse_move_temp_x-mouse_x <= 0:
                                 local_x += mouse_move_temp_x-mouse_x
                         elif mouse_move_temp_x < mouse_x:
-                            if local_x-(mouse_x - mouse_move_temp_x) >= 0 - perBlockWidth*len(map_img_list[0]) + window_x:
+                            if local_x-(mouse_x - mouse_move_temp_x) >= 0 - perBlockWidth*theMap.column + window_x:
                                 local_x -= mouse_x-mouse_move_temp_x
                         if mouse_move_temp_y > mouse_y:
                             if local_y+mouse_move_temp_y-mouse_y <= 0:
                                 local_y += mouse_move_temp_y-mouse_y
                         elif mouse_move_temp_y < mouse_y:
-                            if local_y-(mouse_y-mouse_move_temp_y) >= 0 - perBlockHeight*len(map_img_list) + window_y:
+                            if local_y-(mouse_y-mouse_move_temp_y) >= 0 - perBlockHeight*theMap.row + window_y:
                                 local_y -= mouse_y-mouse_move_temp_y
                         mouse_move_temp_x = mouse_x
                         mouse_move_temp_y = mouse_y
@@ -741,7 +716,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #如果需要移动屏幕
         if screen_to_move_x != None and screen_to_move_x != 0:
             temp_value = local_x + screen_to_move_x*0.2
-            if -1*len(theMap[0])*perBlockWidth<=temp_value<=0:
+            if -1*theMap.column*perBlockWidth<=temp_value<=0:
                 local_x = temp_value
                 screen_to_move_x*=0.8
                 if int(screen_to_move_x) == 0:
@@ -750,7 +725,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 screen_to_move_x = 0
         if screen_to_move_y != None and screen_to_move_y !=0:
             temp_value = local_y + screen_to_move_y*0.2
-            if -1*len(theMap)*perBlockHeight<=temp_value<=0:
+            if -1*theMap.row*perBlockHeight<=temp_value<=0:
                 local_y = temp_value
                 screen_to_move_y*=0.8
                 if int(screen_to_move_y) == 0:
@@ -759,11 +734,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 screen_to_move_y = 0
         
         #加载地图
-        for y in range(len(map_img_list)):
-            for x in range(len(map_img_list[y])):
-                if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight*1.5<=(y-0.5)*perBlockHeight+local_y<= window_y:
-                    img_display = pygame.transform.scale(env_img_list[map_img_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
-                    drawImg(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight),screen,local_x,local_y)
+        theMap.display_map(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y)
         #加载篝火
         if facilities_data["campfire"] != None:
             for key in facilities_data["campfire"]:
@@ -774,10 +745,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 else:
                     facilities_data["campfire"][key]["img_id"]+=0.25
         #加载阴影区
-        for y in range(len(map_img_list)):
-            for x in range(len(map_img_list[y])):
-                if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y and (x,y) not in light_area and dark_mode == True:
-                    drawImg(UI_img["black"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+        theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
         
         #玩家回合
         if whose_round == "player":
@@ -814,17 +782,17 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if screen_to_move_x == None:
                     if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0:
                         screen_to_move_x = window_x*0.2-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x
-                    elif characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x > window_x*0.8 and local_x>=len(theMap[0])*perBlockWidth*-1:
+                    elif characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x > window_x*0.8 and local_x>=theMap.column*perBlockWidth*-1:
                         screen_to_move_x = window_x*0.8-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x
                 if screen_to_move_y == None:
                     if characters_data[the_character_get_click].y*perBlockHeight-perBlockWidth/2+local_y < window_y*0.2 and local_y<=0:
                         screen_to_move_y = window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
-                    elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=len(theMap)*perBlockHeight*-1:
+                    elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=theMap.row*perBlockHeight*-1:
                         screen_to_move_y = window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
 
                 #左下角的角色信息
                 text_size = 20
-                drawImage(the_character_get_click_info_board,screen)
+                the_character_get_click_info_board.draw(screen)
                 padding = (the_character_get_click_info_board.height-character_icon_img_list[characters_data[the_character_get_click].type].get_height())/2
                 drawImg(character_icon_img_list[characters_data[the_character_get_click].type],(padding,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 tcgc_hp1 = fontRender("HP: ","white",20)
@@ -919,11 +887,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 #显示移动范围
                 if action_choice == "move":
                     #建立地图
-                    map2d=Array2D(len(theMap[0]),len(theMap))
+                    map2d=Array2D(theMap.column,theMap.row)
                     #历遍地图，设置障碍方块
-                    for y in range(len(theMap)):
-                        for x in range(len(theMap[y])):
-                            if blocks_setting[theMap[y][x]]["canPassThrough"] == False:
+                    for y in range(theMap.row):
+                        for x in range(theMap.column):
+                            if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
                                 map2d[x][y]=1
                     #历遍设施，设置障碍方块
                     for key1 in facilities_data:
@@ -975,7 +943,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     for y in range(characters_data[the_character_get_click].y-the_character_effective_range,characters_data[the_character_get_click].y+the_character_effective_range):
                         if y < characters_data[the_character_get_click].y:
                             for x in range(characters_data[the_character_get_click].x-the_character_effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+the_character_effective_range+(y-characters_data[the_character_get_click].y)):
-                                if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
                                     if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
                                         attacking_range["far"].append([x,y])
                                     elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
@@ -987,7 +955,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
                                     pass
                                 else:
-                                    if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                    if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
                                         if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
                                             attacking_range["far"].append([x,y])
                                         elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
@@ -1014,12 +982,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 for y in range(block_get_hover_y-characters_data[the_character_get_click].attack_range,block_get_hover_y+characters_data[the_character_get_click].attack_range):
                                     if y < block_get_hover_y:
                                         for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)):
-                                            if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                            if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
                                                 drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                 the_attacking_range_area.append([x,y])
                                     else:
                                         for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)):
-                                            if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                            if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
                                                 drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                 the_attacking_range_area.append([x,y])
                                 enemies_get_attack = {}
@@ -1046,7 +1014,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].skill_effective_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].skill_effective_range):
                         if y < characters_data[the_character_get_click].y:
                             for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].skill_effective_range-(y-characters_data[the_character_get_click].y)+1,characters_data[the_character_get_click].x+characters_data[the_character_get_click].skill_effective_range+(y-characters_data[the_character_get_click].y)):
-                                if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
                                     drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     skill_range.append([x,y])
                         else:
@@ -1054,7 +1022,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
                                     pass
                                 else:
-                                    if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                    if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
                                         drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                         skill_range.append([x,y])
                     if [block_get_click_x,block_get_click_y] in skill_range:
@@ -1244,7 +1212,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         if whose_round == "sangvisFerris":
             enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]
             if enemy_action == None:
-                enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data)
+                enemy_action = AI(enemies_in_control,theMap.mapData,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data)
                 print(enemies_in_control+" choses "+enemy_action[0])
             if enemy_action[0] == "attack":
                 if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
@@ -1318,7 +1286,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         the_dead_one = []
         for every_chara in characters_data:
             if every_chara != the_character_get_click:
-                if theMap[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
+                if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
                     characters_data[every_chara].undetected = True
                 else:
                     characters_data[every_chara].undetected = False
@@ -1352,7 +1320,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                     for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].effective_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].effective_range):
                                         if y < sangvisFerris_data[enemies].y:
                                             for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)):
-                                                if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
                                                     drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                 else:
                                                     drawImg(UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
@@ -1361,7 +1329,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                                 if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
                                                     pass
                                                 else:
-                                                    if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
+                                                    if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
                                                         drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                     else:
                                                         drawImg(UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
@@ -1391,7 +1359,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
         #加载雪花
         for i in range(len(all_snow_on_screen)):
-            drawImage(all_snow_on_screen[i],screen,local_x,local_y)
+            all_snow_on_screen[i].draw(screen,local_x,local_y)
             all_snow_on_screen[i].x -= 10*zoom_in
             all_snow_on_screen[i].y += 20*zoom_in
             if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
@@ -1400,7 +1368,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         
         if whose_round == "player":
             #加载结束回合的按钮
-            drawImage(end_round_button,screen)
+            end_round_button.draw(screen)
 
         #显示警告
         warnings_to_display.display(screen,window_x,window_y)
@@ -1428,7 +1396,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if event.type == KEYDOWN:
                     if event.key == K_SPACE:
                         battle = False
-            drawImage(original_UI_img["score"],screen)
+            original_UI_img["score"].draw(screen)
             drawImg(total_kills,(250,300),screen)
             drawImg(total_time,(250,350),screen)
             drawImg(total_rounds_txt,(250,400),screen)

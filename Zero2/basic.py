@@ -26,24 +26,29 @@ def loadImg(path,length=None,height=None,setAlpha=None,ifConvertAlpha=True):
             return img
         elif length < 0 or height < 0:
             raise Exception('Both length and height must be positive')
+#图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
+def drawImg(img,position,screen,local_x=0,local_y=0):
+    screen.blit(img,(position[0]+local_x,position[1]+local_y))
 
 #高级图片加载模块：接收图片路径（或者已经载入的图片）,位置:[x,y],长,高,返回对应的图片class
 def loadImage(path,the_object_position,width=None,height=None,description="Default",ifConvertAlpha=True):
-    class theImg:
+    class theImage:
         def __init__(self,img,x,y,width,height,description="Default"):
             self.img = img
             self.x = x
             self.y = y
             self.width = width
-            self.height = height                                                                                                      
+            self.height = height
             self.description = description
+        def draw(self,screen,local_x=0,local_y=0):
+            screen.blit(pygame.transform.scale(self.img, (int(self.width),int(self.height))),(self.x+local_x,self.y+local_y))
     if isinstance(path,str):
         if ifConvertAlpha == False:
-            return theImg(pygame.image.load(os.path.join(path)),the_object_position[0],the_object_position[1],width,height,description)
+            return theImage(pygame.image.load(os.path.join(path)),the_object_position[0],the_object_position[1],width,height,description)
         else:
-            return theImg(pygame.image.load(os.path.join(path)).convert_alpha(),the_object_position[0],the_object_position[1],width,height,description)
+            return theImage(pygame.image.load(os.path.join(path)).convert_alpha(),the_object_position[0],the_object_position[1],width,height,description)
     else:
-        return theImg(path,the_object_position[0],the_object_position[1],width,height,description)
+        return theImage(path,the_object_position[0],the_object_position[1],width,height,description)
 
 #文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
 def fontRender(txt,color,size=50,ifBold=False,ifItalic=False,font="simsunnsimsun",mode=True):
@@ -105,17 +110,6 @@ def displayWithInCenter(item1,item2,x,y,screen,local_x=0,local_y=0):
     added_y = (item2.get_height()-item1.get_height())/2
     screen.blit(item2,(x+local_x,y+local_y))
     screen.blit(item1,(x+added_x+local_x,y+added_y+local_y))
-
-#图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
-def drawImg(img,position,screen,local_x=0,local_y=0):
-    screen.blit(img,(position[0]+local_x,position[1]+local_y))
-
-#高级图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
-def drawImage(theImgClass,screen,local_x=0,local_y=0):
-    if theImgClass.img.get_width() == theImgClass.width and  theImgClass.img.get_height() == theImgClass.height or theImgClass.width == None and theImgClass.height ==None:
-        screen.blit(theImgClass.img,(theImgClass.x+local_x,theImgClass.y+local_y))
-    else:
-        screen.blit(pygame.transform.scale(theImgClass.img, (int(theImgClass.width),int(theImgClass.height))),(theImgClass.x+local_x,theImgClass.y+local_y))
 
 #字典合并
 def dicMerge(dict1, dict2): 

@@ -66,7 +66,7 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     t2 = fontRender("警告：所有内容仍处于研发阶段，不代表最终效果","white",30)
 
     for i in range(0,250,2):
-        drawImage(the_black,screen)
+        the_black.draw(screen)
         t1.set_alpha(i)
         drawImg(t1,(30,window_y-130),screen)
         t2.set_alpha(i)
@@ -75,7 +75,7 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
         pygame.display.flip()
     
     for i in range(250,0,-2):
-        drawImage(the_black,screen)
+        the_black.draw(screen)
         t1.set_alpha(i)
         drawImg(t1,(30,window_y-130),screen)
         t2.set_alpha(i)

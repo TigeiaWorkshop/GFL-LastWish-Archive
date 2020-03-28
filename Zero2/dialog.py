@@ -69,9 +69,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     #加载完成-淡出效果
     for i in range(100,-1,-1):
         if dialog_content[dialogId]["background_img"] == None:
-            drawImage(black_bg,screen)
+            black_bg.draw(screen)
         elif dialog_content[dialogId]["background_img"] in dialog_bg_img_dic:
-            drawImage(dialog_bg_img_dic[dialog_content[dialogId]["background_img"]],screen)
+            dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
         else:
             if videoCapture == None:
                 if os.path.exists("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
@@ -106,9 +106,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     while len(dialog_content)!=0 and if_skip == False:
         #背景
         if dialog_content[dialogId]["background_img"] == None:
-            drawImage(black_bg,screen)
+            black_bg.draw(screen)
         elif dialog_content[dialogId]["background_img"] in dialog_bg_img_dic:
-            drawImage(dialog_bg_img_dic[dialog_content[dialogId]["background_img"]],screen)
+            dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
         else:
             if videoCapture == None:
                 if os.path.exists("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
@@ -135,9 +135,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
             elif len(dialog_content[dialogId]["characters_img"])==1:
                 drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][0]],(window_x/4,window_y-window_x/2),screen)
         # 对话框图片
-        drawImage(dialoguebox,screen)
+        dialoguebox.draw(screen)
         #跳过按钮
-        drawImage(skip_button,screen)
+        skip_button.draw(screen)
 
         if dialoguebox.height < dialoguebox_max_height:
             dialoguebox.height += dialoguebox_max_height/12
@@ -186,6 +186,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                             if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["narrator"] != dialog_content[dialogId]["narrator"]:
                                 dialoguebox.height = 0
                                 dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
+                            dialog_options.append(i)
                             dialogId = dialog_content[dialogId]["next_dialog_id"][i][1]
                             break
 
@@ -245,7 +246,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     pygame.mixer.music.fadeout(1000)
     for i in range(0,55,2):
         black_bg.img.set_alpha(i)
-        drawImage(black_bg,screen)
+        black_bg.draw(screen)
         fpsClock.tick(fps)
         pygame.display.update()
 
