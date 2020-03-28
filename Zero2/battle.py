@@ -327,7 +327,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     else:
                         facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
-            theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
+            if dark_mode == True:
+                theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
             #角色动画
             for every_chara in characters_data:
                 if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
@@ -415,7 +416,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     else:
                         facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
-            theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
+            if dark_mode == True:
+                theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
 
             key_to_remove = []
             for every_chara in all_characters_path:
@@ -563,7 +565,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     else:
                         facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
-            theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
+            if dark_mode == True:
+                theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
                 
             #角色动画
             for every_chara in characters_data:
@@ -745,7 +748,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 else:
                     facilities_data["campfire"][key]["img_id"]+=0.25
         #加载阴影区
-        theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
+        if dark_mode == True:
+            theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
         
         #玩家回合
         if whose_round == "player":
@@ -886,50 +890,55 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             elif green_hide == False and the_character_get_click != "":
                 #显示移动范围
                 if action_choice == "move":
-                    #建立地图
-                    map2d=Array2D(theMap.column,theMap.row)
-                    #历遍地图，设置障碍方块
-                    for y in range(theMap.row):
-                        for x in range(theMap.column):
-                            if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
-                                map2d[x][y]=1
-                    #历遍设施，设置障碍方块
-                    for key1 in facilities_data:
-                        for key2 in facilities_data[key1]:
-                            map2d[facilities_data[key1][key2]["x"]][facilities_data[key1][key2]["y"]]=1
-                    # 历遍所有角色，将角色的坐标点设置为障碍方块
-                    all_characters_data = dicMerge(characters_data,sangvisFerris_data)
-                    for every_chara in all_characters_data:
-                        map2d[all_characters_data[every_chara].x][all_characters_data[every_chara].y] = 1
                     #创建AStar对象,并设置起点和终点为
                     star_point_x = characters_data[the_character_get_click].x
                     star_point_y = characters_data[the_character_get_click].y
-                    aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(int((mouse_x-local_x)/perBlockWidth),int((mouse_y-local_y)/perBlockHeight)))
-                    #开始寻路
-                    pathList=aStar.start()
-                    #遍历路径点,讲指定数量的点放到路径列表中
-                    the_route = []
-                    if pathList != None:
-                        if len(pathList)>int(characters_data[the_character_get_click].current_action_point/2):
-                            route_len = int(characters_data[the_character_get_click].current_action_point/2)
-                        else:
-                            route_len = len(pathList)
-                        for i in range(route_len):
-                            if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
-                                star_point_x+=1
-                            elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
-                                star_point_x-=1
-                            elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
-                                star_point_y+=1
-                            elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
-                                star_point_y-=1
+                    end_point_x = int((mouse_x-local_x)/perBlockWidth)
+                    end_point_y = int((mouse_y-local_y)/perBlockHeight)
+                    max_blocks_can_move = int(characters_data[the_character_get_click].current_action_point/2)
+                    if abs(end_point_x-star_point_x)+abs(end_point_y-star_point_y)<=max_blocks_can_move:
+                        #建立地图
+                        map2d=Array2D(theMap.column,theMap.row)
+                        #历遍地图，设置障碍方块
+                        for y in range(theMap.row):
+                            for x in range(theMap.column):
+                                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
+                                    map2d[x][y]=1
+                        #历遍设施，设置障碍方块
+                        for key1 in facilities_data:
+                            for key2 in facilities_data[key1]:
+                                map2d[facilities_data[key1][key2]["x"]][facilities_data[key1][key2]["y"]]=1
+                        # 历遍所有角色，将角色的坐标点设置为障碍方块
+                        all_characters_data = dicMerge(characters_data,sangvisFerris_data)
+                        for every_chara in all_characters_data:
+                            map2d[all_characters_data[every_chara].x][all_characters_data[every_chara].y] = 1
+                        aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(end_point_x,end_point_y))
+                        #开始寻路
+                        pathList=aStar.start()
+                        #遍历路径点,讲指定数量的点放到路径列表中
+                        the_route = []
+                        if pathList != None:
+                            if len(pathList)>max_blocks_can_move:
+                                route_len = max_blocks_can_move
                             else:
-                                #快速跳出
-                                break
-                            the_route.append([star_point_x,star_point_y])
-                    #显示路径
-                    for i in range(len(the_route)):
-                        drawImg(UI_img["green"],(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
+                                route_len = len(pathList)
+                            for i in range(route_len):
+                                if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
+                                    star_point_x+=1
+                                elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
+                                    star_point_x-=1
+                                elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
+                                    star_point_y+=1
+                                elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
+                                    star_point_y-=1
+                                else:
+                                    #快速跳出
+                                    break
+                                the_route.append([star_point_x,star_point_y])
+                            #显示路径
+                            for i in range(len(the_route)):
+                                drawImg(UI_img["green"],(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
+                            displayInCenter(fontRender("-"+str((i+1)*2)+"AP","green",window_x/106,True),UI_img["green"],the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight,screen,local_x,local_y)
                 #显示攻击范围        
                 elif action_choice == "attack":
                     attacking_range = {"near":[],"middle":[],"far":[]}
