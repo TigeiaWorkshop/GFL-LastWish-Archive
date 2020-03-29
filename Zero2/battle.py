@@ -140,8 +140,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
     if zoom_in < 1:
         zoom_in = 1
-    elif zoom_in > 2:
-        zoom_in = 2
+    elif zoom_in > 3:
+        zoom_in = 3
     perBlockWidth = round(window_x/block_x*zoom_in)
     perBlockHeight = round(window_y/block_y*zoom_in)
 
@@ -178,11 +178,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     #初始化角色信息
     characters_data = {}
     for each_character in characters:
-        characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],character_gif_dic(characters[each_character]["type"],perBlockWidth,perBlockHeight),characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["type"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["start_position"],characters[each_character]["undetected"])
+        characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],character_gif_dic(characters[each_character]["type"]),characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["type"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["start_position"],characters[each_character]["undetected"])
 
     sangvisFerris_data = {}
     for each_character in sangvisFerris:
-        sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],sangvisFerris[each_character]["kind"],character_gif_dic(sangvisFerris[each_character]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["type"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
+        sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],sangvisFerris[each_character]["kind"],character_gif_dic(sangvisFerris[each_character]["type"],"sangvisFerri"),sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["type"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
 
     #加载对话时角色的图标
     all_icon_file_list = glob.glob(r'Assets/image/npc_icon/*.png')
@@ -660,7 +660,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             elif event.type == MOUSEBUTTONDOWN:
                 #上下滚轮-放大和缩小地图
                 if event.button == 4:
-                    if zoom_in < 2:
+                    if zoom_in < 3:
                         zoom_in += 0.25
                         perBlockWidth = round(window_x/block_x*zoom_in)
                         perBlockHeight = round(window_y/block_y*zoom_in)
