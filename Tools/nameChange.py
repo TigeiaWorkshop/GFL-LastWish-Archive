@@ -1,13 +1,15 @@
 import os
-character="jupiter"
+character="vespid"
 #kind = "character"
 kind = "sangvisFerri"
-action=["attack","attack2","die","wait","wait2"]
+#action=["attack","attack2","die","wait","wait2"]
+action=["attack","die","die2","die3","move","wait"]
 #action=["attack","die","move","skill","victory","victoryloop","wait"]
+#action=["attack","die","move","reload","repair","set","wait"]
 #action=["attack","die","move","wait"]
 total_img=0
 for a in range(len(action)):
-    path="../Assets/img/"+kind+"/"+character+"/"+action[a]+"/"
+    path="../Assets/image/"+kind+"/"+character+"/"+action[a]+"/"
     f=os.listdir(path)
     n=0
     for i in f:

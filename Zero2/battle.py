@@ -54,7 +54,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 percent_of_hp = characters_data[chara_name].current_hp/characters_data[chara_name].max_hp
             
         original_alpha = gif_dic[action][0][0][gif_dic[action][1]].get_alpha()
-        img_of_char = pygame.transform.scale(gif_dic[action][0][0][gif_dic[action][1]], (round(perBlockWidth*2), round(perBlockHeight*2)))
+        img_of_char = pygame.transform.scale(gif_dic[action][0][0][gif_dic[action][1]], (round(perBlockWidth*4), round(perBlockHeight*4)))
         if chara_name in characters_data and characters_data[chara_name].kind != "HOC":
             if hidden == True:
                 img_of_char.set_alpha(130)
@@ -64,9 +64,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             img_of_char.set_alpha(original_alpha)
         if -perBlockWidth<=x*perBlockWidth+local_x <= window_x and -perBlockHeight<=y*perBlockHeight+local_y<= window_y:
             if ifFlip == True:
-                drawImg(pygame.transform.flip(img_of_char,True,False),(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
+                drawImg(pygame.transform.flip(img_of_char,True,False),((x-1.5)*perBlockWidth,(y-1.9)*perBlockHeight),screen,local_x,local_y)
             else:
-                drawImg(img_of_char,(x*perBlockWidth-perBlockWidth/2,y*perBlockHeight-perBlockHeight/2),screen,local_x,local_y)
+                drawImg(img_of_char,((x-1.5)*perBlockWidth,(y-1.9)*perBlockHeight),screen,local_x,local_y)
             if percent_of_hp>0:
                 drawImg(hp_empty,(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
                 drawImg(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp),round(perBlockHeight/5))),(x*perBlockWidth,y*perBlockHeight*0.98),screen,local_x,local_y)
@@ -98,7 +98,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         dialog_during_battle = loadData["dialog_during_battle"]
 
     #章节标题显示
-    the_black = loadImg("Assets/img/UI/black.png",window_x,window_y)
+    the_black = loadImg("Assets/image/UI/black.png",window_x,window_y)
     title_number_display = fontRender(chapter_no.replace("NaN",chapter_name.replace("chapter","")),"white")
     title_main_display = fontRender(chapter_title,"white")
 
@@ -113,10 +113,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         pygame.display.update()
 
     #加载背景图片
-    all_env_file_list = glob.glob(r'Assets/img/environment/block/*.png')
+    all_env_file_list = glob.glob(r'Assets/image/environment/block/*.png')
     env_img_list={}
     for i in range(len(all_env_file_list)):
-        img_name = all_env_file_list[i].replace("Assets","").replace("img","").replace("environment","").replace("block","").replace(".png","").replace("\\","").replace("/","")
+        img_name = all_env_file_list[i].replace("Assets","").replace("image","").replace("environment","").replace("block","").replace(".png","").replace("\\","").replace("/","")
         env_img_list[img_name] = loadImg(all_env_file_list[i])
     #地图方块图片随机化
     with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
@@ -151,7 +151,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         local_y=0
 
     #加载雪花
-    all_snow_img = glob.glob(r'Assets/img/environment/snow/*.png')
+    all_snow_img = glob.glob(r'Assets/image/environment/snow/*.png')
     snow_list = []
     for snowflake in all_snow_img:
         snow_list.append(loadImg(snowflake))
@@ -171,7 +171,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     campfire_images = []
     if facilities_data["campfire"] != None:
         for i in range(1,11):
-            campfire_images.append(loadImg("Assets/img/environment/campfire/"+str(i)+".png"))
+            campfire_images.append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
         for key in facilities_data["campfire"]:
             facilities_data["campfire"][key]["img_id"] = random.randint(0,9)
 
@@ -185,35 +185,35 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],sangvisFerris[each_character]["kind"],character_gif_dic(sangvisFerris[each_character]["type"],perBlockWidth,perBlockHeight,"sangvisFerri"),sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["type"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
 
     #加载对话时角色的图标
-    all_icon_file_list = glob.glob(r'Assets/img/npc_icon/*.png')
+    all_icon_file_list = glob.glob(r'Assets/image/npc_icon/*.png')
     character_icon_img_list={}
     for i in range(len(all_icon_file_list)):
-        img_name = all_icon_file_list[i].replace("Assets","").replace("img","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
+        img_name = all_icon_file_list[i].replace("Assets","").replace("image","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
         character_icon_img_list[img_name] = loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
 
     #加载UI
     #加载结束回合的图片
-    end_round_button = loadImage("Assets/img/UI/endRound.png",(window_x*0.8,window_y*0.7),window_x/10, window_y/10)
+    end_round_button = loadImage("Assets/image/UI/endRound.png",(window_x*0.8,window_y*0.7),window_x/10, window_y/10)
     #加载选择菜单的图片
-    select_menu_button_original = loadImg("Assets/img/UI/menu.png")
+    select_menu_button_original = loadImg("Assets/image/UI/menu.png")
     #加载子弹图片
-    bullet_img = loadImg("Assets/img/UI/bullet.png", perBlockWidth/6, perBlockHeight/12)
+    bullet_img = loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, perBlockHeight/12)
     bullets_list = []
     #加载血条,各色方块等UI图片 size:perBlockWidth, perBlockHeight/5
     original_UI_img = {
-        "hp_empty" : loadImg("Assets/img/UI/hp_empty.png"),
-        "hp_red" : loadImg("Assets/img/UI/hp_red.png"),
-        "hp_green" : loadImg("Assets/img/UI/hp_green.png"),
-        "action_point_blue" : loadImg("Assets/img/UI/action_point.png"),
-        "bullets_number_brown" : loadImg("Assets/img/UI/bullets_number.png"),
-        "green" : loadImg("Assets/img/UI/green.png",None,None,100),
-        "red" : loadImg("Assets/img/UI/red.png",None,None,100),
-        "black" : loadImg("Assets/img/UI/black.png",None,None,100),
-        "yellow": loadImg("Assets/img/UI/yellow.png",None,None,100),
-        "blue": loadImg("Assets/img/UI/blue.png",None,None,100),
-        "orange": loadImg("Assets/img/UI/orange.png",None,None,100),
+        "hp_empty" : loadImg("Assets/image/UI/hp_empty.png"),
+        "hp_red" : loadImg("Assets/image/UI/hp_red.png"),
+        "hp_green" : loadImg("Assets/image/UI/hp_green.png"),
+        "action_point_blue" : loadImg("Assets/image/UI/action_point.png"),
+        "bullets_number_brown" : loadImg("Assets/image/UI/bullets_number.png"),
+        "green" : loadImg("Assets/image/UI/green.png",None,None,100),
+        "red" : loadImg("Assets/image/UI/red.png",None,None,100),
+        "black" : loadImg("Assets/image/UI/black.png",None,None,100),
+        "yellow": loadImg("Assets/image/UI/yellow.png",None,None,100),
+        "blue": loadImg("Assets/image/UI/blue.png",None,None,100),
+        "orange": loadImg("Assets/image/UI/orange.png",None,None,100),
         #计分板
-        "score" : loadImage("Assets/img/UI/score.png",(200,200),300,600),
+        "score" : loadImage("Assets/image/UI/score.png",(200,200),300,600),
     }
     #UI - 变形后
     UI_img = {
@@ -224,7 +224,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         "blue" : pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight)),
         "orange": pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
     }
-    the_character_get_click_info_board = loadImage("Assets/img/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
+    the_character_get_click_info_board = loadImage("Assets/image/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
 
     #-----加载音效-----
     #行走的音效 -- 频道0
@@ -493,7 +493,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #脚步停止
         pygame.mixer.Channel(0).stop()
         #加载对话框图片
-        dialoguebox_up = loadImage("Assets/img/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
+        dialoguebox_up = loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
         dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
         #设定初始化
         display_num = 0
@@ -1193,7 +1193,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 if whose_round == "playerToSangvisFerris":
                     sangvisFerris_name_list = []
                     for every_chara in sangvisFerris_data:
-                        sangvisFerris_name_list.append(every_chara)
+                        if sangvisFerris_data[every_chara].current_hp>0:
+                            sangvisFerris_name_list.append(every_chara)
                     for every_chara in characters_data:
                         if characters_data[every_chara].dying != False:
                             characters_data[every_chara].dying -= 1
@@ -1214,6 +1215,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
         #检测所有敌人是否都已经被消灭
         if len(sangvisFerris_data) == 0 and whose_round != "result":
+            the_character_get_click = ""
             whose_round = "result_win"
         
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑中间检测区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#

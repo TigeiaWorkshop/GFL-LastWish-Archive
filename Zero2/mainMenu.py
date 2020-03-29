@@ -35,7 +35,7 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
 
     # 创建窗口
     screen = pygame.display.set_mode((window_x, window_y),pygame.SCALED)
-    icon_img = loadImg("Assets/img/UI/icon.png")
+    icon_img = loadImg("Assets/image/UI/icon.png")
     pygame.display.set_icon(icon_img)
     pygame.display.set_caption(game_title) #窗口标题
     
@@ -49,7 +49,7 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     main_menu_txt_start_height = (window_y-len(main_menu_txt)*window_x/38*2)/2
     chapter_select_txt_start_height = (window_y-len(chapter_select)*window_x/38*2)/2
     #关卡选择的封面
-    cover_img = loadImg("Assets/img/covers/chapter1.png",window_x,window_y)
+    cover_img = loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
     #帧数控制器
     fpsClock = pygame.time.Clock()
     video_fps = videoCapture.get(cv2.CAP_PROP_FPS)
@@ -61,7 +61,7 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
     hover_sound_play_on = None
     last_hover_sound_play_on = None
 
-    the_black = loadImage("Assets/img/UI/black.png",(0,0),window_x,window_y)
+    the_black = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
     t1 = fontRender("缇吉娅工坊 呈现","white",30)
     t2 = fontRender("警告：所有内容仍处于研发阶段，不代表最终效果","white",30)
 

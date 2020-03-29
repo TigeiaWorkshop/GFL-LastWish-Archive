@@ -12,8 +12,8 @@ from Zero2.battle import *
 
 def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     #加载动画
-    LoadingImgAbove = loadImg("Assets/img/loading_img/LoadingImgAbove.png",window_x+8,window_y/1.7)
-    LoadingImgBelow = loadImg("Assets/img/loading_img/LoadingImgBelow.png",window_x+8,window_y/2.05)
+    LoadingImgAbove = loadImg("Assets/image/loading_img/LoadingImgAbove.png",window_x+8,window_y/1.7)
+    LoadingImgBelow = loadImg("Assets/image/loading_img/LoadingImgBelow.png",window_x+8,window_y/2.05)
     #帧数控制器
     fpsClock = pygame.time.Clock()
 
@@ -32,31 +32,31 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
         dialog_content = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
     
     #加载npc立绘
-    all_npc_file_list = glob.glob(r'Assets/img/npc/*.png')
+    all_npc_file_list = glob.glob(r'Assets/image/npc/*.png')
     npc_img_dic={}
     for i in range(len(all_npc_file_list)):
-        img_name = all_npc_file_list[i].replace("Assets","").replace("img","").replace("npc","").replace(".png","").replace("\\","").replace("/","")
+        img_name = all_npc_file_list[i].replace("Assets","").replace("image","").replace("npc","").replace(".png","").replace("\\","").replace("/","")
         npc_img_dic[img_name] = loadImg(all_npc_file_list[i],window_x/2,window_x/2)
     #加载对话的背景图片（注意是jpg）
-    all_dialog_bg_file_list = glob.glob(r'Assets/img/dialog_background/*.jpg')
+    all_dialog_bg_file_list = glob.glob(r'Assets/image/dialog_background/*.jpg')
     dialog_bg_img_dic={}
     for i in range(len(all_dialog_bg_file_list)):
-        img_name = all_dialog_bg_file_list[i].replace("Assets","").replace("img","").replace("dialog_background","").replace(".jpg","").replace("\\","").replace("/","")
+        img_name = all_dialog_bg_file_list[i].replace("Assets","").replace("image","").replace("dialog_background","").replace(".jpg","").replace("\\","").replace("/","")
         dialog_bg_img_dic[img_name] = loadImage(all_dialog_bg_file_list[i],(0,0),window_x,window_y)
     
     #加载对话框
     dialoguebox_max_height = window_y/4
-    dialoguebox = loadImage("Assets/img/UI/dialoguebox.png",((window_x-window_x/1.4)/2,window_y*0.65+dialoguebox_max_height/2),window_x/1.4,0)
+    dialoguebox = loadImage("Assets/image/UI/dialoguebox.png",((window_x-window_x/1.4)/2,window_y*0.65+dialoguebox_max_height/2),window_x/1.4,0)
     #鼠标图标
-    mouse_none = loadImg("Assets/img/UI/mouse_none.png",window_x/65,window_x/65)
-    mouse_click = loadImg("Assets/img/UI/mouse.png",window_x/65,window_x/65)
+    mouse_none = loadImg("Assets/image/UI/mouse_none.png",window_x/65,window_x/65)
+    mouse_click = loadImg("Assets/image/UI/mouse.png",window_x/65,window_x/65)
     #选项栏
-    optionBox = loadImg("Assets/img/UI/option.png")
+    optionBox = loadImg("Assets/image/UI/option.png")
     #跳过按钮
-    skip_button = loadImage("Assets/img/UI/skip.png",(window_x*0.92,window_y*0.05),window_x*0.055,window_x*0.025)
+    skip_button = loadImage("Assets/image/UI/skip.png",(window_x*0.92,window_y*0.05),window_x*0.055,window_x*0.025)
     if_skip = False
     #黑色帘幕
-    black_bg = loadImage("Assets/img/UI/black.png",(0,0),window_x,window_y)
+    black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
     #设定初始化
     dialogId = "head"
     dialog_content_id = 1
@@ -74,9 +74,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
             dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
         else:
             if videoCapture == None:
-                if os.path.exists("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
+                if os.path.exists("Assets/image/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
                     raise Exception('The video file is not exist')
-                videoCapture = cv2.VideoCapture("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"])
+                videoCapture = cv2.VideoCapture("Assets/image/dialog_background/"+dialog_content[dialogId]["background_img"])
                 frames_num=videoCapture.get(7)
                 the_FPS = videoCapture.get(cv2.CAP_PROP_FPS)
             else:
@@ -111,9 +111,9 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
             dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
         else:
             if videoCapture == None:
-                if os.path.exists("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
+                if os.path.exists("Assets/image/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
                     raise Exception('The video file is not exist')
-                videoCapture = cv2.VideoCapture("Assets/img/dialog_background/"+dialog_content[dialogId]["background_img"])
+                videoCapture = cv2.VideoCapture("Assets/image/dialog_background/"+dialog_content[dialogId]["background_img"])
                 frames_num=videoCapture.get(7)
                 the_FPS = videoCapture.get(cv2.CAP_PROP_FPS)
             else:
