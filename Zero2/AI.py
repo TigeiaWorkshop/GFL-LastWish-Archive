@@ -3,13 +3,13 @@ from Zero2.map import *
 
 def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data):
     attacking_range = []
-    for y in range(sangvisFerris_data[aiInControl].y-sangvisFerris_data[aiInControl].attack_range,sangvisFerris_data[aiInControl].y+sangvisFerris_data[aiInControl].attack_range):
+    for y in range(sangvisFerris_data[aiInControl].y-sangvisFerris_data[aiInControl].effective_range,sangvisFerris_data[aiInControl].y+sangvisFerris_data[aiInControl].effective_range):
         if y < sangvisFerris_data[aiInControl].y:
-            for x in range(sangvisFerris_data[aiInControl].x-sangvisFerris_data[aiInControl].attack_range-(y-sangvisFerris_data[aiInControl].y)+1,sangvisFerris_data[aiInControl].x+sangvisFerris_data[aiInControl].attack_range+(y-sangvisFerris_data[aiInControl].y)):
+            for x in range(sangvisFerris_data[aiInControl].x-sangvisFerris_data[aiInControl].effective_range-(y-sangvisFerris_data[aiInControl].y)+1,sangvisFerris_data[aiInControl].x+sangvisFerris_data[aiInControl].effective_range+(y-sangvisFerris_data[aiInControl].y)):
                 if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
                     attacking_range.append([x,y])
         else:
-            for x in range(sangvisFerris_data[aiInControl].x-sangvisFerris_data[aiInControl].attack_range+(y-sangvisFerris_data[aiInControl].y)+1,sangvisFerris_data[aiInControl].x+sangvisFerris_data[aiInControl].attack_range-(y-sangvisFerris_data[aiInControl].y)):
+            for x in range(sangvisFerris_data[aiInControl].x-sangvisFerris_data[aiInControl].effective_range+(y-sangvisFerris_data[aiInControl].y)+1,sangvisFerris_data[aiInControl].x+sangvisFerris_data[aiInControl].effective_range-(y-sangvisFerris_data[aiInControl].y)):
                 if x == sangvisFerris_data[aiInControl].x and y == sangvisFerris_data[aiInControl].y:
                     pass
                 else:
@@ -37,6 +37,8 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                     
     if len(characters_can_be_attacked) > 0:
         return ["attack",characters_can_be_attacked[0]]
+    elif sangvisFerris_data[aiInControl].kind == "HOC":
+        return ["stay"]
     else:
         #建立地图
         map2d=Array2D(len(theMap[0]),len(theMap))
