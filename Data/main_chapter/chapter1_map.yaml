@@ -2454,11 +2454,20 @@ map:
   - 0
 sangvisFerri:
   guard:
-    action_point: 2
+    action_point: 20
     attack_range: 1
     current_bullets: 20
     current_hp: 1000
-    effective_range: 4
+    effective_range:
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
     kind: HG
     magazine_capacity: 20
     max_damage: 100
@@ -2468,12 +2477,21 @@ sangvisFerri:
     type: guard
     x: 28
     y: 9
-  jaeger_2:
-    action_point: 2
+  jaeger:
+    action_point: 20
     attack_range: 1
     current_bullets: 20
     current_hp: 200
-    effective_range: 6
+    effective_range: 
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
     kind: RF
     magazine_capacity: 20
     max_damage: 500
@@ -2488,7 +2506,16 @@ sangvisFerri:
     attack_range: 1
     current_bullets: 20
     current_hp: 250
-    effective_range: 8
+    effective_range: 
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
     kind: SMG
     magazine_capacity: 20
     max_damage: 200
@@ -2499,11 +2526,20 @@ sangvisFerri:
     x: 28
     y: 11
   ripper:
-    action_point: 5
+    action_point: 10
     attack_range: 1
     current_bullets: 20
     current_hp: 400
-    effective_range: 6
+    effective_range: 
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
     kind: SMG
     magazine_capacity: 20
     max_damage: 400
@@ -2517,31 +2553,21 @@ sangvisFerri:
     type: ripper
     x: 28
     y: 12
-  ripper_0:
-    action_point: 5
-    attack_range: 1
-    current_bullets: 20
-    current_hp: 400
-    effective_range: 6
-    kind: SMG
-    magazine_capacity: 20
-    max_damage: 400
-    max_hp: 400
-    min_damage: 300
-    patrol_path:
-    - - 4
-      - 1
-    - - 4
-      - 7
-    type: ripper
-    x: 9
-    y: 12
   jupiter:
-    action_point: 5
+    action_point: 15
     attack_range: 1
     current_bullets: 20
     current_hp: 400
-    effective_range: 10
+    effective_range: 
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
     kind: HOC
     magazine_capacity: 20
     max_damage: 400
@@ -2552,11 +2578,20 @@ sangvisFerri:
     x: 11
     y: 15
   vespid:
-    action_point: 4
+    action_point: 15
     attack_range: 1
     current_bullets: 20
     current_hp: 350
-    effective_range: 6
+    effective_range: 
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
     kind: AR
     magazine_capacity: 20
     max_damage: 450
@@ -2566,21 +2601,6 @@ sangvisFerri:
     type: vespid
     x: 28
     y: 13
-  vespid_0:
-    action_point: 4
-    attack_range: 1
-    current_bullets: 20
-    current_hp: 350
-    effective_range: 6
-    kind: AR
-    magazine_capacity: 20
-    max_damage: 450
-    max_hp: 350
-    min_damage: 400
-    patrol_path: []
-    type: vespid
-    x: 44
-    y: 15
 weather: snow
 zoom_in: 2
 facility:

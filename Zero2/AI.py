@@ -2,39 +2,53 @@ from Zero2.basic import *
 from Zero2.map import *
 
 def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data):
-    attacking_range = []
-    for y in range(sangvisFerris_data[aiInControl].y-sangvisFerris_data[aiInControl].effective_range,sangvisFerris_data[aiInControl].y+sangvisFerris_data[aiInControl].effective_range):
+    attacking_range = {"near":[],"middle":[],"far":[]}
+    the_character_effective_range = 0
+    if sangvisFerris_data[aiInControl].effective_range["far"] != None:
+        the_character_effective_range = sangvisFerris_data[aiInControl].effective_range["far"][1]+1
+    elif sangvisFerris_data[aiInControl].effective_range["middle"] != None:
+        the_character_effective_range = sangvisFerris_data[aiInControl].effective_range["middle"][1]+1
+    elif sangvisFerris_data[aiInControl].effective_range["near"] != None:
+        the_character_effective_range = sangvisFerris_data[aiInControl].effective_range["near"][1]+1
+    for y in range(sangvisFerris_data[aiInControl].y-the_character_effective_range,sangvisFerris_data[aiInControl].y+the_character_effective_range):
         if y < sangvisFerris_data[aiInControl].y:
-            for x in range(sangvisFerris_data[aiInControl].x-sangvisFerris_data[aiInControl].effective_range-(y-sangvisFerris_data[aiInControl].y)+1,sangvisFerris_data[aiInControl].x+sangvisFerris_data[aiInControl].effective_range+(y-sangvisFerris_data[aiInControl].y)):
-                if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                    attacking_range.append([x,y])
+            for x in range(sangvisFerris_data[aiInControl].x-the_character_effective_range-(y-sangvisFerris_data[aiInControl].y)+1,sangvisFerris_data[aiInControl].x+the_character_effective_range+(y-sangvisFerris_data[aiInControl].y)):
+                if sangvisFerris_data[aiInControl].effective_range["far"] != None and sangvisFerris_data[aiInControl].effective_range["far"][0] <= abs(x-sangvisFerris_data[aiInControl].x)+abs(y-sangvisFerris_data[aiInControl].y) <= sangvisFerris_data[aiInControl].effective_range["far"][1]:
+                    attacking_range["far"].append([x,y])
+                elif sangvisFerris_data[aiInControl].effective_range["middle"] != None and sangvisFerris_data[aiInControl].effective_range["middle"][0] <= abs(x-sangvisFerris_data[aiInControl].x)+abs(y-sangvisFerris_data[aiInControl].y) <= sangvisFerris_data[aiInControl].effective_range["middle"][1]:
+                    attacking_range["middle"].append([x,y])
+                elif sangvisFerris_data[aiInControl].effective_range["near"] != None and sangvisFerris_data[aiInControl].effective_range["near"][0] <= abs(x-sangvisFerris_data[aiInControl].x)+abs(y-sangvisFerris_data[aiInControl].y) <= sangvisFerris_data[aiInControl].effective_range["near"][1]:
+                    attacking_range["near"].append([x,y])
         else:
-            for x in range(sangvisFerris_data[aiInControl].x-sangvisFerris_data[aiInControl].effective_range+(y-sangvisFerris_data[aiInControl].y)+1,sangvisFerris_data[aiInControl].x+sangvisFerris_data[aiInControl].effective_range-(y-sangvisFerris_data[aiInControl].y)):
+            for x in range(sangvisFerris_data[aiInControl].x-the_character_effective_range+(y-sangvisFerris_data[aiInControl].y)+1,sangvisFerris_data[aiInControl].x+the_character_effective_range-(y-sangvisFerris_data[aiInControl].y)):
                 if x == sangvisFerris_data[aiInControl].x and y == sangvisFerris_data[aiInControl].y:
                     pass
                 else:
-                    if blocks_setting[theMap[y][x]]["canPassThrough"] == True:
-                        attacking_range.append([x,y])
+                    if sangvisFerris_data[aiInControl].effective_range["far"] != None and sangvisFerris_data[aiInControl].effective_range["far"][0] <= abs(x-sangvisFerris_data[aiInControl].x)+abs(y-sangvisFerris_data[aiInControl].y) <= sangvisFerris_data[aiInControl].effective_range["far"][1]:
+                        attacking_range["far"].append([x,y])
+                    elif sangvisFerris_data[aiInControl].effective_range["middle"] != None and sangvisFerris_data[aiInControl].effective_range["middle"][0] <= abs(x-sangvisFerris_data[aiInControl].x)+abs(y-sangvisFerris_data[aiInControl].y) <= sangvisFerris_data[aiInControl].effective_range["middle"][1]:
+                        attacking_range["middle"].append([x,y])
+                    elif sangvisFerris_data[aiInControl].effective_range["near"] != None and sangvisFerris_data[aiInControl].effective_range["near"][0] <= abs(x-sangvisFerris_data[aiInControl].x)+abs(y-sangvisFerris_data[aiInControl].y) <= sangvisFerris_data[aiInControl].effective_range["near"][1]:
+                        attacking_range["near"].append([x,y])
     characters_can_be_attacked = []
     characters_can_be_detect = []
+    #检测是否有可以立马攻击的敌人
     for character in characters_data:
-        #检测是否有可以立马攻击的敌人
-        if [characters_data[character].x,characters_data[character].y] in attacking_range and characters_data[character].undetected == False:
-            if len(characters_can_be_attacked) == 0:
-                characters_can_be_attacked = [character]
-            else:
-                for i in range(len(characters_can_be_attacked)):
-                    if characters_data[character].current_hp < characters_data[characters_can_be_attacked[i]].current_hp:
-                        characters_can_be_attacked.insert(i,character)
-        #检测是否有可以立马攻击的敌人
-        elif characters_data[character].undetected == False:
+        if characters_data[character].undetected == False:
+            for key in attacking_range:
+                if [characters_data[character].x,characters_data[character].y] in attacking_range[key]:
+                    if len(characters_can_be_attacked) == 0:
+                        characters_can_be_attacked = [[character,key]]
+                    else:
+                        for i in range(len(characters_can_be_attacked)):
+                            if characters_data[character].current_hp < characters_data[characters_can_be_attacked[i]].current_hp:
+                                characters_can_be_attacked.insert(i,[character,key])
             if len(characters_can_be_detect) == 0:
                 characters_can_be_detect = [character]
             else:
                 for i in range(len(characters_can_be_detect)):
                     if characters_data[character].current_hp < characters_data[characters_can_be_detect[i]].current_hp:
                         characters_can_be_detect.insert(i,character)
-                    
     if len(characters_can_be_attacked) > 0:
         return ["attack",characters_can_be_attacked[0]]
     elif sangvisFerris_data[aiInControl].kind == "HOC":

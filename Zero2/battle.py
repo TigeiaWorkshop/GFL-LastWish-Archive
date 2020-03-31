@@ -780,8 +780,10 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             green_hide = "SelectMenu"
                             break
 
-            #显示选择菜单
+            #选择菜单的判定，显示功能在角色动画之后
             if green_hide == "SelectMenu":
+                #加载按钮
+                select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth*2), round(perBlockWidth/1.3)))
                 #移动画面以使得被点击的角色可以被更好的操作
                 if screen_to_move_x == None:
                     if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0:
@@ -793,58 +795,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         screen_to_move_y = window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
                     elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=theMap.row*perBlockHeight*-1:
                         screen_to_move_y = window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
-
-                #左下角的角色信息
-                text_size = 20
-                the_character_get_click_info_board.draw(screen)
-                padding = (the_character_get_click_info_board.height-character_icon_img_list[characters_data[the_character_get_click].type].get_height())/2
-                drawImg(character_icon_img_list[characters_data[the_character_get_click].type],(padding,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                tcgc_hp1 = fontRender("HP: ","white",20)
-                tcgc_hp2 = fontRender(str(characters_data[the_character_get_click].current_hp)+"/"+str(characters_data[the_character_get_click].max_hp),"black",20)
-                tcgc_action_point1 = fontRender("AP: ","white",20)
-                tcgc_action_point2 = fontRender(str(characters_data[the_character_get_click].current_action_point)+"/"+str(characters_data[the_character_get_click].max_action_point),"black",20)
-                tcgc_bullets_situation1 = fontRender("BP: ","white",20)
-                tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].bullets_carried),"black",20)
-                drawImg(tcgc_hp1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(tcgc_action_point1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(tcgc_bullets_situation1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                hp_empty = pygame.transform.scale(original_UI_img["hp_empty"],(int(the_character_get_click_info_board.width/3),int(text_size)))
-                drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(pygame.transform.scale(original_UI_img["hp_green"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_hp/characters_data[the_character_get_click].max_hp),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(pygame.transform.scale(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_action_point/characters_data[the_character_get_click].max_action_point),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(pygame.transform.scale(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].magazine_capacity),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                displayInCenter(tcgc_hp2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                displayInCenter(tcgc_action_point2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth*2), round(perBlockWidth/1.3)))
-                #----选择菜单----
-                #攻击按钮
-                txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",round(perBlockWidth/3))
-                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/5))
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
-                #移动按钮
-                txt_temp = fontRender(selectMenuButtons_dic["move"],"black",round(perBlockWidth/3))
-                txt_temp2 = fontRender("2N AP","black",round(perBlockWidth/5))
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
-                #技能按钮
-                if characters_data[the_character_get_click].kind != "HOC":
-                    txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",round(perBlockWidth/3))
-                    txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/5))
-                    drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),screen,local_x,local_y)
-                    drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.4)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
-                    drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
-                #换弹按钮
-                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(perBlockWidth/3))
-                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/5))
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),screen,local_x,local_y)
-                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.6)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.95)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
                 #按钮判定
                 if pygame.mouse.get_pressed()[0]:
                     if isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
@@ -1125,12 +1075,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         action_displayer(the_character_get_click,"attack",characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,False)
                     if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-2:
                         for each_enemy in enemies_get_attack:
-                            if enemies_get_attack[each_enemy] == "near" and random.randint(1,100) <= 90 or enemies_get_attack[each_enemy] == "middle" and random.randint(1,100) <= 75 or enemies_get_attack[each_enemy] == "far" and random.randint(1,100) <= 60:
+                            if enemies_get_attack[each_enemy] == "near" and random.randint(1,100) <= 95 or enemies_get_attack[each_enemy] == "middle" and random.randint(1,100) <= 80 or enemies_get_attack[each_enemy] == "far" and random.randint(1,100) <= 65:
                                 the_damage = random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
                                 sangvisFerris_data[each_enemy].decreaseHp(the_damage)
                                 damage_do_to_character[each_enemy] = fontRender("-"+str(the_damage),"red",25)
                             else:
-                                damage_do_to_character[each_enemy] = fontRender("miss","red",25)
+                                damage_do_to_character[each_enemy] = fontRender("Miss","red",25)
                     if characters_data[the_character_get_click].gif_dic["attack"][1] == characters_data[the_character_get_click].gif_dic["attack"][0][1]-1:
                         characters_data[the_character_get_click].gif_dic["attack"][1] = 0
                         characters_data[the_character_get_click].current_bullets -= 1
@@ -1226,14 +1176,16 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 enemy_action = AI(enemies_in_control,theMap.mapData,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data)
                 print(enemies_in_control+" choses "+enemy_action[0])
             if enemy_action[0] == "attack":
-                if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
-                    action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
-                if sangvisFerris_data[enemies_in_control].gif_dic["attack"][1] == sangvisFerris_data[enemies_in_control].gif_dic["attack"][0][1]-2:
-                    the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
-                    characters_data[enemy_action[1]].decreaseHp(the_damage)
-                the_characters_attacking = sangvisFerris_data[enemies_in_control].gif_dic
-                if the_characters_attacking["attack"][1] == the_characters_attacking["attack"][0][1]-1:
-                    the_characters_attacking["attack"][1] = 0
+                action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
+                if sangvisFerris_data[enemies_in_control].gif_dic["attack"][1] == sangvisFerris_data[enemies_in_control].gif_dic["attack"][0][1]-1:
+                    temp_value = random.randint(0,100)
+                    if enemy_action[1][1] == "near" and temp_value <= 95 or enemy_action[1][1] == "middle" and temp_value <= 80 or enemy_action[1][1] == "far" and temp_value <= 65:
+                        the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
+                        characters_data[enemy_action[1][0]].decreaseHp(the_damage)
+                        damage_do_to_character[enemy_action[1][0]] = fontRender("-"+str(the_damage),"red",25)
+                    else:
+                        damage_do_to_character[enemy_action[1][0]] = fontRender("Miss","red",25)
+                    sangvisFerris_data[enemies_in_control].gif_dic["attack"][1] = 0
                     enemies_in_control_id +=1
                     if enemies_in_control_id == len(sangvisFerris_data):
                         whose_round = "sangvisFerrisToPlayer"
@@ -1307,6 +1259,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     action_displayer(every_chara,"die",characters_data[every_chara].x,characters_data[every_chara].y,False)
             if characters_data[every_chara].kind == "HOC" and characters_data[every_chara].current_hp <= 0:
                 the_dead_one.append(every_chara)
+            if every_chara in damage_do_to_character:
+                the_alpha_to_check = damage_do_to_character[every_chara].get_alpha()
+                if the_alpha_to_check > 0:
+                    drawImg(damage_do_to_character[every_chara],(characters_data[every_chara].x*perBlockWidth,characters_data[every_chara].y*perBlockHeight),screen,local_x,local_y)
+                    damage_do_to_character[every_chara].set_alpha(the_alpha_to_check-5)
+                else:
+                    del damage_do_to_character[every_chara]
         if len(the_dead_one) != 0:
             for i in range(len(the_dead_one)):
                 the_characters_attacking = characters_data[the_dead_one[i]].gif_dic
@@ -1324,27 +1283,38 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             if enemies != enemies_in_control:
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
                     if sangvisFerris_data[enemies].current_hp>0:
-                            if green_hide == True and pygame.mouse.get_pressed()[2]:
-                                block_get_click_x2 = int((mouse_x-local_x)/perBlockWidth)
-                                block_get_click_y2 = int((mouse_y-local_y)/perBlockHeight)
-                                if block_get_click_x2 == sangvisFerris_data[enemies].x and block_get_click_y2 == sangvisFerris_data[enemies].y:
-                                    for y in range(sangvisFerris_data[enemies].y-sangvisFerris_data[enemies].effective_range,sangvisFerris_data[enemies].y+sangvisFerris_data[enemies].effective_range):
-                                        if y < sangvisFerris_data[enemies].y:
-                                            for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)):
-                                                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
+                        if green_hide == True and pygame.mouse.get_pressed()[2]:
+                            if int((mouse_x-local_x)/perBlockWidth) == sangvisFerris_data[enemies].x and int((mouse_y-local_y)/perBlockHeight) == sangvisFerris_data[enemies].y:
+                                the_character_effective_range = 0
+                                if sangvisFerris_data[enemies].effective_range["far"] != None:
+                                    the_character_effective_range = sangvisFerris_data[enemies].effective_range["far"][1]+1
+                                elif sangvisFerris_data[enemies].effective_range["middle"] != None:
+                                    the_character_effective_range = sangvisFerris_data[enemies].effective_range["middle"][1]+1
+                                elif sangvisFerris_data[enemies].effective_range["near"] != None:
+                                    the_character_effective_range = sangvisFerris_data[enemies].effective_range["near"][1]+1
+                                for y in range(sangvisFerris_data[enemies].y-the_character_effective_range,sangvisFerris_data[enemies].y+the_character_effective_range):
+                                    if y < sangvisFerris_data[enemies].y:
+                                        for x in range(sangvisFerris_data[enemies].x-the_character_effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+the_character_effective_range+(y-sangvisFerris_data[enemies].y)):
+                                            if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
+                                                if sangvisFerris_data[enemies].effective_range["far"] != None and sangvisFerris_data[enemies].effective_range["far"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["far"][1]:
+                                                    drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                elif sangvisFerris_data[enemies].effective_range["middle"] != None and sangvisFerris_data[enemies].effective_range["middle"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["middle"][1]:
+                                                    drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                elif sangvisFerris_data[enemies].effective_range["near"] != None and sangvisFerris_data[enemies].effective_range["near"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["near"][1]:
                                                     drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                else:
-                                                    drawImg(UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                        else:
-                                            for x in range(sangvisFerris_data[enemies].x-sangvisFerris_data[enemies].effective_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+sangvisFerris_data[enemies].effective_range-(y-sangvisFerris_data[enemies].y)):
-                                                if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
-                                                    pass
-                                                else:
-                                                    if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
+                                    else:
+                                        for x in range(sangvisFerris_data[enemies].x-the_character_effective_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+the_character_effective_range-(y-sangvisFerris_data[enemies].y)):
+                                            if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
+                                                pass
+                                            else:
+                                                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
+                                                    if sangvisFerris_data[enemies].effective_range["far"] != None and sangvisFerris_data[enemies].effective_range["far"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["far"][1]:
+                                                        drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    elif sangvisFerris_data[enemies].effective_range["middle"] != None and sangvisFerris_data[enemies].effective_range["middle"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["middle"][1]:
+                                                        drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    elif sangvisFerris_data[enemies].effective_range["near"] != None and sangvisFerris_data[enemies].effective_range["near"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["near"][1]:
                                                         drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    else:
-                                                        drawImg(UI_img["red"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                            action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
+                        action_displayer(enemies,"wait",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y)
                     elif sangvisFerris_data[enemies].current_hp<=0:
                         action_displayer(enemies,"die",sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y,False)
                         the_dead_one.append(enemies)
@@ -1368,6 +1338,59 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
 
+        #显示选择菜单
+        if green_hide == "SelectMenu":
+            #左下角的角色信息
+            text_size = 20
+            the_character_get_click_info_board.draw(screen)
+            padding = (the_character_get_click_info_board.height-character_icon_img_list[characters_data[the_character_get_click].type].get_height())/2
+            drawImg(character_icon_img_list[characters_data[the_character_get_click].type],(padding,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            tcgc_hp1 = fontRender("HP: ","white",20)
+            tcgc_hp2 = fontRender(str(characters_data[the_character_get_click].current_hp)+"/"+str(characters_data[the_character_get_click].max_hp),"black",20)
+            tcgc_action_point1 = fontRender("AP: ","white",20)
+            tcgc_action_point2 = fontRender(str(characters_data[the_character_get_click].current_action_point)+"/"+str(characters_data[the_character_get_click].max_action_point),"black",20)
+            tcgc_bullets_situation1 = fontRender("BP: ","white",20)
+            tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].bullets_carried),"black",20)
+            drawImg(tcgc_hp1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            drawImg(tcgc_action_point1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            drawImg(tcgc_bullets_situation1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            hp_empty = pygame.transform.scale(original_UI_img["hp_empty"],(int(the_character_get_click_info_board.width/3),int(text_size)))
+            drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            drawImg(pygame.transform.scale(original_UI_img["hp_green"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_hp/characters_data[the_character_get_click].max_hp),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            drawImg(pygame.transform.scale(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_action_point/characters_data[the_character_get_click].max_action_point),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            drawImg(pygame.transform.scale(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].magazine_capacity),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            displayInCenter(tcgc_hp2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            displayInCenter(tcgc_action_point2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+            #----选择菜单----
+            #攻击按钮
+            txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",round(perBlockWidth/3))
+            txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/5))
+            drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
+            drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
+            drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
+            #移动按钮
+            txt_temp = fontRender(selectMenuButtons_dic["move"],"black",round(perBlockWidth/3))
+            txt_temp2 = fontRender("2N AP","black",round(perBlockWidth/5))
+            drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
+            drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
+            drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
+            #技能按钮
+            if characters_data[the_character_get_click].kind != "HOC":
+                txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",round(perBlockWidth/3))
+                txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/5))
+                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),screen,local_x,local_y)
+                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.4)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
+            #换弹按钮
+            txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(perBlockWidth/3))
+            txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/5))
+            drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),screen,local_x,local_y)
+            drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.6)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
+            drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.95)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
+        
         #加载雪花
         for i in range(len(all_snow_on_screen)):
             all_snow_on_screen[i].draw(screen,local_x,local_y)
