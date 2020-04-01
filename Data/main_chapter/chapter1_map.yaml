@@ -2484,11 +2484,11 @@ sangvisFerri:
     current_hp: 200
     effective_range: 
       far:
-      - 8
-      - 9
+      - 6
+      - 6
       middle:
       - 5
-      - 7
+      - 5
       near:
       - 1
       - 4
