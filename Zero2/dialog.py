@@ -186,7 +186,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                             if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["narrator"] != dialog_content[dialogId]["narrator"]:
                                 dialoguebox.height = 0
                                 dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
-                            dialog_options.append(i)
+                            dialog_options[len(dialog_options)] = i
                             dialogId = dialog_content[dialogId]["next_dialog_id"][i][1]
                             break
 

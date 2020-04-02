@@ -120,7 +120,7 @@ class Array2D:
     def showArray2D(self):
         for y in range(self.h):
             for x in range(self.w):
-                print(self.data[x][y],end=' ')
+                print(self.data[x][y])
             print("")
 
     def __getitem__(self, item):

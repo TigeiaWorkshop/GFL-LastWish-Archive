@@ -1174,17 +1174,17 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]
             if enemy_action == None:
                 enemy_action = AI(enemies_in_control,theMap.mapData,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data)
-                print(enemies_in_control+" choses "+enemy_action[0])
-            if enemy_action[0] == "attack":
+                print(enemies_in_control+" choses "+enemy_action["action"])
+            if enemy_action["action"] == "attack":
                 action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
                 if sangvisFerris_data[enemies_in_control].gif_dic["attack"][1] == sangvisFerris_data[enemies_in_control].gif_dic["attack"][0][1]-1:
                     temp_value = random.randint(0,100)
-                    if enemy_action[1][1] == "near" and temp_value <= 95 or enemy_action[1][1] == "middle" and temp_value <= 80 or enemy_action[1][1] == "far" and temp_value <= 65:
+                    if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
                         the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
-                        characters_data[enemy_action[1][0]].decreaseHp(the_damage)
-                        damage_do_to_character[enemy_action[1][0]] = fontRender("-"+str(the_damage),"red",25)
+                        characters_data[enemy_action["target"]].decreaseHp(the_damage)
+                        damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",25)
                     else:
-                        damage_do_to_character[enemy_action[1][0]] = fontRender("Miss","red",25)
+                        damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",25)
                     sangvisFerris_data[enemies_in_control].gif_dic["attack"][1] = 0
                     enemies_in_control_id +=1
                     if enemies_in_control_id == len(sangvisFerris_data):
@@ -1192,40 +1192,90 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         total_rounds += 1
                     enemy_action = None
                     enemies_in_control = ""
-            elif enemy_action[0] == "move":
-                the_route = enemy_action[1]
-                if the_route != []:
+            elif enemy_action["action"] == "move&attack":
+                if enemy_action["route"] != []:
                     if pygame.mixer.Channel(0).get_busy() == False:
                         the_sound_id = random.randint(0,len(walking_sound)-1)
                         pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
-                    if sangvisFerris_data[enemies_in_control].x < the_route[0][0]:
+                    if sangvisFerris_data[enemies_in_control].x < enemy_action["route"][0][0]:
                         sangvisFerris_data[enemies_in_control].x+=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
                             action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
-                        if sangvisFerris_data[enemies_in_control].x >= the_route[0][0]:
-                            sangvisFerris_data[enemies_in_control].x = the_route[0][0]
-                            the_route.pop(0)
-                    elif sangvisFerris_data[enemies_in_control].x > the_route[0][0]:
+                        if sangvisFerris_data[enemies_in_control].x >= enemy_action["route"][0][0]:
+                            sangvisFerris_data[enemies_in_control].x = enemy_action["route"][0][0]
+                            enemy_action["route"].pop(0)
+                    elif sangvisFerris_data[enemies_in_control].x > enemy_action["route"][0][0]:
                         sangvisFerris_data[enemies_in_control].x-=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
                             action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
-                        if sangvisFerris_data[enemies_in_control].x <= the_route[0][0]:
-                            sangvisFerris_data[enemies_in_control].x = the_route[0][0]
-                            the_route.pop(0)
-                    elif sangvisFerris_data[enemies_in_control].y < the_route[0][1]:
+                        if sangvisFerris_data[enemies_in_control].x <= enemy_action["route"][0][0]:
+                            sangvisFerris_data[enemies_in_control].x = enemy_action["route"][0][0]
+                            enemy_action["route"].pop(0)
+                    elif sangvisFerris_data[enemies_in_control].y < enemy_action["route"][0][1]:
                         sangvisFerris_data[enemies_in_control].y+=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
                             action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
-                        if sangvisFerris_data[enemies_in_control].y >= the_route[0][1]:
-                            sangvisFerris_data[enemies_in_control].y = the_route[0][1]
-                            the_route.pop(0)
-                    elif sangvisFerris_data[enemies_in_control].y > the_route[0][1]:
+                        if sangvisFerris_data[enemies_in_control].y >= enemy_action["route"][0][1]:
+                            sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
+                            enemy_action["route"].pop(0)
+                    elif sangvisFerris_data[enemies_in_control].y > enemy_action["route"][0][1]:
                         sangvisFerris_data[enemies_in_control].y-=0.125
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
                             action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,True,True)
-                        if sangvisFerris_data[enemies_in_control].y <= the_route[0][1]:
-                            sangvisFerris_data[enemies_in_control].y = the_route[0][1]
-                            the_route.pop(0)
+                        if sangvisFerris_data[enemies_in_control].y <= enemy_action["route"][0][1]:
+                            sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
+                            enemy_action["route"].pop(0)
+                else:
+                    pygame.mixer.Channel(0).stop()
+                    action_displayer(enemies_in_control,"attack",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,False)
+                    if sangvisFerris_data[enemies_in_control].gif_dic["attack"][1] == sangvisFerris_data[enemies_in_control].gif_dic["attack"][0][1]-1:
+                        temp_value = random.randint(0,100)
+                        if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
+                            the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
+                            characters_data[enemy_action["target"]].decreaseHp(the_damage)
+                            damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",25)
+                        else:
+                            damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",25)
+                        sangvisFerris_data[enemies_in_control].gif_dic["attack"][1] = 0
+                        enemies_in_control_id +=1
+                        if enemies_in_control_id == len(sangvisFerris_data):
+                            whose_round = "sangvisFerrisToPlayer"
+                            total_rounds += 1
+                        enemy_action = None
+                        enemies_in_control = ""
+            elif enemy_action["action"] == "move":
+                if enemy_action["route"] != []:
+                    if pygame.mixer.Channel(0).get_busy() == False:
+                        the_sound_id = random.randint(0,len(walking_sound)-1)
+                        pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
+                    if sangvisFerris_data[enemies_in_control].x < enemy_action["route"][0][0]:
+                        sangvisFerris_data[enemies_in_control].x+=0.125
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
+                        if sangvisFerris_data[enemies_in_control].x >= enemy_action["route"][0][0]:
+                            sangvisFerris_data[enemies_in_control].x = enemy_action["route"][0][0]
+                            enemy_action["route"].pop(0)
+                    elif sangvisFerris_data[enemies_in_control].x > enemy_action["route"][0][0]:
+                        sangvisFerris_data[enemies_in_control].x-=0.125
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
+                        if sangvisFerris_data[enemies_in_control].x <= enemy_action["route"][0][0]:
+                            sangvisFerris_data[enemies_in_control].x = enemy_action["route"][0][0]
+                            enemy_action["route"].pop(0)
+                    elif sangvisFerris_data[enemies_in_control].y < enemy_action["route"][0][1]:
+                        sangvisFerris_data[enemies_in_control].y+=0.125
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y)
+                        if sangvisFerris_data[enemies_in_control].y >= enemy_action["route"][0][1]:
+                            sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
+                            enemy_action["route"].pop(0)
+                    elif sangvisFerris_data[enemies_in_control].y > enemy_action["route"][0][1]:
+                        sangvisFerris_data[enemies_in_control].y-=0.125
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            action_displayer(enemies_in_control,"move",sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y,True,True)
+                        if sangvisFerris_data[enemies_in_control].y <= enemy_action["route"][0][1]:
+                            sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
+                            enemy_action["route"].pop(0)
                 else:
                     pygame.mixer.Channel(0).stop()
                     enemies_in_control_id +=1
@@ -1234,7 +1284,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         total_rounds += 1
                     enemy_action = None
                     enemies_in_control = ""
-            elif enemy_action[0] == "stay":
+            elif enemy_action["action"] == "stay":
                 enemies_in_control_id +=1
                 if enemies_in_control_id == len(sangvisFerris_data):
                     whose_round = "sangvisFerrisToPlayer"

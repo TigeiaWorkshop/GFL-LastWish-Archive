@@ -33,9 +33,12 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                         characters_can_be_detect.insert(i,character)
     if character_with_min_hp != None:
         #[行动, 需要攻击的目标, 所在范围]
-        return ["attack",character_with_min_hp[0],character_with_min_hp[1]]
+        return {"action": "attack",
+        "target": character_with_min_hp[0],
+        "target_area": character_with_min_hp[1]
+        }
     elif sangvisFerris_data[aiInControl].kind == "HOC":
-        return ["stay"]
+        return {"action": "stay"}
     else:
         #先检测是否有可以移动后攻击的敌人
         ap_need_to_attack = 5
@@ -67,7 +70,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
             temp_x = sangvisFerris_data[aiInControl].x
             temp_y = sangvisFerris_data[aiInControl].y
             the_route = []
-            for i in range(len(max_moving_routes_for_attacking)):
+            for i in range(max_moving_routes_for_attacking):
                 if Point(temp_x+1,temp_y) in pathList and [temp_x+1,temp_y] not in the_route:
                     temp_x+=1
                 elif Point(temp_x-1,temp_y) in pathList and [temp_x-1,temp_y] not in the_route:
@@ -79,18 +82,18 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                 else:
                     break
                 the_route.append([temp_x,temp_y])
-            if the_route[-1] == (characters_data[character].x,characters_data[character].y):
-                the_route.pop()
-            if abs(characters_data[character].x-temp_x)+abs(characters_data[character].y-temp_y)<=the_character_effective_range:
+            if [characters_data[character].x,characters_data[character].y] in the_route:
+                the_route.remove([characters_data[character].x,characters_data[character].y])
+            if abs(characters_data[character].x-temp_x)+abs(characters_data[character].y-temp_y)<the_character_effective_range:
                 characters_can_be_attacked[character] = the_route
             map2d[characters_data[character].x][characters_data[character].y] = 1
         #如果存在可以在移动后攻击到的敌人
         if len(characters_can_be_attacked) >= 1:
             character_with_min_hp = None
             for key in characters_can_be_attacked:
-                if character_with_min_hp == None or characters_data[key].current_hp < characters_data[characters_can_be_attacked[0]].current_hp:
+                if character_with_min_hp == None or characters_data[key].current_hp < characters_data[character_with_min_hp[0]].current_hp:
                     character_with_min_hp = [key,characters_can_be_attacked[key]]
-            temp_distance = abs(characters_data[character].x-temp_x)+abs(characters_data[character].y-temp_y)
+            temp_distance = abs(characters_data[character_with_min_hp[0]].x-character_with_min_hp[1][-1][0])+abs(characters_data[character_with_min_hp[0]].y-character_with_min_hp[1][-1][1])
             if sangvisFerris_data[aiInControl].effective_range["far"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["far"][1]:
                 temp_area = "far"
             elif sangvisFerris_data[aiInControl].effective_range["middle"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["middle"][1]:
@@ -100,9 +103,16 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
             else:
                 print('A character named '+aiInControl+' is causing trouble while attacking '+character_with_min_hp[0]+'. Then route is:')
                 print(character_with_min_hp[1])
+                print("temp_distance:",temp_distance)
+                print('the_character_effective_range:',the_character_effective_range)
                 raise Exception("Please double check this character's effective_range.")
             #[行动，已经整理好的路线，需要攻击的目标，所在范围]
-            return ["move&attack",character_with_min_hp[1],character_with_min_hp[0],temp_area]
+            return {
+                "action":"move&attack",
+                "route":character_with_min_hp[1],
+                "target":character_with_min_hp[0],
+                "target_area": temp_area
+            }
         #如果不存在可以在移动后攻击到的敌人
         elif len(characters_can_be_attacked) == 0:
             #如果这一回合没有敌人暴露
@@ -111,33 +121,33 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                 if len(the_characters_detected_last_round) == 0:
                     #如果敌人没有巡逻路线
                     if sangvisFerris_data[aiInControl].patrol_path == []:
-                        return ["stay"]
+                        return {"action": "stay"}
                     #如果敌人有巡逻路线
                     else:
-                        star_point_x = sangvisFerris_data[aiInControl].x
-                        star_point_y = sangvisFerris_data[aiInControl].y
+                        temp_x = sangvisFerris_data[aiInControl].x
+                        temp_y = sangvisFerris_data[aiInControl].y
                         #创建AStar对象
-                        aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(sangvisFerris_data[aiInControl].patrol_path[0][0],sangvisFerris_data[aiInControl].patrol_path[0][1]))
+                        aStar=AStar(map2d,Point(temp_x,temp_y),Point(sangvisFerris_data[aiInControl].patrol_path[0][0],sangvisFerris_data[aiInControl].patrol_path[0][1]))
                         #开始寻路
                         pathList=aStar.start()
                         #遍历路径点,讲指定数量的点放到路径列表中
                         the_route = []
                         for i in range(sangvisFerris_data[aiInControl].max_action_point):
-                            if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
-                                star_point_x+=1
-                            elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
-                                star_point_x-=1
-                            elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
-                                star_point_y+=1
-                            elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
-                                star_point_y-=1
+                            if Point(temp_x+1,temp_y) in pathList and [temp_x+1,temp_y] not in the_route:
+                                temp_x+=1
+                            elif Point(temp_x-1,temp_y) in pathList and [temp_x-1,temp_y] not in the_route:
+                                temp_x-=1
+                            elif Point(temp_x,temp_y+1) in pathList and [temp_x,temp_y+1] not in the_route:
+                                temp_y+=1
+                            elif Point(temp_x,temp_y-1) in pathList and [temp_x,temp_y-1] not in the_route:
+                                temp_y-=1
                             else:
                                 break
-                            the_route.append([star_point_x,star_point_y])
+                            the_route.append([temp_x,temp_y])
                         if the_route[-1][0] == sangvisFerris_data[aiInControl].patrol_path[0][0] and the_route[-1][1] == sangvisFerris_data[aiInControl].patrol_path[0][1] and len(sangvisFerris_data[aiInControl].patrol_path) > 1:
                             sangvisFerris_data[aiInControl].patrol_path.append(sangvisFerris_data[aiInControl].patrol_path[0])
                             sangvisFerris_data[aiInControl].patrol_path.pop(0)
-                        return ["move",the_route]
+                        return {"action": "move","route":the_route}
                 #如果上一个回合有敌人暴露
                 else:
                     that_character = None
@@ -147,52 +157,56 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                         else:
                             if sangvisFerris_data[that_character].current_hp < sangvisFerris_data[that_character].current_hp:
                                 that_character = that_character
+                    temp_x = sangvisFerris_data[aiInControl].x
+                    temp_y = sangvisFerris_data[aiInControl].y
                     #创建AStar对象
-                    aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(the_characters_detected_last_round[that_character][0],the_characters_detected_last_round[that_character][1]))
+                    aStar=AStar(map2d,Point(temp_x,temp_y),Point(the_characters_detected_last_round[that_character][0],the_characters_detected_last_round[that_character][1]))
                     #开始寻路
                     pathList=aStar.start()
                     #遍历路径点,讲指定数量的点放到路径列表中
                     if pathList != None:
                         the_route = []
                         for i in range(sangvisFerris_data[aiInControl].max_action_point):
-                            if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
-                                star_point_x+=1
-                            elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
-                                star_point_x-=1
-                            elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
-                                star_point_y+=1
-                            elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
-                                star_point_y-=1
+                            if Point(temp_x+1,temp_y) in pathList and [temp_x+1,temp_y] not in the_route:
+                                temp_x+=1
+                            elif Point(temp_x-1,temp_y) in pathList and [temp_x-1,temp_y] not in the_route:
+                                temp_x-=1
+                            elif Point(temp_x,temp_y+1) in pathList and [temp_x,temp_y+1] not in the_route:
+                                temp_y+=1
+                            elif Point(temp_x,temp_y-1) in pathList and [temp_x,temp_y-1] not in the_route:
+                                temp_y-=1
                             else:
                                 break
-                            the_route.append([star_point_x,star_point_y])
-                        return ["move",the_route]
+                            the_route.append([temp_x,temp_y])
+                        return {"action": "move","route":the_route}
                     else:
-                        return ["stay"]
+                        return {"action": "stay"}
                     
             #如果这一回合有敌人暴露
             else:
                 map2d[characters_data[characters_can_be_detect[0]].x][characters_data[characters_can_be_detect[0]].y] = 0
                 #创建AStar对象
-                aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(characters_data[characters_can_be_detect[0]].x,characters_data[characters_can_be_detect[0]].y))
+                temp_x = sangvisFerris_data[aiInControl].x
+                temp_y = sangvisFerris_data[aiInControl].y
+                aStar=AStar(map2d,Point(temp_x,temp_y),Point(characters_data[characters_can_be_detect[0]].x,characters_data[characters_can_be_detect[0]].y))
                 pathList=aStar.start()
                 #遍历路径点,讲指定数量的点放到路径列表中
                 if pathList != None:
                     the_route = []
                     for i in range(sangvisFerris_data[aiInControl].max_action_point):
-                        if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
-                            star_point_x+=1
-                        elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
-                            star_point_x-=1
-                        elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
-                            star_point_y+=1
-                        elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
-                            star_point_y-=1
+                        if Point(temp_x+1,temp_y) in pathList and [temp_x+1,temp_y] not in the_route:
+                            temp_x+=1
+                        elif Point(temp_x-1,temp_y) in pathList and [temp_x-1,temp_y] not in the_route:
+                            temp_x-=1
+                        elif Point(temp_x,temp_y+1) in pathList and [temp_x,temp_y+1] not in the_route:
+                            temp_y+=1
+                        elif Point(temp_x,temp_y-1) in pathList and [temp_x,temp_y-1] not in the_route:
+                            temp_y-=1
                         else:
                             break
-                        the_route.append([star_point_x,star_point_y])
+                        the_route.append([temp_x,temp_y])
                     if the_route[-1][0] == characters_data[characters_can_be_detect[0]].x and the_route[-1][1] == characters_data[characters_can_be_detect[0]].y:
                         the_route.pop()
-                    return ["move",the_route]
+                    return {"action": "move","route":the_route}
                 else:
-                    return ["stay"]
+                    return {"action": "stay"}
