@@ -3,26 +3,26 @@ from Zero2.map import *
 
 def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data):
     the_character_effective_range = 0
-    if sangvisFerris_data[aiInControl].effective_range["far"] != None:
+    if "far" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["far"] != None:
         the_character_effective_range = sangvisFerris_data[aiInControl].effective_range["far"][1]+1
-    elif sangvisFerris_data[aiInControl].effective_range["middle"] != None:
+    elif "middle" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["middle"] != None:
         the_character_effective_range = sangvisFerris_data[aiInControl].effective_range["middle"][1]+1
-    elif sangvisFerris_data[aiInControl].effective_range["near"] != None:
+    elif "near" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["near"] != None:
         the_character_effective_range = sangvisFerris_data[aiInControl].effective_range["near"][1]+1
     
     character_with_min_hp = None
     characters_can_be_detect = []
     #检测是否有可以立马攻击的敌人
     for character in characters_data:
-        if characters_data[character].undetected == False:
+        if characters_data[character].undetected == False and characters_data[character].current_hp>0:
             #如果现在还没有可以直接攻击的角色或者当前历遍到角色的血量比最小值要高
             if character_with_min_hp == None or characters_data[character].current_hp <= characters_data[character_with_min_hp[0]].current_hp:
                 temp_distance = abs(characters_data[character].x-sangvisFerris_data[aiInControl].x)+abs(characters_data[character].y-sangvisFerris_data[aiInControl].y)
-                if sangvisFerris_data[aiInControl].effective_range["far"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["far"][1]:
+                if "far" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["far"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["far"][1]:
                     character_with_min_hp = [character,"far"]
-                elif sangvisFerris_data[aiInControl].effective_range["middle"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["middle"][1]:
+                elif "middle" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["middle"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["middle"][1]:
                     character_with_min_hp = [character,"middle"]
-                elif sangvisFerris_data[aiInControl].effective_range["near"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["near"][1]:
+                elif "near" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["near"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["near"][1]:
                     if character_with_min_hp == None or characters_data[character].current_hp <= characters_data[character_with_min_hp[0]].current_hp:
                         character_with_min_hp = [character,"near"]
             if len(characters_can_be_detect) == 0:
@@ -63,30 +63,31 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
         characters_can_be_attacked = {}
         #再次历遍所有characters_data以获取所有当前角色可以在移动后攻击到的敌对阵营角色
         for character in characters_data:
-            map2d[characters_data[character].x][characters_data[character].y] = 0
-            aStar=AStar(map2d,Point(sangvisFerris_data[aiInControl].x,sangvisFerris_data[aiInControl].y),Point(characters_data[character].x,characters_data[character].y))
-            pathList=aStar.start()
-            #检测当前角色移动后足以攻击到这个敌对阵营的角色
-            temp_x = sangvisFerris_data[aiInControl].x
-            temp_y = sangvisFerris_data[aiInControl].y
-            the_route = []
-            for i in range(max_moving_routes_for_attacking):
-                if Point(temp_x+1,temp_y) in pathList and [temp_x+1,temp_y] not in the_route:
-                    temp_x+=1
-                elif Point(temp_x-1,temp_y) in pathList and [temp_x-1,temp_y] not in the_route:
-                    temp_x-=1
-                elif Point(temp_x,temp_y+1) in pathList and [temp_x,temp_y+1] not in the_route:
-                    temp_y+=1
-                elif Point(temp_x,temp_y-1) in pathList and [temp_x,temp_y-1] not in the_route:
-                    temp_y-=1
-                else:
-                    break
-                the_route.append([temp_x,temp_y])
-            if [characters_data[character].x,characters_data[character].y] in the_route:
-                the_route.remove([characters_data[character].x,characters_data[character].y])
-            if abs(characters_data[character].x-temp_x)+abs(characters_data[character].y-temp_y)<the_character_effective_range:
-                characters_can_be_attacked[character] = the_route
-            map2d[characters_data[character].x][characters_data[character].y] = 1
+            if characters_data[character].undetected == False and characters_data[character].current_hp>0:
+                map2d[characters_data[character].x][characters_data[character].y] = 0
+                aStar=AStar(map2d,Point(sangvisFerris_data[aiInControl].x,sangvisFerris_data[aiInControl].y),Point(characters_data[character].x,characters_data[character].y))
+                pathList=aStar.start()
+                #检测当前角色移动后足以攻击到这个敌对阵营的角色
+                temp_x = sangvisFerris_data[aiInControl].x
+                temp_y = sangvisFerris_data[aiInControl].y
+                the_route = []
+                for i in range(max_moving_routes_for_attacking):
+                    if Point(temp_x+1,temp_y) in pathList and [temp_x+1,temp_y] not in the_route:
+                        temp_x+=1
+                    elif Point(temp_x-1,temp_y) in pathList and [temp_x-1,temp_y] not in the_route:
+                        temp_x-=1
+                    elif Point(temp_x,temp_y+1) in pathList and [temp_x,temp_y+1] not in the_route:
+                        temp_y+=1
+                    elif Point(temp_x,temp_y-1) in pathList and [temp_x,temp_y-1] not in the_route:
+                        temp_y-=1
+                    else:
+                        break
+                    the_route.append([temp_x,temp_y])
+                if [characters_data[character].x,characters_data[character].y] in the_route:
+                    the_route.remove([characters_data[character].x,characters_data[character].y])
+                if abs(characters_data[character].x-temp_x)+abs(characters_data[character].y-temp_y)<the_character_effective_range:
+                    characters_can_be_attacked[character] = the_route
+                map2d[characters_data[character].x][characters_data[character].y] = 1
         #如果存在可以在移动后攻击到的敌人
         if len(characters_can_be_attacked) >= 1:
             character_with_min_hp = None

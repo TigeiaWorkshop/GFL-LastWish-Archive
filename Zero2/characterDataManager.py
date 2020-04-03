@@ -23,10 +23,11 @@ class Doll:
         self.current_hp+=hpHealed
 
 class characterDataManager(Doll):
-    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,gif_dic,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,start_position,detect):
+    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,gif_dic,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,start_position,detect):
         Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,gif_dic,magazine_capacity,max_damage,max_hp,min_damage,type,x,y)
         self.bullets_carried = bullets_carried
         self.skill_effective_range = skill_effective_range
+        self.skill_cover_range = skill_cover_range
         self.start_position = start_position
         self.undetected = detect
         self.dying = False
