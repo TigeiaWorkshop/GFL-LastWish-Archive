@@ -42,6 +42,10 @@ def loadImage(path,the_object_position,width=None,height=None,description="Defau
             self.description = description
         def draw(self,screen,local_x=0,local_y=0):
             screen.blit(pygame.transform.scale(self.img, (int(self.width),int(self.height))),(self.x+local_x,self.y+local_y))
+        def set_alpha(self,value):
+            self.img.set_alpha(value)
+        def get_alpha(self):
+            return self.img.get_alpha()
     if isinstance(path,str):
         if ifConvertAlpha == False:
             return theImage(pygame.image.load(os.path.join(path)),the_object_position[0],the_object_position[1],width,height,description)

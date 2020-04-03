@@ -245,7 +245,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
     #淡出
     pygame.mixer.music.fadeout(1000)
     for i in range(0,55,2):
-        black_bg.img.set_alpha(i)
+        black_bg.set_alpha(i)
         black_bg.draw(screen)
         fpsClock.tick(fps)
         pygame.display.update()
