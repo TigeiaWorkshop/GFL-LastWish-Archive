@@ -143,7 +143,7 @@ character:
     attack_range: 3
     bullets_carried: 200
     current_bullets: 10
-    current_hp: 2500
+    current_hp: 25
     effective_range:
       far:
       - 6
