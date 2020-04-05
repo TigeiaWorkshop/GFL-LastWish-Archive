@@ -9,9 +9,7 @@ from pygame.locals import *
 from Zero2.basic import *
 from Zero2.dialog import *
 
-pygame.init()
-
-def mainMenu(window_x,window_y,lang,fps,mode=""):
+def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
     #加载主菜单文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -34,7 +32,6 @@ def mainMenu(window_x,window_y,lang,fps,mode=""):
             chapter_select[i] = fontRenderPro(chapter_select[i],"disable",window_x/38)
 
     # 创建窗口
-    screen = pygame.display.set_mode((window_x, window_y),pygame.SCALED)
     icon_img = loadImg("Assets/image/UI/icon.png")
     pygame.display.set_icon(icon_img)
     pygame.display.set_caption(game_title) #窗口标题
