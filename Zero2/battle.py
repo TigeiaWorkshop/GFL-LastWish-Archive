@@ -261,9 +261,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     mouse_move_temp_x = -1
     mouse_move_temp_y = -1
     total_rounds = 1
-    enemies_in_control_id= 0
     warnings_to_display = warningSystem()
     damage_do_to_character = {}
+    the_dead_one = {}
     screen_to_move_x=None
     screen_to_move_y=None
     #计算光亮区域
@@ -1182,6 +1182,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 drawImg(enemy_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
             if text_of_endround_alpha <=0:
                 if whose_round == "playerToSangvisFerris":
+                    enemies_in_control_id = 0
                     sangvisFerris_name_list = []
                     for every_chara in sangvisFerris_data:
                         if sangvisFerris_data[every_chara].current_hp>0:
@@ -1191,7 +1192,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             characters_data[every_chara].dying -= 1
                     whose_round = "sangvisFerris"
                 elif whose_round == "sangvisFerrisToPlayer":
-                    enemies_in_control_id = 0
                     characters_detect_this_round = {}
                     for key in characters_data:
                         characters_data[key].current_action_point = characters_data[key].max_action_point
@@ -1250,15 +1250,19 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                             enemy_action["route"].pop(0)
                 else:
-                    pygame.mixer.Channel(0).stop()
+                    if pygame.mixer.Channel(0).get_busy() == True:
+                        pygame.mixer.Channel(0).stop()
                     enemies_in_control_id +=1
-                    if enemies_in_control_id == len(sangvisFerris_data):
+                    if enemies_in_control_id >= len(sangvisFerris_name_list):
                         whose_round = "sangvisFerrisToPlayer"
                         total_rounds += 1
                     enemy_action = None
                     enemies_in_control = ""
             elif enemy_action["action"] == "attack":
-                sangvisFerris_data[enemies_in_control].draw("attack",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
+                if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
+                    sangvisFerris_data[enemies_in_control].draw("attack",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
+                else:
+                    sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] += 1
                 if sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] == sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgNum"]-1:
                     temp_value = random.randint(0,100)
                     if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
@@ -1270,13 +1274,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",25)
                     sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] = 0
                     enemies_in_control_id +=1
-                    if enemies_in_control_id == len(sangvisFerris_data):
+                    if enemies_in_control_id >= len(sangvisFerris_name_list):
                         whose_round = "sangvisFerrisToPlayer"
                         total_rounds += 1
                     enemy_action = None
                     enemies_in_control = ""
             elif enemy_action["action"] == "move&attack":
-                if enemy_action["route"] != []:
+                if len(enemy_action["route"]) > 0:
                     if pygame.mixer.Channel(0).get_busy() == False:
                         the_sound_id = random.randint(0,len(walking_sound)-1)
                         pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
@@ -1309,8 +1313,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                             enemy_action["route"].pop(0)
                 else:
-                    pygame.mixer.Channel(0).stop()
-                    sangvisFerris_data[enemies_in_control].draw("attack",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
+                    if pygame.mixer.Channel(0).get_busy() == True:
+                        pygame.mixer.Channel(0).stop()
+                    if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
+                        sangvisFerris_data[enemies_in_control].draw("attack",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
+                    else:
+                        sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] += 1
                     if sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] == sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgNum"]-1:
                         temp_value = random.randint(0,100)
                         if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
@@ -1322,15 +1330,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",25)
                         sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] = 0
                         enemies_in_control_id +=1
-                        if enemies_in_control_id == len(sangvisFerris_data):
+                        if enemies_in_control_id >= len(sangvisFerris_name_list):
                             whose_round = "sangvisFerrisToPlayer"
                             total_rounds += 1
                         enemy_action = None
                         enemies_in_control = ""
-            
             elif enemy_action["action"] == "stay":
                 enemies_in_control_id +=1
-                if enemies_in_control_id == len(sangvisFerris_data):
+                if enemies_in_control_id >= len(sangvisFerris_name_list):
                     whose_round = "sangvisFerrisToPlayer"
                     total_rounds += 1
                 enemy_action = None
@@ -1340,19 +1347,18 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         # 我方角色动画
-        the_dead_one = []
         for every_chara in characters_data:
             if every_chara != the_character_get_click:
                 if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
                     characters_data[every_chara].undetected = True
                 else:
                     characters_data[every_chara].undetected = False
-                if characters_data[every_chara].dying == False:
-                    characters_data[every_chara].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
+                if characters_data[every_chara].current_hp > 0:
+                        characters_data[every_chara].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                 else:
                     characters_data[every_chara].draw("die",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
-            if characters_data[every_chara].kind == "HOC" and characters_data[every_chara].current_hp <= 0:
-                the_dead_one.append(every_chara)
+                    if characters_data[every_chara].kind == "HOC" and every_chara not in the_dead_one:
+                        the_dead_one[every_chara] = "characters_data"
             if every_chara in damage_do_to_character:
                 the_alpha_to_check = damage_do_to_character[every_chara].get_alpha()
                 if the_alpha_to_check > 0:
@@ -1360,18 +1366,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     damage_do_to_character[every_chara].set_alpha(the_alpha_to_check-5)
                 else:
                     del damage_do_to_character[every_chara]
-        if len(the_dead_one) != 0:
-            for i in range(len(the_dead_one)):
-                if characters_data[the_dead_one[i]].gif_dic["die"]["imgId"] == characters_data[the_dead_one[i]].gif_dic["die"]["imgNum"]-1:
-                    the_alpha = characters_data[the_dead_one[i]].gif_dic["die"]["img"][-1].get_alpha()
-                    if the_alpha > 0:
-                        characters_data[the_dead_one[i]].gif_dic["die"]["img"][-1].set_alpha(the_alpha-5)
-                    else:
-                        del characters_data[the_dead_one[i]]
-                        result_of_round["times_characters_down"]+=1
-                        light_area = calculate_darkness(characters_data,facilities_data["campfire"])
         #敌方动画
-        the_dead_one = []
         for enemies in sangvisFerris_data:
             if enemies != enemies_in_control:
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
@@ -1410,7 +1405,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         sangvisFerris_data[enemies].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                     elif sangvisFerris_data[enemies].current_hp<=0:
                         sangvisFerris_data[enemies].draw("die",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
-                        the_dead_one.append(enemies)
+                        if enemies not in the_dead_one:
+                            the_dead_one[enemies] = "sangvisFerris_data"
                     if enemies in damage_do_to_character:
                         the_alpha_to_check = damage_do_to_character[enemies].get_alpha()
                         if the_alpha_to_check > 0:
@@ -1418,16 +1414,29 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             damage_do_to_character[enemies].set_alpha(the_alpha_to_check-5)
                         else:
                             del damage_do_to_character[enemies]
-        if len(the_dead_one) != 0:
-            for i in range(len(the_dead_one)):
-                if sangvisFerris_data[the_dead_one[i]].gif_dic["die"]["imgId"] == sangvisFerris_data[the_dead_one[i]].gif_dic["die"]["imgNum"]-1:
-                    the_alpha = sangvisFerris_data[the_dead_one[i]].gif_dic["die"]["img"][-1].get_alpha()
+        the_dead_one_remove = []
+        for key,value in the_dead_one.items():
+            if value == "sangvisFerris_data":
+                if sangvisFerris_data[key].gif_dic["die"]["imgId"] == sangvisFerris_data[key].gif_dic["die"]["imgNum"]-1:
+                    the_alpha = sangvisFerris_data[key].gif_dic["die"]["img"][-1].get_alpha()
                     if the_alpha > 0:
-                        sangvisFerris_data[the_dead_one[i]].gif_dic["die"]["img"][-1].set_alpha(the_alpha-5)
+                        sangvisFerris_data[key].gif_dic["die"]["img"][-1].set_alpha(the_alpha-5)
                     else:
-                        sangvisFerris_data.pop(the_dead_one[i])
+                        the_dead_one_remove.append(key)
+                        del sangvisFerris_data[key]
                         result_of_round["total_kills"]+=1
-                
+            elif value == "characters_data":
+                if characters_data[key].gif_dic["die"]["imgId"] == characters_data[key].gif_dic["die"]["imgNum"]-1:
+                    the_alpha = characters_data[key].gif_dic["die"]["img"][-1].get_alpha()
+                    if the_alpha > 0:
+                        characters_data[key].gif_dic["die"]["img"][-1].set_alpha(the_alpha-5)
+                    else:
+                        the_dead_one_remove.append(key)
+                        del characters_data[key]
+                        result_of_round["times_characters_down"]+=1
+                        light_area = calculate_darkness(characters_data,facilities_data["campfire"])
+        for key in the_dead_one_remove:
+            del the_dead_one[key]
         #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
 
         #显示选择菜单

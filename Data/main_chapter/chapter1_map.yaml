@@ -21,8 +21,8 @@ character:
     max_damage: 300
     max_hp: 250
     min_damage: 200
-    skill_effective_range: null
     skill_cover_range: null
+    skill_effective_range: null
     start_position:
     - 3
     - 12
@@ -51,6 +51,7 @@ character:
     max_damage: 350
     max_hp: 5500
     min_damage: 250
+    skill_cover_range: 1
     skill_effective_range:
       middle:
       - 4
@@ -58,7 +59,6 @@ character:
       near:
       - 1
       - 3
-    skill_cover_range: 1
     start_position:
     - 1
     - 1
@@ -87,11 +87,11 @@ character:
     max_damage: 150
     max_hp: 3500
     min_damage: 100
+    skill_cover_range: 1
     skill_effective_range:
       near:
       - 1
       - 6
-    skill_cover_range: 1
     start_position:
     - 1
     - 2
@@ -120,6 +120,7 @@ character:
     max_damage: 200
     max_hp: 8000
     min_damage: 150
+    skill_cover_range: 3
     skill_effective_range:
       far:
       - 5
@@ -130,7 +131,6 @@ character:
       near:
       - 1
       - 3
-    skill_cover_range: 3
     start_position:
     - 1
     - 3
@@ -159,6 +159,7 @@ character:
     max_damage: 6500
     max_hp: 2500
     min_damage: 4000
+    skill_cover_range: 1
     skill_effective_range:
       middle:
       - 6
@@ -166,7 +167,6 @@ character:
       near:
       - 1
       - 5
-    skill_cover_range: 1
     start_position:
     - 1
     - 4
@@ -174,6 +174,16 @@ character:
     undetected: false
     x: 10
     y: 8
+facility:
+  campfire:
+    campfire1:
+      range: 3
+      x: 12
+      y: 10
+    campfire2:
+      range: 3
+      x: 15
+      y: 15
 local_x: 0
 local_y: 0
 map:
@@ -2511,7 +2521,7 @@ sangvisFerri:
     attack_range: 1
     current_bullets: 20
     current_hp: 200
-    effective_range: 
+    effective_range:
       far:
       - 6
       - 6
@@ -2530,12 +2540,36 @@ sangvisFerri:
     type: jaeger
     x: 9
     y: 11
+  jupiter:
+    action_point: 15
+    attack_range: 1
+    current_bullets: 20
+    current_hp: 400
+    effective_range:
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
+    kind: HOC
+    magazine_capacity: 20
+    max_damage: 400
+    max_hp: 400
+    min_damage: 300
+    patrol_path: []
+    type: jupiter
+    x: 11
+    y: 15
   prowler:
     action_point: 10
     attack_range: 1
     current_bullets: 20
     current_hp: 250
-    effective_range: 
+    effective_range:
       far:
       - 8
       - 9
@@ -2559,7 +2593,7 @@ sangvisFerri:
     attack_range: 1
     current_bullets: 20
     current_hp: 400
-    effective_range: 
+    effective_range:
       far:
       - 8
       - 9
@@ -2582,36 +2616,12 @@ sangvisFerri:
     type: ripper
     x: 28
     y: 12
-  jupiter:
-    action_point: 15
-    attack_range: 1
-    current_bullets: 20
-    current_hp: 400
-    effective_range: 
-      far:
-      - 8
-      - 9
-      middle:
-      - 5
-      - 7
-      near:
-      - 1
-      - 4
-    kind: HOC
-    magazine_capacity: 20
-    max_damage: 400
-    max_hp: 400
-    min_damage: 300
-    patrol_path: []
-    type: jupiter
-    x: 11
-    y: 15
   vespid:
     action_point: 15
     attack_range: 1
     current_bullets: 20
     current_hp: 350
-    effective_range: 
+    effective_range:
       far:
       - 8
       - 9
@@ -2632,13 +2642,3 @@ sangvisFerri:
     y: 13
 weather: snow
 zoom_in: 2
-facility:
-  campfire:
-    campfire1:
-      x: 12
-      y: 10
-      range: 3
-    campfire2:
-      x: 15
-      y: 15
-      range: 3

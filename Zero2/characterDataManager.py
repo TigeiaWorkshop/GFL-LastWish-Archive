@@ -1,7 +1,8 @@
 import random
 import os
 import pygame
-from Zero2.basic import fontRender,drawImg
+import glob
+from Zero2.basic import fontRender
 
 class Doll:
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,faction,magazine_capacity,max_damage,max_hp,min_damage,type,x,y):
@@ -35,7 +36,7 @@ class Doll:
         if self.faction == "character" and self.dying != False:
             self.dying == False
             self.gif_dic["die"]["imgId"] = 0
-    def draw(self,action,screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,isContinue=True,ifFlip=False):
+    def draw(self,action,screen,original_UI_img,perBlockWidth,perBlockHeight,local_x=0,local_y=0,isContinue=True,ifFlip=False):
         if self.dying == False:
             hp_img = original_UI_img["hp_green"]
             current_hp_to_display = fontRender(str(self.current_hp)+"/"+str(self.max_hp),"black",10)
@@ -46,7 +47,7 @@ class Doll:
             percent_of_hp = self.dying/3
         original_alpha = self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]].get_alpha()
         img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*4), round(perBlockHeight*4)))
-        if self.faction == "character":
+        if self.faction == "character" and self.current_hp>0:
             if self.undetected == True:
                 img_of_char.set_alpha(130)
             else:
@@ -54,12 +55,12 @@ class Doll:
         else:
             img_of_char.set_alpha(original_alpha)
         if ifFlip == True:
-            drawImg(pygame.transform.flip(img_of_char,True,False),((self.x-1.5)*perBlockWidth,(self.y-1.9)*perBlockHeight),screen,local_x,local_y)
-        else:
-            drawImg(img_of_char,((self.x-1.5)*perBlockWidth,(self.y-1.9)*perBlockHeight),screen,local_x,local_y)
-        drawImg(pygame.transform.scale(original_UI_img["hp_empty"], (perBlockWidth, round(perBlockHeight/5))),(self.x*perBlockWidth,self.y*perBlockHeight*0.98),screen,local_x,local_y)
-        drawImg(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp),round(perBlockHeight/5))),(self.x*perBlockWidth,self.y*perBlockHeight*0.98),screen,local_x,local_y)
-        drawImg(current_hp_to_display,(self.x*perBlockWidth,self.y*perBlockHeight*0.98),screen,local_x,local_y)
+            img_of_char = pygame.transform.flip(img_of_char,True,False)
+        #把角色图片画到屏幕上
+        screen.blit(img_of_char,((self.x-1.5)*perBlockWidth+local_x,(self.y-1.9)*perBlockHeight+local_y))
+        screen.blit(pygame.transform.scale(original_UI_img["hp_empty"], (perBlockWidth, round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
+        screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp),round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
+        screen.blit(current_hp_to_display,(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
         self.gif_dic[action]["imgId"] += 1
         if isContinue==True:
             if self.gif_dic[action]["imgId"] >= self.gif_dic[action]["imgNum"]:
@@ -69,16 +70,12 @@ class Doll:
                 self.gif_dic[action]["imgId"] -= 1
     def draw_bb(self,action,screen,perBlockWidth,perBlockHeight,local_x,local_y,isContinue=True,ifFlip=False):
         img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*4), round(perBlockHeight*4)))
+        if ifFlip == True:
+            pygame.transform.flip(img_of_char,True,False)
         if self.faction == "character":
-            if ifFlip == True:
-                drawImg(pygame.transform.flip(img_of_char,True,False),((self.start_position[0]-1.5)*perBlockWidth,(self.start_position[1]-1.9)*perBlockHeight),screen,local_x,local_y)
-            else:
-                drawImg(img_of_char,((self.start_position[0]-1.5)*perBlockWidth,(self.start_position[1]-1.9)*perBlockHeight),screen,local_x,local_y)
+            screen.blit(img_of_char,((self.start_position[0]-1.5)*perBlockWidth+local_x,(self.start_position[1]-1.9)*perBlockHeight+local_y))
         else:
-            if ifFlip == True:
-                drawImg(pygame.transform.flip(img_of_char,True,False),((self.x-1.5)*perBlockWidth,(self.y-1.9)*perBlockHeight),screen,local_x,local_y)
-            else:
-                drawImg(img_of_char,((self.x-1.5)*perBlockWidth,(self.y-1.9)*perBlockHeight),screen,local_x,local_y)
+            screen.blit(img_of_char,((self.x-1.5)*perBlockWidth+local_x,(self.y-1.9)*perBlockHeight+local_y))
         self.gif_dic[action]["imgId"] += 1
         if isContinue==True:
             if self.gif_dic[action]["imgId"] >= self.gif_dic[action]["imgNum"]:
@@ -104,25 +101,18 @@ class sangvisFerriDataManager(Doll):
 #动图制作模块：接受一个友方角色名和动作,当前的方块标准长和高，返回对应角色动作list或者因为没图片而返回None
 #810*810 possition:405/567
 def character_creator(character_name,action,faction="character"):
+    if os.path.exists("Assets/image/"+faction+"/"+character_name+"/"+action):
+        files_amount = len(glob.glob("Assets/image/"+faction+"/"+character_name+"/"+action+"/*.png"))
+        path = "Assets/image/"+faction+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_NaN.png"
+    elif os.path.exists("../Assets/image/"+faction+"/"+character_name+"/"+action):
+        files_amount = len(glob.glob("../Assets/image/"+faction+"/"+character_name+"/"+action+"/*.png"))
+        path = "../Assets/image/"+faction+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_NaN.png"
+    else:
+        return None
     character_gif=[]
-    files_amount = 0
-    if os.path.exists("../Assets/image/"+faction+"/"+character_name+"/"+action):
-        for file in os.listdir("../Assets/image/"+faction+"/"+character_name+"/"+action):
-            files_amount+=1
+    if files_amount > 0:
         for i in range(files_amount):
-            path = "../Assets/image/"+faction+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_"+str(i)+".png"
-            character_gif.append(pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (375, 375)))
-        return {
-            "img":character_gif,
-            "imgId":0,
-            "imgNum":files_amount
-        }
-    elif os.path.exists("Assets/image/"+faction+"/"+character_name+"/"+action):
-        for file in os.listdir("Assets/image/"+faction+"/"+character_name+"/"+action):
-            files_amount+=1
-        for i in range(files_amount):
-            path = "Assets/image/"+faction+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_"+str(i)+".png"
-            character_gif.append(pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (375, 375)))
+            character_gif.append(pygame.transform.scale(pygame.image.load(os.path.join(path.replace("NaN",str(i)))).convert_alpha(), (375, 375)))
         return {
             "img":character_gif,
             "imgId":0,
@@ -146,13 +136,11 @@ def character_gif_dic(character_name,faction="character"):
         "wait":character_creator(character_name,"wait",faction),
         "wait2":character_creator(character_name,"wait2",faction),
     }
-    if faction == "character" or "jupiter" in character_name.lower():
+    if faction == "character":
         gif_dic["die"] = character_creator(character_name,"die",faction)
     else:
-        temp = random.randint(0,2)
-        if temp == 0:
+        temp_list = ["","2","3"]
+        gif_dic["die"] = character_creator(character_name,"die"+temp_list[random.randint(0,2)],faction)
+        if gif_dic["die"]==None:
             gif_dic["die"] = character_creator(character_name,"die",faction)
-        else:
-            temp = str(temp+1)
-            gif_dic["die"] = character_creator(character_name,"die"+temp,faction)
     return gif_dic
