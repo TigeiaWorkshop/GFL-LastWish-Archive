@@ -51,33 +51,18 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         fpsClock.tick(fps)
         pygame.display.update()
 
-    #开始加载场景-1
+    #开始加载场景
     black_bg.draw(screen)
     drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
     drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-    now_loading = fontRender("正在加载地图.", "white",25)
+    now_loading = fontRender("正在加载地图...", "white",25)
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     pygame.display.update()
 
-    #加载背景图片
-    all_env_file_list = glob.glob(r'Assets/image/environment/block/*.png')
-    env_img_list={}
-    for i in range(len(all_env_file_list)):
-        img_name = all_env_file_list[i].replace("Assets","").replace("image","").replace("environment","").replace("block","").replace(".png","").replace("\\","").replace("/","")
-        env_img_list[img_name] = loadImg(all_env_file_list[i])
-    #地图方块图片随机化
+    #加载地图设置
     with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         blocks_setting = loadData["blocks"]
-    
-    #开始加载场景-2
-    black_bg.draw(screen)
-    drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-    drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-    now_loading = fontRender("正在加载地图..", "white",25)
-    drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-    pygame.display.update()
-
     #读取并初始化章节信息
     with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -88,7 +73,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         local_y = loadData["local_y"]
         characters = loadData["character"]
         sangvisFerris = loadData["sangvisFerri"]
-        theMap = MapObject(loadData["map"],blocks_setting,env_img_list)
+        theMap = MapObject(loadData["map"],blocks_setting,window_x)
         bg_music = loadData["background_music"]
         environment_sound = loadData["weather"]
         facilities_data = loadData["facility"]
@@ -105,14 +90,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     if local_y+window_y/block_y*0.25*theMap.row>0:
         local_y=0
     
-    #开始加载场景-3
-    black_bg.draw(screen)
-    drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-    drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-    now_loading = fontRender("正在加载地图...", "white",25)
-    drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-    pygame.display.update()
-
     #加载雪花
     all_snow_img = glob.glob(r'Assets/image/environment/snow/*.png')
     snow_list = []
@@ -200,12 +177,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         "hp_green" : loadImg("Assets/image/UI/hp_green.png"),
         "action_point_blue" : loadImg("Assets/image/UI/action_point.png"),
         "bullets_number_brown" : loadImg("Assets/image/UI/bullets_number.png"),
-        "green" : loadImg("Assets/image/UI/green.png",None,None,100),
-        "red" : loadImg("Assets/image/UI/red.png",None,None,100),
-        "black" : loadImg("Assets/image/UI/black.png",None,None,100),
-        "yellow": loadImg("Assets/image/UI/yellow.png",None,None,100),
-        "blue": loadImg("Assets/image/UI/blue.png",None,None,100),
-        "orange": loadImg("Assets/image/UI/orange.png",None,None,100),
+        "green" : loadImg("Assets/image/UI/green.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
+        "red" : loadImg("Assets/image/UI/red.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
+        "black" : loadImg("Assets/image/UI/black.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
+        "yellow": loadImg("Assets/image/UI/yellow.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
+        "blue": loadImg("Assets/image/UI/blue.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
+        "orange": loadImg("Assets/image/UI/orange.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
         #计分板
         "score" : loadImage("Assets/image/UI/score.png",(200,200),300,600),
     }
