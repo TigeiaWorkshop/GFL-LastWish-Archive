@@ -1106,8 +1106,15 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                                 the_route.pop(0)
                     else:
                         pygame.mixer.Channel(0).stop()
-                        isWaiting =True
-                        the_character_get_click = ""
+                        if characters_data[the_character_get_click].gif_dic["set"] != None:
+                            characters_data[the_character_get_click].draw("set",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
+                            if characters_data[the_character_get_click].gif_dic["set"]["imgId"] == characters_data[the_character_get_click].gif_dic["set"]["imgNum"]-1:
+                                isWaiting =True
+                                characters_data[the_character_get_click].gif_dic["set"]["imgId"]=0
+                                the_character_get_click = ""
+                        else:
+                            isWaiting =True
+                            the_character_get_click = ""
                     light_area = calculate_darkness(characters_data,facilities_data["campfire"])
                 elif action_choice == "attack":
                     if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
@@ -1346,77 +1353,67 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 print("warning: not choice")
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
-        # 我方角色动画
-        for every_chara in characters_data:
-            if every_chara != the_character_get_click:
-                if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
-                    characters_data[every_chara].undetected = True
-                else:
-                    characters_data[every_chara].undetected = False
-                if characters_data[every_chara].current_hp > 0:
-                        characters_data[every_chara].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
-                else:
-                    characters_data[every_chara].draw("die",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
-                    if characters_data[every_chara].kind == "HOC" and every_chara not in the_dead_one:
-                        the_dead_one[every_chara] = "characters_data"
-            if every_chara in damage_do_to_character:
-                the_alpha_to_check = damage_do_to_character[every_chara].get_alpha()
-                if the_alpha_to_check > 0:
-                    drawImg(damage_do_to_character[every_chara],(characters_data[every_chara].x*perBlockWidth,characters_data[every_chara].y*perBlockHeight),screen,local_x,local_y)
-                    damage_do_to_character[every_chara].set_alpha(the_alpha_to_check-5)
-                else:
-                    del damage_do_to_character[every_chara]
-        #敌方动画
-        for enemies in sangvisFerris_data:
-            if enemies != enemies_in_control:
-                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
-                    if sangvisFerris_data[enemies].current_hp>0:
-                        if green_hide == True and pygame.mouse.get_pressed()[2]:
-                            if int((mouse_x-local_x)/perBlockWidth) == sangvisFerris_data[enemies].x and int((mouse_y-local_y)/perBlockHeight) == sangvisFerris_data[enemies].y:
-                                the_character_effective_range = 0
-                                if sangvisFerris_data[enemies].effective_range["far"] != None:
-                                    the_character_effective_range = sangvisFerris_data[enemies].effective_range["far"][1]+1
-                                elif sangvisFerris_data[enemies].effective_range["middle"] != None:
-                                    the_character_effective_range = sangvisFerris_data[enemies].effective_range["middle"][1]+1
-                                elif sangvisFerris_data[enemies].effective_range["near"] != None:
-                                    the_character_effective_range = sangvisFerris_data[enemies].effective_range["near"][1]+1
-                                for y in range(sangvisFerris_data[enemies].y-the_character_effective_range,sangvisFerris_data[enemies].y+the_character_effective_range):
-                                    if y < sangvisFerris_data[enemies].y:
-                                        for x in range(sangvisFerris_data[enemies].x-the_character_effective_range-(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+the_character_effective_range+(y-sangvisFerris_data[enemies].y)):
+        for key,value in dicMerge(characters_data,sangvisFerris_data).items():
+            #当友方角色在草丛中时
+            if value.faction == "character":
+                if key != the_character_get_click:
+                    if theMap.mapData[value.y][value.x] == 2:
+                        value.undetected = True
+                    else:
+                        value.undetected = False
+            #根据血量判断角色的动作
+            if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in light_area or dark_mode != True:
+                if value.current_hp > 0:
+                    if green_hide == True and pygame.mouse.get_pressed()[2]:
+                        if int((mouse_x-local_x)/perBlockWidth) == value.x and int((mouse_y-local_y)/perBlockHeight) == value.y:
+                            the_character_effective_range = 0
+                            if value.effective_range["far"] != None:
+                                the_character_effective_range = value.effective_range["far"][1]+1
+                            elif value.effective_range["middle"] != None:
+                                the_character_effective_range = value.effective_range["middle"][1]+1
+                            elif value.effective_range["near"] != None:
+                                the_character_effective_range = value.effective_range["near"][1]+1
+                            for y in range(value.y-the_character_effective_range,value.y+the_character_effective_range):
+                                if y < value.y:
+                                    for x in range(value.x-the_character_effective_range-(y-value.y)+1,value.x+the_character_effective_range+(y-value.y)):
+                                        if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
+                                            if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
+                                                drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
+                                                drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
+                                                drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                else:
+                                    for x in range(value.x-the_character_effective_range+(y-value.y)+1,value.x+the_character_effective_range-(y-value.y)):
+                                        if x == value.x and y == value.y:
+                                            pass
+                                        else:
                                             if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
-                                                if sangvisFerris_data[enemies].effective_range["far"] != None and sangvisFerris_data[enemies].effective_range["far"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["far"][1]:
+                                                if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
                                                     drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                elif sangvisFerris_data[enemies].effective_range["middle"] != None and sangvisFerris_data[enemies].effective_range["middle"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["middle"][1]:
+                                                elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
                                                     drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                elif sangvisFerris_data[enemies].effective_range["near"] != None and sangvisFerris_data[enemies].effective_range["near"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["near"][1]:
+                                                elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
                                                     drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                    else:
-                                        for x in range(sangvisFerris_data[enemies].x-the_character_effective_range+(y-sangvisFerris_data[enemies].y)+1,sangvisFerris_data[enemies].x+the_character_effective_range-(y-sangvisFerris_data[enemies].y)):
-                                            if x == sangvisFerris_data[enemies].x and y == sangvisFerris_data[enemies].y:
-                                                pass
-                                            else:
-                                                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
-                                                    if sangvisFerris_data[enemies].effective_range["far"] != None and sangvisFerris_data[enemies].effective_range["far"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["far"][1]:
-                                                        drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    elif sangvisFerris_data[enemies].effective_range["middle"] != None and sangvisFerris_data[enemies].effective_range["middle"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["middle"][1]:
-                                                        drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    elif sangvisFerris_data[enemies].effective_range["near"] != None and sangvisFerris_data[enemies].effective_range["near"][0] <= abs(x-sangvisFerris_data[enemies].x)+abs(y-sangvisFerris_data[enemies].y) <= sangvisFerris_data[enemies].effective_range["near"][1]:
-                                                        drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                        sangvisFerris_data[enemies].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
-                    elif sangvisFerris_data[enemies].current_hp<=0:
-                        sangvisFerris_data[enemies].draw("die",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
-                        if enemies not in the_dead_one:
-                            the_dead_one[enemies] = "sangvisFerris_data"
-                    if enemies in damage_do_to_character:
-                        the_alpha_to_check = damage_do_to_character[enemies].get_alpha()
-                        if the_alpha_to_check > 0:
-                            drawImg(damage_do_to_character[enemies],(sangvisFerris_data[enemies].x*perBlockWidth,sangvisFerris_data[enemies].y*perBlockHeight),screen,local_x,local_y)
-                            damage_do_to_character[enemies].set_alpha(the_alpha_to_check-5)
-                        else:
-                            del damage_do_to_character[enemies]
+                    value.draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
+                elif value.current_hp<=0:
+                    value.draw("die",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
+            #是否有在播放死亡角色的动画（而不是倒地状态）
+            if value.current_hp<=0 and key not in the_dead_one:
+                if value.faction == "character" and value.kind == "HOC" or value.faction == "sangvisFerri":
+                    the_dead_one[key] = value.faction
+            #伤害/治理数值显示
+            if key in damage_do_to_character:
+                the_alpha_to_check = damage_do_to_character[key].get_alpha()
+                if the_alpha_to_check > 0:
+                    drawImg(damage_do_to_character[key],(value.x*perBlockWidth,value.y*perBlockHeight),screen,local_x,local_y)
+                    damage_do_to_character[key].set_alpha(the_alpha_to_check-5)
+                else:
+                    del damage_do_to_character[key]
+
         the_dead_one_remove = []
         for key,value in the_dead_one.items():
-            if value == "sangvisFerris_data":
+            if value == "sangvisFerri":
                 if sangvisFerris_data[key].gif_dic["die"]["imgId"] == sangvisFerris_data[key].gif_dic["die"]["imgNum"]-1:
                     the_alpha = sangvisFerris_data[key].gif_dic["die"]["img"][-1].get_alpha()
                     if the_alpha > 0:
@@ -1425,7 +1422,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         the_dead_one_remove.append(key)
                         del sangvisFerris_data[key]
                         result_of_round["total_kills"]+=1
-            elif value == "characters_data":
+            elif value == "character":
                 if characters_data[key].gif_dic["die"]["imgId"] == characters_data[key].gif_dic["die"]["imgNum"]-1:
                     the_alpha = characters_data[key].gif_dic["die"]["img"][-1].get_alpha()
                     if the_alpha > 0:
