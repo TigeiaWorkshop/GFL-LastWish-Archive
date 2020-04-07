@@ -82,6 +82,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         zoom_in = 1
     elif zoom_in > 3:
         zoom_in = 3
+    zoomIntoBe = zoom_in
     perBlockWidth = round(window_x/block_x*zoom_in)
     perBlockHeight = round(window_y/block_y*zoom_in)
 
@@ -243,6 +244,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     the_dead_one = {}
     screen_to_move_x=None
     screen_to_move_y=None
+    pressKeyToMove={"up":False,"down":False,"left":False,"right":False}
     #计算光亮区域
     light_area = calculate_darkness(characters_data,facilities_data["campfire"])
     # 移动路径
@@ -621,49 +623,37 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #玩家输入按键判定-任何情况
         for event in pygame.event.get():
             if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
+                if event.key == K_ESCAPE and isWaiting == True:
                     green_hide = True
                     the_character_get_click = ""
-                    isWaiting = True
                     action_choice = ""
                     attacking_range = None
                     skill_range = None
+                if event.key == K_w:
+                    pressKeyToMove["up"]=True
+                if event.key == K_a:
+                    pressKeyToMove["left"]=True
+                if event.key == K_s:
+                    pressKeyToMove["down"]=True
+                if event.key == K_d:
+                    pressKeyToMove["right"]=True
                 if event.key == K_m:
                     exit()
+            elif event.type == KEYUP:
+                if event.key == K_w:
+                    pressKeyToMove["up"]=False
+                if event.key == K_a:
+                    pressKeyToMove["left"]=False
+                if event.key == K_s:
+                    pressKeyToMove["down"]=False
+                if event.key == K_d:
+                    pressKeyToMove["right"]=False
             elif event.type == MOUSEBUTTONDOWN:
                 #上下滚轮-放大和缩小地图
-                if event.button == 4:
-                    if zoom_in < 3:
-                        zoom_in += 0.25
-                        perBlockWidth = round(window_x/block_x*zoom_in)
-                        perBlockHeight = round(window_y/block_y*zoom_in)
-                        if local_x < 0 - perBlockWidth*theMap.column:
-                            local_x = 0 - perBlockWidth*theMap.column
-                        if local_y < 0 - perBlockWidth*theMap.row:
-                            local_y = 0 - perBlockWidth*theMap.row
-                        #加载UI
-                        UI_img["green"] = pygame.transform.scale(original_UI_img["green"], (perBlockWidth, perBlockHeight))
-                        UI_img["red"] = pygame.transform.scale(original_UI_img["red"], (perBlockWidth, perBlockHeight))
-                        UI_img["black"] = pygame.transform.scale(original_UI_img["black"], (perBlockWidth, perBlockHeight))
-                        UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight))
-                        UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight))
-                        UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
-                elif event.button == 5:
-                    if zoom_in > 1:
-                        zoom_in -= 0.25
-                        perBlockWidth = round(window_x/block_x*zoom_in)
-                        perBlockHeight = round(window_y/block_y*zoom_in)
-                        if local_x >0:
-                            local_x=0
-                        if local_y>0:
-                            local_y = 0
-                        #加载UI
-                        UI_img["green"] = pygame.transform.scale(original_UI_img["green"], (perBlockWidth, perBlockHeight))
-                        UI_img["red"] = pygame.transform.scale(original_UI_img["red"], (perBlockWidth, perBlockHeight))
-                        UI_img["black"] = pygame.transform.scale(original_UI_img["black"], (perBlockWidth, perBlockHeight))
-                        UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight))
-                        UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight))
-                        UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
+                if event.button == 4 and zoomIntoBe < 3:
+                    zoomIntoBe += 0.25
+                elif event.button == 5 and zoomIntoBe > 1:
+                    zoomIntoBe -= 0.25
             #移动屏幕
             if pygame.mouse.get_pressed()[2]:
                 if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
@@ -689,6 +679,50 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 mouse_move_temp_x = -1
                 mouse_move_temp_y = -1
         
+        #根据zoomIntoBe调整zoom_in大小
+        if zoomIntoBe != round(zoom_in,2):
+            if zoomIntoBe < zoom_in:
+                zoom_in -= 0.05
+            elif zoomIntoBe > zoom_in:
+                zoom_in += 0.05
+            newPerBlockWidth = round(window_x/block_x*zoom_in)
+            newPerBlockHeight = round(window_y/block_y*zoom_in)
+            local_x += (perBlockWidth-newPerBlockWidth)*theMap.column/2
+            local_y += (perBlockHeight-newPerBlockHeight)*theMap.row/2
+            perBlockWidth = newPerBlockWidth
+            perBlockHeight = newPerBlockHeight
+            #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
+            UI_img["green"] = pygame.transform.scale(original_UI_img["green"], (perBlockWidth, perBlockHeight))
+            UI_img["red"] = pygame.transform.scale(original_UI_img["red"], (perBlockWidth, perBlockHeight))
+            UI_img["black"] = pygame.transform.scale(original_UI_img["black"], (perBlockWidth, perBlockHeight))
+            UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight))
+            UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight))
+            UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
+        else:
+            zoom_in = zoomIntoBe
+
+        #根据按键情况设定要移动的数值
+        if pressKeyToMove["up"] == True:
+            if screen_to_move_y== None:
+                screen_to_move_y = perBlockHeight
+            else:
+                screen_to_move_y += perBlockHeight
+        if pressKeyToMove["down"] == True:
+            if screen_to_move_y== None:
+                screen_to_move_y = -perBlockHeight
+            else:
+                screen_to_move_y -= perBlockHeight
+        if pressKeyToMove["left"] == True:
+            if screen_to_move_x== None:
+                screen_to_move_x = perBlockWidth
+            else:
+                screen_to_move_x += perBlockWidth
+        if pressKeyToMove["right"] == True:
+            if screen_to_move_x== None:
+                screen_to_move_x = -perBlockWidth
+            else:
+                screen_to_move_x -= perBlockWidth
+
         #如果需要移动屏幕
         if screen_to_move_x != None and screen_to_move_x != 0:
             temp_value = local_x + screen_to_move_x*0.2
@@ -709,6 +743,16 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             else:
                 screen_to_move_y = 0
         
+        #检测屏幕是不是移到了不移到的地方
+        if local_x < window_x-perBlockWidth*theMap.column:
+            local_x = window_x-perBlockWidth*theMap.column
+        elif local_x > 0:
+            local_x = 0
+        if local_y < window_y-perBlockHeight*theMap.row:
+            local_y = window_y-perBlockHeight*theMap.row
+        elif local_y > 0:
+            local_y = 0
+
         #加载地图
         theMap.display_map(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y)
         #加载篝火
