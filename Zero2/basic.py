@@ -1,5 +1,6 @@
 import os
 import pygame
+import cv2
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
 def loadImg(path,length=None,height=None,setAlpha=None,ifConvertAlpha=True):
@@ -140,3 +141,38 @@ class warningSystem:
                 del self.all_warnings[i]
     def empty(self):
         self.all_warnings = []
+
+#视频捕捉系统
+class VideoObject:
+    def __init__(self,path,ifLoop=False,endPoint=None,loopStartPoint=None):
+        self.video = cv2.VideoCapture(path)
+        self.ifLoop = ifLoop
+        if endPoint != None:
+            self.endPoint = endPoint
+        else:
+            self.endPoint = self.getFrameNum()
+        if loopStartPoint != None:
+            self.loopStartPoint = loopStartPoint
+        else:
+            self.loopStartPoint = 1
+    def getFPS(self):
+        return self.video.get(cv2.CAP_PROP_FPS)
+    def getFrameNum(self):
+        return self.video.get(7)
+    def getFrame(self):
+        return self.video.get(1)
+    def setFrame(self,num):
+        self.video.set(1,num)
+    def display(self,surface,screen):
+        if self.getFrame() >= self.endPoint:
+            if self.ifLoop == True:
+                self.setFrame(self.loopStartPoint)
+            else:
+                return True
+        ret, frame = self.video.read()
+        if frame.shape[0] != surface.get_width() or frame.shape[1] != surface.get_height():
+            frame = cv2.resize(frame,(surface.get_width(),surface.get_height()))
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.transpose(frame)
+        pygame.surfarray.blit_array(surface, frame)
+        screen.blit(surface, (0,0))

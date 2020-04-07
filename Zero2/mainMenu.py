@@ -1,7 +1,6 @@
 import time
 from sys import exit
 
-import cv2
 import pygame
 import yaml
 from pygame.locals import *
@@ -37,7 +36,7 @@ def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
     pygame.display.set_caption(game_title) #窗口标题
     
     #加载主菜单背景
-    videoCapture = cv2.VideoCapture("Assets/movie/SquadAR.mp4")
+    videoCapture = VideoObject("Assets/movie/SquadAR.mp4",True,3105,935)
     #数值初始化
     cover_alpha = 0
     background_img_id = 0
@@ -49,7 +48,9 @@ def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
     cover_img = loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
     #帧数控制器
     fpsClock = pygame.time.Clock()
-    video_fps = videoCapture.get(cv2.CAP_PROP_FPS)
+    video_fps = videoCapture.getFPS()
+    if video_fps<30:
+        video_fps=30
     #视频面
     surface = pygame.surface.Surface((window_x, window_y))
     #音效
@@ -83,15 +84,7 @@ def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
     # 游戏主循环
     while True:
         #背景图片
-        if videoCapture.get(1) >= 3105:
-            videoCapture.set(1, 935)
-        ret, frame = videoCapture.read()
-        if frame.shape[0] != window_x or frame.shape[1] != window_y:
-            frame = cv2.resize(frame,(window_x,window_y))
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.transpose(frame)
-        pygame.surfarray.blit_array(surface, frame)
-        screen.blit(surface, (0,0))
+        videoCapture.display(surface,screen)
 
         if isHoverOn(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
@@ -110,7 +103,7 @@ def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
             for txt in main_menu_txt:
                 if isHoverOn(main_menu_txt[txt].n, (txt_location,main_menu_txt_start_height+window_x/38*2*i)):
                     hover_sound_play_on = "0_"+str(i)
-                    drawImg(main_menu_txt[txt].b, (txt_location,main_menu_txt_start_height+window_x/38*2*i),screen)
+                    drawImg(main_menu_txt[txt].b, (txt_location,main_menu_txt_start_height+window_x/38*(2*i-0.25)),screen)
                 else:
                     drawImg(main_menu_txt[txt].n, (txt_location,main_menu_txt_start_height+window_x/38*2*i),screen)
                 i+=1
@@ -118,7 +111,7 @@ def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
             for i in range(len(chapter_select)):
                 if isHoverOn(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
                     hover_sound_play_on = "1_"+str(i)
-                    drawImg(chapter_select[i].b, (txt_location,chapter_select_txt_start_height+window_x/38*2*i),screen)
+                    drawImg(chapter_select[i].b, (txt_location,chapter_select_txt_start_height+window_x/38*(2*i-0.25)),screen)
                 else:
                     drawImg(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i),screen)
 
@@ -148,7 +141,7 @@ def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
                             dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_before_battle")
                             battle("chapter"+str(i+1),window_x,window_y,screen,lang,fps)
                             dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_after_battle")
-                            videoCapture.set(1,1)
+                            videoCapture.setFrame(1)
                             break
             
         while pygame.mixer.music.get_busy() != 1:

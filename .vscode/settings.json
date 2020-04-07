@@ -12,6 +12,7 @@
         "numpy",
         "nyto",
         "printf",
+        "pyinstaller",
         "sangvis",
         "simhei",
         "strftime",

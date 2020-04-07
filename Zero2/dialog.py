@@ -1,7 +1,6 @@
 import glob
 from sys import exit
 
-import cv2
 import pygame
 import yaml
 from pygame.locals import *
@@ -74,21 +73,13 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
             dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
         else:
             if videoCapture == None:
-                if os.path.exists("Assets/image/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
+                if os.path.exists("Assets/movie/"+dialog_content[dialogId]["background_img"]) == False:
                     raise Exception('The video file is not exist')
-                videoCapture = cv2.VideoCapture("Assets/image/dialog_background/"+dialog_content[dialogId]["background_img"])
-                frames_num=videoCapture.get(7)
-                the_FPS = videoCapture.get(cv2.CAP_PROP_FPS)
+                videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
+                frames_num = videoCapture.getFrameNum()
+                the_FPS = videoCapture.getFPS()
             else:
-                if videoCapture.get(1) >= frames_num:
-                    videoCapture.set(1, frames_num)
-                ret, frame = videoCapture.read()
-                if frame.shape[0] != window_x or frame.shape[1] != window_y:
-                    frame = cv2.resize(frame,(window_x,window_y))
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = cv2.transpose(frame)
-                pygame.surfarray.blit_array(surface, frame)
-                screen.blit(surface, (0,0))
+                videoCapture.display(surface,screen)
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         fpsClock.tick(the_FPS)
@@ -111,21 +102,13 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
             dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
         else:
             if videoCapture == None:
-                if os.path.exists("Assets/image/dialog_background/"+dialog_content[dialogId]["background_img"]) == False:
+                if os.path.exists("Assets/movie/"+dialog_content[dialogId]["background_img"]) == False:
                     raise Exception('The video file is not exist')
-                videoCapture = cv2.VideoCapture("Assets/image/dialog_background/"+dialog_content[dialogId]["background_img"])
-                frames_num=videoCapture.get(7)
-                the_FPS = videoCapture.get(cv2.CAP_PROP_FPS)
+                videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
+                frames_num = videoCapture.getFrameNum()
+                the_FPS = videoCapture.getFPS()
             else:
-                if videoCapture.get(1) >= frames_num:
-                    videoCapture.set(1, frames_num)
-                ret, frame = videoCapture.read()
-                if frame.shape[0] != window_x or frame.shape[1] != window_y:
-                    frame = cv2.resize(frame,(window_x,window_y))
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = cv2.transpose(frame)
-                pygame.surfarray.blit_array(surface, frame)
-                screen.blit(surface, (0,0))
+                videoCapture.display(surface,screen)
 
         #加载对话人物立绘
         if dialog_content[dialogId]["characters_img"] != None:
