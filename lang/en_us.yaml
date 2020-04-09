@@ -14,14 +14,18 @@ chapter:
 - chapter8
 - back
 game_title: Girls' Frontline-Last wish
+loading_info:
+  now_loading: Loading...
+  now_loading_characters: Now loading characters' data...
+  now_loading_level: Now loading level data...
+  now_loading_map: Now loading map data...
 main_menu:
-  text_continue: Continue
   text_chooseChapter: Select Chapter
+  text_continue: Continue
   text_dlc: DLC
-  text_workshop: Workshop
-  text_setting: setting
   text_exit: Exit
-now_loading: Loading...
+  text_setting: setting
+  text_workshop: Workshop
 select_menu:
   attack: Attack
   move: Move
@@ -31,8 +35,8 @@ warnings:
   magazine_is_empty: Current character has an empty magazine, please reload.
   magazine_is_full: Current character has a full magazine, no need to reload.
   no_bullets_left: Current character has no bullet left.
+  no_enemy_in_effective_range: There is no enemy in this character's attack range.
   no_enough_ap_to_attack: You don't have enough action points for attacking.
   no_enough_ap_to_move: You don't have enough action points for moving.
   no_enough_ap_to_reload: You don't have enough action points for reloading.
   no_enough_ap_to_use_skill: You don't have enough action points for using skill.
-  no_enemy_in_effective_range: There is no enemy in this character's attack range.

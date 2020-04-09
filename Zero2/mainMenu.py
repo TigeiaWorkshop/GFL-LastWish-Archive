@@ -7,6 +7,7 @@ from pygame.locals import *
 
 from Zero2.basic import *
 from Zero2.dialog import *
+from Zero2.cutscene import *
 
 def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
     #加载主菜单文字
@@ -137,10 +138,11 @@ def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
                         if i == len(chapter_select)-1 and isHoverOn(chapter_select[-1].b,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
                             menu_type = 0
                         #章节选择
-                        elif isHoverOn(chapter_select[i].b,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+                        elif isHoverOn(chapter_select[i].b,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
                             dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_before_battle")
                             battle("chapter"+str(i+1),window_x,window_y,screen,lang,fps)
                             dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_after_battle")
+                            cutscene(screen,surface,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                             videoCapture.setFrame(1)
                             break
             

@@ -24,11 +24,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         selectMenuButtons_dic = loadData["select_menu"]
-        your_round_txt = fontRender(loadData["Battle_UI"]["yourRound"], "white")
-        enemy_round_txt = fontRender(loadData["Battle_UI"]["enemyRound"], "white")
+        your_round_txt = fontRender(loadData["Battle_UI"]["yourRound"], "white",window_x/38)
+        enemy_round_txt = fontRender(loadData["Battle_UI"]["enemyRound"], "white",window_x/38)
         text_now_total_rounds_original = loadData["Battle_UI"]["numRound"]
         chapter_no = loadData["Battle_UI"]["numChapter"]
         warnings_info = loadData["warnings"]
+        loading_info = loadData["loading_info"]
     
     with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -38,8 +39,8 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
     #章节标题显示
     black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
-    title_number_display = fontRender(chapter_no.replace("NaN",chapter_name.replace("chapter","")),"white")
-    title_main_display = fontRender(chapter_title,"white")
+    title_number_display = fontRender(chapter_no.replace("NaN",chapter_name.replace("chapter","")),"white",window_x/38)
+    title_main_display = fontRender(chapter_title,"white",window_x/38)
 
     #渐入效果
     for i in range(0,250,2):
@@ -51,11 +52,11 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         fpsClock.tick(fps)
         pygame.display.update()
 
-    #开始加载场景
+    #开始加载地图场景
     black_bg.draw(screen)
     drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
     drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-    now_loading = fontRender("正在加载地图...", "white",25)
+    now_loading = fontRender(loading_info["now_loading_map"], "white",window_x/76)
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     pygame.display.update()
 
@@ -116,14 +117,6 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         for key in facilities_data["campfire"]:
             facilities_data["campfire"][key]["img_id"] = random.randint(0,9)
 
-    #开始加载角色信息
-    black_bg.draw(screen)
-    drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-    drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-    now_loading = fontRender("正在加载角色信息...", "white",25)
-    drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-    pygame.display.update()
-
     #初始化角色信息
     i = 1
     num_of_characters = len(characters)+len(sangvisFerris)
@@ -133,7 +126,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         black_bg.draw(screen)
         drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-        now_loading = fontRender("正在加载角色信息...("+str(i)+"/"+str(num_of_characters)+")", "white",25)
+        now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
         drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
         pygame.display.update()
         i+=1
@@ -143,25 +136,27 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         black_bg.draw(screen)
         drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-        now_loading = fontRender("正在加载角色信息...("+str(i)+"/"+str(num_of_characters)+")", "white",25)
+        now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
         drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
         pygame.display.update()
         i+=1
 
+    #加载对话时角色的图标
+    character_icon_img_list={}
+    if dialog_during_battle != None:
+        all_icon_file_list = glob.glob(r'Assets/image/npc_icon/*.png')
+        for i in range(len(all_icon_file_list)):
+            img_name = all_icon_file_list[i].replace("Assets","").replace("image","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
+            character_icon_img_list[img_name] = loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
+        del all_icon_file_list
+    
     #开始加载关卡设定
     black_bg.draw(screen)
     drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
     drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-    now_loading = fontRender("正在加载关卡设定...", "white",25)
+    now_loading = fontRender(loading_info["now_loading_level"], "white",window_x/76)
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     pygame.display.update()
-
-    #加载对话时角色的图标
-    all_icon_file_list = glob.glob(r'Assets/image/npc_icon/*.png')
-    character_icon_img_list={}
-    for i in range(len(all_icon_file_list)):
-        img_name = all_icon_file_list[i].replace("Assets","").replace("image","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
-        character_icon_img_list[img_name] = loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
 
     #加载UI
     #加载结束回合的图片
@@ -263,17 +258,21 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
     text_of_endround_alpha = 400
 
     #关卡背景介绍信息文字
-    battle_info_line1 = fontRender(battle_info[0],"white",25)
-    battle_info_line2 = fontRender(battle_info[1],"white",25)
+    for i in range(len(battle_info)):
+        battle_info[i] = fontRender(battle_info[i],"white",window_x/76)
+
     #显示章节信息
-    for i in range(0,250,2):
+    for a in range(0,250,2):
         black_bg.draw(screen)
-        battle_info_line1.set_alpha(i)
-        battle_info_line2.set_alpha(i)
         drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-        drawImg(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
-        drawImg(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+        for i in range(len(battle_info)):
+            battle_info[i].set_alpha(a)
+            drawImg(battle_info[i],(perBlockWidth*1.5,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+            if i == 1:
+                temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
+                temp_secode.set_alpha(a)
+                drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
         fpsClock.tick(fps)
         pygame.display.update()
     
@@ -322,14 +321,15 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                     all_snow_on_screen[i].x = random.randint(0,window_x*2)
             black_bg.set_alpha(a)
             black_bg.draw(screen)
-            title_number_display.set_alpha(a)
-            title_main_display.set_alpha(a)
             drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
             drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-            battle_info_line1.set_alpha(a)
-            battle_info_line2.set_alpha(a)
-            drawImg(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
-            drawImg(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+            for i in range(len(battle_info)):
+                battle_info[i].set_alpha(a)
+                drawImg(battle_info[i],(perBlockWidth*1.5,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                if i == 1:
+                    temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
+                    temp_secode.set_alpha(a)
+                    drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
             fpsClock.tick(fps)
             pygame.display.flip()
     #如果战斗前有对话
@@ -455,10 +455,13 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                 title_main_display.set_alpha(txt_alpha)
                 drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
                 drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-                battle_info_line1.set_alpha(txt_alpha)
-                battle_info_line2.set_alpha(txt_alpha)
-                drawImg(battle_info_line1,(perBlockWidth,window_y*0.8),screen)
-                drawImg(battle_info_line2,(perBlockWidth,window_y*0.8+battle_info_line1.get_height()*2),screen)
+                for i in range(len(battle_info)):
+                    battle_info[i].set_alpha(txt_alpha)
+                    drawImg(battle_info[i],(perBlockWidth*1.5,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                    if i == 1:
+                        temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
+                        temp_secode.set_alpha(txt_alpha)
+                        drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
                 txt_alpha -= 5
             #画面更新
             fpsClock.tick(fps)
@@ -1149,9 +1152,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             if enemies_get_attack[each_enemy] == "near" and random.randint(1,100) <= 95 or enemies_get_attack[each_enemy] == "middle" and random.randint(1,100) <= 80 or enemies_get_attack[each_enemy] == "far" and random.randint(1,100) <= 65:
                                 the_damage = random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
                                 sangvisFerris_data[each_enemy].decreaseHp(the_damage)
-                                damage_do_to_character[each_enemy] = fontRender("-"+str(the_damage),"red",25)
+                                damage_do_to_character[each_enemy] = fontRender("-"+str(the_damage),"red",window_x/76)
                             else:
-                                damage_do_to_character[each_enemy] = fontRender("Miss","red",25)
+                                damage_do_to_character[each_enemy] = fontRender("Miss","red",window_x/76)
                     if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == characters_data[the_character_get_click].gif_dic["attack"]["imgNum"]-1:
                         characters_data[the_character_get_click].gif_dic["attack"]["imgId"] = 0
                         characters_data[the_character_get_click].current_bullets -= 1
@@ -1194,7 +1197,7 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
             text_now_total_rounds = text_now_total_rounds_original
-            text_now_total_rounds = fontRender(text_now_total_rounds.replace("NaN",str(total_rounds)), "white")
+            text_now_total_rounds = fontRender(text_now_total_rounds.replace("NaN",str(total_rounds)), "white",window_x/38)
             if text_of_endround_move < (window_x-your_round_txt.get_width()*2)/2:
                 text_of_endround_move += perBlockWidth*2
             if text_of_endround_move >= (window_x-your_round_txt.get_width()*2)/2-30:
@@ -1297,9 +1300,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                         the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                         result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
                         light_area = calculate_darkness(characters_data,facilities_data["campfire"])
-                        damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",25)
+                        damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                     else:
-                        damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",25)
+                        damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
                     sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] = 0
                     enemies_in_control_id +=1
                     if enemies_in_control_id >= len(sangvisFerris_name_list):
@@ -1353,9 +1356,9 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
                             the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                             result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
                             light_area = calculate_darkness(characters_data,facilities_data["campfire"])
-                            damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",25)
+                            damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                         else:
-                            damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",25)
+                            damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
                         sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] = 0
                         enemies_in_control_id +=1
                         if enemies_in_control_id >= len(sangvisFerris_name_list):
@@ -1464,12 +1467,12 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
             the_character_get_click_info_board.draw(screen)
             padding = (the_character_get_click_info_board.height-character_icon_img_list[characters_data[the_character_get_click].type].get_height())/2
             drawImg(character_icon_img_list[characters_data[the_character_get_click].type],(padding,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-            tcgc_hp1 = fontRender("HP: ","white",20)
-            tcgc_hp2 = fontRender(str(characters_data[the_character_get_click].current_hp)+"/"+str(characters_data[the_character_get_click].max_hp),"black",20)
-            tcgc_action_point1 = fontRender("AP: ","white",20)
-            tcgc_action_point2 = fontRender(str(characters_data[the_character_get_click].current_action_point)+"/"+str(characters_data[the_character_get_click].max_action_point),"black",20)
-            tcgc_bullets_situation1 = fontRender("BP: ","white",20)
-            tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].bullets_carried),"black",20)
+            tcgc_hp1 = fontRender("HP: ","white",window_x/96)
+            tcgc_hp2 = fontRender(str(characters_data[the_character_get_click].current_hp)+"/"+str(characters_data[the_character_get_click].max_hp),"black",window_x/96)
+            tcgc_action_point1 = fontRender("AP: ","white",window_x/96)
+            tcgc_action_point2 = fontRender(str(characters_data[the_character_get_click].current_action_point)+"/"+str(characters_data[the_character_get_click].max_action_point),"black",window_x/96)
+            tcgc_bullets_situation1 = fontRender("BP: ","white",window_x/96)
+            tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].bullets_carried),"black",window_x/96)
             drawImg(tcgc_hp1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
             drawImg(tcgc_action_point1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
             drawImg(tcgc_bullets_situation1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
@@ -1534,14 +1537,14 @@ def battle(chapter_name,window_x,window_y,screen,lang,fps,dark_mode=True):
 
         #结束动画
         if whose_round == "result_win":
-            total_kills = fontRender("总杀敌："+str(result_of_round["total_kills"]),"white",20)
+            total_kills = fontRender("总杀敌："+str(result_of_round["total_kills"]),"white",window_x/96)
             result_of_round["total_time"] = time.localtime(time.time()-result_of_round["total_time"])
-            total_time = fontRender("通关时间："+str(time.strftime('%M:%S',result_of_round["total_time"])),"white",20)
+            total_time = fontRender("通关时间："+str(time.strftime('%M:%S',result_of_round["total_time"])),"white",window_x/96)
             result_of_round["total_rounds"] = total_rounds
-            total_rounds_txt = fontRender("通关回合数："+str(result_of_round["total_rounds"]),"white",20)
-            times_characters_down = fontRender("友方角色被击倒："+str(result_of_round["times_characters_down"]),"white",20)
-            player_rate = fontRender("评价：A","white",20)
-            press_space = fontRender("按空格继续","white",20)
+            total_rounds_txt = fontRender("通关回合数："+str(result_of_round["total_rounds"]),"white",window_x/96)
+            times_characters_down = fontRender("友方角色被击倒："+str(result_of_round["times_characters_down"]),"white",window_x/96)
+            player_rate = fontRender("评价：A","white",window_x/96)
+            press_space = fontRender("按空格继续","white",window_x/96)
             whose_round = "result"
         
         if whose_round == "result":
