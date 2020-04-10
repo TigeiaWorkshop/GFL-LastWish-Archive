@@ -13,6 +13,7 @@ class Doll:
         self.current_hp = current_hp
         self.dying = False
         self.effective_range = effective_range
+        self.max_effective_range = calculate_range(effective_range)
         self.kind = kind
         self.faction = faction
         self.gif_dic = character_gif_dic(type,faction)
@@ -89,6 +90,7 @@ class characterDataManager(Doll):
         Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"character",magazine_capacity,max_damage,max_hp,min_damage,type,x,y)
         self.bullets_carried = bullets_carried
         self.skill_effective_range = skill_effective_range
+        self.max_skill_range = calculate_range(skill_effective_range)
         self.skill_cover_range = skill_cover_range
         self.start_position = start_position
         self.undetected = detect
@@ -97,6 +99,20 @@ class sangvisFerriDataManager(Doll):
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,patrol_path):
         Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"sangvisFerri",magazine_capacity,max_damage,max_hp,min_damage,type,x,y)
         self.patrol_path = patrol_path
+
+#计算最远攻击距离
+def calculate_range(effective_range_dic):
+    if effective_range_dic != None:
+        max_attack_range = 0
+        if "far" in effective_range_dic and effective_range_dic["far"] != None and max_attack_range < effective_range_dic["far"][-1]:
+            max_attack_range = effective_range_dic["far"][-1]
+        if "middle" in effective_range_dic and effective_range_dic["middle"] != None and max_attack_range < effective_range_dic["middle"][-1]:
+            max_attack_range = effective_range_dic["middle"][-1]
+        if "near" in effective_range_dic and effective_range_dic["near"] != None and max_attack_range < effective_range_dic["near"][-1]:
+            max_attack_range = effective_range_dic["near"][-1]
+        return max_attack_range
+    else:
+        return None
 
 #动图制作模块：接受一个友方角色名和动作,当前的方块标准长和高，返回对应角色动作list或者因为没图片而返回None
 #810*810 possition:405/567

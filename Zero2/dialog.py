@@ -9,7 +9,9 @@ from Zero2.basic import *
 from Zero2.battle import *
 
 
-def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
+def dialog(chapter_name,screen,lang,fps,part):
+    #获取屏幕的尺寸
+    window_x,window_y = screen.get_size()
     #加载动画
     LoadingImgAbove = loadImg("Assets/image/loading_img/LoadingImgAbove.png",window_x+8,window_y/1.7)
     LoadingImgBelow = loadImg("Assets/image/loading_img/LoadingImgBelow.png",window_x+8,window_y/2.05)
@@ -210,6 +212,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                             dialoguebox.height = 0
                             dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
                         dialogId = dialog_content[dialogId]["next_dialog_id"][1]
+                        dialog_is_playing_sound.stop()
                 elif pygame.mouse.get_pressed()[2]:
                     if dialog_content[dialogId]["last_dialog_id"] != None:
                         dialog_content_id = 1
@@ -221,6 +224,7 @@ def dialog(chapter_name,window_x,window_y,screen,lang,fps,part):
                             pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".mp3")
                             pygame.mixer.music.play(loops=9999, start=0.0)
                         dialogId = dialog_content[dialogId]["last_dialog_id"]
+                        dialog_is_playing_sound.stop()
         
         fpsClock.tick(the_FPS)
         pygame.display.update()

@@ -9,7 +9,10 @@ from Zero2.basic import *
 from Zero2.dialog import *
 from Zero2.cutscene import *
 
-def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
+def mainMenu(screen,lang,fps,mode=""):
+    #获取屏幕的尺寸
+    window_x,window_y = screen.get_size()
+
     #加载主菜单文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -139,9 +142,9 @@ def mainMenu(screen,window_x,window_y,lang,fps,mode=""):
                             menu_type = 0
                         #章节选择
                         elif isHoverOn(chapter_select[i].b,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
-                            dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_before_battle")
-                            battle("chapter"+str(i+1),window_x,window_y,screen,lang,fps)
-                            dialog("chapter"+str(i+1),window_x,window_y,screen,lang,fps,"dialog_after_battle")
+                            dialog("chapter"+str(i+1),screen,lang,fps,"dialog_before_battle")
+                            battle("chapter"+str(i+1),screen,lang,fps)
+                            dialog("chapter"+str(i+1),screen,lang,fps,"dialog_after_battle")
                             cutscene(screen,surface,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                             videoCapture.setFrame(1)
                             break

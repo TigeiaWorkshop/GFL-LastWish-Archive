@@ -2,14 +2,6 @@ from Zero2.basic import *
 from Zero2.map import *
 
 def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data):
-    the_character_effective_range = 0
-    if "far" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["far"] != None:
-        the_character_effective_range = sangvisFerris_data[aiInControl].effective_range["far"][1]+1
-    elif "middle" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["middle"] != None:
-        the_character_effective_range = sangvisFerris_data[aiInControl].effective_range["middle"][1]+1
-    elif "near" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["near"] != None:
-        the_character_effective_range = sangvisFerris_data[aiInControl].effective_range["near"][1]+1
-    
     character_with_min_hp = None
     characters_can_be_detect = []
     #检测是否有可以立马攻击的敌人
@@ -85,7 +77,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                     the_route.append([temp_x,temp_y])
                 if [characters_data[character].x,characters_data[character].y] in the_route:
                     the_route.remove([characters_data[character].x,characters_data[character].y])
-                if abs(characters_data[character].x-temp_x)+abs(characters_data[character].y-temp_y)<the_character_effective_range:
+                if abs(characters_data[character].x-temp_x)+abs(characters_data[character].y-temp_y)<sangvisFerris_data[aiInControl].max_effective_range+1:
                     characters_can_be_attacked[character] = the_route
                 map2d[characters_data[character].x][characters_data[character].y] = 1
         #如果存在可以在移动后攻击到的敌人
@@ -105,7 +97,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                 print('A character named '+aiInControl+' is causing trouble while attacking '+character_with_min_hp[0]+'. Then route is:')
                 print(character_with_min_hp[1])
                 print("temp_distance:",temp_distance)
-                print('the_character_effective_range:',the_character_effective_range)
+                print('sangvisFerris_data[aiInControl].max_effective_range:',sangvisFerris_data[aiInControl].max_effective_range)
                 raise Exception("Please double check this character's effective_range.")
             #[行动，已经整理好的路线，需要攻击的目标，所在范围]
             return {
