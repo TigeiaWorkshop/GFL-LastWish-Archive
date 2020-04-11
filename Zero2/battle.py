@@ -15,6 +15,9 @@ from Zero2.AI import *
 from Zero2.skills import *
 
 def battle(chapter_name,screen,lang,fps,dark_mode=True):
+    pygame.joystick.init()
+    joystick = pygame.joystick.Joystick(0)
+    joystick.init()
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #卸载音乐
@@ -489,7 +492,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         exit()
-                elif event.type == MOUSEBUTTONDOWN and event.button == 1:
+                elif event.type == MOUSEBUTTONDOWN and event.button == 1 or joystick.get_init() and event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
                     if display_num < len(dialog_during_battle)-1:
                         display_num += 1
                         #检测上方对话框
@@ -636,10 +639,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     skill_range = None
                 if event.key == K_w:
                     pressKeyToMove["up"]=True
-                if event.key == K_a:
-                    pressKeyToMove["left"]=True
                 if event.key == K_s:
                     pressKeyToMove["down"]=True
+                if event.key == K_a:
+                    pressKeyToMove["left"]=True
                 if event.key == K_d:
                     pressKeyToMove["right"]=True
                 if event.key == K_m:
@@ -647,10 +650,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             elif event.type == KEYUP:
                 if event.key == K_w:
                     pressKeyToMove["up"]=False
-                if event.key == K_a:
-                    pressKeyToMove["left"]=False
                 if event.key == K_s:
                     pressKeyToMove["down"]=False
+                if event.key == K_a:
+                    pressKeyToMove["left"]=False
                 if event.key == K_d:
                     pressKeyToMove["right"]=False
             elif event.type == MOUSEBUTTONDOWN:
@@ -659,6 +662,24 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     zoomIntoBe += 0.25
                 elif event.button == 5 and zoomIntoBe > 1:
                     zoomIntoBe -= 0.25
+            if joystick.get_init():
+                if round(joystick.get_axis(1)) == -1:
+                    pressKeyToMove["up"]=True
+                else:
+                    pressKeyToMove["up"]=False
+                if round(joystick.get_axis(1)) == 1:
+                    pressKeyToMove["down"]=True
+                else:
+                    pressKeyToMove["down"]=False
+                if round(joystick.get_axis(0)) == 1:
+                    pressKeyToMove["right"]=True
+                else:
+                    pressKeyToMove["right"]=False
+                if round(joystick.get_axis(0)) == -1:
+                    pressKeyToMove["left"]=True
+                else:
+                    pressKeyToMove["left"]=False
+
             #移动屏幕
             if pygame.mouse.get_pressed()[2]:
                 if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
@@ -778,7 +799,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             block_get_click_x = None
             block_get_click_y = None
             #玩家输入按键判定-玩家回合限定
-            if pygame.mouse.get_pressed()[0]:
+            if pygame.mouse.get_pressed()[0] or joystick.get_init() and event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
                 #获取角色坐标
                 block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
                 block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
