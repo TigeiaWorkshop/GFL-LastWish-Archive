@@ -15,9 +15,7 @@ def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,ch
         return skill_target
     elif action=="react":
         if characters_data[characterName].type == "gsh-18":
-            healed_hp = characters_data[skill_target].min_damage
-            if characters_data[skill_target].current_hp + healed_hp > characters_data[skill_target].max_hp:
-                healed_hp = characters_data[skill_target].max_hp - characters_data[skill_target].current_hp
+            healed_hp = round((characters_data[skill_target].max_hp - characters_data[skill_target].current_hp)*0.3)
             characters_data[skill_target].heal(healed_hp)
             if characters_data[skill_target].dying != False:
                 characters_data[skill_target].dying = False

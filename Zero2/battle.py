@@ -241,7 +241,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     screen_to_move_x=None
     screen_to_move_y=None
     pressKeyToMove={"up":False,"down":False,"left":False,"right":False}
-    rightClickCharacter = {}
+    rightClickCharacterAlpha = 0
     #计算光亮区域
     light_area = calculate_darkness(characters_data,facilities_data["campfire"])
     # 移动路径
@@ -1379,24 +1379,34 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 print("warning: not choice")
 
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
+        rightClickCharacterAlphaDeduct = True
         for key,value in dicMerge(characters_data,sangvisFerris_data).items():
             #根据血量判断角色的动作
             if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in light_area or dark_mode != True:
                 if value.current_hp > 0:
                     if green_hide == True and pygame.mouse.get_pressed()[2]:
                         if int((mouse_x-local_x)/perBlockWidth) == value.x and int((mouse_y-local_y)/perBlockHeight) == value.y:
-                            ifShowRange = False
-                            if key in rightClickCharacter:
-                                if rightClickCharacter[key]<5:
-                                    rightClickCharacter[key] += 1
+                            rightClickCharacterAlphaDeduct = False
+                            if rightClickCharacterAlpha < 100:
+                                rightClickCharacterAlpha += 10
+                            UI_img["yellow"].set_alpha(rightClickCharacterAlpha)
+                            UI_img["blue"].set_alpha(rightClickCharacterAlpha)
+                            UI_img["green"].set_alpha(rightClickCharacterAlpha)
+                            for y in range(value.y-value.max_effective_range,value.y+value.max_effective_range+1):
+                                if y < value.y:
+                                    for x in range(value.x-value.max_effective_range-(y-value.y),value.x+value.max_effective_range+(y-value.y)+1):
+                                        if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
+                                            if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
+                                                drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
+                                                drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                            elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
+                                                drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                 else:
-                                    ifShowRange = True
-                            else:
-                                rightClickCharacter[key] = 0
-                            if ifShowRange == True:
-                                for y in range(value.y-value.max_effective_range,value.y+value.max_effective_range+1):
-                                    if y < value.y:
-                                        for x in range(value.x-value.max_effective_range-(y-value.y),value.x+value.max_effective_range+(y-value.y)+1):
+                                    for x in range(value.x-value.max_effective_range+(y-value.y),value.x+value.max_effective_range-(y-value.y)+1):
+                                        if x == value.x and y == value.y:
+                                            pass
+                                        else:
                                             if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
                                                 if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
                                                     drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
@@ -1404,21 +1414,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                                     drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                 elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
                                                     drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                    else:
-                                        for x in range(value.x-value.max_effective_range+(y-value.y),value.x+value.max_effective_range-(y-value.y)+1):
-                                            if x == value.x and y == value.y:
-                                                pass
-                                            else:
-                                                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == True:
-                                                    if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
-                                                        drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
-                                                        drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
-                                                        drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                        else:
-                            if key in rightClickCharacter:
-                                rightClickCharacter = {}
+                            UI_img["yellow"].set_alpha(100)
+                            UI_img["blue"].set_alpha(100)
+                            UI_img["green"].set_alpha(100)
                     value.draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                 elif value.current_hp<=0:
                     value.draw("die",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
@@ -1434,6 +1432,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     damage_do_to_character[key].set_alpha(the_alpha_to_check-5)
                 else:
                     del damage_do_to_character[key]
+        
+        if rightClickCharacterAlphaDeduct == True and rightClickCharacterAlpha>0:
+            rightClickCharacterAlpha-=10
 
         the_dead_one_remove = []
         for key,value in the_dead_one.items():
