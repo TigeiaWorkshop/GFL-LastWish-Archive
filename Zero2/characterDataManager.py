@@ -38,12 +38,15 @@ class Doll:
             self.dying == False
             self.gif_dic["die"]["imgId"] = 0
     def draw(self,action,screen,original_UI_img,perBlockWidth,perBlockHeight,local_x=0,local_y=0,isContinue=True,ifFlip=False):
+        hp_img = None
         if self.dying == False:
-            hp_img = original_UI_img["hp_green"]
+            if original_UI_img != None:
+                hp_img = original_UI_img["hp_green"]
             current_hp_to_display = fontRender(str(self.current_hp)+"/"+str(self.max_hp),"black",10)
             percent_of_hp = self.current_hp/self.max_hp
         else:
-            hp_img = original_UI_img["hp_red"]
+            if original_UI_img != None:
+                hp_img = original_UI_img["hp_red"]
             current_hp_to_display = fontRender(str(self.dying)+"/3","black",10)
             percent_of_hp = self.dying/3
         original_alpha = self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]].get_alpha()
@@ -59,9 +62,10 @@ class Doll:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
         #把角色图片画到屏幕上
         screen.blit(img_of_char,((self.x-1.5)*perBlockWidth+local_x,(self.y-1.9)*perBlockHeight+local_y))
-        screen.blit(pygame.transform.scale(original_UI_img["hp_empty"], (perBlockWidth, round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
-        screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp),round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
-        screen.blit(current_hp_to_display,(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
+        if original_UI_img != None:
+            screen.blit(pygame.transform.scale(original_UI_img["hp_empty"], (perBlockWidth, round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
+            screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp),round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
+            screen.blit(current_hp_to_display,(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
         self.gif_dic[action]["imgId"] += 1
         if isContinue==True:
             if self.gif_dic[action]["imgId"] >= self.gif_dic[action]["imgNum"]:

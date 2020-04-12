@@ -11,14 +11,14 @@ class MapObject:
         self.mapData = mapData
         self.img_data_list = randomBlock(mapData,blocks_setting)
         self.env_img_list = load_env_images(self.img_data_list,window_x,self.column)
-    def display_map(self,screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y):
-        for y in range(math.ceil((-perBlockHeight-local_y)/perBlockHeight),math.ceil((window_y-local_y)/perBlockHeight)):
-            for x in range(math.ceil((-perBlockWidth-local_x)/perBlockWidth),math.ceil((window_x-local_x)/perBlockWidth)):
+    def display_map(self,screen,perBlockWidth,perBlockHeight,local_x,local_y):
+        for y in range(math.ceil((-perBlockHeight-local_y)/perBlockHeight),math.ceil((screen.get_height()-local_y)/perBlockHeight)):
+            for x in range(math.ceil((-perBlockWidth-local_x)/perBlockWidth),math.ceil((screen.get_width()-local_x)/perBlockWidth)):
                 img_display = pygame.transform.scale(self.env_img_list[self.img_data_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
                 screen.blit(img_display,(x*perBlockWidth+local_x,(y-0.5)*perBlockHeight+local_y))
-    def display_shadow(self,screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,shadow_img):
-        for y in range(math.ceil((-perBlockHeight-local_y)/perBlockHeight),math.ceil((window_y-local_y)/perBlockHeight)):
-            for x in range(math.ceil((-perBlockWidth-local_x)/perBlockWidth),math.ceil((window_x-local_x)/perBlockWidth)):
+    def display_shadow(self,screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,shadow_img):
+        for y in range(math.ceil((-perBlockHeight-local_y)/perBlockHeight),math.ceil((screen.get_height()-local_y)/perBlockHeight)):
+            for x in range(math.ceil((-perBlockWidth-local_x)/perBlockWidth),math.ceil((screen.get_width()-local_x)/perBlockWidth)):
                 if (x,y) not in light_area:
                     screen.blit(shadow_img,(x*perBlockWidth+local_x,y*perBlockHeight+local_y))
 

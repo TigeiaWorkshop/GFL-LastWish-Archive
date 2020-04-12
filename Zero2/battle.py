@@ -308,7 +308,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             pygame.mixer.Channel(1).play(environment_sound)
         for a in range(250,0,-5):
             #加载地图
-            theMap.display_map(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y)
+            theMap.display_map(screen,perBlockWidth,perBlockHeight,local_x,local_y)
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
@@ -320,7 +320,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
             if dark_mode == True:
-                theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
+                theMap.display_shadow(screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,UI_img["black"])
             #角色动画
             for every_chara in characters_data:
                 if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
@@ -363,190 +363,157 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             dialog_down_content_id = 0
             dialog_up_displayed_line = 0
             dialog_down_displayed_line = 0
-            dialog = True
             displayDialog = True
+            all_characters_path = None
             #对话系统总循环
             while display_num < len(dialog_to_display):
+                if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
+                    pygame.mixer.Channel(1).play(environment_sound)
+                #加载地图
+                theMap.display_map(screen,perBlockWidth,perBlockHeight,local_x,local_y)
+                #加载篝火
+                if facilities_data["campfire"] != None:
+                    for key in facilities_data["campfire"]:
+                        if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
+                            drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth,perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
+                        if facilities_data["campfire"][key]["img_id"] >= 9.0:
+                            facilities_data["campfire"][key]["img_id"] = 0
+                        else:
+                            facilities_data["campfire"][key]["img_id"]+=0.25
+                #角色动画
+                for key,value in dicMerge(sangvisFerris_data,characters_data).items():
+                    if value.faction == "character" or (value.x,value.y) in light_area or dark_mode != True:
+                        if all_characters_path != None and key in all_characters_path:
+                            value.draw("move",screen,None,perBlockWidth,perBlockHeight,local_x,local_y)
+                        else:
+                            value.draw("wait",screen,None,perBlockWidth,perBlockHeight,local_x,local_y)
+                #加载阴影区
+                if dark_mode == True:
+                    theMap.display_shadow(screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,UI_img["black"])
+                #加载雪花
+                for i in range(len(all_snow_on_screen)):
+                    all_snow_on_screen[i].draw(screen,local_x,local_y)
+                    all_snow_on_screen[i].x -= 10*zoom_in
+                    all_snow_on_screen[i].y += 20*zoom_in
+                    if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
+                        all_snow_on_screen[i].y = random.randint(-100,0)
+                        all_snow_on_screen[i].x = random.randint(0,window_x*2)
                 #如果操作是移动
                 if "move" in dialog_to_display[display_num]:
-                    #建立地图
-                    map2d=Array2D(theMap.column,theMap.row)
-                    #历遍地图，设置障碍方块
-                    for y in range(theMap.row):
-                        for x in range(theMap.column):
-                            if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
-                                map2d[x][y]=1
-                    #历遍设施，设置障碍方块
-                    for key1 in facilities_data:
-                        for key2 in facilities_data[key1]:
-                            map2d[facilities_data[key1][key2]["x"]][facilities_data[key1][key2]["y"]]=1
-                    all_characters_path = {}
-                    # 历遍所有角色，将不需要移动的角色的坐标点设置为障碍方块，为需要移动的角色生成路径
-                    for key,value in dicMerge(sangvisFerris_data,characters_data).items():
-                        if key not in dialog_to_display[display_num]["move"]:
-                            map2d[value.x][value.y] = 1
-                        else:
-                            #创建AStar对象,并设置起点和终点
-                            star_point_x = value.x
-                            star_point_y = value.y
-                            aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(dialog_to_display[display_num]["move"][key]["x"],dialog_to_display[display_num]["move"][key]["y"]))
-                            #开始寻路
-                            pathList=aStar.start()
-                            #遍历路径点,讲指定数量的点放到路径列表中
-                            the_route = []
-                            if pathList != None:
-                                for i in range(len(pathList)):
-                                    if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
-                                        star_point_x+=1
-                                    elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
-                                        star_point_x-=1
-                                    elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
-                                        star_point_y+=1
-                                    elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
-                                        star_point_y-=1
-                                    the_route.append([star_point_x,star_point_y])
+                    if all_characters_path == None:
+                        #建立地图
+                        map2d=Array2D(theMap.column,theMap.row)
+                        #历遍地图，设置障碍方块
+                        for y in range(theMap.row):
+                            for x in range(theMap.column):
+                                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
+                                    map2d[x][y]=1
+                        #历遍设施，设置障碍方块
+                        for key1 in facilities_data:
+                            for key2 in facilities_data[key1]:
+                                map2d[facilities_data[key1][key2]["x"]][facilities_data[key1][key2]["y"]]=1
+                        all_characters_path = {}
+                        # 历遍所有角色，将不需要移动的角色的坐标点设置为障碍方块，为需要移动的角色生成路径
+                        for key,value in dicMerge(sangvisFerris_data,characters_data).items():
+                            if key not in dialog_to_display[display_num]["move"]:
+                                map2d[value.x][value.y] = 1
                             else:
-                                raise Exception('Waring: '+key+" cannot find her path, please rewrite her start position!")
-                            all_characters_path[key] = the_route
-                    
-                    while len(all_characters_path)>0:
+                                #创建AStar对象,并设置起点和终点
+                                star_point_x = value.x
+                                star_point_y = value.y
+                                aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(dialog_to_display[display_num]["move"][key]["x"],dialog_to_display[display_num]["move"][key]["y"]))
+                                #开始寻路
+                                pathList=aStar.start()
+                                #遍历路径点,讲指定数量的点放到路径列表中
+                                the_route = []
+                                if pathList != None:
+                                    for i in range(len(pathList)):
+                                        if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
+                                            star_point_x+=1
+                                        elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
+                                            star_point_x-=1
+                                        elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
+                                            star_point_y+=1
+                                        elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
+                                            star_point_y-=1
+                                        the_route.append([star_point_x,star_point_y])
+                                else:
+                                    raise Exception('Waring: '+key+" cannot find her path, please rewrite her start position!")
+                                all_characters_path[key] = the_route
+                    if len(all_characters_path)>0:
                         if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
                             pygame.mixer.Channel(1).play(environment_sound)
-                        #加载地图
-                        theMap.display_map(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y)
-                        #加载篝火
-                        if facilities_data["campfire"] != None:
-                            for key in facilities_data["campfire"]:
-                                if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
-                                    drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth,perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
-                                if facilities_data["campfire"][key]["img_id"] >= 9.0:
-                                    facilities_data["campfire"][key]["img_id"] = 0
-                                else:
-                                    facilities_data["campfire"][key]["img_id"]+=0.25
-                        #加载阴影区
-                        if dark_mode == True:
-                            theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
                         key_to_remove = []
-                        for every_chara in all_characters_path:
-                            if all_characters_path[every_chara] != []:
+                        for key,value in all_characters_path.items():
+                            if value != []:
                                 if pygame.mixer.Channel(0).get_busy() == False:
                                     the_sound_id = random.randint(0,len(walking_sound)-1)
                                     pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
-                                if characters_data[every_chara].x < all_characters_path[every_chara][0][0]:
-                                    characters_data[every_chara].x+=0.125
-                                    characters_data[every_chara].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
-                                    if characters_data[every_chara].x >= all_characters_path[every_chara][0][0]:
-                                        characters_data[every_chara].x = all_characters_path[every_chara][0][0]
-                                        all_characters_path[every_chara].pop(0)
-                                elif characters_data[every_chara].x > all_characters_path[every_chara][0][0]:
-                                    characters_data[every_chara].x-=0.125
-                                    characters_data[every_chara].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,True,True)
-                                    if characters_data[every_chara].x <= all_characters_path[every_chara][0][0]:
-                                        characters_data[every_chara].x = all_characters_path[every_chara][0][0]
-                                        all_characters_path[every_chara].pop(0)
-                                elif characters_data[every_chara].y < all_characters_path[every_chara][0][1]:
-                                    characters_data[every_chara].y+=0.125
-                                    characters_data[every_chara].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
-                                    if characters_data[every_chara].y >= all_characters_path[every_chara][0][1]:
-                                        characters_data[every_chara].y = all_characters_path[every_chara][0][1]
-                                        all_characters_path[every_chara].pop(0)
-                                elif characters_data[every_chara].y > all_characters_path[every_chara][0][1]:
-                                    characters_data[every_chara].y-=0.125
-                                    characters_data[every_chara].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
-                                    if characters_data[every_chara].y <= all_characters_path[every_chara][0][1]:
-                                        characters_data[every_chara].y = all_characters_path[every_chara][0][1]
-                                        all_characters_path[every_chara].pop(0)
+                                if key in characters_data:
+                                    if characters_data[key].x < value[0][0]:
+                                        characters_data[key].x+=0.125
+                                        if characters_data[key].x >= value[0][0]:
+                                            characters_data[key].x = value[0][0]
+                                            value.pop(0)
+                                    elif characters_data[key].x > value[0][0]:
+                                        characters_data[key].x-=0.125
+                                        if characters_data[key].x <= value[0][0]:
+                                            characters_data[key].x = value[0][0]
+                                            value.pop(0)
+                                    elif characters_data[key].y < value[0][1]:
+                                        characters_data[key].y+=0.125
+                                        if characters_data[key].y >= value[0][1]:
+                                            characters_data[key].y = value[0][1]
+                                            value.pop(0)
+                                    elif characters_data[key].y > value[0][1]:
+                                        characters_data[key].y-=0.125
+                                        if characters_data[key].y <= value[0][1]:
+                                            characters_data[key].y = value[0][1]
+                                            value.pop(0)
+                                    if theMap.mapData[int(characters_data[key].y)][int(characters_data[key].x)] == 2:
+                                        characters_data[key].undetected = True
+                                    else:
+                                        characters_data[key].undetected = False
+                                elif key in sangvisFerris_data:
+                                    if sangvisFerris_data[key].x < value[0][0]:
+                                        sangvisFerris_data[key].x+=0.125
+                                        if sangvisFerris_data[key].x >= value[0][0]:
+                                            sangvisFerris_data[key].x = value[0][0]
+                                            value.pop(0)
+                                    elif sangvisFerris_data[key].x > value[0][0]:
+                                        sangvisFerris_data[key].x-=0.125
+                                        if sangvisFerris_data[key].x <= value[0][0]:
+                                            sangvisFerris_data[key].x = value[0][0]
+                                            value.pop(0)
+                                    elif sangvisFerris_data[key].y < value[0][1]:
+                                        sangvisFerris_data[key].y+=0.125
+                                        if sangvisFerris_data[key].y >= value[0][1]:
+                                            sangvisFerris_data[key].y = value[0][1]
+                                            value.pop(0)
+                                    elif sangvisFerris_data[key].y > value[0][1]:
+                                        sangvisFerris_data[key].y-=0.125
+                                        if sangvisFerris_data[key].y <= value[0][1]:
+                                            sangvisFerris_data[key].y = value[0][1]
+                                            value.pop(0)
                             else:
-                                key_to_remove.append(every_chara)
+                                key_to_remove.append(key)
+                        
                         light_area = calculate_darkness(characters_data,facilities_data["campfire"])
                         for i in range(len(key_to_remove)):
                             all_characters_path.pop(key_to_remove[i])
-                        #角色动画
-                        for every_chara in characters_data:
-                            if every_chara not in all_characters_path:
-                                if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
-                                    characters_data[every_chara].undetected = True
-                                else:
-                                    characters_data[every_chara].undetected = False
-                                characters_data[every_chara].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
-                        for enemies in sangvisFerris_data:
-                            if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
-                                sangvisFerris_data[enemies].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
-
-                        #加载雪花
-                        for i in range(len(all_snow_on_screen)):
-                            all_snow_on_screen[i].draw(screen,local_x,local_y)
-                            all_snow_on_screen[i].x -= 10*zoom_in
-                            all_snow_on_screen[i].y += 20*zoom_in
-                            if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
-                                all_snow_on_screen[i].y = random.randint(-100,0)
-                                all_snow_on_screen[i].x = random.randint(0,window_x*2)
-                        
-                        if txt_alpha >= 0:
-                            black_bg.set_alpha(txt_alpha)
-                            black_bg.draw(screen)
-                            title_number_display.set_alpha(txt_alpha)
-                            title_main_display.set_alpha(txt_alpha)
-                            drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-                            drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-                            for i in range(len(battle_info)):
-                                battle_info[i].set_alpha(txt_alpha)
-                                drawImg(battle_info[i],(perBlockWidth*1.5,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-                                if i == 1:
-                                    temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
-                                    temp_secode.set_alpha(txt_alpha)
-                                    drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-                            txt_alpha -= 5
-                        #画面更新
-                        fpsClock.tick(fps)
-                        pygame.display.update()
-                    #脚步停止
-                    pygame.mixer.Channel(0).stop()
-                    display_num += 1
+                    else:
+                        #脚步停止
+                        if pygame.mixer.Channel(0).get_busy() != False:
+                            pygame.mixer.Channel(0).stop()
+                        display_num += 1
+                        all_characters_path = None
                 #开始对话
                 elif "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
-                    if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
-                        pygame.mixer.Channel(1).play(environment_sound)
-                    #加载地图
-                    theMap.display_map(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y)
-                    #加载篝火
-                    if facilities_data["campfire"] != None:
-                        for key in facilities_data["campfire"]:
-                            if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
-                                drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth, perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
-                            if facilities_data["campfire"][key]["img_id"] >= 9.0:
-                                facilities_data["campfire"][key]["img_id"] = 0
-                            else:
-                                facilities_data["campfire"][key]["img_id"]+=0.25
-                    #加载阴影区
-                    if dark_mode == True:
-                        theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
-                        
-                    #角色动画
-                    for every_chara in characters_data:
-                        if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
-                            characters_data[every_chara].undetected = True
-                        else:
-                            characters_data[every_chara].undetected = False
-                        characters_data[every_chara].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
-                    for enemies in sangvisFerris_data:
-                        if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
-                            sangvisFerris_data[enemies].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
-
-                    #加载雪花
-                    for i in range(len(all_snow_on_screen)):
-                        all_snow_on_screen[i].draw(screen,local_x,local_y)
-                        all_snow_on_screen[i].x -= 10*zoom_in
-                        all_snow_on_screen[i].y += 20*zoom_in
-                        if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
-                            all_snow_on_screen[i].y = random.randint(-100,0)
-                            all_snow_on_screen[i].x = random.randint(0,window_x*2)
-                        
+                    #对话框的移动
                     if dialoguebox_up.x > window_x/2+dialoguebox_up.width*0.4:
                         dialoguebox_up.x -= 150
                     if dialoguebox_down.x < window_x/2-dialoguebox_down.width*1.4:
                         dialoguebox_down.x += 150
-
                     #上方对话框
                     if dialog_to_display[display_num]["dialoguebox_up"] != None:
                         #对话框图片
@@ -590,21 +557,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         if dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"] != None:
                             drawImg(character_icon_img_list[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
 
-                    if txt_alpha >= 0:
-                        black_bg.set_alpha(txt_alpha)
-                        black_bg.draw(screen)
-                        title_number_display.set_alpha(txt_alpha)
-                        title_main_display.set_alpha(txt_alpha)
-                        drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-                        drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-                        for i in range(len(battle_info)):
-                            battle_info[i].set_alpha(txt_alpha)
-                            drawImg(battle_info[i],(perBlockWidth*1.5,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-                            if i == 1:
-                                temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
-                                temp_secode.set_alpha(txt_alpha)
-                                drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-                        txt_alpha -= 5
                     #玩家输入按键判定
                     for event in pygame.event.get():
                         if event.type == KEYDOWN:
@@ -613,45 +565,56 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         elif event.type == MOUSEBUTTONDOWN and event.button == 1 or ifJoystickInit and event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
                             display_num +=1
                             if display_num < len(dialog_to_display):
-                                #检测上方对话框
-                                if dialog_to_display[display_num]["dialoguebox_up"] != None:
-                                    if dialog_to_display[display_num-1]["dialoguebox_up"] != None:
-                                        if dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
-                                            dialoguebox_up.x = window_x
+                                if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
+                                    #检测上方对话框
+                                    if dialog_to_display[display_num]["dialoguebox_up"] != None and dialog_to_display[display_num-1]["dialoguebox_up"] != None and dialog_to_display[display_num]["dialoguebox_up"]["speaker"] == dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
+                                        if dialog_to_display[display_num]["dialoguebox_up"]["content"] != dialog_to_display[display_num]["dialoguebox_up"]["content"]:
                                             dialog_up_content_id = 0
                                             dialog_up_displayed_line = 0
-                                        elif dialog_to_display[display_num]["dialoguebox_up"]["content"] != dialog_to_display[display_num-1]["dialoguebox_up"]["content"]:
-                                            dialog_up_content_id = 0
-                                            dialog_up_displayed_line = 0
+                                        else:
+                                            pass
                                     else:
                                         dialoguebox_up.x = window_x
                                         dialog_up_content_id = 0
                                         dialog_up_displayed_line = 0
-                                else:
-                                    dialoguebox_up.x = window_x
-                                    dialog_up_content_id = 0
-                                    dialog_up_displayed_line = 0
-                                #检测下方对话框    
-                                if dialog_to_display[display_num]["dialoguebox_down"] != None:
-                                    if dialog_to_display[display_num-1]["dialoguebox_down"] != None:
-                                        if dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
-                                            dialoguebox_down.x = -window_x*0.3
+                                    #检测下方对话框    
+                                    if dialog_to_display[display_num]["dialoguebox_down"] != None and dialog_to_display[display_num-1]["dialoguebox_down"] != None and dialog_to_display[display_num]["dialoguebox_down"]["speaker"] == dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
+                                        if dialog_to_display[display_num]["dialoguebox_down"]["content"] != dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
                                             dialog_down_content_id = 0
                                             dialog_down_displayed_line = 0
-                                        elif dialog_to_display[display_num]["dialoguebox_down"]["content"] != dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
-                                            dialog_down_content_id = 0
-                                            dialog_down_displayed_line = 0
+                                        else:
+                                            pass
                                     else:
                                         dialoguebox_down.x = -window_x*0.3
                                         dialog_down_content_id = 0
                                         dialog_down_displayed_line = 0
                                 else:
+                                    dialoguebox_up.x = window_x
+                                    dialog_up_content_id = 0
+                                    dialog_up_displayed_line = 0
                                     dialoguebox_down.x = -window_x*0.3
                                     dialog_down_content_id = 0
                                     dialog_down_displayed_line = 0
-                    #画面更新
-                    fpsClock.tick(fps)
-                    pygame.display.flip()
+                            break
+                #渐变效果：一次性的
+                if txt_alpha >= 0:
+                    black_bg.set_alpha(txt_alpha)
+                    black_bg.draw(screen)
+                    title_number_display.set_alpha(txt_alpha)
+                    title_main_display.set_alpha(txt_alpha)
+                    drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
+                    drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+                    for i in range(len(battle_info)):
+                        battle_info[i].set_alpha(txt_alpha)
+                        drawImg(battle_info[i],(perBlockWidth*1.5,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                        if i == 1:
+                            temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
+                            temp_secode.set_alpha(txt_alpha)
+                            drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                    txt_alpha -= 5
+                #画面更新
+                fpsClock.tick(fps)
+                pygame.display.update()
             dialog_to_display = None
 
         # 游戏主循环
@@ -813,7 +776,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 local_y = 0
 
             #加载地图
-            theMap.display_map(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y)
+            theMap.display_map(screen,perBlockWidth,perBlockHeight,local_x,local_y)
             #加载篝火
             if facilities_data["campfire"] != None:
                 for key in facilities_data["campfire"]:
@@ -825,7 +788,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
             if dark_mode == True:
-                theMap.display_shadow(screen,perBlockWidth,perBlockHeight,window_x,window_y,local_x,local_y,light_area,UI_img["black"])
+                theMap.display_shadow(screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,UI_img["black"])
             
             #玩家回合
             if whose_round == "player":

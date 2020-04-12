@@ -307,6 +307,10 @@ dialog_during_battle:
         - 还有约50公里。
         speaker: asval
         speaker_icon: asval
+    - move:
+        sv-98:
+          x: 11
+          y: 9
     - dialoguebox_down:
         content:
         - 还有好长的路要走啊...
