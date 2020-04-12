@@ -69,30 +69,14 @@ class Doll:
         elif isContinue==False:
             if self.gif_dic[action]["imgId"] >= self.gif_dic[action]["imgNum"]:
                 self.gif_dic[action]["imgId"] -= 1
-    def draw_bb(self,action,screen,perBlockWidth,perBlockHeight,local_x,local_y,isContinue=True,ifFlip=False):
-        img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*4), round(perBlockHeight*4)))
-        if ifFlip == True:
-            pygame.transform.flip(img_of_char,True,False)
-        if self.faction == "character":
-            screen.blit(img_of_char,((self.start_position[0]-1.5)*perBlockWidth+local_x,(self.start_position[1]-1.9)*perBlockHeight+local_y))
-        else:
-            screen.blit(img_of_char,((self.x-1.5)*perBlockWidth+local_x,(self.y-1.9)*perBlockHeight+local_y))
-        self.gif_dic[action]["imgId"] += 1
-        if isContinue==True:
-            if self.gif_dic[action]["imgId"] >= self.gif_dic[action]["imgNum"]:
-                self.gif_dic[action]["imgId"] = 0
-        elif isContinue==False:
-            if self.gif_dic[action]["imgId"] >= self.gif_dic[action]["imgNum"]:
-                self.gif_dic[action]["imgId"] -= 1
 
 class characterDataManager(Doll):
-    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,start_position,detect):
+    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,detect):
         Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"character",magazine_capacity,max_damage,max_hp,min_damage,type,x,y)
         self.bullets_carried = bullets_carried
         self.skill_effective_range = skill_effective_range
         self.max_skill_range = calculate_range(skill_effective_range)
         self.skill_cover_range = skill_cover_range
-        self.start_position = start_position
         self.undetected = detect
 
 class sangvisFerriDataManager(Doll):
