@@ -132,7 +132,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     num_of_characters = len(characters)+len(sangvisFerris)
     characters_data = {}
     for each_character in characters:
-        characters_data[each_character] = characterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["type"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["skill_cover_range"],characters[each_character]["undetected"])
+        characters_data[each_character] = CharacterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["type"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["skill_cover_range"],characters[each_character]["undetected"])
         black_bg.draw(screen)
         drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
@@ -142,7 +142,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         i+=1
     sangvisFerris_data = {}
     for each_character in sangvisFerris:
-        sangvisFerris_data[each_character] = sangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],sangvisFerris[each_character]["kind"],sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["type"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
+        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],sangvisFerris[each_character]["kind"],sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["type"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
         black_bg.draw(screen)
         drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
@@ -246,7 +246,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     mouse_move_temp_x = -1
     mouse_move_temp_y = -1
     total_rounds = 1
-    warnings_to_display = warningSystem()
+    warnings_to_display = WarningSystem()
     damage_do_to_character = {}
     the_dead_one = {}
     screen_to_move_x=None
@@ -452,11 +452,13 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 if key in characters_data:
                                     if characters_data[key].x < value[0][0]:
                                         characters_data[key].x+=0.125
+                                        characters_data[key].setFlip(False)
                                         if characters_data[key].x >= value[0][0]:
                                             characters_data[key].x = value[0][0]
                                             value.pop(0)
                                     elif characters_data[key].x > value[0][0]:
                                         characters_data[key].x-=0.125
+                                        characters_data[key].setFlip(True)
                                         if characters_data[key].x <= value[0][0]:
                                             characters_data[key].x = value[0][0]
                                             value.pop(0)
@@ -477,11 +479,13 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 elif key in sangvisFerris_data:
                                     if sangvisFerris_data[key].x < value[0][0]:
                                         sangvisFerris_data[key].x+=0.125
+                                        characters_data[key].setFlip(True)
                                         if sangvisFerris_data[key].x >= value[0][0]:
                                             sangvisFerris_data[key].x = value[0][0]
                                             value.pop(0)
                                     elif sangvisFerris_data[key].x > value[0][0]:
                                         sangvisFerris_data[key].x-=0.125
+                                        characters_data[key].setFlip(False)
                                         if sangvisFerris_data[key].x <= value[0][0]:
                                             sangvisFerris_data[key].x = value[0][0]
                                             value.pop(0)
@@ -1061,6 +1065,16 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                     if pygame.mouse.get_pressed()[0]:
                                         skill_target = skill(the_character_get_click,{"x":block_get_hover_x,"y":block_get_hover_y},the_skill_cover_area,sangvisFerris_data,characters_data)
                                         if skill_target != None:
+                                            if skill_target in characters_data:
+                                                if characters_data[skill_target].x < characters_data[the_character_get_click].x:
+                                                    characters_data[the_character_get_click].setFlip(True)
+                                                else:
+                                                    characters_data[the_character_get_click].setFlip(False)
+                                            elif skill_target in sangvisFerris_data:
+                                                if sangvisFerris_data[skill_target].x < characters_data[the_character_get_click].x:
+                                                    characters_data[the_character_get_click].setFlip(True)
+                                                else:
+                                                    characters_data[the_character_get_click].setFlip(False)
                                             characters_data[the_character_get_click].current_action_point -= 8
                                             isWaiting = False
                                             green_hide = True
@@ -1079,7 +1093,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         if bullets_to_add > 0:
                             #如果角色有换弹动画
                             if characters_data[the_character_get_click].gif_dic["reload"] != None:
-                                    isWaiting = False
+                                isWaiting = False
                             #如果角色没有换弹动画
                             else:
                                 characters_data[the_character_get_click].current_action_point -= 5
@@ -1115,28 +1129,27 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
                             if characters_data[the_character_get_click].x < the_route[0][0]:
                                 characters_data[the_character_get_click].x+=0.125
-                                characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
+                                characters_data[the_character_get_click].setFlip(False)
                                 if characters_data[the_character_get_click].x >= the_route[0][0]:
                                     characters_data[the_character_get_click].x = the_route[0][0]
                                     the_route.pop(0)
                             elif characters_data[the_character_get_click].x > the_route[0][0]:
                                 characters_data[the_character_get_click].x-=0.125
-                                characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,True,True)
+                                characters_data[the_character_get_click].setFlip(True)
                                 if characters_data[the_character_get_click].x <= the_route[0][0]:
                                     characters_data[the_character_get_click].x = the_route[0][0]
                                     the_route.pop(0)
                             elif characters_data[the_character_get_click].y < the_route[0][1]:
                                 characters_data[the_character_get_click].y+=0.125
-                                characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                                 if characters_data[the_character_get_click].y >= the_route[0][1]:
                                     characters_data[the_character_get_click].y = the_route[0][1]
                                     the_route.pop(0)
                             elif characters_data[the_character_get_click].y > the_route[0][1]:
                                 characters_data[the_character_get_click].y-=0.125
-                                characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                                 if characters_data[the_character_get_click].y <= the_route[0][1]:
                                     characters_data[the_character_get_click].y = the_route[0][1]
                                     the_route.pop(0)
+                            characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                         else:
                             pygame.mixer.Channel(0).stop()
                             if characters_data[the_character_get_click].gif_dic["set"] != None:
@@ -1163,9 +1176,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
                         if block_get_hover_x < characters_data[the_character_get_click].x:
-                            characters_data[the_character_get_click].draw("attack",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False,True)
+                            characters_data[the_character_get_click].setFlip(True)
                         else:
-                            characters_data[the_character_get_click].draw("attack",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
+                            characters_data[the_character_get_click].setFlip(False)
+                        characters_data[the_character_get_click].draw("attack",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == characters_data[the_character_get_click].gif_dic["attack"]["imgNum"]-2:
                             for each_enemy in enemies_get_attack:
                                 if enemies_get_attack[each_enemy] == "near" and random.randint(1,100) <= 95 or enemies_get_attack[each_enemy] == "middle" and random.randint(1,100) <= 80 or enemies_get_attack[each_enemy] == "far" and random.randint(1,100) <= 65:
@@ -1274,32 +1288,28 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
                         if sangvisFerris_data[enemies_in_control].x < enemy_action["route"][0][0]:
                             sangvisFerris_data[enemies_in_control].x+=0.125
-                            if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
-                                sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
+                            sangvisFerris_data[enemies_in_control].setFlip(True)
                             if sangvisFerris_data[enemies_in_control].x >= enemy_action["route"][0][0]:
                                 sangvisFerris_data[enemies_in_control].x = enemy_action["route"][0][0]
                                 enemy_action["route"].pop(0)
                         elif sangvisFerris_data[enemies_in_control].x > enemy_action["route"][0][0]:
                             sangvisFerris_data[enemies_in_control].x-=0.125
-                            if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
-                                sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
+                            sangvisFerris_data[enemies_in_control].setFlip(False)
                             if sangvisFerris_data[enemies_in_control].x <= enemy_action["route"][0][0]:
                                 sangvisFerris_data[enemies_in_control].x = enemy_action["route"][0][0]
                                 enemy_action["route"].pop(0)
                         elif sangvisFerris_data[enemies_in_control].y < enemy_action["route"][0][1]:
                             sangvisFerris_data[enemies_in_control].y+=0.125
-                            if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
-                                sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                             if sangvisFerris_data[enemies_in_control].y >= enemy_action["route"][0][1]:
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
                         elif sangvisFerris_data[enemies_in_control].y > enemy_action["route"][0][1]:
                             sangvisFerris_data[enemies_in_control].y-=0.125
-                            if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
-                                sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,True,True)
                             if sangvisFerris_data[enemies_in_control].y <= enemy_action["route"][0][1]:
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
                             pygame.mixer.Channel(0).stop()
@@ -1311,6 +1321,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         enemies_in_control = ""
                 elif enemy_action["action"] == "attack":
                     if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
+                        if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
+                            sangvisFerris_data[enemies_in_control].setFlip(True)
+                        else:
+                            sangvisFerris_data[enemies_in_control].setFlip(False)
                         sangvisFerris_data[enemies_in_control].draw("attack",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
                     else:
                         sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] += 1
@@ -1337,36 +1351,36 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
                         if sangvisFerris_data[enemies_in_control].x < enemy_action["route"][0][0]:
                             sangvisFerris_data[enemies_in_control].x+=0.125
-                            if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
-                                sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
+                            sangvisFerris_data[enemies_in_control].setFlip(True)
                             if sangvisFerris_data[enemies_in_control].x >= enemy_action["route"][0][0]:
                                 sangvisFerris_data[enemies_in_control].x = enemy_action["route"][0][0]
                                 enemy_action["route"].pop(0)
                         elif sangvisFerris_data[enemies_in_control].x > enemy_action["route"][0][0]:
                             sangvisFerris_data[enemies_in_control].x-=0.125
-                            if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
-                                sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
+                            sangvisFerris_data[enemies_in_control].setFlip(False)
                             if sangvisFerris_data[enemies_in_control].x <= enemy_action["route"][0][0]:
                                 sangvisFerris_data[enemies_in_control].x = enemy_action["route"][0][0]
                                 enemy_action["route"].pop(0)
                         elif sangvisFerris_data[enemies_in_control].y < enemy_action["route"][0][1]:
                             sangvisFerris_data[enemies_in_control].y+=0.125
-                            if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
-                                sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                             if sangvisFerris_data[enemies_in_control].y >= enemy_action["route"][0][1]:
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
                         elif sangvisFerris_data[enemies_in_control].y > enemy_action["route"][0][1]:
                             sangvisFerris_data[enemies_in_control].y-=0.125
-                            if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
-                                sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,True,True)
                             if sangvisFerris_data[enemies_in_control].y <= enemy_action["route"][0][1]:
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in light_area or dark_mode != True:
+                            sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
                             pygame.mixer.Channel(0).stop()
                         if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in light_area or dark_mode != True:
+                            if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
+                                sangvisFerris_data[enemies_in_control].setFlip(True)
+                            else:
+                                sangvisFerris_data[enemies_in_control].setFlip(False)
                             sangvisFerris_data[enemies_in_control].draw("attack",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
                         else:
                             sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] += 1
@@ -1400,7 +1414,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             rightClickCharacterAlphaDeduct = True
             for key,value in dicMerge(characters_data,sangvisFerris_data).items():
                 #根据血量判断角色的动作
-                if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in light_area or dark_mode != True:
+                if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in light_area or value.faction == "sangvisFerri" and key != enemies_in_control and dark_mode != True:
                     if value.current_hp > 0:
                         if green_hide == True and pygame.mouse.get_pressed()[2]:
                             if int((mouse_x-local_x)/perBlockWidth) == value.x and int((mouse_y-local_y)/perBlockHeight) == value.y:

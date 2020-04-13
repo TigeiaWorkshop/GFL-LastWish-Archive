@@ -261,8 +261,8 @@ dialog_during_battle:
   initial_dialog:
     - move:
         2b14_0:
-          x: 6
-          y: 7
+          x: 12
+          y: 9
         gsh-18:
           x: 14
           y: 7

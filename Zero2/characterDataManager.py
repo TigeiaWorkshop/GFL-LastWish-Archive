@@ -22,6 +22,7 @@ class Doll:
         self.max_hp = max_hp
         self.min_damage = min_damage
         self.type = type
+        self.ifFlip = False
         self.x = x
         self.y = y
     def decreaseHp(self,damage,result_of_round=None):
@@ -37,7 +38,10 @@ class Doll:
         if self.faction == "character" and self.dying != False:
             self.dying == False
             self.gif_dic["die"]["imgId"] = 0
-    def draw(self,action,screen,original_UI_img,perBlockWidth,perBlockHeight,local_x=0,local_y=0,isContinue=True,ifFlip=False):
+    def setFlip(self,theBool):
+        if self.ifFlip != theBool:
+            self.ifFlip = theBool
+    def draw(self,action,screen,original_UI_img,perBlockWidth,perBlockHeight,local_x=0,local_y=0,isContinue=True):
         hp_img = None
         if self.dying == False:
             if original_UI_img != None:
@@ -58,7 +62,7 @@ class Doll:
                 img_of_char.set_alpha(255)
         else:
             img_of_char.set_alpha(original_alpha)
-        if ifFlip == True:
+        if self.ifFlip == True:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
         #把角色图片画到屏幕上
         screen.blit(img_of_char,((self.x-1.5)*perBlockWidth+local_x,(self.y-1.9)*perBlockHeight+local_y))
@@ -74,7 +78,7 @@ class Doll:
             if self.gif_dic[action]["imgId"] >= self.gif_dic[action]["imgNum"]:
                 self.gif_dic[action]["imgId"] -= 1
 
-class characterDataManager(Doll):
+class CharacterDataManager(Doll):
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,detect):
         Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"character",magazine_capacity,max_damage,max_hp,min_damage,type,x,y)
         self.bullets_carried = bullets_carried
@@ -83,7 +87,7 @@ class characterDataManager(Doll):
         self.skill_cover_range = skill_cover_range
         self.undetected = detect
 
-class sangvisFerriDataManager(Doll):
+class SangvisFerriDataManager(Doll):
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,patrol_path):
         Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"sangvisFerri",magazine_capacity,max_damage,max_hp,min_damage,type,x,y)
         self.patrol_path = patrol_path

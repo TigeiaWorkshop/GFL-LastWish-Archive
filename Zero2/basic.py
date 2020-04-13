@@ -124,7 +124,7 @@ def dicMerge(dict1, dict2):
     return res 
 
 #警告系统
-class warningSystem:
+class WarningSystem:
     def __init__(self):
         self.all_warnings = []
     def add(self,the_warning):
