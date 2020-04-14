@@ -363,8 +363,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             dialog_down_content_id = 0
             dialog_up_displayed_line = 0
             dialog_down_displayed_line = 0
-            displayDialog = True
             all_characters_path = None
+            actionLoop = {}
+            theAction = None
             #对话系统总循环
             while display_num < len(dialog_to_display):
                 if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
@@ -385,6 +386,13 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     if value.faction == "character" or (value.x,value.y) in light_area or dark_mode != True:
                         if all_characters_path != None and key in all_characters_path:
                             value.draw("move",screen,None,perBlockWidth,perBlockHeight,local_x,local_y)
+                        elif theAction != None and key in theAction:
+                            pass
+                        elif key in actionLoop:
+                            if actionLoop[key] != "die":
+                                value.draw(actionLoop[key],screen,None,perBlockWidth,perBlockHeight,local_x,local_y,False)
+                            else:
+                                value.draw(actionLoop[key],screen,None,perBlockWidth,perBlockHeight,local_x,local_y)
                         else:
                             value.draw("wait",screen,None,perBlockWidth,perBlockHeight,local_x,local_y)
                 #加载阴影区
@@ -511,6 +519,47 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             pygame.mixer.Channel(0).stop()
                         display_num += 1
                         all_characters_path = None
+                #改变方向
+                elif "direction" in dialog_to_display[display_num]:
+                    for key,value in dialog_to_display[display_num]["direction"].items():
+                        if key in characters_data:
+                            characters_data[key].setFlip(value)
+                        elif key in sangvisFerris_data:
+                            sangvisFerris_data[key].setFlip(value)
+                    display_num += 1
+                #改变动作（一次性）
+                elif "action" in dialog_to_display[display_num]:
+                    if theAction == None:
+                        theAction = dialog_to_display[display_num]["action"]
+                    else:
+                        theActionNeedPop = []
+                        if len(theAction) > 0:
+                            for key,action in theAction.items():
+                                if key in characters_data and characters_data[key].draw(action,screen,None,perBlockWidth,perBlockHeight,local_x,local_y,False) == False:
+                                    if action != "die":
+                                        characters_data[key].reset_imgId(action)
+                                    theActionNeedPop.append(key)
+                                elif key in sangvisFerris_data and sangvisFerris_data[key].draw(action,screen,None,perBlockWidth,perBlockHeight,local_x,local_y,False) == False:
+                                    if action != "die":
+                                        sangvisFerris_data[key].reset_imgId(action)
+                                    theActionNeedPop.append(key)
+                            if len(theActionNeedPop) > 0:
+                                for i in range(len(theActionNeedPop)):
+                                    theAction.pop(theActionNeedPop[i])
+                        else:
+                            display_num += 1
+                            theAction = None
+                #改变动作（长期）
+                elif "actionLoop" in dialog_to_display[display_num]:
+                    for key,action in dialog_to_display[display_num]["actionLoop"].items():
+                        actionLoop[key] = action
+                    display_num += 1
+                #停止长期的动作改变
+                elif "actionLoopStop" in dialog_to_display[display_num]:
+                    for i in range(len(dialog_to_display[display_num]["actionLoopStop"])):
+                        if dialog_to_display[display_num]["actionLoopStop"][i] in actionLoop:
+                            del actionLoop[dialog_to_display[display_num]["actionLoopStop"][i]]
+                    display_num += 1
                 #开始对话
                 elif "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
                     #对话框的移动

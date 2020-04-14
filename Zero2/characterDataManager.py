@@ -70,13 +70,21 @@ class Doll:
             screen.blit(pygame.transform.scale(original_UI_img["hp_empty"], (perBlockWidth, round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
             screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp),round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
             screen.blit(current_hp_to_display,(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
-        self.gif_dic[action]["imgId"] += 1
-        if isContinue==True:
-            if self.gif_dic[action]["imgId"] >= self.gif_dic[action]["imgNum"]:
+        #调整id，并返回对应的bool状态
+        if self.gif_dic[action]["imgId"] < self.gif_dic[action]["imgNum"]-1:
+            self.gif_dic[action]["imgId"] += 1
+            return True
+        else:
+            if isContinue == True:
                 self.gif_dic[action]["imgId"] = 0
-        elif isContinue==False:
-            if self.gif_dic[action]["imgId"] >= self.gif_dic[action]["imgNum"]:
-                self.gif_dic[action]["imgId"] -= 1
+                return True
+            else:
+                return False
+    def set_imgId(self,action,theId):
+        self.gif_dic[action]["imgId"] = theId
+    def reset_imgId(self,action):
+        self.gif_dic[action]["imgId"] = 0
+
 
 class CharacterDataManager(Doll):
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,detect):

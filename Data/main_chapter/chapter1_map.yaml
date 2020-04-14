@@ -159,6 +159,8 @@ character:
     undetected: false
     x: 10
     y: 8
+dialogs:
+  initial: initial_dialog
 facility:
   campfire:
     campfire1:
@@ -2627,5 +2629,3 @@ sangvisFerri:
     y: 13
 weather: snow
 zoom_in: 2
-dialogs: 
-  initial: initial_dialog
