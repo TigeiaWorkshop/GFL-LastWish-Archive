@@ -313,8 +313,10 @@ dialog_during_battle:
         y: 9
   - direction:
       sv-98: true
+  - idle: 1
   - direction:
       sv-98: false
+  - idle: 1
   - action:
       sv-98: attack
   - dialoguebox_down:

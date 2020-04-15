@@ -366,6 +366,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             all_characters_path = None
             actionLoop = {}
             theAction = None
+            idle_seconde = 0
+            seconde_to_idle = None
             #对话系统总循环
             while display_num < len(dialog_to_display):
                 if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
@@ -609,7 +611,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         #角色图标
                         if dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"] != None:
                             drawImg(character_icon_img_list[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
-
                     #玩家输入按键判定
                     for event in pygame.event.get():
                         if event.type == KEYDOWN:
@@ -649,6 +650,17 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                     dialog_down_content_id = 0
                                     dialog_down_displayed_line = 0
                             break
+                #闲置一定时间（秒）
+                elif "idle" in dialog_to_display[display_num]:
+                    if seconde_to_idle == None:
+                        seconde_to_idle = dialog_to_display[display_num]["idle"]*fps
+                    else:
+                        if idle_seconde < seconde_to_idle:
+                            idle_seconde += 1
+                        else:
+                            display_num += 1
+                            idle_seconde = 0
+                            seconde_to_idle = None
                 #渐变效果：一次性的
                 if txt_alpha >= 0:
                     black_bg.set_alpha(txt_alpha)
