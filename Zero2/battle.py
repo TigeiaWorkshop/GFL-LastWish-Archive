@@ -83,10 +83,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         local_y = loadData["local_y"]
         characters = loadData["character"]
         sangvisFerris = loadData["sangvisFerri"]
-        theMap = MapObject(loadData["map"],blocks_setting,window_x)
+        theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,window_x)
         bg_music = loadData["background_music"]
         environment_sound = loadData["weather"]
-        facilities_data = loadData["facility"]
         dialogInfo = loadData["dialogs"]
 
     if zoom_in < 1:
@@ -118,14 +117,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
 
     del all_snow_img,snow_list,all_snow_img_len
     gc.collect()
-
-    #加载篝火
-    campfire_images = []
-    if facilities_data["campfire"] != None:
-        for i in range(1,11):
-            campfire_images.append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
-        for key in facilities_data["campfire"]:
-            facilities_data["campfire"][key]["img_id"] = random.randint(0,9)
 
     #初始化角色信息
     i = 1
@@ -204,7 +195,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     #加载对话框图片
     dialoguebox_up = loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
     dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
-
+    #选择菜单按钮底图
+    select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth*2), round(perBlockWidth/1.3)))
     #-----加载音效-----
     #行走的音效 -- 频道0
     all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
@@ -256,7 +248,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     battleSystemMainLoop = True
     txt_alpha = 250
     #计算光亮区域
-    light_area = calculate_darkness(characters_data,facilities_data["campfire"])
+    light_area = calculate_darkness(characters_data,theMap.facility["campfire"])
     # 移动路径
     the_route = []
     #上个回合因为暴露被敌人发现的角色
@@ -309,15 +301,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         for a in range(250,0,-5):
             #加载地图
             theMap.display_map(screen,perBlockWidth,perBlockHeight,local_x,local_y)
-            #加载篝火
-            if facilities_data["campfire"] != None:
-                for key in facilities_data["campfire"]:
-                    if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
-                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth, perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
-                    if facilities_data["campfire"][key]["img_id"] >= 9.0:
-                        facilities_data["campfire"][key]["img_id"] = 0
-                    else:
-                        facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
             if dark_mode == True:
                 theMap.display_shadow(screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,UI_img["black"])
@@ -374,15 +357,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     pygame.mixer.Channel(1).play(environment_sound)
                 #加载地图
                 theMap.display_map(screen,perBlockWidth,perBlockHeight,local_x,local_y)
-                #加载篝火
-                if facilities_data["campfire"] != None:
-                    for key in facilities_data["campfire"]:
-                        if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
-                            drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth,perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
-                        if facilities_data["campfire"][key]["img_id"] >= 9.0:
-                            facilities_data["campfire"][key]["img_id"] = 0
-                        else:
-                            facilities_data["campfire"][key]["img_id"]+=0.25
                 #角色动画
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
                     if value.faction == "character" or (value.x,value.y) in light_area or dark_mode != True:
@@ -419,9 +393,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
                                     map2d[x][y]=1
                         #历遍设施，设置障碍方块
-                        for key1 in facilities_data:
-                            for key2 in facilities_data[key1]:
-                                map2d[facilities_data[key1][key2]["x"]][facilities_data[key1][key2]["y"]]=1
+                        for key1 in theMap.facility:
+                            for key2,value2 in theMap.facility[key1].items():
+                                map2d[value2["x"]][value2["y"]]=1
                         all_characters_path = {}
                         # 历遍所有角色，将不需要移动的角色的坐标点设置为障碍方块，为需要移动的角色生成路径
                         for key,value in dicMerge(sangvisFerris_data,characters_data).items():
@@ -511,8 +485,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                             value.pop(0)
                             else:
                                 key_to_remove.append(key)
-                        
-                        light_area = calculate_darkness(characters_data,facilities_data["campfire"])
+                        light_area = calculate_darkness(characters_data,theMap.facility["campfire"])
                         for i in range(len(key_to_remove)):
                             all_characters_path.pop(key_to_remove[i])
                     else:
@@ -559,8 +532,15 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 #停止长期的动作改变
                 elif "actionLoopStop" in dialog_to_display[display_num]:
                     for i in range(len(dialog_to_display[display_num]["actionLoopStop"])):
-                        if dialog_to_display[display_num]["actionLoopStop"][i] in actionLoop:
-                            del actionLoop[dialog_to_display[display_num]["actionLoopStop"][i]]
+                        character_key = dialog_to_display[display_num]["actionLoopStop"][i]
+                        if character_key in actionLoop:
+                            if character_key in characters_data:
+                                characters_data[character_key].reset_imgId(actionLoop[character_key])
+                            elif character_key in sangvisFerris_data:
+                                sangvisFerris_data[character_key].reset_imgId(actionLoop[character_key])
+                            else:
+                                raise Exception("Warning: Cannot find",character_key," while system is trying to reset the action.")
+                            del actionLoop[character_key]
                     display_num += 1
                 #开始对话
                 elif "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
@@ -785,6 +765,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight))
                 UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight))
                 UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
+                select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth*2), round(perBlockWidth/1.3)))
             else:
                 zoom_in = zoomIntoBe
 
@@ -842,23 +823,12 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
 
             #加载地图
             theMap.display_map(screen,perBlockWidth,perBlockHeight,local_x,local_y)
-            #加载篝火
-            if facilities_data["campfire"] != None:
-                for key in facilities_data["campfire"]:
-                    if -perBlockWidth<=facilities_data["campfire"][key]["x"]*perBlockWidth+local_x <= window_x and -perBlockHeight<=facilities_data["campfire"][key]["y"]*perBlockHeight+local_y<= window_y:
-                        drawImg(pygame.transform.scale(campfire_images[int(facilities_data["campfire"][key]["img_id"])], (perBlockWidth, perBlockHeight)),(facilities_data["campfire"][key]["x"]*perBlockWidth,facilities_data["campfire"][key]["y"]*perBlockHeight),screen,local_x,local_y)
-                    if facilities_data["campfire"][key]["img_id"] >= 9.0:
-                        facilities_data["campfire"][key]["img_id"] = 0
-                    else:
-                        facilities_data["campfire"][key]["img_id"]+=0.25
             #加载阴影区
             if dark_mode == True:
                 theMap.display_shadow(screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,UI_img["black"])
             
             #玩家回合
             if whose_round == "player":
-                block_get_click_x = None
-                block_get_click_y = None
                 #玩家输入按键判定-玩家回合限定
                 if pygame.mouse.get_pressed()[0] or ifJoystickInit and event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
                     #获取角色坐标
@@ -874,10 +844,46 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         isWaiting = False
                         green_hide = True
                         characters_data[the_character_get_click].current_action_point -= len(the_route)*2
+                    elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
+                        if characters_data[the_character_get_click].current_bullets > 0 and characters_data[the_character_get_click].current_action_point >= 5:
+                            action_choice = "attack"
+                            block_get_click_x = None
+                            block_get_click_y = None
+                            green_hide = False
+                        if characters_data[the_character_get_click].current_bullets <= 0:
+                            warnings_to_display.add(warnings_info["magazine_is_empty"])
+                        if characters_data[the_character_get_click].current_action_point < 5:
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_attack"])
+                    elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
+                        if characters_data[the_character_get_click].current_action_point >= 2:
+                            action_choice = "move"
+                            block_get_click_x = None
+                            block_get_click_y = None
+                            green_hide = False
+                        else:
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_move"])
+                    elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y) and characters_data[the_character_get_click].kind != "HOC":
+                        if characters_data[the_character_get_click].current_action_point >= 8:
+                            action_choice = "skill"
+                            block_get_click_x = None
+                            block_get_click_y = None
+                            green_hide = False
+                        else:
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_use_skill"])
+                    elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),local_x,local_y):
+                        if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
+                            action_choice = "reload"
+                            block_get_click_x = None
+                            block_get_click_y = None
+                            green_hide = False
+                        if characters_data[the_character_get_click].bullets_carried <= 0:
+                            warnings_to_display.add(warnings_info["no_bullets_left"])
+                        if characters_data[the_character_get_click].current_action_point < 5:
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_reload"])
                     else:
                         #控制选择菜单的显示与隐藏
                         for key in characters_data:
-                            if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False:
+                            if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False and green_hide != False:
                                 screen_to_move_x = None
                                 screen_to_move_y = None
                                 attacking_range = None
@@ -888,8 +894,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
 
                 #选择菜单的判定，显示功能在角色动画之后
                 if green_hide == "SelectMenu":
-                    #加载按钮
-                    select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth*2), round(perBlockWidth/1.3)))
                     #移动画面以使得被点击的角色可以被更好的操作
                     if screen_to_move_x == None:
                         if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0:
@@ -901,49 +905,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             screen_to_move_y = window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
                         elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=theMap.row*perBlockHeight*-1:
                             screen_to_move_y = window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
-                    #按钮判定
-                    if pygame.mouse.get_pressed()[0]:
-                        if isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
-                            time.sleep(0.05)
-                            if characters_data[the_character_get_click].current_bullets > 0 and characters_data[the_character_get_click].current_action_point >= 5:
-                                action_choice = "attack"
-                                block_get_click_x = None
-                                block_get_click_y = None
-                                green_hide = False
-                            if characters_data[the_character_get_click].current_bullets <= 0:
-                                warnings_to_display.add(warnings_info["magazine_is_empty"])
-                            if characters_data[the_character_get_click].current_action_point < 5:
-                                warnings_to_display.add(warnings_info["no_enough_ap_to_attack"])
-                        elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
-                            time.sleep(0.05)
-                            if characters_data[the_character_get_click].current_action_point >= 2:
-                                action_choice = "move"
-                                block_get_click_x = None
-                                block_get_click_y = None
-                                green_hide = False
-                            else:
-                                warnings_to_display.add(warnings_info["no_enough_ap_to_move"])
-                        elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y) and characters_data[the_character_get_click].kind != "HOC":
-                            time.sleep(0.05)
-                            if characters_data[the_character_get_click].current_action_point >= 8:
-                                action_choice = "skill"
-                                block_get_click_x = None
-                                block_get_click_y = None
-                                green_hide = False
-                            else:
-                                warnings_to_display.add(warnings_info["no_enough_ap_to_use_skill"])
-                        elif isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),local_x,local_y):
-                            if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
-                                action_choice = "reload"
-                                block_get_click_x = None
-                                block_get_click_y = None
-                                green_hide = False
-                            if characters_data[the_character_get_click].bullets_carried <= 0:
-                                warnings_to_display.add(warnings_info["no_bullets_left"])
-                            if characters_data[the_character_get_click].current_action_point < 5:
-                                warnings_to_display.add(warnings_info["no_enough_ap_to_reload"])
+                        
                 #显示攻击/移动/技能范围
-                elif green_hide == False and the_character_get_click != "":
+                if green_hide == False and the_character_get_click != "":
                     #显示移动范围
                     if action_choice == "move":
                         #创建AStar对象,并设置起点和终点为
@@ -961,9 +925,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                     if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
                                         map2d[x][y]=1
                             #历遍设施，设置障碍方块
-                            for key1 in facilities_data:
-                                for key2 in facilities_data[key1]:
-                                    map2d[facilities_data[key1][key2]["x"]][facilities_data[key1][key2]["y"]]=1
+                            for key1 in theMap.facility:
+                                for key2,value2 in theMap.facility[key1].items():
+                                    map2d[value2["x"]][value2["y"]]=1
                             # 历遍所有角色，将角色的坐标点设置为障碍方块
                             all_characters_data = dicMerge(characters_data,sangvisFerris_data)
                             for every_chara in all_characters_data:
@@ -1068,6 +1032,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         else:
                             warnings_to_display.add(warnings_info["no_enemy_in_effective_range"])
                             action_choice = ""
+                            block_get_click_x = None
+                            block_get_click_y = None
+                            green_hide = False
                     #显示技能范围        
                     elif action_choice == "skill":
                         if characters_data[the_character_get_click].max_skill_range > 0:
@@ -1232,7 +1199,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                     characters_data[the_character_get_click].undetected = False
                                 isWaiting =True
                                 the_character_get_click = ""
-                        light_area = calculate_darkness(characters_data,facilities_data["campfire"])
+                        light_area = calculate_darkness(characters_data,theMap.facility["campfire"])
                     elif action_choice == "attack":
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
@@ -1266,7 +1233,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             gc.collect()
                         if characters_data[the_character_get_click].gif_dic["skill"]["imgId"] == characters_data[the_character_get_click].gif_dic["skill"]["imgNum"]-1:
                             characters_data[the_character_get_click].gif_dic["skill"]["imgId"] = 0
-                            light_area = calculate_darkness(characters_data,facilities_data["campfire"])
+                            light_area = calculate_darkness(characters_data,theMap.facility["campfire"])
                             isWaiting =True
                             the_character_get_click = ""
                             action_choice = ""
@@ -1340,7 +1307,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             if whose_round == "sangvisFerris":
                 enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]
                 if enemy_action == None:
-                    enemy_action = AI(enemies_in_control,theMap.mapData,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data)
+                    enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting)
                     print(enemies_in_control+" choses "+enemy_action["action"])
                 if enemy_action["action"] == "move":
                     if enemy_action["route"] != []:
@@ -1394,7 +1361,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
                             the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                             result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
-                            light_area = calculate_darkness(characters_data,facilities_data["campfire"])
+                            light_area = calculate_darkness(characters_data,theMap.facility["campfire"])
                             damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                         else:
                             damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
@@ -1450,7 +1417,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
                                 the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                                 result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
-                                light_area = calculate_darkness(characters_data,facilities_data["campfire"])
+                                light_area = calculate_darkness(characters_data,theMap.facility["campfire"])
                                 damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                             else:
                                 damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
@@ -1549,7 +1516,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             the_dead_one_remove.append(key)
                             del characters_data[key]
                             result_of_round["times_characters_down"]+=1
-                            light_area = calculate_darkness(characters_data,facilities_data["campfire"])
+                            light_area = calculate_darkness(characters_data,theMap.facility["campfire"])
             for key in the_dead_one_remove:
                 del the_dead_one[key]
             #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#

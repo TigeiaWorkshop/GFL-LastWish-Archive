@@ -5,22 +5,45 @@ import pygame
 import os
 
 class MapObject:
-    def  __init__(self,mapData,blocks_setting,window_x):
+    def  __init__(self,mapData,facilityData,blocks_setting,window_x):
         self.row = len(mapData)
         self.column = len(mapData[0])
         self.mapData = mapData
         self.img_data_list = randomBlock(mapData,blocks_setting)
         self.env_img_list = load_env_images(self.img_data_list,window_x,self.column)
+        self.facility = processFacilityData(facilityData)
+        self.campfireImg = loadCampfireImg(facilityData)
     def display_map(self,screen,perBlockWidth,perBlockHeight,local_x,local_y):
         for y in range(math.ceil((-perBlockHeight-local_y)/perBlockHeight),math.ceil((screen.get_height()-local_y)/perBlockHeight)):
             for x in range(math.ceil((-perBlockWidth-local_x)/perBlockWidth),math.ceil((screen.get_width()-local_x)/perBlockWidth)):
                 img_display = pygame.transform.scale(self.env_img_list[self.img_data_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
                 screen.blit(img_display,(x*perBlockWidth+local_x,(y-0.5)*perBlockHeight+local_y))
+        for key in self.facility:
+            for key2,value2 in self.facility[key].items():
+                if math.ceil((-perBlockHeight-local_y)/perBlockHeight)<=value2["y"]<math.ceil((screen.get_height()-local_y)/perBlockHeight) and math.ceil((-perBlockWidth-local_x)/perBlockWidth)<=value2["x"]<math.ceil((screen.get_width()-local_x)/perBlockWidth):
+                    if key == "campfire":
+                        screen.blit(pygame.transform.scale(self.campfireImg[int(value2["img_id"])], (perBlockWidth,perBlockHeight)),(value2["x"]*perBlockWidth+local_x,value2["y"]*perBlockHeight+local_y))
+                        if self.facility[key][key2]["img_id"] >= 9.0:
+                            self.facility[key][key2]["img_id"] = 0
+                        else:
+                            self.facility[key][key2]["img_id"]+=0.25
     def display_shadow(self,screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,shadow_img):
         for y in range(math.ceil((-perBlockHeight-local_y)/perBlockHeight),math.ceil((screen.get_height()-local_y)/perBlockHeight)):
             for x in range(math.ceil((-perBlockWidth-local_x)/perBlockWidth),math.ceil((screen.get_width()-local_x)/perBlockWidth)):
                 if (x,y) not in light_area:
                     screen.blit(shadow_img,(x*perBlockWidth+local_x,y*perBlockHeight+local_y))
+
+def processFacilityData(facilityData):
+    for key in facilityData["campfire"]:
+        facilityData["campfire"][key]["img_id"] = random.randint(0,9)
+    return facilityData
+
+def loadCampfireImg(facilityData):
+    campfire_images = []
+    if facilityData["campfire"] != None:
+        for i in range(1,11):
+            campfire_images.append(pygame.image.load(os.path.join("Assets/image/environment/campfire/"+str(i)+".png")))
+    return campfire_images
 
 #读取需要的地图图片
 def load_env_images(img_data_list,window_x,column):

@@ -1,7 +1,7 @@
 from Zero2.basic import *
 from Zero2.map import *
 
-def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting,facilities_data):
+def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting):
     character_with_min_hp = None
     characters_can_be_detect = []
     #检测是否有可以立马攻击的敌人
@@ -36,16 +36,16 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
         ap_need_to_attack = 5
         max_moving_routes_for_attacking = int((sangvisFerris_data[aiInControl].max_action_point - ap_need_to_attack)/2)
         #建立地图
-        map2d=Array2D(len(theMap[0]),len(theMap))
+        map2d=Array2D(len(theMap.mapData[0]),len(theMap.mapData))
         #历遍地图，设置障碍方块
-        for y in range(len(theMap)):
-            for x in range(len(theMap[y])):
-                if blocks_setting[theMap[y][x]]["canPassThrough"] == False:
+        for y in range(len(theMap.mapData)):
+            for x in range(len(theMap.mapData[y])):
+                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
                     map2d[x][y]=1
         #历遍设施，设置障碍方块
-        for key1 in facilities_data:
-            for key2 in facilities_data[key1]:
-                map2d[facilities_data[key1][key2]["x"]][facilities_data[key1][key2]["y"]]=1
+        for key1 in theMap.facility:
+            for key2,value2 in theMap.facility[key1].items():
+                map2d[value2["x"]][value2["y"]]=1
         #历遍所有角色，将角色的坐标点设置为障碍方块
         for character in characters_data:
             map2d[characters_data[character].x][characters_data[character].y] = 1
