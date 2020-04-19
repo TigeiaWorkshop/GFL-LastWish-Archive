@@ -282,3 +282,11 @@ class AStar:
                         return list(reversed(pathList))
             if len(self.openList) == 0:
                 return None
+
+class DisplayController:
+    def __init__(self,fps):
+        self.fps = fps
+        self.clock = pygame.time.Clock()
+    def flip(self):
+        self.clock.tick(self.fps)
+        pygame.display.flip()

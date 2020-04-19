@@ -15,15 +15,14 @@ def dialog(chapter_name,screen,lang,fps,part):
     #加载动画
     LoadingImgAbove = loadImg("Assets/image/loading_img/LoadingImgAbove.png",window_x+8,window_y/1.7)
     LoadingImgBelow = loadImg("Assets/image/loading_img/LoadingImgBelow.png",window_x+8,window_y/2.05)
-    #帧数控制器
-    fpsClock = pygame.time.Clock()
+    #帧率控制器
+    Display = DisplayController(fps)
 
     #开始加载-渐入效果
     for i in range(101):
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
-        fpsClock.tick(fps)
-        pygame.display.update()
+        Display.flip()
     
     #卸载音乐
     pygame.mixer.music.unload()
@@ -84,8 +83,7 @@ def dialog(chapter_name,screen,lang,fps,part):
                 videoCapture.display(surface,screen)
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
-        fpsClock.tick(the_FPS)
-        pygame.display.update()
+        Display.flip()
     
     #音效
     pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".mp3")
@@ -225,17 +223,14 @@ def dialog(chapter_name,screen,lang,fps,part):
                             pygame.mixer.music.play(loops=9999, start=0.0)
                         dialogId = dialog_content[dialogId]["last_dialog_id"]
                         dialog_is_playing_sound.stop()
-        
-        fpsClock.tick(the_FPS)
-        pygame.display.update()
+        Display.flip()
     
     #淡出
     pygame.mixer.music.fadeout(1000)
     for i in range(0,55,2):
         black_bg.set_alpha(i)
         black_bg.draw(screen)
-        fpsClock.tick(fps)
-        pygame.display.update()
+        Display.flip()
 
     if len(dialog_options) == 0:
         return True

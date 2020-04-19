@@ -26,8 +26,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     window_x,window_y = screen.get_size()
     #卸载音乐
     pygame.mixer.music.unload()
-    #帧数控制器
-    fpsClock = pygame.time.Clock()
+    #帧率控制器
+    Display = DisplayController(fps)
 
     #加载按钮的文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
@@ -58,8 +58,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         title_main_display.set_alpha(i)
         drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
-        fpsClock.tick(fps)
-        pygame.display.update()
+        Display.flip()
 
     #开始加载地图场景
     black_bg.draw(screen)
@@ -67,7 +66,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
     now_loading = fontRender(loading_info["now_loading_map"], "white",window_x/76)
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-    pygame.display.update()
+    Display.flip()
 
     #加载地图设置
     with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
@@ -129,7 +128,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
         now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
         drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-        pygame.display.update()
+        Display.flip()
         i+=1
     sangvisFerris_data = {}
     for each_character in sangvisFerris:
@@ -139,7 +138,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
         now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
         drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-        pygame.display.update()
+        Display.flip()
         i+=1
 
     #加载对话时角色的图标
@@ -156,7 +155,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
     now_loading = fontRender(loading_info["now_loading_level"], "white",window_x/76)
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-    pygame.display.update()
+    Display.flip()
 
     #加载UI
     #加载结束回合的图片
@@ -280,8 +279,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                 temp_secode.set_alpha(a)
                 drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-        fpsClock.tick(fps)
-        pygame.display.update()
+        Display.flip()
     
     #加载音乐
     pygame.mixer.music.load("Assets/music/"+bg_music)
@@ -333,8 +331,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                     temp_secode.set_alpha(a)
                     drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-            fpsClock.tick(fps)
-            pygame.display.flip()
+            Display.flip()
     
     #战斗系统主要loop
     while battleSystemMainLoop == True:
@@ -657,9 +654,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             temp_secode.set_alpha(txt_alpha)
                             drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
                     txt_alpha -= 5
-                #画面更新
-                fpsClock.tick(fps)
-                pygame.display.update()
+                Display.flip()
             dialog_to_display = None
 
         # 游戏主循环
@@ -1621,8 +1616,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 drawImg(times_characters_down,(250,450),screen)
                 drawImg(player_rate,(250,500),screen)
                 drawImg(press_space,(250,700),screen)
-            #画面更新
-            fpsClock.tick(fps)
-            pygame.display.flip()
+            Display.flip()
 
     return result_of_round    
