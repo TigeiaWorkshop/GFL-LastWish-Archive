@@ -2,6 +2,7 @@ from Zero2.basic import *
 import random
 def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,characters_data,action="detect",skill_target=None,damage_do_to_character=None):
     if action=="detect":
+        skill_target = None
         if characters_data[characterName].type == "gsh-18":
             for character in characters_data:
                 if click_potcion["x"] == characters_data[character].x and click_potcion["y"] == characters_data[character].y:
