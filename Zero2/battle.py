@@ -101,10 +101,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         local_y=0
     
     #加载雪花
-    all_snow_img = glob.glob(r'Assets/image/environment/snow/*.png')
-    snow_list = []
-    for snowflake in all_snow_img:
-        snow_list.append(loadImg(snowflake))
+    snow_list = loadAllImgInFile('Assets/image/environment/snow/*.png')
 
     all_snow_img_len = len(snow_list)-1
     all_snow_on_screen = []
@@ -114,7 +111,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         the_snow_add_img = snow_list[random.randint(0,all_snow_img_len)]
         all_snow_on_screen.append(loadImage(the_snow_add_img,(the_snow_add_x,the_snow_add_y),int(window_x/200),int(window_x/200)))
 
-    del all_snow_img,snow_list,all_snow_img_len
+    del snow_list,all_snow_img_len
     gc.collect()
 
     #初始化角色信息
@@ -946,8 +943,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                         map2d[x][y]=1
                             #历遍设施，设置障碍方块
                             for key1 in theMap.facility:
-                                for key2,value2 in theMap.facility[key1].items():
-                                    map2d[value2["x"]][value2["y"]]=1
+                                if key1 != "chest":
+                                    for key2,value2 in theMap.facility[key1].items():
+                                        map2d[value2["x"]][value2["y"]]=1
                             # 历遍所有角色，将角色的坐标点设置为障碍方块
                             all_characters_data = dicMerge(characters_data,sangvisFerris_data)
                             for every_chara in all_characters_data:
@@ -1180,6 +1178,20 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
                         else:
                             pygame.mixer.Channel(0).stop()
+                            #检测是不是站在补给上
+                            chest_need_to_remove = None
+                            for key,value in theMap.facility["chest"].items():
+                                if value["x"] == characters_data[the_character_get_click].x and value["y"] == characters_data[the_character_get_click].y:
+                                    for key2,value2 in value["item"].items():
+                                        if key2 == "bullet":
+                                            characters_data[the_character_get_click].bullets_carried += value2
+                                        elif key2 == "hp":
+                                            characters_data[the_character_get_click].current_hp += value2
+                                    chest_need_to_remove = key
+                                    break
+                            if chest_need_to_remove != None:
+                                del theMap.facility["chest"][chest_need_to_remove]
+                            #检测是否角色有set的动画
                             if characters_data[the_character_get_click].gif_dic["set"] != None:
                                 characters_data[the_character_get_click].draw("set",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y,False)
                                 if characters_data[the_character_get_click].gif_dic["set"]["imgId"] == characters_data[the_character_get_click].gif_dic["set"]["imgNum"]-1:

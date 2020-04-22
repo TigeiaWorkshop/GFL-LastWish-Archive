@@ -1,10 +1,11 @@
 import os
 import pygame
 import cv2
+import glob
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
-def loadImg(path,length=None,height=None,setAlpha=None,ifConvertAlpha=True):
-    if length == None and height== None:
+def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
+    if width == None and height== None:
         if ifConvertAlpha == False:
             img = pygame.image.load(os.path.join(path))
         else:
@@ -13,20 +14,20 @@ def loadImg(path,length=None,height=None,setAlpha=None,ifConvertAlpha=True):
             img.set_alpha(setAlpha)
         return img
     else:
-        if length == None:
-            raise Exception('Length is required')
+        if width == None:
+            raise Exception('width is required')
         elif height== None:
             raise Exception('Height is required')
-        elif length >= 0 and height >= 0:
+        elif width >= 0 and height >= 0:
             if ifConvertAlpha == False:
-                img = pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(length), int(height)))
+                img = pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(width), int(height)))
             else:
-                img = pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (int(length), int(height)))
+                img = pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (int(width), int(height)))
             if setAlpha != None:
                 img.set_alpha(setAlpha)
             return img
-        elif length < 0 or height < 0:
-            raise Exception('Both length and height must be positive')
+        elif width < 0 or height < 0:
+            raise Exception('Both width and height must be positive')
 #图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
 def drawImg(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))
@@ -176,3 +177,10 @@ class VideoObject:
         frame = cv2.transpose(frame)
         pygame.surfarray.blit_array(surface, frame)
         screen.blit(surface, (0,0))
+
+def loadAllImgInFile(pathRule,width=None,height=None):
+    allImg = glob.glob(pathRule)
+    for i in range(len(allImg)):
+        allImg[i] = loadImg(allImg[i],width,height)
+    return allImg
+    

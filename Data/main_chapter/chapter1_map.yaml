@@ -171,6 +171,13 @@ facility:
       range: 3
       x: 15
       y: 15
+  chest:
+    chest1:
+      item: 
+        bullet: 20
+        hp: 10
+      x: 13
+      y: 14
 local_x: 0
 local_y: 0
 map:
