@@ -138,25 +138,30 @@ def character_creator(character_name,action,faction="character"):
         return None
 
 #动图字典制作模块：接受一个友方角色名，返回对应的动图字典：
-def character_gif_dic(character_name,faction="character"):
-    gif_dic = {
-        "attack":character_creator(character_name,"attack",faction),
-        "attack2":character_creator(character_name,"attack2",faction),
-        "move":character_creator(character_name,"move",faction),
-        "reload":character_creator(character_name,"reload",faction),
-        "repair":character_creator(character_name,"reload",faction),
-        "set":character_creator(character_name,"set",faction),
-        "skill":character_creator(character_name,"skill",faction),
-        "victory":character_creator(character_name,"victory",faction),
-        "victoryloop":character_creator(character_name,"victoryloop",faction),
-        "wait":character_creator(character_name,"wait",faction),
-        "wait2":character_creator(character_name,"wait2",faction),
-    }
-    if faction == "character":
-        gif_dic["die"] = character_creator(character_name,"die",faction)
-    else:
-        temp_list = ["","2","3"]
-        gif_dic["die"] = character_creator(character_name,"die"+temp_list[random.randint(0,2)],faction)
-        if gif_dic["die"]==None:
+def character_gif_dic(character_name,faction="character",mode=None):
+    if mode == None:
+        gif_dic = {
+            "attack":character_creator(character_name,"attack",faction),
+            "attack2":character_creator(character_name,"attack2",faction),
+            "move":character_creator(character_name,"move",faction),
+            "reload":character_creator(character_name,"reload",faction),
+            "repair":character_creator(character_name,"reload",faction),
+            "set":character_creator(character_name,"set",faction),
+            "skill":character_creator(character_name,"skill",faction),
+            "victory":character_creator(character_name,"victory",faction),
+            "victoryloop":character_creator(character_name,"victoryloop",faction),
+            "wait":character_creator(character_name,"wait",faction),
+            "wait2":character_creator(character_name,"wait2",faction),
+        }
+        if faction == "character":
             gif_dic["die"] = character_creator(character_name,"die",faction)
+        else:
+            temp_list = ["","2","3"]
+            gif_dic["die"] = character_creator(character_name,"die"+temp_list[random.randint(0,2)],faction)
+            if gif_dic["die"]==None:
+                gif_dic["die"] = character_creator(character_name,"die",faction)
+    elif mode == "dev":
+        gif_dic = {"wait":character_creator(character_name,"wait",faction)}
+    else:
+        raise Exception('Error: Mode does not exist.')
     return gif_dic
