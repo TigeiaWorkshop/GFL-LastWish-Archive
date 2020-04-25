@@ -1,9 +1,13 @@
-import random
-import yaml
-import math
-import pygame
-import os
 import glob
+import math
+import os
+import random
+
+import pygame
+import yaml
+
+from Zero2.basic import loadAllImgInFile
+
 
 class MapObject:
     def  __init__(self,mapData,facilityData,blocks_setting,window_x):
@@ -50,6 +54,37 @@ class MapObject:
             for x in range(math.ceil((-perBlockWidth-local_x)/perBlockWidth),math.ceil((screen.get_width()-local_x)/perBlockWidth)):
                 if (x,y) not in light_area:
                     screen.blit(shadow_img,(x*perBlockWidth+local_x,y*perBlockHeight+local_y))
+
+class WeatherSystem:
+    def  __init__(self,weather,window_x,window_y):
+        self.name = 0
+        self.img_list = loadAllImgInFile("Assets/image/environment/"+weather+"/*.png")
+        self.ImgObject = []
+        for i in range(100):
+            imgId = random.randint(0,len(self.img_list)-1)
+            img_size = random.randint(3,10)
+            img_speed = random.randint(1,4)
+            img_x = random.randint(1,window_x*1.5)
+            img_y = random.randint(1,window_y)
+            self.ImgObject.append(Snow(imgId,img_size,img_speed,img_x,img_y))
+    def display(self,screen,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
+        for i in range(len(self.ImgObject)):
+            if 0<=self.ImgObject[i].x+local_x<=screen.get_width() and 0<=self.ImgObject[i].y+local_y<=screen.get_height():
+                imgTemp = pygame.transform.scale(self.img_list[self.ImgObject[i].imgId], (round(perBlockWidth/self.ImgObject[i].size), round(perBlockWidth/self.ImgObject[i].size)))
+                screen.blit(imgTemp,(self.ImgObject[i].x+local_x,self.ImgObject[i].y+local_y))
+            self.ImgObject[i].x -= perBlockHeight/3
+            self.ImgObject[i].y += perBlockHeight/3
+            if self.ImgObject[i].x <= 0 or self.ImgObject[i].y+local_y >= screen.get_height():
+                self.ImgObject[i].y = random.randint(-50,0)
+                self.ImgObject[i].x = random.randint(0,screen.get_width()*2)
+
+class Snow:
+    def  __init__(self,imgId,size,speed,x,y):
+        self.imgId = imgId
+        self.size = size
+        self.speed = speed
+        self.x = x
+        self.y = y
 
 def processFacilityData(facilityData):
     for key in facilityData["campfire"]:

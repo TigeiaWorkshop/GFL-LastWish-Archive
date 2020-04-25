@@ -6,7 +6,6 @@ from sys import exit
 import pygame
 import yaml
 from pygame.locals import *
-import gc
 
 from Zero2.basic import *
 from Zero2.characterDataManager import *
@@ -84,7 +83,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         sangvisFerris = loadData["sangvisFerri"]
         theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,window_x)
         bg_music = loadData["background_music"]
-        environment_sound = loadData["weather"]
+        theWeather = loadData["weather"]
         dialogInfo = loadData["dialogs"]
 
     if zoom_in < 1:
@@ -99,20 +98,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         local_x=0
     if local_y+window_y/block_y*0.25*theMap.row>0:
         local_y=0
-    
-    #加载雪花
-    snow_list = loadAllImgInFile('Assets/image/environment/snow/*.png')
-
-    all_snow_img_len = len(snow_list)-1
-    all_snow_on_screen = []
-    for i in range(100):
-        the_snow_add_y = random.randint(1,window_y)
-        the_snow_add_x = random.randint(1,window_x*1.5)
-        the_snow_add_img = snow_list[random.randint(0,all_snow_img_len)]
-        all_snow_on_screen.append(loadImage(the_snow_add_img,(the_snow_add_x,the_snow_add_y),int(window_x/200),int(window_x/200)))
-
-    del snow_list,all_snow_img_len
-    gc.collect()
 
     #初始化角色信息
     i = 1
@@ -200,9 +185,12 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     for i in range(len(all_walking_sounds)):
         walking_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
     the_sound_id = None
-    #环境的音效 -- 频道1
-    if environment_sound != None:
-        environment_sound = pygame.mixer.Sound("Assets/sound/environment/"+environment_sound+".ogg")
+    #加载天气和环境的音效 -- 频道1
+    environment_sound = None
+    weatherController = None
+    if theWeather != None:
+        environment_sound = pygame.mixer.Sound("Assets/sound/environment/"+theWeather+".ogg")
+        weatherController = WeatherSystem(theWeather,window_x,window_y)    
     #攻击的音效 -- 频道2
     all_attacking_sounds = {
         #突击步枪
@@ -311,13 +299,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in light_area or dark_mode != True:
                     sangvisFerris_data[enemies].draw("wait",screen,original_UI_img,perBlockWidth,perBlockHeight,local_x,local_y)
             #加载雪花
-            for i in range(len(all_snow_on_screen)):
-                all_snow_on_screen[i].draw(screen,local_x,local_y)
-                all_snow_on_screen[i].x -= 10*zoom_in
-                all_snow_on_screen[i].y += 20*zoom_in
-                if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
-                    all_snow_on_screen[i].y = random.randint(-100,0)
-                    all_snow_on_screen[i].x = random.randint(0,window_x*2)
+            if weatherController != None:
+                weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
+
             black_bg.set_alpha(a)
             black_bg.draw(screen)
             drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
@@ -370,13 +354,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 if dark_mode == True:
                     theMap.display_shadow(screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,UI_img["black"])
                 #加载雪花
-                for i in range(len(all_snow_on_screen)):
-                    all_snow_on_screen[i].draw(screen,local_x,local_y)
-                    all_snow_on_screen[i].x -= 10*zoom_in
-                    all_snow_on_screen[i].y += 20*zoom_in
-                    if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
-                        all_snow_on_screen[i].y = random.randint(-100,0)
-                        all_snow_on_screen[i].x = random.randint(0,window_x*2)
+                if weatherController != None:
+                    weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
                 #如果操作是移动
                 if "move" in dialog_to_display[display_num]:
                     if all_characters_path == None:
@@ -1244,7 +1223,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             sangvisFerris_data = temp_dic["sangvisFerris_data"]
                             damage_do_to_character = temp_dic["damage_do_to_character"]
                             del temp_dic
-                            gc.collect()
                         if characters_data[the_character_get_click].gif_dic["skill"]["imgId"] == characters_data[the_character_get_click].gif_dic["skill"]["imgNum"]-1:
                             characters_data[the_character_get_click].gif_dic["skill"]["imgId"] = 0
                             light_area = calculate_darkness(characters_data,theMap.facility["campfire"])
@@ -1590,13 +1568,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.95)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
             
             #加载雪花
-            for i in range(len(all_snow_on_screen)):
-                all_snow_on_screen[i].draw(screen,local_x,local_y)
-                all_snow_on_screen[i].x -= 10*zoom_in
-                all_snow_on_screen[i].y += 20*zoom_in
-                if all_snow_on_screen[i].x <= 0 or all_snow_on_screen[i].y+local_y >= 1080:
-                    all_snow_on_screen[i].y = random.randint(-100,0)  
-                    all_snow_on_screen[i].x = random.randint(0,window_x*2)
+            if weatherController != None:
+                weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
             
             if whose_round == "player":
                 #加载结束回合的按钮
