@@ -1,3 +1,4 @@
+# cython: language_level=3
 import glob
 import math
 import os
@@ -54,7 +55,7 @@ class MapObject:
                     else:
                         self.facility[key][key2]["img_id"]+=0.25
                 elif key == "chest":
-                    screen.blit(pygame.transform.scale(self.facilityImg["chest"], (perBlockWidth,perBlockHeight)),(value2["x"]*perBlockWidth,value2["y"]*perBlockHeight))
+                    screen.blit(pygame.transform.scale(self.facilityImg["chest"], (self.perBlockWidth,self.perBlockHeight)),(value2["x"]*self.perBlockWidth,value2["y"]*self.perBlockHeight))
     def display_shadow(self,screen,local_x,local_y,light_area,shadow_img):
         for y in range(math.ceil((-self.perBlockHeight-local_y)/self.perBlockHeight),math.ceil((screen.get_height()-local_y)/self.perBlockHeight)):
             for x in range(math.ceil((-self.perBlockWidth-local_x)/self.perBlockWidth),math.ceil((screen.get_width()-local_x)/self.perBlockWidth)):
