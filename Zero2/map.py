@@ -8,13 +8,12 @@ import yaml
 
 from Zero2.basic import loadAllImgInFile
 
-
 class MapObject:
     def  __init__(self,mapData,facilityData,blocks_setting,window_x):
         self.row = len(mapData)
         self.column = len(mapData[0])
-        self.mapData = mapData
-        self.img_data_list = randomBlock(mapData,blocks_setting)
+        self.mapData = tuple(mapData)
+        self.img_data_list = tuple(randomBlock(mapData,blocks_setting))
         self.env_img_list = load_env_images(self.img_data_list,window_x,self.column)
         self.facility = processFacilityData(facilityData)
         self.facilityImg = loadFacilityImg(facilityData)
@@ -55,6 +54,7 @@ class MapObject:
                 if (x,y) not in light_area:
                     screen.blit(shadow_img,(x*perBlockWidth+local_x,y*perBlockHeight+local_y))
 
+#环境系统
 class WeatherSystem:
     def  __init__(self,weather,window_x,window_y):
         self.name = 0
@@ -78,6 +78,7 @@ class WeatherSystem:
                 self.ImgObject[i].y = random.randint(-50,0)
                 self.ImgObject[i].x = random.randint(0,screen.get_width()*2)
 
+#雪花片
 class Snow:
     def  __init__(self,imgId,size,speed,x,y):
         self.imgId = imgId

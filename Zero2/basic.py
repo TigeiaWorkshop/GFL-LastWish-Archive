@@ -39,6 +39,9 @@ def loadImage(path,the_object_position,width=None,height=None,description="Defau
             self.img = img
             self.x = x
             self.y = y
+            self.xTogo = x
+            self.yTogo = y
+            self.items = []
             self.width = width
             self.height = height
             self.description = description
@@ -137,7 +140,7 @@ class WarningSystem:
             img_alpha = self.all_warnings[i].get_alpha()
             if img_alpha > 0:
                 screen.blit(self.all_warnings[i],((window_x-self.all_warnings[i].get_width())/2,(window_y-self.all_warnings[i].get_height())/2+i*self.all_warnings[i].get_height()*1.2))
-                self.all_warnings[i].set_alpha(img_alpha-10)
+                self.all_warnings[i].set_alpha(img_alpha-5)
             else:
                 del self.all_warnings[i]
     def empty(self):

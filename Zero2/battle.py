@@ -162,6 +162,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         "orange": loadImg("Assets/image/UI/orange.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
         #计分板
         "score" : loadImage("Assets/image/UI/score.png",(200,200),300,600),
+        "supplyBoard":loadImage("Assets/image/UI/score.png",((window_x-window_x/3)/2,-window_y/12),window_x/3,window_y/12),
     }
     #UI - 变形后
     UI_img = {
@@ -232,6 +233,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     battleSystemMainLoop = True
     txt_alpha = 250
     skill_target = None
+    stayingTime = 0
     #计算光亮区域
     light_area = calculate_darkness(characters_data,theMap.facility["campfire"])
     # 移动路径
@@ -1161,11 +1163,16 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             chest_need_to_remove = None
                             for key,value in theMap.facility["chest"].items():
                                 if value["x"] == characters_data[the_character_get_click].x and value["y"] == characters_data[the_character_get_click].y:
+                                    original_UI_img["supplyBoard"].items = []
                                     for key2,value2 in value["item"].items():
                                         if key2 == "bullet":
                                             characters_data[the_character_get_click].bullets_carried += value2
+                                            original_UI_img["supplyBoard"].items.append(fontRender("获得子弹: "+str(value2),"white",window_x/80))
                                         elif key2 == "hp":
                                             characters_data[the_character_get_click].current_hp += value2
+                                            original_UI_img["supplyBoard"].items.append(fontRender("获得血量: "+str(value2),"white",window_x/80))
+                                    if len(original_UI_img["supplyBoard"].items)>0:
+                                        original_UI_img["supplyBoard"].yTogo = 10
                                     chest_need_to_remove = key
                                     break
                             if chest_need_to_remove != None:
@@ -1571,6 +1578,31 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             if weatherController != None:
                 weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
             
+            #显示获取到的物资
+            if original_UI_img["supplyBoard"].yTogo == 10:
+                if original_UI_img["supplyBoard"].y < original_UI_img["supplyBoard"].yTogo:
+                    original_UI_img["supplyBoard"].y += 5
+                else:
+                    if stayingTime == 30:
+                        original_UI_img["supplyBoard"].yTogo = -window_y/12
+                        stayingTime = 0
+                    else:
+                        stayingTime += 1
+            else:
+                if original_UI_img["supplyBoard"].y > original_UI_img["supplyBoard"].yTogo:
+                    original_UI_img["supplyBoard"].y -= 5
+
+            original_UI_img["supplyBoard"].draw(screen)
+            if len(original_UI_img["supplyBoard"].items) > 0 and original_UI_img["supplyBoard"].y != -window_y/30:
+                lenTemp = 0
+                for i in range(len(original_UI_img["supplyBoard"].items)):
+                    lenTemp += original_UI_img["supplyBoard"].items[i].get_width()*1.5
+                start_point = (window_x - lenTemp)/2
+                for i in range(len(original_UI_img["supplyBoard"].items)):
+                    start_point += original_UI_img["supplyBoard"].items[i].get_width()*0.25
+                    drawImg(original_UI_img["supplyBoard"].items[i],(start_point,(original_UI_img["supplyBoard"].height - original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,original_UI_img["supplyBoard"].y)
+                    start_point += original_UI_img["supplyBoard"].items[i].get_width()*1.25
+
             if whose_round == "player":
                 #加载结束回合的按钮
                 end_round_button.draw(screen)
