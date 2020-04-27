@@ -81,7 +81,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         local_y = loadData["local_y"]
         characters = loadData["character"]
         sangvisFerris = loadData["sangvisFerri"]
-        theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,window_x)
+        theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,round(window_x/block_x*zoom_in),round(window_y/block_y*zoom_in))
         bg_music = loadData["background_music"]
         theWeather = loadData["weather"]
         dialogInfo = loadData["dialogs"]
@@ -91,8 +91,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     elif zoom_in > 3:
         zoom_in = 3
     zoomIntoBe = zoom_in
-    perBlockWidth = round(window_x/block_x*zoom_in)
-    perBlockHeight = round(window_y/block_y*zoom_in)
+    perBlockWidth = theMap.perBlockWidth
+    perBlockHeight = theMap.perBlockHeight
 
     if local_x+window_x/block_x*0.25*theMap.column >0:
         local_x=0
@@ -286,10 +286,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             pygame.mixer.Channel(1).play(environment_sound)
         for a in range(250,0,-5):
             #加载地图
-            theMap.display_map(screen,perBlockWidth,perBlockHeight,local_x,local_y)
+            theMap.display_map(screen,local_x,local_y)
             #加载阴影区
             if dark_mode == True:
-                theMap.display_shadow(screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,UI_img["black"])
+                theMap.display_shadow(screen,local_x,local_y,light_area,UI_img["black"])
             #角色动画
             for every_chara in characters_data:
                 if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
@@ -337,7 +337,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
                     pygame.mixer.Channel(1).play(environment_sound)
                 #加载地图
-                theMap.display_map(screen,perBlockWidth,perBlockHeight,local_x,local_y)
+                theMap.display_map(screen,local_x,local_y)
                 #角色动画
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
                     if value.faction == "character" or (value.x,value.y) in light_area or dark_mode != True:
@@ -354,7 +354,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             value.draw("wait",screen,None,perBlockWidth,perBlockHeight,local_x,local_y)
                 #加载阴影区
                 if dark_mode == True:
-                    theMap.display_shadow(screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,UI_img["black"])
+                    theMap.display_shadow(screen,local_x,local_y,light_area,UI_img["black"])
                 #加载雪花
                 if weatherController != None:
                     weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
@@ -745,6 +745,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight))
                 UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
                 select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth*2), round(perBlockWidth/1.3)))
+                theMap.changePerBlockSize(perBlockWidth, perBlockHeight)
             else:
                 zoom_in = zoomIntoBe
 
@@ -801,10 +802,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 local_y = 0
 
             #加载地图
-            theMap.display_map(screen,perBlockWidth,perBlockHeight,local_x,local_y)
+            theMap.display_map(screen,local_x,local_y)
             #加载阴影区
             if dark_mode == True:
-                theMap.display_shadow(screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,UI_img["black"])
+                theMap.display_shadow(screen,local_x,local_y,light_area,UI_img["black"])
             
             #玩家回合
             if whose_round == "player":

@@ -317,16 +317,12 @@ dialog_during_battle:
   - direction:
       sv-98: false
   - idle: 1
-  - action:
-      sv-98: attack
   - dialoguebox_down:
       content:
       - 还有好长的路要走啊...
       speaker: gsh-18
       speaker_icon: gsh-18
     dialoguebox_up: null
-  - actionLoop:
-      sv-98: attack
   - dialoguebox_down:
       content:
       - 大家小心，前方200米有敌人活动的痕迹

@@ -181,9 +181,18 @@ class VideoObject:
         pygame.surfarray.blit_array(surface, frame)
         screen.blit(surface, (0,0))
 
+#加载路径下的所有图片，储存到一个list当中，然后返回
 def loadAllImgInFile(pathRule,width=None,height=None):
     allImg = glob.glob(pathRule)
     for i in range(len(allImg)):
         allImg[i] = loadImg(allImg[i],width,height)
     return allImg
-    
+
+#画面更新控制器
+class DisplayController:
+    def __init__(self,fps):
+        self.fps = fps
+        self.clock = pygame.time.Clock()
+    def flip(self):
+        self.clock.tick(self.fps)
+        pygame.display.flip()

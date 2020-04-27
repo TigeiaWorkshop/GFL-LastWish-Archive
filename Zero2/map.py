@@ -6,53 +6,60 @@ import random
 import pygame
 import yaml
 
-from Zero2.basic import loadAllImgInFile
+from Zero2.basic import loadAllImgInFile,loadImg
 
 class MapObject:
-    def  __init__(self,mapData,facilityData,blocks_setting,window_x):
+    def  __init__(self,mapData,facilityData,blocks_setting,perBlockWidth,perBlockHeight):
         self.row = len(mapData)
         self.column = len(mapData[0])
         self.mapData = tuple(mapData)
+        self.perBlockWidth = perBlockWidth
+        self.perBlockHeight = perBlockHeight
         self.img_data_list = tuple(randomBlock(mapData,blocks_setting))
-        self.env_img_list = load_env_images(self.img_data_list,window_x,self.column)
+        self.env_img_list_original = load_env_images(self.img_data_list)
+        self.env_img_list = load_env_images(self.img_data_list,perBlockWidth,perBlockHeight*1.5)
         self.facility = processFacilityData(facilityData)
         self.facilityImg = loadFacilityImg(facilityData)
-    def display_map(self,screen,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
-        for y in range(math.ceil((-perBlockHeight-local_y)/perBlockHeight),math.ceil((screen.get_height()-local_y)/perBlockHeight)):
-            for x in range(math.ceil((-perBlockWidth-local_x)/perBlockWidth),math.ceil((screen.get_width()-local_x)/perBlockWidth)):
-                img_display = pygame.transform.scale(self.env_img_list[self.img_data_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
-                screen.blit(img_display,(x*perBlockWidth+local_x,(y-0.5)*perBlockHeight+local_y))
+    def changePerBlockSize(self,newPerBlockWidth,newPerBlockHeight):
+        self.perBlockWidth = newPerBlockWidth
+        self.perBlockHeight = newPerBlockHeight
+        for key in self.env_img_list:
+            self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockHeight*1.5)))
+    def display_map(self,screen,local_x=0,local_y=0):
+        for y in range(math.ceil((-self.perBlockHeight-local_y)/self.perBlockHeight),math.ceil((screen.get_height()-local_y)/self.perBlockHeight)):
+            for x in range(math.ceil((-self.perBlockWidth-local_x)/self.perBlockWidth),math.ceil((screen.get_width()-local_x)/self.perBlockWidth)):
+                screen.blit(self.env_img_list[self.img_data_list[y][x]],(x*self.perBlockWidth+local_x,(y-0.5)*self.perBlockHeight+local_y))
         for key in self.facility:
             for key2,value2 in self.facility[key].items():
-                if math.ceil((-perBlockHeight-local_y)/perBlockHeight)<=value2["y"]<math.ceil((screen.get_height()-local_y)/perBlockHeight) and math.ceil((-perBlockWidth-local_x)/perBlockWidth)<=value2["x"]<math.ceil((screen.get_width()-local_x)/perBlockWidth):
+                if math.ceil((-self.perBlockHeight-local_y)/self.perBlockHeight)<=value2["y"]<math.ceil((screen.get_height()-local_y)/self.perBlockHeight) and math.ceil((-self.perBlockWidth-local_x)/self.perBlockWidth)<=value2["x"]<math.ceil((screen.get_width()-local_x)/self.perBlockWidth):
                     if key == "campfire":
-                        screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(value2["img_id"])], (perBlockWidth,perBlockHeight)),(value2["x"]*perBlockWidth+local_x,value2["y"]*perBlockHeight+local_y))
-                        if self.facility[key][key2]["img_id"] >= 9.0:
+                        screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(value2["img_id"])], (self.perBlockWidth,self.perBlockHeight)),(value2["x"]*self.perBlockWidth+local_x,value2["y"]*self.perBlockHeight+local_y))
+                        if self.facility[key][key2]["img_id"] >= len(self.facilityImg["campfire"])-1:
                             self.facility[key][key2]["img_id"] = 0
                         else:
-                            self.facility[key][key2]["img_id"]+=0.25
+                            self.facility[key][key2]["img_id"] += 0.1
                     elif key == "chest":
-                        screen.blit(pygame.transform.scale(self.facilityImg["chest"], (perBlockWidth,perBlockHeight)),(value2["x"]*perBlockWidth+local_x,value2["y"]*perBlockHeight+local_y))
-    def display_map_fullSize(self,screen,perBlockWidth,perBlockHeight):
+                        screen.blit(pygame.transform.scale(self.facilityImg["chest"], (self.perBlockWidth,self.perBlockHeight)),(value2["x"]*self.perBlockWidth+local_x,value2["y"]*self.perBlockHeight+local_y))
+    def display_map_fullSize(self,screen):
         for y in range(0,self.row):
             for x in range(0,self.column):
-                img_display = pygame.transform.scale(self.env_img_list[self.img_data_list[y][x]], (perBlockWidth, round(perBlockHeight*1.5)))
-                screen.blit(img_display,(x*perBlockWidth,(y-0.5)*perBlockHeight))
+                img_display = pygame.transform.scale(self.env_img_list[self.img_data_list[y][x]], (self.perBlockWidth, round(self.perBlockHeight*1.5)))
+                screen.blit(img_display,(x*self.perBlockWidth,(y-0.5)*self.perBlockHeight))
         for key in self.facility:
             for key2,value2 in self.facility[key].items():
                 if key == "campfire":
-                    screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(value2["img_id"])], (perBlockWidth,perBlockHeight)),(value2["x"]*perBlockWidth,value2["y"]*perBlockHeight))
+                    screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(value2["img_id"])], (self.perBlockWidth,self.perBlockHeight)),(value2["x"]*self.perBlockWidth,value2["y"]*self.perBlockHeight))
                     if self.facility[key][key2]["img_id"] >= 9.0:
                         self.facility[key][key2]["img_id"] = 0
                     else:
                         self.facility[key][key2]["img_id"]+=0.25
                 elif key == "chest":
                     screen.blit(pygame.transform.scale(self.facilityImg["chest"], (perBlockWidth,perBlockHeight)),(value2["x"]*perBlockWidth,value2["y"]*perBlockHeight))
-    def display_shadow(self,screen,perBlockWidth,perBlockHeight,local_x,local_y,light_area,shadow_img):
-        for y in range(math.ceil((-perBlockHeight-local_y)/perBlockHeight),math.ceil((screen.get_height()-local_y)/perBlockHeight)):
-            for x in range(math.ceil((-perBlockWidth-local_x)/perBlockWidth),math.ceil((screen.get_width()-local_x)/perBlockWidth)):
+    def display_shadow(self,screen,local_x,local_y,light_area,shadow_img):
+        for y in range(math.ceil((-self.perBlockHeight-local_y)/self.perBlockHeight),math.ceil((screen.get_height()-local_y)/self.perBlockHeight)):
+            for x in range(math.ceil((-self.perBlockWidth-local_x)/self.perBlockWidth),math.ceil((screen.get_width()-local_x)/self.perBlockWidth)):
                 if (x,y) not in light_area:
-                    screen.blit(shadow_img,(x*perBlockWidth+local_x,y*perBlockHeight+local_y))
+                    screen.blit(shadow_img,(x*self.perBlockWidth+local_x,y*self.perBlockHeight+local_y))
 
 #环境系统
 class WeatherSystem:
@@ -87,11 +94,13 @@ class Snow:
         self.x = x
         self.y = y
 
+#初始化篝火动画的图片Id
 def processFacilityData(facilityData):
     for key in facilityData["campfire"]:
         facilityData["campfire"][key]["img_id"] = random.randint(0,9)
     return facilityData
 
+#加载场地设施的图片
 def loadFacilityImg(facilityData):
     Facility_images = {}
     #加载篝火的图片
@@ -99,36 +108,34 @@ def loadFacilityImg(facilityData):
         Facility_images["campfire"] = []
         for i in range(1,11):
             try:
-                Facility_images["campfire"].append(pygame.image.load(os.path.join("Assets/image/environment/campfire/"+str(i)+".png")))
+                Facility_images["campfire"].append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
             except BaseException:
-                Facility_images["campfire"].append(pygame.image.load(os.path.join("../Assets/image/environment/campfire/"+str(i)+".png")))
+                Facility_images["campfire"].append(loadImg("../Assets/image/environment/campfire/"+str(i)+".png"))
     #加载其他设施的图片
     allImg = glob.glob(r"Assets/image/environment/facility/*.png")
     if len(allImg)>0:
         for imgPath in allImg:
-            Facility_images[imgPath.lstrip("Assets/image/environment/facility/").rstrip(".png").replace("\\","")] = pygame.image.load(os.path.join(imgPath))
+            Facility_images[imgPath.lstrip("Assets/image/environment/facility/").rstrip(".png").replace("\\","")] = loadImg(imgPath)
     else:
         allImg = glob.glob(r"../Assets/image/environment/facility/*.png")
         for imgPath in allImg:
-            Facility_images[imgPath.lstrip("../Assets/image/environment/facility/").rstrip(".png").replace("\\","")] = pygame.image.load(os.path.join(imgPath))
+            Facility_images[imgPath.lstrip("../Assets/image/environment/facility/").rstrip(".png").replace("\\","")] = loadImg(imgPath)
     return Facility_images
 
 #读取需要的地图图片
-def load_env_images(img_data_list,window_x,column):
+def load_env_images(img_data_list,theWidth=None,theHeight=None):
     all_images_needed = []
     for i in range(len(img_data_list)):
         for a in range(len(img_data_list[i])):
             if img_data_list[i][a] not in all_images_needed:
                 all_images_needed.append(img_data_list[i][a])
     #加载背景图片
-    max_length = math.ceil(window_x/column*3)
-    max_height = math.ceil(window_x/column*3*1.5)
     env_img_list={}
     for i in range(len(all_images_needed)):
         try:
-            env_img_list[all_images_needed[i]] = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/environment/block/"+all_images_needed[i]+".png")).convert_alpha(), (max_length, max_height))
+            env_img_list[all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
         except BaseException:
-            env_img_list[all_images_needed[i]] = pygame.transform.scale(pygame.image.load(os.path.join("../Assets/image/environment/block/"+all_images_needed[i]+".png")).convert_alpha(), (max_length, max_height))
+            env_img_list[all_images_needed[i]] = loadImg("../Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
     return env_img_list
 
 #随机地图方块
@@ -353,11 +360,3 @@ class AStar:
                         return list(reversed(pathList))
             if len(self.openList) == 0:
                 return None
-
-class DisplayController:
-    def __init__(self,fps):
-        self.fps = fps
-        self.clock = pygame.time.Clock()
-    def flip(self):
-        self.clock.tick(self.fps)
-        pygame.display.flip()
