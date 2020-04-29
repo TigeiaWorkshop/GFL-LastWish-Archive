@@ -1,34 +1,31 @@
 # cython: language_level=3
-import os
-import pygame
-import cv2
 import glob
+import math
+import os
+
+import cv2
+import pygame
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
 def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
-    if width == None and height== None:
-        if ifConvertAlpha == False:
-            img = pygame.image.load(os.path.join(path))
-        else:
-            img = pygame.image.load(os.path.join(path)).convert_alpha()
-        if setAlpha != None:
-            img.set_alpha(setAlpha)
-        return img
+    if ifConvertAlpha == False:
+        img = pygame.image.load(os.path.join(path))
     else:
-        if width == None:
-            raise Exception('width is required')
-        elif height== None:
-            raise Exception('Height is required')
-        elif width >= 0 and height >= 0:
-            if ifConvertAlpha == False:
-                img = pygame.transform.scale(pygame.image.load(os.path.join(path)), (int(width), int(height)))
-            else:
-                img = pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(), (int(width), int(height)))
-            if setAlpha != None:
-                img.set_alpha(setAlpha)
-            return img
-        elif width < 0 or height < 0:
-            raise Exception('Both width and height must be positive')
+        img = pygame.image.load(os.path.join(path)).convert_alpha()
+    if setAlpha != None:
+        img.set_alpha(setAlpha)
+    if width == None and height == None:
+        pass
+    elif height!= None and height >= 0 and width == None:
+        img = pygame.transform.scale(img,(round(height/img.get_height()*img.get_width()), round(height)))
+    elif height == None and width!= None and width >= 0:
+        img = pygame.transform.scale(img,(round(width), round(width/img.get_width()*img.get_height())))
+    elif width >= 0 and height >= 0:
+        img = pygame.transform.scale(img, (int(width), int(height)))
+    elif width < 0 or height < 0:
+        raise Exception('Both width and height must be positive interger!')
+    return img
+        
 #图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
 def drawImg(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))

@@ -40,24 +40,18 @@ with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
     loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
     characters = loadData["character"]
     sangvisFerris = loadData["sangvisFerri"]
-    theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,window_x)
+    theMap = loadData["map"]
 
 #初始化地图
-"""
 if len(theMap) == 0:
+    SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
     block_y = 36
     block_x = 64
     default_map = []
     for i in range(block_y):
         map_per_line = []
         for a in range(block_x):
-            if i == 0 or i == block_y-1:
-                map_per_line.append(0)
-            else:
-                if a == 0 or a == block_x-1:
-                    map_per_line.append(0)
-                else:
-                    map_per_line.append(1)
+            map_per_line.append(SnowEnvImg[random.randint(0,5)])
         default_map.append(map_per_line)
 
     with open("../Data/main_chapter/chapter1_map.yaml", "w", encoding='utf-8') as f:
@@ -65,11 +59,11 @@ if len(theMap) == 0:
         yaml.dump(loadData, f)
 
     with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
-        theMap = loadData["map"]
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,False,int(window_x/block_x*0.9))
 else:
-    block_x = len(theMap[0])
-    block_y = len(theMap)
-"""
+    theMap = MapObject(theMap,loadData["facility"],blocks_setting,False,int(window_x/64*0.9))
+
 block_x = len(theMap.mapData[0])
 block_y = len(theMap.mapData)
 perBlockWidth = int(window_x/block_x*0.9)
@@ -177,7 +171,7 @@ while True:
                             sangvisFerris_data.pop(any_chara_replace)
                             sangvisFerris.pop(any_chara_replace)
     #加载地图
-    theMap.display_map_fullSize(screen,perBlockWidth,perBlockHeight)
+    theMap.display_map(screen,perBlockWidth,perBlockHeight)
     #角色动画
     for every_chara in characters_data:
         characters_data[every_chara].draw("wait",screen,None,perBlockWidth,perBlockHeight)
@@ -204,6 +198,7 @@ while True:
     
     #显示所有可放置的环境方块
     i=0
+    """
     for the_block_id in blocks_setting:
         if blocks_setting[the_block_id]["imgNum"] > 1:
             img_name = blocks_setting[the_block_id]["name"]+"0"
@@ -213,7 +208,7 @@ while True:
         if pygame.mouse.get_pressed()[0] and isHoverOn(env_img_list[img_name],(window_x*0.92+perBlockWidth*1.5*(i%3),perBlockHeight*1.5*int(i/3))):
             object_to_put_down = {"type":"block","id":the_block_id,"name":img_name}
         i+=1
-    
+    """
     #跟随鼠标显示即将被放下的物品
     if object_to_put_down != None:
         if object_to_put_down["type"] == "block":

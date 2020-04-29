@@ -7,35 +7,33 @@ import random
 import pygame
 import yaml
 
-from Zero2.basic import loadAllImgInFile,loadImg
+from Zero2.basic import loadAllImgInFile, loadImg
 
 class MapObject:
-    def  __init__(self,mapData,facilityData,blocks_setting,dark_mode,perBlockWidth,perBlockHeight):
-        self.mapData = initialBlockData(mapData,facilityData,blocks_setting,dark_mode)
+    def  __init__(self,mapData,facilityData,blocks_setting,dark_mode,perBlockWidth):
         self.perBlockWidth = perBlockWidth
-        self.perBlockHeight = perBlockHeight
         self.env_img_list_original = load_env_images(mapData)
-        self.env_img_list = load_env_images(mapData,perBlockWidth,perBlockHeight)
+        self.env_img_list = load_env_images(mapData,perBlockWidth)
+        self.mapData = initialBlockData(mapData,facilityData,blocks_setting,dark_mode)
         self.facilityImg = loadFacilityImg(facilityData)
         self.facilityData = facilityData
     def changePerBlockSize(self,newPerBlockWidth,newPerBlockHeight):
         self.perBlockWidth = newPerBlockWidth
-        self.perBlockHeight = newPerBlockHeight
-        for key in self.env_img_list:
-            self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockHeight*1.5)))
+        #for key in self.env_img_list:
+        #    self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockHeight*1.5)))
     def display_map(self,screen,local_x=0,local_y=0):
-        for y in range(len(mapData)):
-            for x in range(len(mapData[y])):
-                screen.blit(self.env_img_list[self.mapData[y][x].name],(x*self.perBlockWidth+local_x,(y-0.5)*self.perBlockHeight+local_y))
+        for y in range(len(self.mapData)):
+            for x in range(len(self.mapData[y])):
+                screen.blit(self.env_img_list[self.mapData[y][x].name],(x*self.perBlockWidth+local_x,(y-0.5)*self.perBlockWidth+local_y))
                 if self.mapData[y][x].facility != None:
                     if self.mapData[y][x].facility["kind"] == "campfire":
-                        screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(self.mapData[y][x].facility["imgId"])], (self.perBlockWidth,self.perBlockHeight)),(x*self.perBlockWidth+local_x,y*self.perBlockHeight+local_y))
+                        screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(self.mapData[y][x].facility["imgId"])], (self.perBlockWidth,self.perBlockWidth)),(x*self.perBlockWidth+local_x,y*self.perBlockWidth+local_y))
                         if self.mapData[y][x].facility["imgId"] >= len(self.facilityImg["campfire"])-1:
                             self.mapData[y][x].facility["imgId"] = 0
                         else:
                             self.mapData[y][x].facility["imgId"] += 0.1
                     elif self.mapData[y][x].facility["kind"] == "chest":
-                        screen.blit(pygame.transform.scale(self.facilityImg["chest"], (self.perBlockWidth,self.perBlockHeight)),(x*self.perBlockWidth+local_x,y*self.perBlockHeight+local_y))
+                        screen.blit(pygame.transform.scale(self.facilityImg["chest"], (self.perBlockWidth,self.perBlockWidth)),(x*self.perBlockWidth+local_x,y*self.perBlockWidth+local_y))
 
 #初始化地图数据
 def initialBlockData(mapData,facilityData,blocks_setting,dark_mode):
