@@ -10,17 +10,14 @@ import yaml
 from Zero2.basic import loadAllImgInFile,loadImg
 
 class MapObject:
-    def  __init__(self,mapData,facilityData,blocks_setting,perBlockWidth,perBlockHeight):
-        self.row = len(mapData)
-        self.column = len(mapData[0])
-        self.mapData = tuple(mapData)
+    def  __init__(self,mapData,facilityData,blocks_setting,dark_mode,perBlockWidth,perBlockHeight):
+        self.mapData = initialBlockData(mapData,facilityData,blocks_setting,dark_mode)
         self.perBlockWidth = perBlockWidth
         self.perBlockHeight = perBlockHeight
-        self.img_data_list = tuple(randomBlock(mapData,blocks_setting))
-        self.env_img_list_original = load_env_images(self.img_data_list)
-        self.env_img_list = load_env_images(self.img_data_list,perBlockWidth,perBlockHeight*1.5)
-        self.facility = processFacilityData(facilityData)
+        self.env_img_list_original = load_env_images(mapData)
+        self.env_img_list = load_env_images(mapData,perBlockWidth,perBlockHeight)
         self.facilityImg = loadFacilityImg(facilityData)
+        self.facilityData = facilityData
     def changePerBlockSize(self,newPerBlockWidth,newPerBlockHeight):
         self.perBlockWidth = newPerBlockWidth
         self.perBlockHeight = newPerBlockHeight
@@ -41,26 +38,36 @@ class MapObject:
                             self.facility[key][key2]["img_id"] += 0.1
                     elif key == "chest":
                         screen.blit(pygame.transform.scale(self.facilityImg["chest"], (self.perBlockWidth,self.perBlockHeight)),(value2["x"]*self.perBlockWidth+local_x,value2["y"]*self.perBlockHeight+local_y))
-    def display_map_fullSize(self,screen):
-        for y in range(0,self.row):
-            for x in range(0,self.column):
-                img_display = pygame.transform.scale(self.env_img_list[self.img_data_list[y][x]], (self.perBlockWidth, round(self.perBlockHeight*1.5)))
-                screen.blit(img_display,(x*self.perBlockWidth,(y-0.5)*self.perBlockHeight))
-        for key in self.facility:
-            for key2,value2 in self.facility[key].items():
-                if key == "campfire":
-                    screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(value2["img_id"])], (self.perBlockWidth,self.perBlockHeight)),(value2["x"]*self.perBlockWidth,value2["y"]*self.perBlockHeight))
-                    if self.facility[key][key2]["img_id"] >= 9.0:
-                        self.facility[key][key2]["img_id"] = 0
-                    else:
-                        self.facility[key][key2]["img_id"]+=0.25
-                elif key == "chest":
-                    screen.blit(pygame.transform.scale(self.facilityImg["chest"], (self.perBlockWidth,self.perBlockHeight)),(value2["x"]*self.perBlockWidth,value2["y"]*self.perBlockHeight))
     def display_shadow(self,screen,local_x,local_y,light_area,shadow_img):
         for y in range(math.ceil((-self.perBlockHeight-local_y)/self.perBlockHeight),math.ceil((screen.get_height()-local_y)/self.perBlockHeight)):
             for x in range(math.ceil((-self.perBlockWidth-local_x)/self.perBlockWidth),math.ceil((screen.get_width()-local_x)/self.perBlockWidth)):
                 if (x,y) not in light_area:
                     screen.blit(shadow_img,(x*self.perBlockWidth+local_x,y*self.perBlockHeight+local_y))
+
+#初始化地图数据
+def initialBlockData(mapData,facilityData,blocks_setting,dark_mode):
+    if dark_mode == True:
+        alphaValue = 255
+    else:
+        alphaValue = 0
+    for y in range(len(mapData)):
+        for x in range(len(mapData[y])):
+            mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]],alphaValue)
+    for key,value in facilityData.items():
+        for key2,value2 in value.items():
+            mapData[value2["y"]][value2["x"]].facility = {"kind": key}
+            if key == "campfire":
+                mapData[value2["y"]][value2["x"]].facility["imgId"] = random.randint(0,9)
+    return mapData
+
+#方块类
+class Block:
+    def  __init__(self,name,canPassThrough,shadowAlpha):
+        self.name = name
+        self.canPassThrough = canPassThrough
+        self.currentShadowAlpha = shadowAlpha
+        self.shadowAlpha = shadowAlpha
+        self.facility = None
 
 #环境系统
 class WeatherSystem:
@@ -95,12 +102,6 @@ class Snow:
         self.x = x
         self.y = y
 
-#初始化篝火动画的图片Id
-def processFacilityData(facilityData):
-    for key in facilityData["campfire"]:
-        facilityData["campfire"][key]["img_id"] = random.randint(0,9)
-    return facilityData
-
 #加载场地设施的图片
 def loadFacilityImg(facilityData):
     Facility_images = {}
@@ -124,12 +125,12 @@ def loadFacilityImg(facilityData):
     return Facility_images
 
 #读取需要的地图图片
-def load_env_images(img_data_list,theWidth=None,theHeight=None):
+def load_env_images(theMap,theWidth=None,theHeight=None):
     all_images_needed = []
-    for i in range(len(img_data_list)):
-        for a in range(len(img_data_list[i])):
-            if img_data_list[i][a] not in all_images_needed:
-                all_images_needed.append(img_data_list[i][a])
+    for i in range(len(theMap)):
+        for a in range(len(theMap[i])):
+            if theMap[i][a] not in all_images_needed:
+                all_images_needed.append(theMap[i][a])
     #加载背景图片
     env_img_list={}
     for i in range(len(all_images_needed)):
@@ -138,20 +139,6 @@ def load_env_images(img_data_list,theWidth=None,theHeight=None):
         except BaseException:
             env_img_list[all_images_needed[i]] = loadImg("../Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
     return env_img_list
-
-#随机地图方块
-def randomBlock(theMap,blocks_setting):
-    map_img_list = []
-    for i in range(len(theMap)):
-        map_img_per_line = []
-        for a in range(len(theMap[i])):
-            if blocks_setting[theMap[i][a]]["imgNum"] > 1:
-                img_name = blocks_setting[theMap[i][a]]["name"]+str(random.randint(0,blocks_setting[theMap[i][a]]["imgNum"]-1))
-            else:
-                img_name = blocks_setting[theMap[i][a]]["name"]
-            map_img_per_line.append(img_name)
-        map_img_list.append(map_img_per_line)
-    return map_img_list
 
 #计算光亮区域
 def calculate_darkness(characters_data,campfire_data):
