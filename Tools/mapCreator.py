@@ -26,7 +26,7 @@ with open("../Data/setting.yaml", "r", encoding='utf-8') as f:
     lang_file = setting['Language']
 
 # 创建窗口
-screen = pygame.display.set_mode([window_x, window_y])
+screen = pygame.display.set_mode([window_x, window_y],pygame.SCALED)
 #窗口标题
 pygame.display.set_caption("Girls frontline-Last Wish: MapCreator") 
 
@@ -46,7 +46,7 @@ with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
 if len(theMap) == 0:
     SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
     block_y = 36
-    block_x = 64
+    block_x = 48
     default_map = []
     for i in range(block_y):
         map_per_line = []
@@ -62,7 +62,7 @@ if len(theMap) == 0:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,False,int(window_x/block_x*0.9))
 else:
-    theMap = MapObject(theMap,loadData["facility"],blocks_setting,False,int(window_x/64*0.9))
+    theMap = MapObject(theMap,loadData["facility"],blocks_setting,False,int(window_x/64*3))
 
 block_x = len(theMap.mapData[0])
 block_y = len(theMap.mapData)
