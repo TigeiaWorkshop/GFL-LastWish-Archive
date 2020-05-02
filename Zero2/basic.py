@@ -8,10 +8,13 @@ import pygame
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
 def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
-    if ifConvertAlpha == False:
-        img = pygame.image.load(os.path.join(path))
+    if isinstance(path,str):
+        if ifConvertAlpha == False:
+            img = pygame.image.load(os.path.join(path))
+        else:
+            img = pygame.image.load(os.path.join(path)).convert_alpha()
     else:
-        img = pygame.image.load(os.path.join(path)).convert_alpha()
+        img = path
     if setAlpha != None:
         img.set_alpha(setAlpha)
     if width == None and height == None:

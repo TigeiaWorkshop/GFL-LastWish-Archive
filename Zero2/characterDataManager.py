@@ -3,7 +3,7 @@ import random
 import os
 import pygame
 import glob
-from Zero2.basic import fontRender
+from Zero2.basic import fontRender,displayInCenter
 
 class Doll:
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,faction,magazine_capacity,max_damage,max_hp,min_damage,type,x,y):
@@ -55,7 +55,7 @@ class Doll:
             current_hp_to_display = fontRender(str(self.dying)+"/3","black",10)
             percent_of_hp = self.dying/3
         original_alpha = self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]].get_alpha()
-        img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*4), round(perBlockHeight*4)))
+        img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*2), round(perBlockWidth*2)))
         if self.faction == "character" and self.current_hp>0:
             if self.undetected == True:
                 img_of_char.set_alpha(130)
@@ -66,11 +66,16 @@ class Doll:
         if self.ifFlip == True:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
         #把角色图片画到屏幕上
-        screen.blit(img_of_char,((self.x-1.5)*perBlockWidth+local_x,(self.y-1.9)*perBlockHeight+local_y))
+        xTemp = (self.x-self.y)*perBlockWidth*0.43+local_x
+        yTemp = (self.y+self.x)*perBlockWidth*0.2+local_y
+        xTemp2 = xTemp + perBlockWidth*0.25
+        yTemp2 = yTemp - perBlockWidth*0.2
+        screen.blit(img_of_char,(xTemp-perBlockWidth*0.5,yTemp-perBlockWidth*1.15))
         if original_UI_img != None:
-            screen.blit(pygame.transform.scale(original_UI_img["hp_empty"], (perBlockWidth, round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
-            screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp),round(perBlockHeight/5))),(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
-            screen.blit(current_hp_to_display,(self.x*perBlockWidth+local_x,self.y*perBlockHeight*0.98+local_y))
+            hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(perBlockWidth/2), round(perBlockHeight/10)))
+            screen.blit(hpEmptyScale,(xTemp2,yTemp2))
+            screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp/2),round(perBlockHeight/10))),(xTemp2,yTemp2))
+            displayInCenter(current_hp_to_display,hpEmptyScale,xTemp2,yTemp2,screen)
         #调整id，并返回对应的bool状态
         if self.gif_dic[action]["imgId"] < self.gif_dic[action]["imgNum"]-1:
             self.gif_dic[action]["imgId"] += 1
@@ -129,7 +134,7 @@ def character_creator(character_name,action,faction="character"):
     character_gif=[]
     if files_amount > 0:
         for i in range(files_amount):
-            character_gif.append(pygame.transform.scale(pygame.image.load(os.path.join(path.replace("NaN",str(i)))).convert_alpha(), (375, 375)))
+            character_gif.append(pygame.image.load(os.path.join(path.replace("NaN",str(i)))).convert_alpha())
         return {
             "img":character_gif,
             "imgId":0,
