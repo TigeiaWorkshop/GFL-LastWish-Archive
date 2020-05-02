@@ -21,6 +21,8 @@ class MapObject:
         self.facilityData = facilityData
         self.bgImg = pygame.transform.scale(bgImg.img,(bgImg.width,bgImg.height))
         self.bgImg.set_alpha(255)
+        self.greenBlockImg = None
+        self.greenBlockImgArea = []
     def changePerBlockSize(self,newPerBlockWidth):
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list:
@@ -32,12 +34,14 @@ class MapObject:
         for y in range(len(self.mapData)):
             for x in range(len(self.mapData[y])):
                 xTemp = (x-y)*self.perBlockWidth*0.43+local_x
-                yTemp = (y+x)*self.perBlockWidth*0.2+local_y
+                yTemp = (y+x)*self.perBlockWidth*0.22+local_y
                 widthTemp = self.env_img_list[self.mapData[y][x].name].get_width()*2/3
                 if xTemp > -self.perBlockWidth and yTemp > -self.env_img_list[self.mapData[y][x].name].get_height():
                     if xTemp < screen.get_width() and yTemp < screen.get_height():
                         screen.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
-                        if pygame.mouse.get_pressed()[0] and xTemp+widthTemp*0.45<mouse_x<xTemp+widthTemp*1.35 and yTemp<mouse_y<yTemp+self.env_img_list[self.mapData[y][x].name].get_width()*0.5:
+                        if (x,y) in self.greenBlockImgArea:
+                            screen.blit(self.greenBlockImg,(xTemp,yTemp))
+                        if xTemp+widthTemp*0.45<mouse_x<xTemp+widthTemp*1.35 and yTemp<mouse_y<yTemp+self.env_img_list[self.mapData[y][x].name].get_width()*0.5:
                             block_get_click = {"x":x,"y":y}
                         if self.mapData[y][x].facility != None:
                             if self.mapData[y][x].facility["kind"] == "campfire":

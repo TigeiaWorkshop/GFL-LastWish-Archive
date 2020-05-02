@@ -33,6 +33,18 @@ def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
 def drawImg(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))
 
+#重新编辑尺寸
+def resizeImg(img,imgSize=(None,None)):
+    if imgSize[1]!= None and imgSize[1] >= 0 and imgSize[0] == None:
+        img = pygame.transform.scale(img,(round(imgSize[1]/img.get_height()*img.get_width()), round(imgSize[1])))
+    elif imgSize[1] == None and imgSize[0]!= None and imgSize[0] >= 0:
+        img = pygame.transform.scale(img,(round(imgSize[0]), round(imgSize[0]/img.get_width()*img.get_height())))
+    elif imgSize[0] >= 0 and imgSize[1] >= 0:
+        img = pygame.transform.scale(img, (int(imgSize[0]), int(imgSize[1])))
+    elif imgSize[0] < 0 or imgSize[1] < 0:
+        raise Exception('Both width and height must be positive interger!')
+    return img
+
 #高级图片加载模块：接收图片路径（或者已经载入的图片）,位置:[x,y],长,高,返回对应的图片class
 def loadImage(path,the_object_position,width=None,height=None,description="Default",ifConvertAlpha=True):
     class theImage:

@@ -151,31 +151,32 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         "hp_green" : loadImg("Assets/image/UI/hp_green.png"),
         "action_point_blue" : loadImg("Assets/image/UI/action_point.png"),
         "bullets_number_brown" : loadImg("Assets/image/UI/bullets_number.png"),
-        "green" : loadImg("Assets/image/UI/green.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
-        "red" : loadImg("Assets/image/UI/red.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
-        "black" : loadImg("Assets/image/UI/black.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
-        "yellow": loadImg("Assets/image/UI/yellow.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
-        "blue": loadImg("Assets/image/UI/blue.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
-        "orange": loadImg("Assets/image/UI/orange.png",math.ceil(window_x/theMap.row*3),math.ceil(window_y/theMap.row*3),100),
+        "green" : loadImg("Assets/image/UI/green.png",None,None,100),
+        "red" : loadImg("Assets/image/UI/red.png",None,None,100),
+        "black" : loadImg("Assets/image/UI/black.png",None,None,100),
+        "yellow": loadImg("Assets/image/UI/yellow.png",None,None,100),
+        "blue": loadImg("Assets/image/UI/blue.png",None,None,100),
+        "orange": loadImg("Assets/image/UI/orange.png",None,None,100),
         #计分板
         "score" : loadImage("Assets/image/UI/score.png",(200,200),300,600),
         "supplyBoard":loadImage("Assets/image/UI/score.png",((window_x-window_x/3)/2,-window_y/12),window_x/3,window_y/12),
     }
     #UI - 变形后
     UI_img = {
-        "green" : pygame.transform.scale(original_UI_img["green"], (perBlockWidth, perBlockHeight)),
-        "red" : pygame.transform.scale(original_UI_img["red"], (perBlockWidth, perBlockHeight)),
-        "black" : pygame.transform.scale(original_UI_img["black"], (perBlockWidth, perBlockHeight)),
-        "yellow" : pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight)),
-        "blue" : pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight)),
-        "orange": pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
+        "green" : resizeImg(original_UI_img["green"], (perBlockWidth, None)),
+        "red" : resizeImg(original_UI_img["red"], (perBlockWidth, None)),
+        "black" : resizeImg(original_UI_img["black"], (perBlockWidth, None)),
+        "yellow" : resizeImg(original_UI_img["yellow"], (perBlockWidth, None)),
+        "blue" : resizeImg(original_UI_img["blue"], (perBlockWidth, None)),
+        "orange": resizeImg(original_UI_img["orange"], (perBlockWidth, None))
     }
+    theMap.greenBlockImg = UI_img["green"]
     the_character_get_click_info_board = loadImage("Assets/image/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
     #加载对话框图片
     dialoguebox_up = loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
     dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
     #选择菜单按钮底图
-    select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
+    select_menu_button = resizeImg(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
     #-----加载音效-----
     #行走的音效 -- 频道0
     all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
@@ -231,6 +232,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     txt_alpha = 250
     skill_target = None
     stayingTime = 0
+    buttonGetHover = None
     #计算光亮区域
     light_area = calculate_darkness(characters_data,theMap.facilityData["campfire"])
     # 移动路径
@@ -643,6 +645,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         action_choice = ""
                         attacking_range = None
                         skill_range = None
+                        theMap.greenBlockImgArea = []
                     if event.key == K_w:
                         pressKeyToMove["up"]=True
                     if event.key == K_s:
@@ -725,14 +728,15 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 perBlockWidth = newPerBlockWidth
                 perBlockHeight = newPerBlockHeight
                 #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
-                UI_img["green"] = pygame.transform.scale(original_UI_img["green"], (perBlockWidth, perBlockHeight))
-                UI_img["red"] = pygame.transform.scale(original_UI_img["red"], (perBlockWidth, perBlockHeight))
-                UI_img["black"] = pygame.transform.scale(original_UI_img["black"], (perBlockWidth, perBlockHeight))
-                UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight))
-                UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight))
-                UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
-                select_menu_button =  pygame.transform.scale(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
+                UI_img["green"] = resizeImg(original_UI_img["green"], (perBlockWidth, None))
+                UI_img["red"] = resizeImg(original_UI_img["red"], (perBlockWidth, None))
+                UI_img["black"] = resizeImg(original_UI_img["black"], (perBlockWidth, None))
+                UI_img["yellow"] = resizeImg(original_UI_img["yellow"], (perBlockWidth, None))
+                UI_img["blue"] = resizeImg(original_UI_img["blue"], (perBlockWidth, None))
+                UI_img["orange"] = resizeImg(original_UI_img["orange"], (perBlockWidth, None))
+                select_menu_button =  resizeImg(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
                 theMap.changePerBlockSize(perBlockWidth)
+                theMap.greenBlockImg = UI_img["green"]
             else:
                 zoom_in = zoomIntoBe
 
@@ -793,8 +797,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     elif the_route != [] and block_get_click != None and [block_get_click["x"], block_get_click["y"]]in the_route and green_hide==False:
                         isWaiting = False
                         green_hide = True
+                        theMap.greenBlockImgArea = []
                         characters_data[the_character_get_click].current_action_point -= len(the_route)*2
-                    elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
+                    elif green_hide == "SelectMenu" and buttonGetHover == "attack":
                         if characters_data[the_character_get_click].current_bullets > 0 and characters_data[the_character_get_click].current_action_point >= 5:
                             action_choice = "attack"
                             green_hide = False
@@ -802,19 +807,19 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             warnings_to_display.add(warnings_info["magazine_is_empty"])
                         if characters_data[the_character_get_click].current_action_point < 5:
                             warnings_to_display.add(warnings_info["no_enough_ap_to_attack"])
-                    elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
+                    elif green_hide == "SelectMenu" and buttonGetHover == "move":
                         if characters_data[the_character_get_click].current_action_point >= 2:
                             action_choice = "move"
                             green_hide = False
                         else:
                             warnings_to_display.add(warnings_info["no_enough_ap_to_move"])
-                    elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y) and characters_data[the_character_get_click].kind != "HOC":
+                    elif green_hide == "SelectMenu" and buttonGetHover == "skill":
                         if characters_data[the_character_get_click].current_action_point >= 8:
                             action_choice = "skill"
                             green_hide = False
                         else:
                             warnings_to_display.add(warnings_info["no_enough_ap_to_use_skill"])
-                    elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),local_x,local_y):
+                    elif green_hide == "SelectMenu" and buttonGetHover == "reload":
                         if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
                             action_choice = "reload"
                             green_hide = False
@@ -872,12 +877,12 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 #显示攻击/移动/技能范围
                 if green_hide == False and the_character_get_click != "":
                     #显示移动范围
-                    if action_choice == "move":
+                    if action_choice == "move" and block_get_click != None:
                         #创建AStar对象,并设置起点和终点为
                         star_point_x = characters_data[the_character_get_click].x
                         star_point_y = characters_data[the_character_get_click].y
-                        end_point_x = int((mouse_x-local_x)/perBlockWidth)
-                        end_point_y = int((mouse_y-local_y)/perBlockHeight)
+                        end_point_x = block_get_click["x"]
+                        end_point_y = block_get_click["y"]
                         max_blocks_can_move = int(characters_data[the_character_get_click].current_action_point/2)
                         if abs(end_point_x-star_point_x)+abs(end_point_y-star_point_y)<=max_blocks_can_move:
                             #建立地图
@@ -918,10 +923,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                     else:
                                         #快速跳出
                                         break
-                                    the_route.append([star_point_x,star_point_y])
+                                    the_route.append((star_point_x,star_point_y))
                                 #显示路径
-                                for i in range(len(the_route)):
-                                    drawImg(UI_img["green"],(the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight),screen,local_x,local_y)
+                                theMap.greenBlockImgArea = tuple(the_route)
                                 displayInCenter(fontRender("-"+str((i+1)*2)+"AP","green",window_x/106,True),UI_img["green"],the_route[i][0]*perBlockWidth,the_route[i][1]*perBlockHeight,screen,local_x,local_y)
                     #显示攻击范围        
                     elif action_choice == "attack":
@@ -1486,6 +1490,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
 
             #显示选择菜单
             if green_hide == "SelectMenu":
+                buttonGetHover = None
                 #左下角的角色信息
                 text_size = 20
                 the_character_get_click_info_board.draw(screen)
@@ -1500,13 +1505,13 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 drawImg(tcgc_hp1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(tcgc_action_point1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(tcgc_bullets_situation1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                hp_empty = pygame.transform.scale(original_UI_img["hp_empty"],(int(the_character_get_click_info_board.width/3),int(text_size)))
+                hp_empty = resizeImg(original_UI_img["hp_empty"],(int(the_character_get_click_info_board.width/3),int(text_size)))
                 drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(pygame.transform.scale(original_UI_img["hp_green"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_hp/characters_data[the_character_get_click].max_hp),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(pygame.transform.scale(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_action_point/characters_data[the_character_get_click].max_action_point),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(pygame.transform.scale(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].magazine_capacity),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(resizeImg(original_UI_img["hp_green"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_hp/characters_data[the_character_get_click].max_hp),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(resizeImg(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_action_point/characters_data[the_character_get_click].max_action_point),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                drawImg(resizeImg(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].magazine_capacity),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_hp2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_action_point2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
@@ -1517,6 +1522,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/13))
                 txt_tempX = tempLocation["xStart"]-select_menu_button.get_width()*0.6
                 txt_tempY = tempLocation["yStart"]+select_menu_button.get_height()/5
+                if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
+                    buttonGetHover = "attack"
                 drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
                 drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                 drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
@@ -1525,6 +1532,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 txt_temp2 = fontRender("2N AP","black",round(perBlockWidth/13))
                 txt_tempX = tempLocation["xEnd"]-select_menu_button.get_width()*0.4
                 txt_tempY = tempLocation["yStart"]+select_menu_button.get_height()/5
+                if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
+                    buttonGetHover = "move"
                 drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
                 drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                 drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
@@ -1534,6 +1543,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/13))
                     txt_tempX = tempLocation["xStart"]+perBlockWidth/4
                     txt_tempY = tempLocation["yStart"]-perBlockWidth/2.8
+                    if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
+                        buttonGetHover = "skill"
                     drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
                     drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                     drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
@@ -1542,6 +1553,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/13))
                 txt_tempX = tempLocation["xStart"]+perBlockWidth/4
                 txt_tempY = tempLocation["yStart"]+perBlockWidth/2.4
+                if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
+                    buttonGetHover = "reload"
                 drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
                 drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                 drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
