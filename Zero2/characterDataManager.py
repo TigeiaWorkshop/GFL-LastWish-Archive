@@ -91,7 +91,6 @@ class Doll:
     def reset_imgId(self,action):
         self.gif_dic[action]["imgId"] = 0
 
-
 class CharacterDataManager(Doll):
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,detect):
         Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"character",magazine_capacity,max_damage,max_hp,min_damage,type,x,y)

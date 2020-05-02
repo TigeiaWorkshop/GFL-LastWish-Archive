@@ -33,11 +33,12 @@ class MapObject:
             for x in range(len(self.mapData[y])):
                 xTemp = (x-y)*self.perBlockWidth*0.43+local_x
                 yTemp = (y+x)*self.perBlockWidth*0.2+local_y
+                widthTemp = self.env_img_list[self.mapData[y][x].name].get_width()*2/3
                 if xTemp > -self.perBlockWidth and yTemp > -self.env_img_list[self.mapData[y][x].name].get_height():
                     if xTemp < screen.get_width() and yTemp < screen.get_height():
                         screen.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
-                        if pygame.mouse.get_pressed()[0] and xTemp<mouse_x<xTemp+self.env_img_list[self.mapData[y][x].name].get_width() and yTemp<mouse_y<yTemp+self.env_img_list[self.mapData[y][x].name].get_height():
-                            block_get_click = [x,y]
+                        if pygame.mouse.get_pressed()[0] and xTemp+widthTemp*0.45<mouse_x<xTemp+widthTemp*1.35 and yTemp<mouse_y<yTemp+self.env_img_list[self.mapData[y][x].name].get_width()*0.5:
+                            block_get_click = {"x":x,"y":y}
                         if self.mapData[y][x].facility != None:
                             if self.mapData[y][x].facility["kind"] == "campfire":
                                 screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(self.mapData[y][x].facility["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
@@ -51,6 +52,16 @@ class MapObject:
                         break
                 else:
                     pass
+        return block_get_click
+    def getBlockExactLocation(self,x,y,local_x,local_y):
+        xStart = (x-y)*self.perBlockWidth*0.43+local_x
+        yStart = (y+x)*self.perBlockWidth*0.2+local_y
+        return {
+        "xStart": xStart,
+        "xEnd": xStart + self.env_img_list[self.mapData[y][x].name].get_width(),
+        "yStart": yStart,
+        "yEnd": yStart + self.env_img_list[self.mapData[y][x].name].get_width()*0.5
+        }
 
 #初始化地图数据
 def initialBlockData(mapData,facilityData,blocks_setting,dark_mode):

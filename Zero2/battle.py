@@ -95,13 +95,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     perBlockHeight = round(window_y/block_y*zoom_in)
     #初始化地图模块
     theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,dark_mode,perBlockWidth,black_bg)
-
-    """
-    if local_x+window_x/block_x*0.25*theMap.column >0:
-        local_x=0
-    if local_y+window_y/block_y*0.25*theMap.row>0:
-        local_y=0
-    """
+    
     #初始化角色信息
     i = 1
     num_of_characters = len(characters)+len(sangvisFerris)
@@ -181,7 +175,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     dialoguebox_up = loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
     dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
     #选择菜单按钮底图
-    select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth*2), round(perBlockWidth/1.3)))
+    select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
     #-----加载音效-----
     #行走的音效 -- 频道0
     all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
@@ -737,7 +731,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 UI_img["yellow"] = pygame.transform.scale(original_UI_img["yellow"], (perBlockWidth, perBlockHeight))
                 UI_img["blue"] = pygame.transform.scale(original_UI_img["blue"], (perBlockWidth, perBlockHeight))
                 UI_img["orange"] = pygame.transform.scale(original_UI_img["orange"], (perBlockWidth, perBlockHeight))
-                select_menu_button = pygame.transform.scale(select_menu_button_original, (round(perBlockWidth*2), round(perBlockWidth/1.3)))
+                select_menu_button =  pygame.transform.scale(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
                 theMap.changePerBlockSize(perBlockWidth)
             else:
                 zoom_in = zoomIntoBe
@@ -796,7 +790,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         the_character_get_click = ""
                         green_hide = True
                     #是否在显示移动范围后点击了且点击区域在移动范围内
-                    elif the_route != [] and block_get_click != None and block_get_click in the_route and green_hide==False:
+                    elif the_route != [] and block_get_click != None and [block_get_click["x"], block_get_click["y"]]in the_route and green_hide==False:
                         isWaiting = False
                         green_hide = True
                         characters_data[the_character_get_click].current_action_point -= len(the_route)*2
@@ -852,7 +846,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     #判断是否有被点击的角色
                     elif block_get_click != None:
                         for key in characters_data:
-                            if characters_data[key].x == block_get_click[0] and characters_data[key].y == block_get_click[1] and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False and green_hide != False:
+                            if characters_data[key].x == block_get_click["x"] and characters_data[key].y == block_get_click["y"] and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False and green_hide != False:
                                 screen_to_move_x = None
                                 screen_to_move_y = None
                                 attacking_range = None
@@ -1517,32 +1511,41 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 displayInCenter(tcgc_action_point2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 #----选择菜单----
-                #攻击按钮
-                txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",round(perBlockWidth/3))
-                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/5))
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth-select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
-                #移动按钮
-                txt_temp = fontRender(selectMenuButtons_dic["move"],"black",round(perBlockWidth/3))
-                txt_temp2 = fontRender("2N AP","black",round(perBlockWidth/5))
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.1)*perBlockHeight),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+select_menu_button.get_width()+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.45)*perBlockHeight),screen,local_x,local_y)
-                #技能按钮
+                tempLocation = theMap.getBlockExactLocation(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,local_x,local_y)
+                #攻击按钮 - 左
+                txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",round(perBlockWidth/10))
+                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/13))
+                txt_tempX = tempLocation["xStart"]-select_menu_button.get_width()*0.6
+                txt_tempY = tempLocation["yStart"]+select_menu_button.get_height()/5
+                drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
+                drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
+                drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
+                #移动按钮 - 右
+                txt_temp = fontRender(selectMenuButtons_dic["move"],"black",round(perBlockWidth/10))
+                txt_temp2 = fontRender("2N AP","black",round(perBlockWidth/13))
+                txt_tempX = tempLocation["xEnd"]-select_menu_button.get_width()*0.4
+                txt_tempY = tempLocation["yStart"]+select_menu_button.get_height()/5
+                drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
+                drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
+                drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
+                #技能按钮 - 上
                 if characters_data[the_character_get_click].kind != "HOC":
-                    txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",round(perBlockWidth/3))
-                    txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/5))
-                    drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),screen,local_x,local_y)
-                    drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y-0.4)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
-                    drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y-0.05)*perBlockHeight-select_menu_button.get_height()),screen,local_x,local_y)
-                #换弹按钮
-                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(perBlockWidth/3))
-                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/5))
-                drawImg(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),screen,local_x,local_y)
-                drawImg(txt_temp,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp.get_width())/2,(characters_data[the_character_get_click].y+0.6)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
-                drawImg(txt_temp2,((characters_data[the_character_get_click].x-0.5)*perBlockWidth+(select_menu_button.get_width()-txt_temp2.get_width())/2,(characters_data[the_character_get_click].y+0.95)*perBlockHeight+select_menu_button.get_height()),screen,local_x,local_y)
-            
+                    txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",round(perBlockWidth/10))
+                    txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/13))
+                    txt_tempX = tempLocation["xStart"]+perBlockWidth/4
+                    txt_tempY = tempLocation["yStart"]-perBlockWidth/2.8
+                    drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
+                    drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
+                    drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
+                #换弹按钮 - 下
+                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(perBlockWidth/10))
+                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/13))
+                txt_tempX = tempLocation["xStart"]+perBlockWidth/4
+                txt_tempY = tempLocation["yStart"]+perBlockWidth/2.4
+                drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
+                drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
+                drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
+
             #加载雪花
             if weatherController != None:
                 weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
