@@ -26,6 +26,8 @@ class MapObject:
         for key in self.env_img_list:
             self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height())))
     def display_map(self,screen,local_x=0,local_y=0):
+        block_get_click = None
+        mouse_x,mouse_y=pygame.mouse.get_pos()
         screen.blit(self.bgImg,(0,0))
         for y in range(len(self.mapData)):
             for x in range(len(self.mapData[y])):
@@ -34,6 +36,8 @@ class MapObject:
                 if xTemp > -self.perBlockWidth and yTemp > -self.env_img_list[self.mapData[y][x].name].get_height():
                     if xTemp < screen.get_width() and yTemp < screen.get_height():
                         screen.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
+                        if pygame.mouse.get_pressed()[0] and xTemp<mouse_x<xTemp+self.env_img_list[self.mapData[y][x].name].get_width() and yTemp<mouse_y<yTemp+self.env_img_list[self.mapData[y][x].name].get_height():
+                            block_get_click = [x,y]
                         if self.mapData[y][x].facility != None:
                             if self.mapData[y][x].facility["kind"] == "campfire":
                                 screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(self.mapData[y][x].facility["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))

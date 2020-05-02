@@ -785,28 +785,24 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     screen_to_move_y = 0
             
             #加载地图
-            theMap.display_map(screen,local_x,local_y)
+            block_get_click = theMap.display_map(screen,local_x,local_y)
             
             #玩家回合
             if whose_round == "player":
                 if right_click == True:
-                    block_get_click_x = int((mouse_x-local_x)/perBlockWidth)
-                    block_get_click_y = int((mouse_y-local_y)/perBlockHeight)
                     #如果点击了回合结束的按钮
                     if isHover(end_round_button) and isWaiting == True:
                         whose_round = "playerToSangvisFerris"
                         the_character_get_click = ""
                         green_hide = True
                     #是否在显示移动范围后点击了且点击区域在移动范围内
-                    elif the_route != [] and [block_get_click_x,block_get_click_y] in the_route and green_hide==False:
+                    elif the_route != [] and block_get_click != None and block_get_click in the_route and green_hide==False:
                         isWaiting = False
                         green_hide = True
                         characters_data[the_character_get_click].current_action_point -= len(the_route)*2
                     elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         if characters_data[the_character_get_click].current_bullets > 0 and characters_data[the_character_get_click].current_action_point >= 5:
                             action_choice = "attack"
-                            block_get_click_x = None
-                            block_get_click_y = None
                             green_hide = False
                         if characters_data[the_character_get_click].current_bullets <= 0:
                             warnings_to_display.add(warnings_info["magazine_is_empty"])
@@ -815,24 +811,18 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth+select_menu_button.get_width()-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight),local_x,local_y):
                         if characters_data[the_character_get_click].current_action_point >= 2:
                             action_choice = "move"
-                            block_get_click_x = None
-                            block_get_click_y = None
                             green_hide = False
                         else:
                             warnings_to_display.add(warnings_info["no_enough_ap_to_move"])
                     elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight-select_menu_button.get_height()-perBlockWidth*0.5),local_x,local_y) and characters_data[the_character_get_click].kind != "HOC":
                         if characters_data[the_character_get_click].current_action_point >= 8:
                             action_choice = "skill"
-                            block_get_click_x = None
-                            block_get_click_y = None
                             green_hide = False
                         else:
                             warnings_to_display.add(warnings_info["no_enough_ap_to_use_skill"])
                     elif green_hide == "SelectMenu" and isHoverOn(select_menu_button,(characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth*0.5,characters_data[the_character_get_click].y*perBlockHeight+select_menu_button.get_height()+perBlockWidth*0.5),local_x,local_y):
                         if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
                             action_choice = "reload"
-                            block_get_click_x = None
-                            block_get_click_y = None
                             green_hide = False
                         if characters_data[the_character_get_click].bullets_carried <= 0:
                             warnings_to_display.add(warnings_info["no_bullets_left"])
@@ -859,10 +849,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         isWaiting = False
                         green_hide = True
                         skill_range = None
-                    else:
-                        #控制选择菜单的显示与隐藏
+                    #判断是否有被点击的角色
+                    elif block_get_click != None:
                         for key in characters_data:
-                            if characters_data[key].x == block_get_click_x and characters_data[key].y == block_get_click_y and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False and green_hide != False:
+                            if characters_data[key].x == block_get_click[0] and characters_data[key].y == block_get_click[1] and isWaiting == True and action_choice != "skill" and characters_data[key].dying == False and green_hide != False:
                                 screen_to_move_x = None
                                 screen_to_move_y = None
                                 attacking_range = None
@@ -1007,8 +997,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         else:
                             warnings_to_display.add(warnings_info["no_enemy_in_effective_range"])
                             action_choice = ""
-                            block_get_click_x = None
-                            block_get_click_y = None
                             green_hide = False
                     #显示技能范围        
                     elif action_choice == "skill":

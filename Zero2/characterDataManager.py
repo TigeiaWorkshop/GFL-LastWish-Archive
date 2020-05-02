@@ -55,7 +55,7 @@ class Doll:
             current_hp_to_display = fontRender(str(self.dying)+"/3","black",10)
             percent_of_hp = self.dying/3
         original_alpha = self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]].get_alpha()
-        img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*2), round(perBlockWidth*2)))
+        img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*1.6), round(perBlockWidth*1.6)))
         if self.faction == "character" and self.current_hp>0:
             if self.undetected == True:
                 img_of_char.set_alpha(130)
@@ -69,8 +69,8 @@ class Doll:
         xTemp = (self.x-self.y)*perBlockWidth*0.43+local_x
         yTemp = (self.y+self.x)*perBlockWidth*0.2+local_y
         xTemp2 = xTemp + perBlockWidth*0.25
-        yTemp2 = yTemp - perBlockWidth*0.2
-        screen.blit(img_of_char,(xTemp-perBlockWidth*0.5,yTemp-perBlockWidth*1.15))
+        yTemp2 = yTemp - perBlockWidth*0.1
+        screen.blit(img_of_char,(xTemp-perBlockWidth*0.3,yTemp-perBlockWidth*0.8))
         if original_UI_img != None:
             hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(perBlockWidth/2), round(perBlockHeight/10)))
             screen.blit(hpEmptyScale,(xTemp2,yTemp2))
