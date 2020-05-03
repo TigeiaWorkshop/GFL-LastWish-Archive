@@ -67,7 +67,7 @@ class Doll:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
         #把角色图片画到屏幕上
         xTemp = (self.x-self.y)*perBlockWidth*0.43+local_x
-        yTemp = (self.y+self.x)*perBlockWidth*0.2+local_y
+        yTemp = (self.y+self.x)*perBlockWidth*0.22+local_y
         xTemp2 = xTemp + perBlockWidth*0.25
         yTemp2 = yTemp - perBlockWidth*0.1
         screen.blit(img_of_char,(xTemp-perBlockWidth*0.3,yTemp-perBlockWidth*0.8))

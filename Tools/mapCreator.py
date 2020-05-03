@@ -46,7 +46,7 @@ with open("../Data/main_chapter/chapter1_map.yaml", "r", encoding='utf-8') as f:
 if len(theMap) == 0:
     SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
     block_y = 36
-    block_x = 48
+    block_x = 36
     default_map = []
     for i in range(block_y):
         map_per_line = []

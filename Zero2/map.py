@@ -7,7 +7,7 @@ import random
 import pygame
 import yaml
 
-from Zero2.basic import loadAllImgInFile, loadImg
+from Zero2.basic import loadAllImgInFile, loadImg, displayInCenter, fontRender
 
 class MapObject:
     def  __init__(self,mapData,facilityData,blocks_setting,dark_mode,perBlockWidth,bgImg):
@@ -23,6 +23,8 @@ class MapObject:
         self.bgImg.set_alpha(255)
         self.greenBlockImg = None
         self.greenBlockImgArea = []
+        self.shadowImg = None
+        self.lightArea = []
     def changePerBlockSize(self,newPerBlockWidth):
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list:
@@ -38,11 +40,9 @@ class MapObject:
                 widthTemp = self.env_img_list[self.mapData[y][x].name].get_width()*2/3
                 if xTemp > -self.perBlockWidth and yTemp > -self.env_img_list[self.mapData[y][x].name].get_height():
                     if xTemp < screen.get_width() and yTemp < screen.get_height():
+                        #画上场景图片
                         screen.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
-                        if (x,y) in self.greenBlockImgArea:
-                            screen.blit(self.greenBlockImg,(xTemp,yTemp))
-                        if xTemp+widthTemp*0.45<mouse_x<xTemp+widthTemp*1.35 and yTemp<mouse_y<yTemp+self.env_img_list[self.mapData[y][x].name].get_width()*0.5:
-                            block_get_click = {"x":x,"y":y}
+                        #画上设施
                         if self.mapData[y][x].facility != None:
                             if self.mapData[y][x].facility["kind"] == "campfire":
                                 screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(self.mapData[y][x].facility["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
@@ -52,6 +52,17 @@ class MapObject:
                                     self.mapData[y][x].facility["imgId"] += 0.1
                             elif self.mapData[y][x].facility["kind"] == "chest":
                                 screen.blit(pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+                        #画上绿色方块
+                        if (x,y) in self.greenBlockImgArea:
+                            screen.blit(self.greenBlockImg,(xTemp+self.perBlockWidth*0.05,yTemp))
+                            if (x,y) == self.greenBlockImgArea[-1]:
+                                displayInCenter(fontRender("-"+str((len(self.greenBlockImgArea)+1)*2)+"AP","green",self.perBlockWidth/8,True),self.greenBlockImg,xTemp,yTemp,screen)
+                        #画上阴影
+                        if self.mapData[y][x].currentShadowAlpha>0 and (x,y) not in self.lightArea:
+                            screen.blit(self.shadowImg,(xTemp+self.perBlockWidth*0.05,yTemp))
+                        #测算鼠标是否在当前块上
+                        if xTemp+self.greenBlockImg.get_width()/3<mouse_x<xTemp+self.greenBlockImg.get_width()/3*2 and yTemp<mouse_y<yTemp+self.greenBlockImg.get_height():
+                            block_get_click = {"x":x,"y":y}
                     else:
                         break
                 else:
