@@ -5,6 +5,8 @@
         "JOYBUTTONUP",
         "KEYUP",
         "MOUSEBUTTONUP",
+        "RGBA",
+        "SRCALPHA",
         "asval",
         "chara",
         "dialoguebox",
