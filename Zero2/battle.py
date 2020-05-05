@@ -790,11 +790,12 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     screen_to_move_y = 0
             
             #加载地图
-            block_get_click = theMap.display_map(screen,local_x,local_y)
+            theMap.display_map(screen,local_x,local_y)
             
             #玩家回合
             if whose_round == "player":
                 if right_click == True:
+                    block_get_click = calBlockInMap(theMap.row,perBlockWidth,local_x,local_y)
                     #如果点击了回合结束的按钮
                     if isHover(end_round_button) and isWaiting == True:
                         whose_round = "playerToSangvisFerris"

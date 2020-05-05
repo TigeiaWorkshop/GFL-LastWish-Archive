@@ -33,6 +33,16 @@ def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
 def drawImg(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))
 
+#调整图片亮度
+def changeDarkness(surface,value):
+    dark = pygame.Surface((surface.get_width(), surface.get_height()), flags=pygame.SRCALPHA)
+    dark.fill((abs(int(value)),abs(int(value)),abs(int(value)),0))
+    if value > 0:
+        surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
+    elif value < 0:
+        surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
+    return surface
+
 #重新编辑尺寸
 def resizeImg(img,imgSize=(None,None)):
     if imgSize[1]!= None and imgSize[1] >= 0 and imgSize[0] == None:
