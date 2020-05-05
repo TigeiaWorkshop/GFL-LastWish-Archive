@@ -18,48 +18,72 @@ class MapObject:
         self.env_img_list = load_env_images(mapData,perBlockWidth)
         self.mapData = initialBlockData(mapData,facilityData,blocks_setting,dark_mode)
         self.facilityImg = loadFacilityImg(facilityData)
-        self.facilityData = facilityData
+        self.facilityData = initialFacility(facilityData)
         self.bgImg = pygame.transform.scale(bgImg.img,(bgImg.width,bgImg.height))
         self.bgImg.set_alpha(255)
         self.greenBlockImg = None
         self.greenBlockImgArea = []
         self.shadowImg = None
         self.lightArea = []
+        self.mapSurface = pygame.surface.Surface((3840, 2160))
     def changePerBlockSize(self,newPerBlockWidth):
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list:
             self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height())))
     def display_map(self,screen,local_x=0,local_y=0):
-        block_get_click = None
-        mouse_x,mouse_y=pygame.mouse.get_pos()
-        screen.blit(self.bgImg,(0,0))
+        screen.blit(self.mapSurface,(local_x,local_y))
+        #画上篝火
+        for key,value in self.facilityData["campfire"].items():
+            xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
+            screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(value["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+            if value["imgId"] >= len(self.facilityImg["campfire"])-1:
+                value["imgId"] = 0
+            else:
+                value["imgId"] += 0.1
+        #画上箱子
+        for key,value in self.facilityData["chest"].items():
+            xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
+            chestImg = pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+            screen.blit(chestImg,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+        return None
+    def process_map(self):
+        self.mapSurface.blit(self.bgImg,(0,0))
         for y in range(len(self.mapData)):
             for x in range(len(self.mapData[y])):
-                xTemp = (x-y)*self.perBlockWidth*0.43+local_x
-                yTemp = (y+x)*self.perBlockWidth*0.22+local_y
+                xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)
+                #画上场景图片
+                self.mapSurface.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
+    def process_map2(self):
+        block_get_click = None
+        mouse_x,mouse_y=pygame.mouse.get_pos()
+        self.mapSurface.blit(self.bgImg,(0,0))
+        for y in range(len(self.mapData)):
+            for x in range(len(self.mapData[y])):
+                xTemp = (x-y)*self.perBlockWidth*0.43
+                yTemp = (y+x)*self.perBlockWidth*0.22
                 widthTemp = self.env_img_list[self.mapData[y][x].name].get_width()*2/3
                 if xTemp > -self.perBlockWidth and yTemp > -self.env_img_list[self.mapData[y][x].name].get_height():
-                    if xTemp < screen.get_width() and yTemp < screen.get_height():
+                    if xTemp < self.mapSurface.get_width() and yTemp < self.mapSurface.get_height():
                         #画上场景图片
-                        screen.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
+                        self.mapSurface.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
                         #画上设施
                         if self.mapData[y][x].facility != None:
                             if self.mapData[y][x].facility["kind"] == "campfire":
-                                screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(self.mapData[y][x].facility["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+                                self.mapSurface.blit(pygame.transform.scale(self.facilityImg["campfire"][int(self.mapData[y][x].facility["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
                                 if self.mapData[y][x].facility["imgId"] >= len(self.facilityImg["campfire"])-1:
                                     self.mapData[y][x].facility["imgId"] = 0
                                 else:
                                     self.mapData[y][x].facility["imgId"] += 0.1
                             elif self.mapData[y][x].facility["kind"] == "chest":
-                                screen.blit(pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+                                self.mapSurface.blit(pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
                         #画上绿色方块
                         if (x,y) in self.greenBlockImgArea:
-                            screen.blit(self.greenBlockImg,(xTemp+self.perBlockWidth*0.05,yTemp))
+                            self.mapSurface.blit(self.greenBlockImg,(xTemp+self.perBlockWidth*0.05,yTemp))
                             if (x,y) == self.greenBlockImgArea[-1]:
-                                displayInCenter(fontRender("-"+str((len(self.greenBlockImgArea)+1)*2)+"AP","green",self.perBlockWidth/8,True),self.greenBlockImg,xTemp,yTemp,screen)
+                                displayInCenter(fontRender("-"+str((len(self.greenBlockImgArea)+1)*2)+"AP","green",self.perBlockWidth/8,True),self.greenBlockImg,xTemp,yTemp,self.mapSurface)
                         #画上阴影
                         if self.mapData[y][x].currentShadowAlpha>0 and (x,y) not in self.lightArea:
-                            screen.blit(self.shadowImg,(xTemp+self.perBlockWidth*0.05,yTemp))
+                            self.mapSurface.blit(self.shadowImg,(xTemp+self.perBlockWidth*0.05,yTemp))
                         #测算鼠标是否在当前块上
                         if xTemp+self.greenBlockImg.get_width()/3<mouse_x<xTemp+self.greenBlockImg.get_width()/3*2 and yTemp<mouse_y<yTemp+self.greenBlockImg.get_height():
                             block_get_click = {"x":x,"y":y}
@@ -89,10 +113,18 @@ def initialBlockData(mapData,facilityData,blocks_setting,dark_mode):
             mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]],alphaValue)
     for key,value in facilityData.items():
         for key2,value2 in value.items():
-            mapData[value2["y"]][value2["x"]].facility = {"kind": key}
-            if key == "campfire":
-                mapData[value2["y"]][value2["x"]].facility["imgId"] = random.randint(0,9)
+            mapData[value2["y"]][value2["x"]].canPassThrough = False
     return mapData
+
+#计算在地图中的位置
+def calPosInMap(row,perBlockWidth,x,y,local_x=0,local_y=0):
+    return (x-y)*perBlockWidth*0.43+local_x+(row-1)*perBlockWidth/2,(y+x)*perBlockWidth*0.22+local_y
+
+#初始化设施数据
+def initialFacility(facilityData):
+    for key in facilityData["campfire"]:
+        facilityData["campfire"][key]["imgId"] = random.randint(0,9)
+    return facilityData
 
 #方块类
 class Block:
@@ -101,7 +133,6 @@ class Block:
         self.canPassThrough = canPassThrough
         self.currentShadowAlpha = shadowAlpha
         self.shadowAlpha = shadowAlpha
-        self.facility = None
 
 #环境系统
 class WeatherSystem:

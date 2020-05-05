@@ -18,11 +18,11 @@ def main():
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_e:
                     dark = pygame.Surface((surface.get_width(), surface.get_height()), flags=pygame.SRCALPHA)
-                    dark.fill((100,100,100,0))
+                    dark.fill((10,10,10,0))
                     surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
                 if event.key == pg.K_q:
                     dark = pygame.Surface((surface.get_width(), surface.get_height()), flags=pygame.SRCALPHA)
-                    dark.fill((100,100, 100, 0))
+                    dark.fill((10,10,10,0))
                     surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
 
 

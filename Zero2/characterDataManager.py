@@ -4,6 +4,7 @@ import os
 import pygame
 import glob
 from Zero2.basic import fontRender,displayInCenter
+from Zero2.map import calPosInMap
 
 class Doll:
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,faction,magazine_capacity,max_damage,max_hp,min_damage,type,x,y):
@@ -42,7 +43,7 @@ class Doll:
     def setFlip(self,theBool):
         if self.ifFlip != theBool:
             self.ifFlip = theBool
-    def draw(self,action,screen,original_UI_img,perBlockWidth,perBlockHeight,local_x=0,local_y=0,isContinue=True):
+    def draw(self,action,screen,original_UI_img,perBlockWidth,mapRow,local_x=0,local_y=0,isContinue=True):
         hp_img = None
         if self.dying == False:
             if original_UI_img != None:
@@ -66,15 +67,14 @@ class Doll:
         if self.ifFlip == True:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
         #把角色图片画到屏幕上
-        xTemp = (self.x-self.y)*perBlockWidth*0.43+local_x
-        yTemp = (self.y+self.x)*perBlockWidth*0.22+local_y
+        xTemp,yTemp = calPosInMap(mapRow,perBlockWidth,self.x,self.y,local_x,local_y)
         xTemp2 = xTemp + perBlockWidth*0.25
         yTemp2 = yTemp - perBlockWidth*0.1
         screen.blit(img_of_char,(xTemp-perBlockWidth*0.3,yTemp-perBlockWidth*0.8))
         if original_UI_img != None:
-            hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(perBlockWidth/2), round(perBlockHeight/10)))
+            hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(perBlockWidth/2), round(perBlockWidth/10)))
             screen.blit(hpEmptyScale,(xTemp2,yTemp2))
-            screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp/2),round(perBlockHeight/10))),(xTemp2,yTemp2))
+            screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp/2),round(perBlockWidth/10))),(xTemp2,yTemp2))
             displayInCenter(current_hp_to_display,hpEmptyScale,xTemp2,yTemp2,screen)
         #调整id，并返回对应的bool状态
         if self.gif_dic[action]["imgId"] < self.gif_dic[action]["imgNum"]-1:
