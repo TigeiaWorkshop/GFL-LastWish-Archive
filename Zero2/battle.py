@@ -742,8 +742,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 UI_img["orange"] = resizeImg(original_UI_img["orange"], (perBlockWidth*0.9, None))
                 select_menu_button =  resizeImg(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
                 theMap.changePerBlockSize(perBlockWidth)
-                theMap.greenBlockImg = UI_img["green"]
-                theMap.shadowImg = UI_img["black"]
             else:
                 zoom_in = zoomIntoBe
 
@@ -791,7 +789,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             
             #加载地图
             theMap.display_map(screen,local_x,local_y)
-            block_get_click = theMap.calBlockInMap(local_x,local_y)
+            block_get_click = theMap.calBlockInMap(UI_img["green"],local_x,local_y)
             #玩家回合
             if whose_round == "player":
                 if right_click == True:
@@ -801,10 +799,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         the_character_get_click = ""
                         green_hide = True
                     #是否在显示移动范围后点击了且点击区域在移动范围内
-                    elif theMap.greenBlockImgArea != () and block_get_click != None and (block_get_click["x"], block_get_click["y"]) in theMap.greenBlockImgArea and green_hide==False:
+                    elif len(the_route) != 0 and block_get_click != None and (block_get_click["x"], block_get_click["y"]) in the_route and green_hide==False:
                         isWaiting = False
                         green_hide = True
-                        theMap.greenBlockImgArea = ()
                         characters_data[the_character_get_click].current_action_point -= len(the_route)*2
                     elif green_hide == "SelectMenu" and buttonGetHover == "attack":
                         if characters_data[the_character_get_click].current_bullets > 0 and characters_data[the_character_get_click].current_action_point >= 5:
@@ -931,7 +928,11 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                         break
                                     the_route.append((star_point_x,star_point_y))
                                 #显示路径
-                                theMap.greenBlockImgArea = tuple(the_route)
+                                for i in range(len(the_route)):
+                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,the_route[i][0],the_route[i][1],local_x,local_y)
+                                    screen.blit(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp))
+                                    if i == len(the_route)-1:
+                                        displayInCenter(fontRender("-"+str((i+1)*2)+"AP","green",perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
                     #显示攻击范围        
                     elif action_choice == "attack":
                         if attacking_range == None:
@@ -939,7 +940,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].max_effective_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].max_effective_range+1):
                                 if y < characters_data[the_character_get_click].y:
                                     for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].max_effective_range-(y-characters_data[the_character_get_click].y),characters_data[the_character_get_click].x+characters_data[the_character_get_click].max_effective_range+(y-characters_data[the_character_get_click].y)+1):
-                                        if theMap.mapData[y][x].canPassThrough == True:
+                                        if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
                                             if "far" in characters_data[the_character_get_click].effective_range and characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
                                                 attacking_range["far"].append([x,y])
                                             elif "middle" in characters_data[the_character_get_click].effective_range and characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
@@ -950,53 +951,56 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                     for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].max_effective_range+(y-characters_data[the_character_get_click].y),characters_data[the_character_get_click].x+characters_data[the_character_get_click].max_effective_range-(y-characters_data[the_character_get_click].y)+1):
                                         if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
                                             pass
-                                        else:
-                                            if theMap.mapData[y][x].canPassThrough == True:
-                                                if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
-                                                    attacking_range["far"].append([x,y])
-                                                elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
-                                                    attacking_range["middle"].append([x,y])
-                                                elif characters_data[the_character_get_click].effective_range["near"] != None and characters_data[the_character_get_click].effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["near"][1]:
-                                                    attacking_range["near"].append([x,y])
+                                        elif len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
+                                            if characters_data[the_character_get_click].effective_range["far"] != None and characters_data[the_character_get_click].effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["far"][1]:
+                                                attacking_range["far"].append([x,y])
+                                            elif characters_data[the_character_get_click].effective_range["middle"] != None and characters_data[the_character_get_click].effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["middle"][1]:
+                                                attacking_range["middle"].append([x,y])
+                                            elif characters_data[the_character_get_click].effective_range["near"] != None and characters_data[the_character_get_click].effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].effective_range["near"][1]:
+                                                attacking_range["near"].append([x,y])
                         any_character_in_attack_range = False
                         for enemies in sangvisFerris_data:
                             if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["near"] or [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["middle"] or [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["far"]:
                                 any_character_in_attack_range = True
                                 break
                         if any_character_in_attack_range == True:
-                            for i in range(len(attacking_range["near"])):
-                                drawImg(UI_img["green"],(attacking_range["near"][i][0]*perBlockWidth,attacking_range["near"][i][1]*perBlockHeight),screen,local_x,local_y)
-                            for i in range(len(attacking_range["middle"])):
-                                drawImg(UI_img["blue"],(attacking_range["middle"][i][0]*perBlockWidth,attacking_range["middle"][i][1]*perBlockHeight),screen,local_x,local_y)
-                            for i in range(len(attacking_range["far"])):
-                                drawImg(UI_img["yellow"],(attacking_range["far"][i][0]*perBlockWidth,attacking_range["far"][i][1]*perBlockHeight),screen,local_x,local_y)
-                            block_get_hover_x = int((mouse_x-local_x)/perBlockWidth)
-                            block_get_hover_y = int((mouse_y-local_y)/perBlockHeight)
-                            the_attacking_range_area = []
-                            for area in attacking_range:
-                                if [block_get_hover_x,block_get_hover_y] in attacking_range[area]:
-                                    for y in range(block_get_hover_y-characters_data[the_character_get_click].attack_range+1,block_get_hover_y+characters_data[the_character_get_click].attack_range):
-                                        if y < block_get_hover_y:
-                                            for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)):
-                                                if theMap.mapData[y][x].canPassThrough == True:
-                                                    drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    the_attacking_range_area.append([x,y])
-                                        else:
-                                            for x in range(block_get_hover_x-characters_data[the_character_get_click].attack_range+(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].attack_range-(y-block_get_hover_y)):
-                                                if theMap.mapData[y][x].canPassThrough == True:
-                                                    drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    the_attacking_range_area.append([x,y])
-                                    break
-                            enemies_get_attack = {}
-                            if len(the_attacking_range_area) > 0:
-                                for enemies in sangvisFerris_data:
-                                    if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in the_attacking_range_area and sangvisFerris_data[enemies].current_hp>0:
-                                        if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["far"]:
-                                            enemies_get_attack[enemies] = "far"
-                                        elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["middle"]:
-                                            enemies_get_attack[enemies] = "middle"
-                                        elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["near"]:
-                                            enemies_get_attack[enemies] = "near"
+                            for potion in attacking_range["near"]:
+                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,potion[0],potion[1],local_x,local_y)
+                                drawImg(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                            for potion in attacking_range["middle"]:
+                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,potion[0],potion[1],local_x,local_y)
+                                drawImg(UI_img["blue"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                            for potion in attacking_range["far"]:
+                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,potion[0],potion[1],local_x,local_y)
+                                drawImg(UI_img["yellow"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                            if block_get_click != None:
+                                the_attacking_range_area = []
+                                for area in attacking_range:
+                                    if [block_get_click["x"],block_get_click["y"]] in attacking_range[area]:
+                                        for y in range(block_get_click["y"]-characters_data[the_character_get_click].attack_range+1,block_get_click["y"]+characters_data[the_character_get_click].attack_range):
+                                            if y < block_get_click["y"]:
+                                                for x in range(block_get_click["x"]-characters_data[the_character_get_click].attack_range-(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].attack_range+(y-block_get_click["y"])):
+                                                    if theMap.mapData[y][x].canPassThrough == True:
+                                                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                        drawImg(UI_img["orange"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                                                        the_attacking_range_area.append([x,y])
+                                            else:
+                                                for x in range(block_get_click["x"]-characters_data[the_character_get_click].attack_range+(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].attack_range-(y-block_get_click["y"])):
+                                                    if theMap.mapData[y][x].canPassThrough == True:
+                                                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                        drawImg(UI_img["orange"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                                                        the_attacking_range_area.append([x,y])
+                                        break
+                                enemies_get_attack = {}
+                                if len(the_attacking_range_area) > 0:
+                                    for enemies in sangvisFerris_data:
+                                        if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in the_attacking_range_area and sangvisFerris_data[enemies].current_hp>0:
+                                            if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["far"]:
+                                                enemies_get_attack[enemies] = "far"
+                                            elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["middle"]:
+                                                enemies_get_attack[enemies] = "middle"
+                                            elif [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["near"]:
+                                                enemies_get_attack[enemies] = "near"
                         else:
                             warnings_to_display.add(warnings_info["no_enemy_in_effective_range"])
                             action_choice = ""
@@ -1010,55 +1014,52 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 for y in range(characters_data[the_character_get_click].y-characters_data[the_character_get_click].max_skill_range,characters_data[the_character_get_click].y+characters_data[the_character_get_click].max_skill_range+1):
                                     if y < characters_data[the_character_get_click].y:
                                         for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].max_skill_range-(y-characters_data[the_character_get_click].y),characters_data[the_character_get_click].x+characters_data[the_character_get_click].max_skill_range+(y-characters_data[the_character_get_click].y)+1):
-                                            if theMap.mapData[y][x].canPassThrough == True:
+                                            if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
                                                 if "far" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["far"] != None and characters_data[the_character_get_click].skill_effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["far"][1]:
                                                     skill_range["far"].append([x,y])
-                                                    
                                                 elif "middle" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["middle"] != None and characters_data[the_character_get_click].skill_effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["middle"][1]:
                                                     skill_range["middle"].append([x,y])
-                                                    drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                                 elif "near" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["near"] != None and characters_data[the_character_get_click].skill_effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["near"][1]:
                                                     skill_range["near"].append([x,y])
-                                                    drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
                                     else:
                                         for x in range(characters_data[the_character_get_click].x-characters_data[the_character_get_click].max_skill_range+(y-characters_data[the_character_get_click].y),characters_data[the_character_get_click].x+characters_data[the_character_get_click].max_skill_range-(y-characters_data[the_character_get_click].y)+1):
                                             if x == characters_data[the_character_get_click].x and y == characters_data[the_character_get_click].y:
                                                 pass
+                                            elif len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
+                                                if "far" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["far"] != None and characters_data[the_character_get_click].skill_effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["far"][1]:
+                                                    skill_range["far"].append([x,y])
+                                                elif "middle" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["middle"] != None and characters_data[the_character_get_click].skill_effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["middle"][1]:
+                                                    skill_range["middle"].append([x,y])
+                                                elif "near" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["near"] != None and characters_data[the_character_get_click].skill_effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["near"][1]:
+                                                    skill_range["near"].append([x,y])
+                            for position in skill_range["near"]:
+                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,position[0],position[1],local_x,local_y)
+                                drawImg(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                            for position in skill_range["middle"]:
+                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,position[0],position[1],local_x,local_y)
+                                drawImg(UI_img["yellow"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                            for position in skill_range["far"]:
+                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,position[0],position[1],local_x,local_y)
+                                drawImg(UI_img["blue"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                            if block_get_click != None:
+                                the_skill_cover_area = []
+                                for area in skill_range:
+                                    if [block_get_click["x"],block_get_click["y"]] in skill_range[area]:
+                                        for y in range(block_get_click["y"]-characters_data[the_character_get_click].skill_cover_range,block_get_click["y"]+characters_data[the_character_get_click].skill_cover_range):
+                                            if y < block_get_click["y"]:
+                                                for x in range(block_get_click["x"]-characters_data[the_character_get_click].skill_cover_range-(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].skill_cover_range+(y-block_get_click["y"])):
+                                                    if theMap.mapData[y][x].canPassThrough == True:
+                                                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                        drawImg(UI_img["orange"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                                                        the_skill_cover_area.append([x,y])
                                             else:
-                                                if theMap.mapData[y][x].canPassThrough == True:
-                                                    if "far" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["far"] != None and characters_data[the_character_get_click].skill_effective_range["far"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["far"][1]:
-                                                        skill_range["far"].append([x,y])
-                                                        drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    elif "middle" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["middle"] != None and characters_data[the_character_get_click].skill_effective_range["middle"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["middle"][1]:
-                                                        skill_range["middle"].append([x,y])
-                                                        drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    elif "near" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["near"] != None and characters_data[the_character_get_click].skill_effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["near"][1]:
-                                                        skill_range["near"].append([x,y])
-                                                        drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                            for i in range(len(skill_range["near"])):
-                                drawImg(UI_img["green"],(skill_range["near"][i][0]*perBlockWidth,skill_range["near"][i][1]*perBlockHeight),screen,local_x,local_y)
-                            for i in range(len(skill_range["middle"])):
-                                drawImg(UI_img["yellow"],(skill_range["middle"][i][0]*perBlockWidth,skill_range["middle"][i][1]*perBlockHeight),screen,local_x,local_y)
-                            for i in range(len(skill_range["far"])):
-                                drawImg(UI_img["blue"],(skill_range["far"][i][0]*perBlockWidth,skill_range["far"][i][1]*perBlockHeight),screen,local_x,local_y)
-                            block_get_hover_x = int((mouse_x-local_x)/perBlockWidth)
-                            block_get_hover_y = int((mouse_y-local_y)/perBlockHeight)
-                            the_skill_cover_area = []
-                            for area in skill_range:
-                                if [block_get_hover_x,block_get_hover_y] in skill_range[area]:
-                                    for y in range(block_get_hover_y-characters_data[the_character_get_click].skill_cover_range,block_get_hover_y+characters_data[the_character_get_click].skill_cover_range):
-                                        if y < block_get_hover_y:
-                                            for x in range(block_get_hover_x-characters_data[the_character_get_click].skill_cover_range-(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].skill_cover_range+(y-block_get_hover_y)):
-                                                if theMap.mapData[y][x].canPassThrough == True:
-                                                    drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    the_skill_cover_area.append([x,y])
-                                        else:
-                                            for x in range(block_get_hover_x-characters_data[the_character_get_click].skill_cover_range+(y-block_get_hover_y)+1,block_get_hover_x+characters_data[the_character_get_click].skill_cover_range-(y-block_get_hover_y)):
-                                                if theMap.mapData[y][x].canPassThrough == True:
-                                                    drawImg(UI_img["orange"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    the_skill_cover_area.append([x,y])
-                                        skill_target = skill(the_character_get_click,{"x":block_get_hover_x,"y":block_get_hover_y},the_skill_cover_area,sangvisFerris_data,characters_data)
-                                    break
+                                                for x in range(block_get_click["x"]-characters_data[the_character_get_click].skill_cover_range+(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].skill_cover_range-(y-block_get_click["y"])):
+                                                    if theMap.mapData[y][x].canPassThrough == True:
+                                                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                        drawImg(UI_img["orange"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                                                        the_skill_cover_area.append([x,y])
+                                            skill_target = skill(the_character_get_click,{"x":block_get_click["x"],"y":block_get_click["y"]},the_skill_cover_area,sangvisFerris_data,characters_data)
+                                        break
                         else:
                             skill_target = skill(the_character_get_click,{"x":None,"y":None},None,sangvisFerris_data,characters_data)
                             if skill_target != None:
@@ -1177,7 +1178,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     elif action_choice == "attack":
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
-                        if block_get_hover_x < characters_data[the_character_get_click].x:
+                        if block_get_click["x"] < characters_data[the_character_get_click].x:
                             characters_data[the_character_get_click].setFlip(True)
                         else:
                             characters_data[the_character_get_click].setFlip(False)

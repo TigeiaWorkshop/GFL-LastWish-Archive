@@ -21,15 +21,13 @@ class MapObject:
         self.facilityData = initialFacility(facilityData)
         self.bgImg = pygame.transform.scale(bgImg.img,(bgImg.width,bgImg.height))
         self.bgImg.set_alpha(255)
-        self.greenBlockImg = None
-        self.greenBlockImgArea = []
-        self.shadowImg = None
         self.lightArea = []
         self.mapSurface = pygame.surface.Surface((3840, 2160))
     def changePerBlockSize(self,newPerBlockWidth):
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list:
             self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height())))
+        self.process_map()
     def display_map(self,screen,local_x=0,local_y=0):
         screen.blit(self.mapSurface,(local_x,local_y))
         #画上篝火
@@ -45,12 +43,6 @@ class MapObject:
             xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
             chestImg = pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
             screen.blit(chestImg,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
-        #画上绿色方块
-        for i in range(len(self.greenBlockImgArea)):
-            xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,self.greenBlockImgArea[i][0],self.greenBlockImgArea[i][1],local_x,local_y)
-            screen.blit(self.greenBlockImg,(xTemp+self.perBlockWidth*0.05,yTemp))
-            if i == len(self.greenBlockImgArea)-1:
-                displayInCenter(fontRender("-"+str((i+1)*2)+"AP","green",self.perBlockWidth/8,True),self.greenBlockImg,xTemp,yTemp,screen)
         """
         #画上阴影
         if self.mapData[y][x].currentShadowAlpha>0 and (x,y) not in self.lightArea:
@@ -64,12 +56,18 @@ class MapObject:
                 #画上场景图片
                 self.mapSurface.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
     #计算在地图中的方块
-    def calBlockInMap(self,local_x=0,local_y=0):
-        mouse_x,mouse_y=pygame.mouse.get_pos()
+    def calBlockInMap(self,block,local_x=0,local_y=0):
         block_get_click = None
-        guessX = int(((mouse_x-local_x-(self.row-1)*self.perBlockWidth/2)/0.43/self.perBlockWidth+(mouse_y-local_y)/self.perBlockWidth/0.22)/2)
-        guessY = int(((mouse_y-local_y)/self.perBlockWidth/0.22-(mouse_x-local_x-(self.row-1)*self.perBlockWidth/2)/self.perBlockWidth/0.43)/2)
-        block_get_click = {"x":guessX,"y":guessY}
+        mouse_x,mouse_y=pygame.mouse.get_pos()
+        lenUnitH = block.get_height()/4
+        lenUnitW = block.get_width()/4
+        for y in range(len(self.mapData)):
+            for x in range(len(self.mapData[y])):
+                xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y,local_x,local_y)
+                xTemp+=self.perBlockWidth*0.05
+                if xTemp+lenUnitW<mouse_x<xTemp+lenUnitW*3 and yTemp<mouse_y<yTemp+lenUnitH*4:
+                    block_get_click = {"x":x,"y":y}
+                    break
         return block_get_click
     def getBlockExactLocation(self,x,y,local_x,local_y):
         xStart,yStart = calPosInMap(self.row,self.perBlockWidth,x,y,local_x,local_y)
@@ -88,7 +86,7 @@ def initialBlockData(mapData,facilityData,blocks_setting,dark_mode):
         alphaValue = 0
     for y in range(len(mapData)):
         for x in range(len(mapData[y])):
-            mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]],alphaValue)
+            mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"],alphaValue)
     for key,value in facilityData.items():
         for key2,value2 in value.items():
             mapData[value2["y"]][value2["x"]].canPassThrough = False
