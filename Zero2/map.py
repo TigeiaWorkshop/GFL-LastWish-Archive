@@ -46,11 +46,12 @@ class MapObject:
             chestImg = pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
             screen.blit(chestImg,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
         #画上绿色方块
+        for i in range(len(self.greenBlockImgArea)):
+            xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,self.greenBlockImgArea[i][0],self.greenBlockImgArea[i][1],local_x,local_y)
+            screen.blit(self.greenBlockImg,(xTemp+self.perBlockWidth*0.05,yTemp))
+            if i == len(self.greenBlockImgArea)-1:
+                displayInCenter(fontRender("-"+str((i+1)*2)+"AP","green",self.perBlockWidth/8,True),self.greenBlockImg,xTemp,yTemp,screen)
         """
-        if (x,y) in self.greenBlockImgArea:
-            self.mapSurface.blit(self.greenBlockImg,(xTemp+self.perBlockWidth*0.05,yTemp))
-            if (x,y) == self.greenBlockImgArea[-1]:
-                displayInCenter(fontRender("-"+str((len(self.greenBlockImgArea)+1)*2)+"AP","green",self.perBlockWidth/8,True),self.greenBlockImg,xTemp,yTemp,self.mapSurface)
         #画上阴影
         if self.mapData[y][x].currentShadowAlpha>0 and (x,y) not in self.lightArea:
             self.mapSurface.blit(self.shadowImg,(xTemp+self.perBlockWidth*0.05,yTemp))
@@ -62,8 +63,16 @@ class MapObject:
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)
                 #画上场景图片
                 self.mapSurface.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
+    #计算在地图中的方块
+    def calBlockInMap(self,local_x=0,local_y=0):
+        mouse_x,mouse_y=pygame.mouse.get_pos()
+        block_get_click = None
+        guessX = int(((mouse_x-local_x-(self.row-1)*self.perBlockWidth/2)/0.43/self.perBlockWidth+(mouse_y-local_y)/self.perBlockWidth/0.22)/2)
+        guessY = int(((mouse_y-local_y)/self.perBlockWidth/0.22-(mouse_x-local_x-(self.row-1)*self.perBlockWidth/2)/self.perBlockWidth/0.43)/2)
+        block_get_click = {"x":guessX,"y":guessY}
+        return block_get_click
     def getBlockExactLocation(self,x,y,local_x,local_y):
-        xStart,yStart = calPosInMap(self.row,self.perBlockWidth,x,y)
+        xStart,yStart = calPosInMap(self.row,self.perBlockWidth,x,y,local_x,local_y)
         return {
         "xStart": xStart,
         "xEnd": xStart + self.env_img_list[self.mapData[y][x].name].get_width(),
@@ -89,14 +98,6 @@ def initialBlockData(mapData,facilityData,blocks_setting,dark_mode):
 def calPosInMap(row,perBlockWidth,x,y,local_x=0,local_y=0):
     return (x-y)*perBlockWidth*0.43+local_x+(row-1)*perBlockWidth/2,(y+x)*perBlockWidth*0.22+local_y
 
-#计算在地图中的方块
-def calBlockInMap(row,perBlockWidth,local_x=0,local_y=0):
-    mouse_x,mouse_y=pygame.mouse.get_pos()
-    x = int(((mouse_x-local_x-(row-1)*perBlockWidth/2)/0.43/perBlockWidth+(mouse_y-local_y)/perBlockWidth/0.22)/2)
-    y = int((mouse_y-local_y)/perBlockWidth/0.22)-x
-    print(x,y)
-    return {"x":x,"y":y}
-
 #初始化设施数据
 def initialFacility(facilityData):
     for key in facilityData["campfire"]:
@@ -105,11 +106,11 @@ def initialFacility(facilityData):
 
 #方块类
 class Block:
-    def  __init__(self,name,canPassThrough,shadowAlpha):
+    def  __init__(self,name,canPassThrough,shadowDarkness):
         self.name = name
         self.canPassThrough = canPassThrough
-        self.currentShadowAlpha = shadowAlpha
-        self.shadowAlpha = shadowAlpha
+        self.currentshadowDarkness = shadowDarkness
+        self.shadowDarkness = shadowDarkness
 
 #环境系统
 class WeatherSystem:

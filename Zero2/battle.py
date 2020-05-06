@@ -152,12 +152,12 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         "hp_green" : loadImg("Assets/image/UI/hp_green.png"),
         "action_point_blue" : loadImg("Assets/image/UI/action_point.png"),
         "bullets_number_brown" : loadImg("Assets/image/UI/bullets_number.png"),
-        "green" : loadImg("Assets/image/UI/green.png",None,None,100),
-        "red" : loadImg("Assets/image/UI/red.png",None,None,100),
-        "black" : loadImg("Assets/image/UI/shadow.png",None,None,100),
-        "yellow": loadImg("Assets/image/UI/yellow.png",None,None,100),
-        "blue": loadImg("Assets/image/UI/blue.png",None,None,100),
-        "orange": loadImg("Assets/image/UI/orange.png",None,None,100),
+        "green" : loadImg("Assets/image/UI/green.png",None,None,150),
+        "red" : loadImg("Assets/image/UI/red.png",None,None,150),
+        "black" : loadImg("Assets/image/UI/shadow.png",None,None,150),
+        "yellow": loadImg("Assets/image/UI/yellow.png",None,None,150),
+        "blue": loadImg("Assets/image/UI/blue.png",None,None,150),
+        "orange": loadImg("Assets/image/UI/orange.png",None,None,150),
         #计分板
         "score" : loadImage("Assets/image/UI/score.png",(200,200),300,600),
         "supplyBoard":loadImage("Assets/image/UI/score.png",((window_x-window_x/3)/2,-window_y/12),window_x/3,window_y/12),
@@ -791,11 +791,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             
             #加载地图
             theMap.display_map(screen,local_x,local_y)
-            
+            block_get_click = theMap.calBlockInMap(local_x,local_y)
             #玩家回合
             if whose_round == "player":
                 if right_click == True:
-                    block_get_click = calBlockInMap(theMap.row,perBlockWidth,local_x,local_y)
                     #如果点击了回合结束的按钮
                     if isHover(end_round_button) and isWaiting == True:
                         whose_round = "playerToSangvisFerris"
@@ -906,9 +905,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                     for key2,value2 in theMap.facilityData[key1].items():
                                         map2d[value2["x"]][value2["y"]]=1
                             # 历遍所有角色，将角色的坐标点设置为障碍方块
-                            all_characters_data = dicMerge(characters_data,sangvisFerris_data)
-                            for every_chara in all_characters_data:
-                                map2d[all_characters_data[every_chara].x][all_characters_data[every_chara].y] = 1
+                            for key,value in dicMerge(characters_data,sangvisFerris_data).items():
+                                map2d[value.x][value.y] = 1
                             aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(end_point_x,end_point_y))
                             #开始寻路
                             pathList=aStar.start()
@@ -920,13 +918,13 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 else:
                                     route_len = len(pathList)
                                 for i in range(route_len):
-                                    if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
+                                    if Point(star_point_x+1,star_point_y) in pathList and (star_point_x+1,star_point_y) not in the_route:
                                         star_point_x+=1
-                                    elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
+                                    elif Point(star_point_x-1,star_point_y) in pathList and (star_point_x-1,star_point_y) not in the_route:
                                         star_point_x-=1
-                                    elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
+                                    elif Point(star_point_x,star_point_y+1) in pathList and (star_point_x,star_point_y+1) not in the_route:
                                         star_point_y+=1
-                                    elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
+                                    elif Point(star_point_x,star_point_y-1) in pathList and (star_point_x,star_point_y-1) not in the_route:
                                         star_point_y-=1
                                     else:
                                         #快速跳出
@@ -1122,12 +1120,12 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                     the_route.pop(0)
                             elif characters_data[the_character_get_click].y < the_route[0][1]:
                                 characters_data[the_character_get_click].y+=0.05
-                                characters_data[the_character_get_click].setFlip(False)
+                                characters_data[the_character_get_click].setFlip(True)
                                 if characters_data[the_character_get_click].y >= the_route[0][1]:
                                     characters_data[the_character_get_click].y = the_route[0][1]
                                     the_route.pop(0)
                             elif characters_data[the_character_get_click].y > the_route[0][1]:
-                                characters_data[the_character_get_click].setFlip(True)
+                                characters_data[the_character_get_click].setFlip(False)
                                 characters_data[the_character_get_click].y-=0.05
                                 if characters_data[the_character_get_click].y <= the_route[0][1]:
                                     characters_data[the_character_get_click].y = the_route[0][1]
