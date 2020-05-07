@@ -7,7 +7,7 @@ import random
 import pygame
 import yaml
 
-from Zero2.basic import loadAllImgInFile, loadImg, displayInCenter, fontRender
+from Zero2.basic import *
 
 class MapObject:
     def  __init__(self,mapData,facilityData,blocks_setting,dark_mode,perBlockWidth,bgImg):
@@ -30,6 +30,7 @@ class MapObject:
         self.process_map()
     def display_map(self,screen,local_x=0,local_y=0):
         screen.blit(self.mapSurface,(local_x,local_y))
+    def display_facility(self,screen,local_x=0,local_y=0):
         #画上篝火
         for key,value in self.facilityData["campfire"].items():
             xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
@@ -43,18 +44,16 @@ class MapObject:
             xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
             chestImg = pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
             screen.blit(chestImg,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
-        """
-        #画上阴影
-        if self.mapData[y][x].currentShadowAlpha>0 and (x,y) not in self.lightArea:
-            self.mapSurface.blit(self.shadowImg,(xTemp+self.perBlockWidth*0.05,yTemp))
-        """
     def process_map(self):
         self.mapSurface.blit(self.bgImg,(0,0))
         for y in range(len(self.mapData)):
             for x in range(len(self.mapData[y])):
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)
                 #画上场景图片
-                self.mapSurface.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
+                if (x,y) not in self.lightArea:
+                    self.mapSurface.blit(addDarkness(self.env_img_list[self.mapData[y][x].name],150),(xTemp,yTemp))
+                else:
+                    self.mapSurface.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
     #计算在地图中的方块
     def calBlockInMap(self,block,local_x=0,local_y=0):
         block_get_click = None
@@ -87,9 +86,6 @@ def initialBlockData(mapData,facilityData,blocks_setting,dark_mode):
     for y in range(len(mapData)):
         for x in range(len(mapData[y])):
             mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"],alphaValue)
-    for key,value in facilityData.items():
-        for key2,value2 in value.items():
-            mapData[value2["y"]][value2["x"]].canPassThrough = False
     return mapData
 
 #计算在地图中的位置

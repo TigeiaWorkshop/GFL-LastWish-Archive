@@ -211,6 +211,22 @@ def loadAllImgInFile(pathRule,width=None,height=None):
         allImg[i] = loadImg(allImg[i],width,height)
     return allImg
 
+#增加图片暗度
+def addDarkness(img,value):
+    newImg = pygame.transform.scale(img,(img.get_width(), img.get_height()))
+    dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA)
+    dark.fill((value,value,value))
+    newImg.blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
+    return newImg
+
+#减少图片暗度
+def removeDarkness(img,value):
+    newImg = pygame.transform.scale(img,(img.get_width(), img.get_height()))
+    dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA)
+    dark.fill((value,value,value))
+    newImg.blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+    return newImg
+
 #画面更新控制器
 class DisplayController:
     def __init__(self,fps):

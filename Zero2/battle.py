@@ -95,7 +95,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     perBlockHeight = round(window_y/block_y*zoom_in)
     #初始化地图模块
     theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,dark_mode,perBlockWidth,black_bg)
-    theMap.process_map()
     
     #初始化角色信息
     i = 1
@@ -120,6 +119,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
         Display.flip()
         i+=1
+
+    #计算光亮区域 并初始化地图
+    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+    theMap.process_map()
 
     #加载对话时角色的图标
     character_icon_img_list={}
@@ -235,8 +238,6 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     skill_target = None
     stayingTime = 0
     buttonGetHover = None
-    #计算光亮区域
-    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
     # 移动路径
     the_route = []
     #上个回合因为暴露被敌人发现的角色
@@ -288,6 +289,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         for a in range(250,0,-5):
             #加载地图
             theMap.display_map(screen,local_x,local_y)
+            #展示设施
+            theMap.display_facility(screen,local_x,local_y)
             #角色动画
             for every_chara in characters_data:
                 if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
@@ -336,6 +339,8 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     pygame.mixer.Channel(1).play(environment_sound)
                 #加载地图
                 theMap.display_map(screen,local_x,local_y)
+                #展示设施
+                theMap.display_facility(screen,local_x,local_y)
                 #角色动画
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
                     if value.faction == "character" or (value.x,value.y) in theMap.lightArea or dark_mode != True:
@@ -399,6 +404,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
                             pygame.mixer.Channel(1).play(environment_sound)
                         key_to_remove = []
+                        reProcessMap = False
                         for key,value in all_characters_path.items():
                             if value != []:
                                 if pygame.mixer.Channel(0).get_busy() == False:
@@ -411,24 +417,28 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                         if characters_data[key].x >= value[0][0]:
                                             characters_data[key].x = value[0][0]
                                             value.pop(0)
+                                            reProcessMap = True
                                     elif characters_data[key].x > value[0][0]:
                                         characters_data[key].x-=0.05
                                         characters_data[key].setFlip(True)
                                         if characters_data[key].x <= value[0][0]:
                                             characters_data[key].x = value[0][0]
                                             value.pop(0)
+                                            reProcessMap = True
                                     elif characters_data[key].y < value[0][1]:
                                         characters_data[key].y+=0.05
                                         characters_data[key].setFlip(True)
                                         if characters_data[key].y >= value[0][1]:
                                             characters_data[key].y = value[0][1]
                                             value.pop(0)
+                                            reProcessMap = True
                                     elif characters_data[key].y > value[0][1]:
                                         characters_data[key].y-=0.05
                                         characters_data[key].setFlip(False)
                                         if characters_data[key].y <= value[0][1]:
                                             characters_data[key].y = value[0][1]
                                             value.pop(0)
+                                            reProcessMap = True
                                     if theMap.mapData[int(characters_data[key].y)][int(characters_data[key].x)] == 2:
                                         characters_data[key].undetected = True
                                     else:
@@ -440,27 +450,33 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                         if sangvisFerris_data[key].x >= value[0][0]:
                                             sangvisFerris_data[key].x = value[0][0]
                                             value.pop(0)
+                                            reProcessMap = True
                                     elif sangvisFerris_data[key].x > value[0][0]:
                                         sangvisFerris_data[key].x-=0.05
                                         sangvisFerris_data[key].setFlip(False)
                                         if sangvisFerris_data[key].x <= value[0][0]:
                                             sangvisFerris_data[key].x = value[0][0]
                                             value.pop(0)
+                                            reProcessMap = True
                                     elif sangvisFerris_data[key].y < value[0][1]:
                                         sangvisFerris_data[key].y+=0.05
                                         sangvisFerris_data[key].setFlip(False)
                                         if sangvisFerris_data[key].y >= value[0][1]:
                                             sangvisFerris_data[key].y = value[0][1]
                                             value.pop(0)
+                                            reProcessMap = True
                                     elif sangvisFerris_data[key].y > value[0][1]:
                                         sangvisFerris_data[key].y-=0.05
                                         sangvisFerris_data[key].setFlip(True)
                                         if sangvisFerris_data[key].y <= value[0][1]:
                                             sangvisFerris_data[key].y = value[0][1]
                                             value.pop(0)
+                                            reProcessMap = True
                             else:
                                 key_to_remove.append(key)
-                        theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                        if reProcessMap == True:
+                            theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                            theMap.process_map()
                         for i in range(len(key_to_remove)):
                             all_characters_path.pop(key_to_remove[i])
                     else:
@@ -1113,24 +1129,32 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 if characters_data[the_character_get_click].x >= the_route[0][0]:
                                     characters_data[the_character_get_click].x = the_route[0][0]
                                     the_route.pop(0)
+                                    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                                    theMap.process_map()
                             elif characters_data[the_character_get_click].x > the_route[0][0]:
                                 characters_data[the_character_get_click].x-=0.05
                                 characters_data[the_character_get_click].setFlip(True)
                                 if characters_data[the_character_get_click].x <= the_route[0][0]:
                                     characters_data[the_character_get_click].x = the_route[0][0]
                                     the_route.pop(0)
+                                    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                                    theMap.process_map()
                             elif characters_data[the_character_get_click].y < the_route[0][1]:
                                 characters_data[the_character_get_click].y+=0.05
                                 characters_data[the_character_get_click].setFlip(True)
                                 if characters_data[the_character_get_click].y >= the_route[0][1]:
                                     characters_data[the_character_get_click].y = the_route[0][1]
                                     the_route.pop(0)
+                                    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                                    theMap.process_map()
                             elif characters_data[the_character_get_click].y > the_route[0][1]:
                                 characters_data[the_character_get_click].setFlip(False)
                                 characters_data[the_character_get_click].y-=0.05
                                 if characters_data[the_character_get_click].y <= the_route[0][1]:
                                     characters_data[the_character_get_click].y = the_route[0][1]
                                     the_route.pop(0)
+                                    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                                    theMap.process_map()
                             characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
                         else:
                             pygame.mixer.Channel(0).stop()
@@ -1174,7 +1198,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 isWaiting =True
                                 the_character_get_click = ""
                                 action_choice = ""
-                        theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                        
                     elif action_choice == "attack":
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
@@ -1208,6 +1232,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         if characters_data[the_character_get_click].gif_dic["skill"]["imgId"] == characters_data[the_character_get_click].gif_dic["skill"]["imgNum"]-1:
                             characters_data[the_character_get_click].gif_dic["skill"]["imgId"] = 0
                             theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                            theMap.process_map()
                             isWaiting =True
                             the_character_get_click = ""
                             action_choice = ""
@@ -1339,6 +1364,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                             result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
                             theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                            theMap.process_map()
                             damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                         else:
                             damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
@@ -1397,6 +1423,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                                 result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
                                 theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                                theMap.process_map()
                                 damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                             else:
                                 damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
@@ -1424,9 +1451,9 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and dark_mode != True:
                     if value.current_hp > 0:
                         if green_hide == True and pygame.mouse.get_pressed()[2]:
-                            if int((mouse_x-local_x)/perBlockWidth) == value.x and int((mouse_y-local_y)/perBlockHeight) == value.y:
+                            if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
                                 rightClickCharacterAlphaDeduct = False
-                                if rightClickCharacterAlpha < 100:
+                                if rightClickCharacterAlpha < 150:
                                     rightClickCharacterAlpha += 10
                                 UI_img["yellow"].set_alpha(rightClickCharacterAlpha)
                                 UI_img["blue"].set_alpha(rightClickCharacterAlpha)
@@ -1434,28 +1461,33 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 for y in range(value.y-value.max_effective_range,value.y+value.max_effective_range+1):
                                     if y < value.y:
                                         for x in range(value.x-value.max_effective_range-(y-value.y),value.x+value.max_effective_range+(y-value.y)+1):
-                                            if theMap.mapData[y][x].canPassThrough == True:
+                                            if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
                                                 if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
-                                                    drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                    drawImg(UI_img["yellow"],(xTemp+perBlockWidth*0.05,yTemp),screen)
                                                 elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
-                                                    drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                    drawImg(UI_img["blue"],(xTemp+perBlockWidth*0.05,yTemp),screen)
                                                 elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
-                                                    drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
+                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                    drawImg(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp),screen)
                                     else:
                                         for x in range(value.x-value.max_effective_range+(y-value.y),value.x+value.max_effective_range-(y-value.y)+1):
                                             if x == value.x and y == value.y:
                                                 pass
-                                            else:
-                                                if theMap.mapData[y][x].canPassThrough == True:
-                                                    if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
-                                                        drawImg(UI_img["yellow"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
-                                                        drawImg(UI_img["blue"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                                    elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
-                                                        drawImg(UI_img["green"],(x*perBlockWidth,y*perBlockHeight),screen,local_x,local_y)
-                                UI_img["yellow"].set_alpha(100)
-                                UI_img["blue"].set_alpha(100)
-                                UI_img["green"].set_alpha(100)
+                                            elif len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
+                                                if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
+                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                    drawImg(UI_img["yellow"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                                                elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
+                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                    drawImg(UI_img["blue"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                                                elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
+                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
+                                                    drawImg(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                                UI_img["yellow"].set_alpha(150)
+                                UI_img["blue"].set_alpha(150)
+                                UI_img["green"].set_alpha(150)
                         value.draw("wait",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
                     elif value.current_hp<=0:
                         value.draw("die",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
@@ -1467,7 +1499,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 if key in damage_do_to_character:
                     the_alpha_to_check = damage_do_to_character[key].get_alpha()
                     if the_alpha_to_check > 0:
-                        drawImg(damage_do_to_character[key],(value.x*perBlockWidth,value.y*perBlockHeight),screen,local_x,local_y)
+                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,value.x,value.y,local_x,local_y)
+                        xTemp+=perBlockWidth*0.05
+                        yTemp-=perBlockWidth*0.05
+                        displayInCenter(damage_do_to_character[key],UI_img["green"],xTemp,yTemp,screen)
                         damage_do_to_character[key].set_alpha(the_alpha_to_check-5)
                     else:
                         del damage_do_to_character[key]
@@ -1496,10 +1531,12 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             del characters_data[key]
                             result_of_round["times_characters_down"]+=1
                             theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
+                            theMap.process_map()
             for key in the_dead_one_remove:
                 del the_dead_one[key]
             #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
-
+            #展示设施
+            theMap.display_facility(screen,local_x,local_y)
             #显示选择菜单
             if green_hide == "SelectMenu":
                 buttonGetHover = None
