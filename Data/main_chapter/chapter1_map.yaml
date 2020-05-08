@@ -179,7 +179,7 @@ facility:
       x: 13
       y: 14
 local_x: 0
-local_y: -200
+local_y: 0
 map:
 - - TileSnow02
   - TileSnow02ToStone01
@@ -1627,4 +1627,4 @@ sangvisFerri:
     x: 28
     y: 13
 weather: snow
-zoom_in: 2
+zoomIn: 3

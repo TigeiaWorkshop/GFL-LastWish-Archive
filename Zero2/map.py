@@ -21,14 +21,19 @@ class MapObject:
         self.facilityImg = loadFacilityImg(facilityData)
         self.facilityData = initialFacility(facilityData)
         self.lightArea = []
-        self.bgImg = loadImg("Assets\image\dialog_background\snowfield.jpg",perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2),perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
-        self.mapSurface = pygame.surface.Surface((self.bgImg.get_width(), self.bgImg.get_height()))
+        self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
+        self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
+        self.bgImg = loadImg("Assets\image\dialog_background\snowfield.jpg")
+        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
     def changePerBlockSize(self,newPerBlockWidth):
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list:
             self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height())))
         for key in self.env_img_list_dark:
             self.env_img_list_dark[key] = addDarkness(pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height()))),150)
+        self.surface_width = int(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
+        self.surface_height = int(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
+        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
         self.process_map()
     def display_map(self,screen,local_x=0,local_y=0):
         screen.blit(self.mapSurface,(local_x,local_y))
@@ -47,7 +52,7 @@ class MapObject:
             chestImg = pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
             screen.blit(chestImg,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
     def process_map(self):
-        self.mapSurface.blit(self.bgImg,(0,0))
+        self.mapSurface.blit(pygame.transform.scale(self.bgImg,(self.surface_width,self.surface_height)),(0,0))
         for y in range(len(self.mapData)):
             for x in range(len(self.mapData[y])):
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)
@@ -112,20 +117,21 @@ class WeatherSystem:
         self.name = 0
         self.img_list = loadAllImgInFile("Assets/image/environment/"+weather+"/*.png")
         self.ImgObject = []
-        for i in range(100):
+        for i in range(50):
             imgId = random.randint(0,len(self.img_list)-1)
             img_size = random.randint(3,10)
-            img_speed = random.randint(1,4)
+            img_speed = random.randint(1,3)
             img_x = random.randint(1,window_x*1.5)
             img_y = random.randint(1,window_y)
             self.ImgObject.append(Snow(imgId,img_size,img_speed,img_x,img_y))
     def display(self,screen,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
+        speed_unit = perBlockWidth/10
         for i in range(len(self.ImgObject)):
-            if 0<=self.ImgObject[i].x+local_x<=screen.get_width() and 0<=self.ImgObject[i].y+local_y<=screen.get_height():
+            if 0<=self.ImgObject[i].x<=screen.get_width() and 0<=self.ImgObject[i].y+local_y<=screen.get_height():
                 imgTemp = pygame.transform.scale(self.img_list[self.ImgObject[i].imgId], (round(perBlockWidth/self.ImgObject[i].size), round(perBlockWidth/self.ImgObject[i].size)))
-                screen.blit(imgTemp,(self.ImgObject[i].x+local_x,self.ImgObject[i].y+local_y))
-            self.ImgObject[i].x -= perBlockHeight/3
-            self.ImgObject[i].y += perBlockHeight/3
+                screen.blit(imgTemp,(self.ImgObject[i].x,self.ImgObject[i].y+local_y))
+            self.ImgObject[i].x -= self.ImgObject[i].speed*speed_unit
+            self.ImgObject[i].y += self.ImgObject[i].speed*speed_unit
             if self.ImgObject[i].x <= 0 or self.ImgObject[i].y+local_y >= screen.get_height():
                 self.ImgObject[i].y = random.randint(-50,0)
                 self.ImgObject[i].x = random.randint(0,screen.get_width()*2)

@@ -77,7 +77,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         block_y = len(loadData["map"])
         block_x = len(loadData["map"][0])
-        zoom_in = loadData["zoom_in"]
+        zoomIn = loadData["zoomIn"]
         local_x = loadData["local_x"]
         local_y = loadData["local_y"]
         characters = loadData["character"]
@@ -86,13 +86,13 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         theWeather = loadData["weather"]
         dialogInfo = loadData["dialogs"]
 
-    if zoom_in < 1:
-        zoom_in = 1
-    elif zoom_in > 3:
-        zoom_in = 3
-    zoomIntoBe = zoom_in
-    perBlockWidth = round(window_x/block_x*zoom_in)
-    perBlockHeight = round(window_y/block_y*zoom_in)
+    if zoomIn < 200:
+        zoomIn = 200
+    elif zoomIn > 300:
+        zoomIn = 300
+    zoomIntoBe = zoomIn
+    perBlockWidth = round(window_x/block_x*zoomIn/100)
+    perBlockHeight = round(window_y/block_y*zoomIn/100)
     #初始化地图模块
     theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,dark_mode,perBlockWidth)
     
@@ -694,10 +694,10 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     #上下滚轮-放大和缩小地图
                     if event.button == 1 and whose_round == "player":
                         right_click = True
-                    if event.button == 4 and zoomIntoBe < 3:
-                        zoomIntoBe += 0.25
-                    elif event.button == 5 and zoomIntoBe > 1:
-                        zoomIntoBe -= 0.25
+                    if event.button == 4 and zoomIntoBe < 300:
+                        zoomIntoBe += 20
+                    elif event.button == 5 and zoomIntoBe > 200:
+                        zoomIntoBe -= 20
                     break
                 if ifJoystickInit:
                     if round(joystick.get_axis(1)) == -1:
@@ -737,14 +737,14 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 mouse_move_temp_x = -1
                 mouse_move_temp_y = -1
             
-            #根据zoomIntoBe调整zoom_in大小
-            if zoomIntoBe != round(zoom_in,2):
-                if zoomIntoBe < zoom_in:
-                    zoom_in -= 0.05
-                elif zoomIntoBe > zoom_in:
-                    zoom_in += 0.05
-                newPerBlockWidth = round(window_x/block_x*zoom_in)
-                newPerBlockHeight = round(window_y/block_y*zoom_in)
+            #根据zoomIntoBe调整zoomIn大小
+            if zoomIntoBe != zoomIn:
+                if zoomIntoBe < zoomIn:
+                    zoomIn -= 5
+                elif zoomIntoBe > zoomIn:
+                    zoomIn += 5
+                newPerBlockWidth = round(window_x/block_x*zoomIn/100)
+                newPerBlockHeight = round(window_y/block_y*zoomIn/100)
                 local_x += (perBlockWidth-newPerBlockWidth)*theMap.column/2
                 local_y += (perBlockHeight-newPerBlockHeight)*theMap.row/2
                 perBlockWidth = newPerBlockWidth
@@ -759,7 +759,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 select_menu_button =  resizeImg(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
                 theMap.changePerBlockSize(perBlockWidth)
             else:
-                zoom_in = zoomIntoBe
+                zoomIn = zoomIntoBe
 
             #根据按键情况设定要移动的数值
             if pressKeyToMove["up"] == True:
@@ -884,15 +884,16 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 if green_hide == "SelectMenu":
                     #移动画面以使得被点击的角色可以被更好的操作
                     if screen_to_move_x == None:
-                        if characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x < window_x*0.2 and local_x<=0:
-                            screen_to_move_x = window_x*0.2-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x
-                        elif characters_data[the_character_get_click].x*perBlockWidth-perBlockWidth/2+local_x > window_x*0.8 and local_x>=theMap.column*perBlockWidth*-1:
-                            screen_to_move_x = window_x*0.8-characters_data[the_character_get_click].x*perBlockWidth+perBlockWidth/2-local_x
+                        tempX,tempY = calPosInMap(theMap.row,perBlockWidth,characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,local_x,local_y)
+                        if tempX < window_x*0.2 and local_x<=0:
+                            screen_to_move_x = window_x*0.2-tempX
+                        elif tempX > window_x*0.8 and local_x>=theMap.column*perBlockWidth*-1:
+                            screen_to_move_x = window_x*0.8-tempX
                     if screen_to_move_y == None:
-                        if characters_data[the_character_get_click].y*perBlockHeight-perBlockWidth/2+local_y < window_y*0.2 and local_y<=0:
-                            screen_to_move_y = window_y*0.2-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
+                        if tempY < window_y*0.2 and local_y<=0:
+                            screen_to_move_y = window_y*0.2-tempY
                         elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=theMap.row*perBlockHeight*-1:
-                            screen_to_move_y = window_y*0.8-characters_data[the_character_get_click].y*perBlockHeight+perBlockHeight/2-local_y
+                            screen_to_move_y = window_y*0.8-tempY
                         
                 #显示攻击/移动/技能范围
                 if green_hide == False and the_character_get_click != "":
