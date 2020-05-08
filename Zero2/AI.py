@@ -41,11 +41,11 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
         #历遍地图，设置障碍方块
         for y in range(len(theMap.mapData)):
             for x in range(len(theMap.mapData[y])):
-                if blocks_setting[theMap.mapData[y][x]]["canPassThrough"] == False:
+                if theMap.mapData[y][x].canPassThrough == False:
                     map2d[x][y]=1
         #历遍设施，设置障碍方块
-        for key1 in theMap.facility:
-            for key2,value2 in theMap.facility[key1].items():
+        for key1 in theMap.facilityData:
+            for key2,value2 in theMap.facilityData[key1].items():
                 map2d[value2["x"]][value2["y"]]=1
         #历遍所有角色，将角色的坐标点设置为障碍方块
         for character in characters_data:

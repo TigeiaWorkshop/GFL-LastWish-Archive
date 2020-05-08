@@ -179,7 +179,7 @@ facility:
       x: 13
       y: 14
 local_x: 0
-local_y: 0
+local_y: -200
 map:
 - - TileSnow02
   - TileSnow02ToStone01

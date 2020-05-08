@@ -94,7 +94,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
     perBlockWidth = round(window_x/block_x*zoom_in)
     perBlockHeight = round(window_y/block_y*zoom_in)
     #初始化地图模块
-    theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,dark_mode,perBlockWidth,black_bg)
+    theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,dark_mode,perBlockWidth)
     
     #初始化角色信息
     i = 1

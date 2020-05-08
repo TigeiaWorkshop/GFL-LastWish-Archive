@@ -10,23 +10,25 @@ import yaml
 from Zero2.basic import *
 
 class MapObject:
-    def  __init__(self,mapData,facilityData,blocks_setting,dark_mode,perBlockWidth,bgImg):
+    def  __init__(self,mapData,facilityData,blocks_setting,dark_mode,perBlockWidth):
         self.perBlockWidth = perBlockWidth
         self.row = len(mapData)
         self.column = len(mapData[0])
         self.env_img_list_original = load_env_images(mapData)
         self.env_img_list = load_env_images(mapData,perBlockWidth)
+        self.env_img_list_dark = load_env_images(mapData,perBlockWidth,None,150)
         self.mapData = initialBlockData(mapData,facilityData,blocks_setting,dark_mode)
         self.facilityImg = loadFacilityImg(facilityData)
         self.facilityData = initialFacility(facilityData)
-        self.bgImg = pygame.transform.scale(bgImg.img,(bgImg.width,bgImg.height))
-        self.bgImg.set_alpha(255)
         self.lightArea = []
-        self.mapSurface = pygame.surface.Surface((3840, 2160))
+        self.bgImg = loadImg("Assets\image\dialog_background\snowfield.jpg",perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2),perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
+        self.mapSurface = pygame.surface.Surface((self.bgImg.get_width(), self.bgImg.get_height()))
     def changePerBlockSize(self,newPerBlockWidth):
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list:
             self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height())))
+        for key in self.env_img_list_dark:
+            self.env_img_list_dark[key] = addDarkness(pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height()))),150)
         self.process_map()
     def display_map(self,screen,local_x=0,local_y=0):
         screen.blit(self.mapSurface,(local_x,local_y))
@@ -51,7 +53,7 @@ class MapObject:
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)
                 #画上场景图片
                 if (x,y) not in self.lightArea:
-                    self.mapSurface.blit(addDarkness(self.env_img_list[self.mapData[y][x].name],150),(xTemp,yTemp))
+                    self.mapSurface.blit(self.env_img_list_dark[self.mapData[y][x].name],(xTemp,yTemp))
                 else:
                     self.mapSurface.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
     #计算在地图中的方块
@@ -85,12 +87,12 @@ def initialBlockData(mapData,facilityData,blocks_setting,dark_mode):
         alphaValue = 0
     for y in range(len(mapData)):
         for x in range(len(mapData[y])):
-            mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"],alphaValue)
+            mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
     return mapData
 
 #计算在地图中的位置
 def calPosInMap(row,perBlockWidth,x,y,local_x=0,local_y=0):
-    return (x-y)*perBlockWidth*0.43+local_x+(row-1)*perBlockWidth/2,(y+x)*perBlockWidth*0.22+local_y
+    return (x-y)*perBlockWidth*0.43+local_x+row*perBlockWidth*0.43,(y+x)*perBlockWidth*0.22+local_y+perBlockWidth*0.4
 
 #初始化设施数据
 def initialFacility(facilityData):
@@ -100,11 +102,9 @@ def initialFacility(facilityData):
 
 #方块类
 class Block:
-    def  __init__(self,name,canPassThrough,shadowDarkness):
+    def  __init__(self,name,canPassThrough):
         self.name = name
         self.canPassThrough = canPassThrough
-        self.currentshadowDarkness = shadowDarkness
-        self.shadowDarkness = shadowDarkness
 
 #环境系统
 class WeatherSystem:
@@ -162,7 +162,7 @@ def loadFacilityImg(facilityData):
     return Facility_images
 
 #读取需要的地图图片
-def load_env_images(theMap,theWidth=None,theHeight=None):
+def load_env_images(theMap,theWidth=None,theHeight=None,darkness=0):
     all_images_needed = []
     for i in range(len(theMap)):
         for a in range(len(theMap[i])):
@@ -175,6 +175,9 @@ def load_env_images(theMap,theWidth=None,theHeight=None):
             env_img_list[all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
         except BaseException:
             env_img_list[all_images_needed[i]] = loadImg("../Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
+    if darkness>0:
+        for img,value in env_img_list.items():
+            env_img_list[img] = addDarkness(value,darkness)
     return env_img_list
 
 #计算光亮区域
