@@ -161,6 +161,8 @@ character:
     y: 8
 dialogs:
   initial: initial_dialog
+  move:
+    13-14: tutorial1
 facility:
   campfire:
     campfire1:

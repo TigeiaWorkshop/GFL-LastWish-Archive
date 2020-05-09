@@ -6,6 +6,8 @@ import os
 import cv2
 import pygame
 
+from sys import exit
+
 #图片加载模块：接收图片路径,长,高,返回对应图片
 def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
     if isinstance(path,str):

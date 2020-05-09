@@ -258,6 +258,19 @@ dialog_before_battle:
     narrator: null
     next_dialog_id: null
 dialog_during_battle:
+  tutorial1:
+  - dialoguebox_down:
+      content:
+      - 这是一个测试
+      speaker: sv-98
+      speaker_icon: sv-98
+    dialoguebox_up: null
+  - dialoguebox_down:
+      content:
+      - 看起来你获得了一些道具
+      speaker: sv-98
+      speaker_icon: sv-98
+    dialoguebox_up: null
   initial_dialog:
   - move:
       2b14_0:

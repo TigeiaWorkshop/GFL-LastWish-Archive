@@ -2,12 +2,9 @@
 import glob
 import math
 import time
-from sys import exit
-
 import pygame
 import yaml
 from pygame.locals import *
-
 from Zero2.basic import *
 from Zero2.characterDataManager import *
 from Zero2.map import *
@@ -652,6 +649,7 @@ def battle(chapter_name,screen,lang,fps):
                     txt_alpha -= 5
                 Display.flip()
             dialog_to_display = None
+            battle = True
 
         # 游戏主循环
         while battle==True:
@@ -1177,6 +1175,7 @@ def battle(chapter_name,screen,lang,fps):
                                     break
                             if chest_need_to_remove != None:
                                 del theMap.facilityData["chest"][chest_need_to_remove]
+                            keyTemp = str(characters_data[the_character_get_click].x)+"-"+str(characters_data[the_character_get_click].y) 
                             #检测是否角色有set的动画
                             if characters_data[the_character_get_click].gif_dic["set"] != None:
                                 characters_data[the_character_get_click].draw("set",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
@@ -1187,7 +1186,7 @@ def battle(chapter_name,screen,lang,fps):
                                         characters_data[the_character_get_click].undetected = True
                                     else:
                                         characters_data[the_character_get_click].undetected = False
-                                    isWaiting =True
+                                    isWaiting = True
                                     the_character_get_click = ""
                                     action_choice = ""
                             else:
@@ -1196,10 +1195,12 @@ def battle(chapter_name,screen,lang,fps):
                                     characters_data[the_character_get_click].undetected = True
                                 else:
                                     characters_data[the_character_get_click].undetected = False
-                                isWaiting =True
+                                isWaiting = True
                                 the_character_get_click = ""
                                 action_choice = ""
-                        
+                            if keyTemp in dialogInfo["move"]:
+                                dialog_to_display = dialog_during_battle[dialogInfo["move"][keyTemp]]
+                                break
                     elif action_choice == "attack":
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])

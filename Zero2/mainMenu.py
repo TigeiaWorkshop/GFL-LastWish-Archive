@@ -1,14 +1,11 @@
 # cython: language_level=3
 import time
-from sys import exit
-
 import pygame
 import yaml
 from pygame.locals import *
-
 from Zero2.basic import *
-from Zero2.dialog import *
 from Zero2.cutscene import *
+from Zero2.dialog import *
 
 def mainMenu(screen,lang,fps,mode=""):
     #获取屏幕的尺寸
