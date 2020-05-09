@@ -178,8 +178,8 @@ facility:
         hp: 10
       x: 13
       y: 14
-local_x: 0
-local_y: 0
+local_x: -1500
+local_y: -300
 map:
 - - TileSnow02
   - TileSnow02ToStone01
@@ -1628,3 +1628,4 @@ sangvisFerri:
     y: 13
 weather: snow
 zoomIn: 3
+darkMode: False

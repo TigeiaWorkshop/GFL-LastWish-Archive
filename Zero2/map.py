@@ -16,8 +16,12 @@ class MapObject:
         self.column = len(mapData[0])
         self.env_img_list_original = load_env_images(mapData)
         self.env_img_list = load_env_images(mapData,perBlockWidth)
-        self.env_img_list_dark = load_env_images(mapData,perBlockWidth,None,150)
-        self.mapData = initialBlockData(mapData,facilityData,blocks_setting,dark_mode)
+        if dark_mode == True:
+            self.env_img_list_dark = load_env_images(mapData,perBlockWidth,None,150)
+        else:
+            self.env_img_list_dark = None
+        self.dark_mode = dark_mode
+        self.mapData = initialBlockData(mapData,facilityData,blocks_setting)
         self.facilityImg = loadFacilityImg(facilityData)
         self.facilityData = initialFacility(facilityData)
         self.lightArea = []
@@ -29,8 +33,9 @@ class MapObject:
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list:
             self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height())))
-        for key in self.env_img_list_dark:
-            self.env_img_list_dark[key] = addDarkness(pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height()))),150)
+        if self.dark_mode == True:
+            for key in self.env_img_list_dark:
+                self.env_img_list_dark[key] = addDarkness(pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height()))),150)
         self.surface_width = int(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
         self.surface_height = int(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
@@ -57,7 +62,7 @@ class MapObject:
             for x in range(len(self.mapData[y])):
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)
                 #画上场景图片
-                if (x,y) not in self.lightArea:
+                if self.dark_mode == True and (x,y) not in self.lightArea:
                     self.mapSurface.blit(self.env_img_list_dark[self.mapData[y][x].name],(xTemp,yTemp))
                 else:
                     self.mapSurface.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
@@ -85,11 +90,7 @@ class MapObject:
         }
 
 #初始化地图数据
-def initialBlockData(mapData,facilityData,blocks_setting,dark_mode):
-    if dark_mode == True:
-        alphaValue = 255
-    else:
-        alphaValue = 0
+def initialBlockData(mapData,facilityData,blocks_setting):
     for y in range(len(mapData)):
         for x in range(len(mapData[y])):
             mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])

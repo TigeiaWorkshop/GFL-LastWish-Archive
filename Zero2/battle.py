@@ -14,7 +14,7 @@ from Zero2.map import *
 from Zero2.AI import *
 from Zero2.skills import *
 
-def battle(chapter_name,screen,lang,fps,dark_mode=True):
+def battle(chapter_name,screen,lang,fps):
     if pygame.joystick.get_count()>0:
         pygame.joystick.init()
         joystick = pygame.joystick.Joystick(0)
@@ -77,7 +77,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         block_y = len(loadData["map"])
         block_x = len(loadData["map"][0])
-        zoomIn = loadData["zoomIn"]
+        zoomIn = loadData["zoomIn"]*100
         local_x = loadData["local_x"]
         local_y = loadData["local_y"]
         characters = loadData["character"]
@@ -85,16 +85,17 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         bg_music = loadData["background_music"]
         theWeather = loadData["weather"]
         dialogInfo = loadData["dialogs"]
+        darkMode = loadData["darkMode"]
 
     if zoomIn < 200:
         zoomIn = 200
-    elif zoomIn > 300:
-        zoomIn = 300
+    elif zoomIn > 400:
+        zoomIn = 400
     zoomIntoBe = zoomIn
-    perBlockWidth = round(window_x/block_x*zoomIn/100)
-    perBlockHeight = round(window_y/block_y*zoomIn/100)
+    perBlockWidth = round(window_x/10)
+    perBlockHeight = round(window_y/10)
     #初始化地图模块
-    theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,dark_mode,perBlockWidth)
+    theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,darkMode,perBlockWidth)
     
     #初始化角色信息
     i = 1
@@ -264,11 +265,11 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
         for i in range(len(battle_info)):
             battle_info[i].set_alpha(a)
-            drawImg(battle_info[i],(perBlockWidth*1.5,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+            drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
             if i == 1:
                 temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                 temp_secode.set_alpha(a)
-                drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
         Display.flip()
     
     #加载音乐
@@ -299,7 +300,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     characters_data[every_chara].undetected = False
                 characters_data[every_chara].draw("wait",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
             for enemies in sangvisFerris_data:
-                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or dark_mode != True:
+                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or darkMode != True:
                     sangvisFerris_data[enemies].draw("wait",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
             #加载雪花
             if weatherController != None:
@@ -311,11 +312,11 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
             for i in range(len(battle_info)):
                 battle_info[i].set_alpha(a)
-                drawImg(battle_info[i],(perBlockWidth*1.5,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
                 if i == 1:
                     temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                     temp_secode.set_alpha(a)
-                    drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                    drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
             Display.flip()
     
     #战斗系统主要loop
@@ -343,7 +344,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                 theMap.display_facility(screen,local_x,local_y)
                 #角色动画
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
-                    if value.faction == "character" or (value.x,value.y) in theMap.lightArea or dark_mode != True:
+                    if value.faction == "character" or (value.x,value.y) in theMap.lightArea or darkMode != True:
                         if all_characters_path != None and key in all_characters_path:
                             value.draw("move",screen,None,perBlockWidth,theMap.row,local_x,local_y)
                         elif theAction != None and key in theAction:
@@ -474,7 +475,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                             reProcessMap = True
                             else:
                                 key_to_remove.append(key)
-                        if reProcessMap == True:
+                        if darkMode == True and reProcessMap == True:
                             theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
                             theMap.process_map()
                         for i in range(len(key_to_remove)):
@@ -582,12 +583,24 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         #角色图标
                         if dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"] != None:
                             drawImg(character_icon_img_list[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
-                    #玩家输入按键判定
-                    for event in pygame.event.get():
-                        if event.type == KEYDOWN:
-                            if event.key == K_ESCAPE:
-                                exit()
-                        elif event.type == MOUSEBUTTONDOWN and event.button == 1 or ifJoystickInit and event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
+                #闲置一定时间（秒）
+                elif "idle" in dialog_to_display[display_num]:
+                    if seconde_to_idle == None:
+                        seconde_to_idle = dialog_to_display[display_num]["idle"]*fps
+                    else:
+                        if idle_seconde < seconde_to_idle:
+                            idle_seconde += 1
+                        else:
+                            display_num += 1
+                            idle_seconde = 0
+                            seconde_to_idle = None
+                #玩家输入按键判定
+                for event in pygame.event.get():
+                    if event.type == KEYDOWN:
+                        if event.key == K_ESCAPE:
+                            exit()
+                    elif event.type == MOUSEBUTTONDOWN and event.button == 1 or ifJoystickInit and event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
+                        if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
                             display_num +=1
                             if display_num < len(dialog_to_display):
                                 if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
@@ -620,18 +633,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                     dialoguebox_down.x = -window_x*0.3
                                     dialog_down_content_id = 0
                                     dialog_down_displayed_line = 0
-                            break
-                #闲置一定时间（秒）
-                elif "idle" in dialog_to_display[display_num]:
-                    if seconde_to_idle == None:
-                        seconde_to_idle = dialog_to_display[display_num]["idle"]*fps
-                    else:
-                        if idle_seconde < seconde_to_idle:
-                            idle_seconde += 1
-                        else:
-                            display_num += 1
-                            idle_seconde = 0
-                            seconde_to_idle = None
+                        break
                 #渐变效果：一次性的
                 if txt_alpha >= 0:
                     black_bg.set_alpha(txt_alpha)
@@ -642,11 +644,11 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
                     for i in range(len(battle_info)):
                         battle_info[i].set_alpha(txt_alpha)
-                        drawImg(battle_info[i],(perBlockWidth*1.5,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                        drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
                         if i == 1:
                             temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                             temp_secode.set_alpha(txt_alpha)
-                            drawImg(temp_secode,(perBlockWidth*1.5+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                            drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
                     txt_alpha -= 5
                 Display.flip()
             dialog_to_display = None
@@ -694,7 +696,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     #上下滚轮-放大和缩小地图
                     if event.button == 1 and whose_round == "player":
                         right_click = True
-                    if event.button == 4 and zoomIntoBe < 300:
+                    if event.button == 4 and zoomIntoBe < 400:
                         zoomIntoBe += 20
                     elif event.button == 5 and zoomIntoBe > 200:
                         zoomIntoBe -= 20
@@ -892,7 +894,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     if screen_to_move_y == None:
                         if tempY < window_y*0.2 and local_y<=0:
                             screen_to_move_y = window_y*0.2-tempY
-                        elif characters_data[the_character_get_click].y*perBlockHeight-perBlockHeight/2+local_y > window_y*0.8 and local_y>=theMap.row*perBlockHeight*-1:
+                        elif tempY > window_y*0.8 and local_y>=theMap.row*perBlockHeight*-1:
                             screen_to_move_y = window_y*0.8-tempY
                         
                 #显示攻击/移动/技能范围
@@ -1021,7 +1023,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         else:
                             warnings_to_display.add(warnings_info["no_enemy_in_effective_range"])
                             action_choice = ""
-                            green_hide = False
+                            green_hide = "SelectMenu"
                     #显示技能范围        
                     elif action_choice == "skill":
                         skill_target = None
@@ -1106,7 +1108,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         #无需换弹
                         elif bullets_to_add <= 0:
                             warnings_to_display.add(warnings_info["magazine_is_full"])
-                            action_choice = ""
+                            green_hide = "SelectMenu"
                         else:
                             print(the_character_get_click+" is causing trouble, please double check the files or reporting this issue")
                             break
@@ -1116,6 +1118,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                     #被点击的角色动画
                     green_hide=True
                     if action_choice == "move":
+                        theCharacterMoved = False
                         if the_route != []:
                             if theMap.mapData[int(characters_data[the_character_get_click].y)][int(characters_data[the_character_get_click].x)] == 2:
                                 characters_data[the_character_get_click].undetected = True
@@ -1129,31 +1132,28 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                                 characters_data[the_character_get_click].setFlip(False)
                                 if characters_data[the_character_get_click].x >= the_route[0][0]:
                                     characters_data[the_character_get_click].x = the_route[0][0]
-                                    the_route.pop(0)
-                                    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                                    theMap.process_map()
+                                    theCharacterMoved = True
                             elif characters_data[the_character_get_click].x > the_route[0][0]:
                                 characters_data[the_character_get_click].x-=0.05
                                 characters_data[the_character_get_click].setFlip(True)
                                 if characters_data[the_character_get_click].x <= the_route[0][0]:
                                     characters_data[the_character_get_click].x = the_route[0][0]
-                                    the_route.pop(0)
-                                    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                                    theMap.process_map()
+                                    theCharacterMoved = True
                             elif characters_data[the_character_get_click].y < the_route[0][1]:
                                 characters_data[the_character_get_click].y+=0.05
                                 characters_data[the_character_get_click].setFlip(True)
                                 if characters_data[the_character_get_click].y >= the_route[0][1]:
                                     characters_data[the_character_get_click].y = the_route[0][1]
-                                    the_route.pop(0)
-                                    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                                    theMap.process_map()
+                                    theCharacterMoved = True
                             elif characters_data[the_character_get_click].y > the_route[0][1]:
                                 characters_data[the_character_get_click].setFlip(False)
                                 characters_data[the_character_get_click].y-=0.05
                                 if characters_data[the_character_get_click].y <= the_route[0][1]:
                                     characters_data[the_character_get_click].y = the_route[0][1]
-                                    the_route.pop(0)
+                                    theCharacterMoved = True
+                            if theCharacterMoved == True:
+                                the_route.pop(0)
+                                if darkMode == True:
                                     theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
                                     theMap.process_map()
                             characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
@@ -1339,7 +1339,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             if sangvisFerris_data[enemies_in_control].y <= enemy_action["route"][0][1]:
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
-                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or dark_mode != True:
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or darkMode != True:
                             sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
@@ -1351,7 +1351,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                         enemy_action = None
                         enemies_in_control = ""
                 elif enemy_action["action"] == "attack":
-                    if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or dark_mode != True:
+                    if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or darkMode != True:
                         if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
                             sangvisFerris_data[enemies_in_control].setFlip(True)
                         else:
@@ -1405,12 +1405,12 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
                             if sangvisFerris_data[enemies_in_control].y <= enemy_action["route"][0][1]:
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
-                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or dark_mode != True:
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or darkMode != True:
                             sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
                             pygame.mixer.Channel(0).stop()
-                        if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or dark_mode != True:
+                        if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or darkMode != True:
                             if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
                                 sangvisFerris_data[enemies_in_control].setFlip(True)
                             else:
@@ -1449,7 +1449,7 @@ def battle(chapter_name,screen,lang,fps,dark_mode=True):
             rightClickCharacterAlphaDeduct = True
             for key,value in dicMerge(characters_data,sangvisFerris_data).items():
                 #根据血量判断角色的动作
-                if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and dark_mode != True:
+                if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and darkMode != True:
                     if value.current_hp > 0:
                         if green_hide == True and pygame.mouse.get_pressed()[2]:
                             if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
