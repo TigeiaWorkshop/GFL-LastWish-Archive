@@ -1,7 +1,5 @@
 # cython: language_level=3
 from Zero2.basic import *
-import pygame
-from pygame.locals import *
 from moviepy.editor import *
 
 def cutscene(screen,surface,videoPath,bgmPath):

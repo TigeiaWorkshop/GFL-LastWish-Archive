@@ -1,10 +1,4 @@
 # cython: language_level=3
-import glob
-import math
-import time
-import pygame
-import yaml
-from pygame.locals import *
 from Zero2.basic import *
 from Zero2.characterDataManager import *
 from Zero2.map import *

@@ -2,11 +2,15 @@
 import glob
 import math
 import os
+import random
+import time
+from sys import exit
 
 import cv2
 import pygame
+import yaml
+from pygame.locals import *
 
-from sys import exit
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
 def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):

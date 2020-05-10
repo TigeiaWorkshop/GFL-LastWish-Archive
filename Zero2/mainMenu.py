@@ -1,8 +1,4 @@
 # cython: language_level=3
-import time
-import pygame
-import yaml
-from pygame.locals import *
 from Zero2.basic import *
 from Zero2.cutscene import *
 from Zero2.dialog import *
@@ -10,7 +6,8 @@ from Zero2.dialog import *
 def mainMenu(screen,lang,fps,mode=""):
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
-
+    #帧率控制器
+    Display = DisplayController(fps)
     #加载主菜单文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -48,11 +45,6 @@ def mainMenu(screen,lang,fps,mode=""):
     chapter_select_txt_start_height = (window_y-len(chapter_select)*window_x/38*2)/2
     #关卡选择的封面
     cover_img = loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
-    #帧数控制器
-    fpsClock = pygame.time.Clock()
-    video_fps = videoCapture.getFPS()
-    if video_fps<30:
-        video_fps=30
     #视频面
     surface = pygame.surface.Surface((window_x, window_y))
     #音效
@@ -71,8 +63,7 @@ def mainMenu(screen,lang,fps,mode=""):
         drawImg(t1,(30,window_y-130),screen)
         t2.set_alpha(i)
         drawImg(t2,(30,window_y-80),screen)
-        time.sleep(0.01)
-        pygame.display.flip()
+        Display.flip()
     
     for i in range(250,0,-2):
         the_black.draw(screen)
@@ -80,8 +71,7 @@ def mainMenu(screen,lang,fps,mode=""):
         drawImg(t1,(30,window_y-130),screen)
         t2.set_alpha(i)
         drawImg(t2,(30,window_y-80),screen)
-        time.sleep(0.01)
-        pygame.display.flip()
+        Display.flip()
 
     # 游戏主循环
     while True:
@@ -151,5 +141,4 @@ def mainMenu(screen,lang,fps,mode=""):
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')
             pygame.mixer.music.play(loops=9999, start=0.0)
 
-        fpsClock.tick(video_fps)
-        pygame.display.update()
+        Display.flip()

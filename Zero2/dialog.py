@@ -1,11 +1,6 @@
 # cython: language_level=3
-import glob
-import pygame
-import yaml
-from pygame.locals import *
 from Zero2.basic import *
 from Zero2.battle import *
-
 
 def dialog(chapter_name,screen,lang,fps,part):
     #获取屏幕的尺寸

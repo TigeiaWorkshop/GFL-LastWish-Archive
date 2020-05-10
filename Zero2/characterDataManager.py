@@ -1,9 +1,5 @@
 # cython: language_level=3
-import random
-import os
-import pygame
-import glob
-from Zero2.basic import fontRender,displayInCenter
+from Zero2.basic import *
 from Zero2.map import calPosInMap
 
 class Doll:

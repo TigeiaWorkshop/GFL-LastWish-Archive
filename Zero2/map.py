@@ -1,12 +1,4 @@
 # cython: language_level=3
-import glob
-import math
-import os
-import random
-
-import pygame
-import yaml
-
 from Zero2.basic import *
 
 class MapObject:
