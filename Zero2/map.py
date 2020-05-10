@@ -21,7 +21,7 @@ class MapObject:
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
         self.bgImg = loadImg("Assets\image\dialog_background\snowfield.jpg")
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
-    def changePerBlockSize(self,newPerBlockWidth):
+    def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list:
             self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height())))
@@ -31,7 +31,7 @@ class MapObject:
         self.surface_width = int(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
         self.surface_height = int(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
-        self.process_map()
+        self.process_map(window_x,window_y)
     def display_map(self,screen,local_x=0,local_y=0):
         screen.blit(self.mapSurface,(local_x,local_y))
     def display_facility(self,screen,local_x=0,local_y=0):
@@ -48,7 +48,12 @@ class MapObject:
             xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
             chestImg = pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
             screen.blit(chestImg,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
-    def process_map(self):
+    def process_map(self,window_x,window_y):
+        if self.surface_width < window_x:
+            self.surface_width = window_x
+        if self.surface_height < window_y:
+            self.surface_height = window_y
+        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
         self.mapSurface.blit(pygame.transform.scale(self.bgImg,(self.surface_width,self.surface_height)),(0,0))
         for y in range(len(self.mapData)):
             for x in range(len(self.mapData[y])):

@@ -114,7 +114,7 @@ def battle(chapter_name,screen,lang,fps):
 
     #计算光亮区域 并初始化地图
     theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-    theMap.process_map()
+    theMap.process_map(window_x,window_y)
 
     #加载对话时角色的图标
     character_icon_img_list={}
@@ -468,7 +468,7 @@ def battle(chapter_name,screen,lang,fps):
                                 key_to_remove.append(key)
                         if darkMode == True and reProcessMap == True:
                             theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                            theMap.process_map()
+                            theMap.process_map(window_x,window_y)
                         for i in range(len(key_to_remove)):
                             all_characters_path.pop(key_to_remove[i])
                     else:
@@ -751,7 +751,7 @@ def battle(chapter_name,screen,lang,fps):
                 UI_img["blue"] = resizeImg(original_UI_img["blue"], (perBlockWidth*0.9, None))
                 UI_img["orange"] = resizeImg(original_UI_img["orange"], (perBlockWidth*0.9, None))
                 select_menu_button =  resizeImg(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
-                theMap.changePerBlockSize(perBlockWidth)
+                theMap.changePerBlockSize(perBlockWidth,window_x,window_y)
             else:
                 zoomIn = zoomIntoBe
 
@@ -780,7 +780,7 @@ def battle(chapter_name,screen,lang,fps):
             #如果需要移动屏幕
             if screen_to_move_x != None and screen_to_move_x != 0:
                 temp_value = local_x + screen_to_move_x*0.2
-                if -1*theMap.column*perBlockWidth<=temp_value<=0:
+                if window_x-theMap.mapSurface.get_width()<=temp_value<=0:
                     local_x = temp_value
                     screen_to_move_x*=0.8
                     if int(screen_to_move_x) == 0:
@@ -789,13 +789,27 @@ def battle(chapter_name,screen,lang,fps):
                     screen_to_move_x = 0
             if screen_to_move_y != None and screen_to_move_y !=0:
                 temp_value = local_y + screen_to_move_y*0.2
-                if -1*theMap.row*perBlockHeight<=temp_value<=0:
+                if window_y-theMap.mapSurface.get_height()<=temp_value<=0:
                     local_y = temp_value
                     screen_to_move_y*=0.8
                     if int(screen_to_move_y) == 0:
                         screen_to_move_y = 0
                 else:
                     screen_to_move_y = 0
+
+            #检测屏幕是不是移到了不移到的地方
+            if local_x < window_x-theMap.mapSurface.get_width():
+                local_x = window_x-theMap.mapSurface.get_width()
+                screen_to_move_x = 0
+            elif local_x > 0:
+                local_x = 0
+                screen_to_move_x = 0
+            if local_y < window_y-theMap.mapSurface.get_height():
+                local_y = window_y-theMap.mapSurface.get_height()
+                screen_to_move_y = 0
+            elif local_y > 0:
+                local_y = 0
+                screen_to_move_y = 0
             
             #加载地图
             theMap.display_map(screen,local_x,local_y)
@@ -1147,7 +1161,7 @@ def battle(chapter_name,screen,lang,fps):
                                 the_route.pop(0)
                                 if darkMode == True:
                                     theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                                    theMap.process_map()
+                                    theMap.process_map(window_x,window_y)
                             characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
                         else:
                             pygame.mixer.Channel(0).stop()
@@ -1192,7 +1206,7 @@ def battle(chapter_name,screen,lang,fps):
                                 isWaiting = True
                                 the_character_get_click = ""
                                 action_choice = ""
-                            if keyTemp in dialogInfo["move"]:
+                            if "move" in dialogInfo and keyTemp in dialogInfo["move"]:
                                 dialog_to_display = dialog_during_battle[dialogInfo["move"][keyTemp]]
                                 break
                     elif action_choice == "attack":
@@ -1228,7 +1242,7 @@ def battle(chapter_name,screen,lang,fps):
                         if characters_data[the_character_get_click].gif_dic["skill"]["imgId"] == characters_data[the_character_get_click].gif_dic["skill"]["imgNum"]-1:
                             characters_data[the_character_get_click].gif_dic["skill"]["imgId"] = 0
                             theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                            theMap.process_map()
+                            theMap.process_map(window_x,window_y)
                             isWaiting =True
                             the_character_get_click = ""
                             action_choice = ""
@@ -1256,7 +1270,7 @@ def battle(chapter_name,screen,lang,fps):
                 text_now_total_rounds = text_now_total_rounds_original
                 text_now_total_rounds = fontRender(text_now_total_rounds.replace("NaN",str(total_rounds)), "white",window_x/38)
                 if text_of_endround_move < (window_x-your_round_txt.get_width()*2)/2:
-                    text_of_endround_move += perBlockWidth*2
+                    text_of_endround_move += perBlockWidth/4
                 if text_of_endround_move >= (window_x-your_round_txt.get_width()*2)/2-30:
                     text_now_total_rounds.set_alpha(text_of_endround_alpha)
                     your_round_txt.set_alpha(text_of_endround_alpha)
@@ -1360,7 +1374,7 @@ def battle(chapter_name,screen,lang,fps):
                             the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                             result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
                             theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                            theMap.process_map()
+                            theMap.process_map(window_x,window_y)
                             damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                         else:
                             damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
@@ -1419,7 +1433,7 @@ def battle(chapter_name,screen,lang,fps):
                                 the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                                 result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
                                 theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                                theMap.process_map()
+                                theMap.process_map(window_x,window_y)
                                 damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                             else:
                                 damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
@@ -1527,7 +1541,7 @@ def battle(chapter_name,screen,lang,fps):
                             del characters_data[key]
                             result_of_round["times_characters_down"]+=1
                             theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                            theMap.process_map()
+                            theMap.process_map(window_x,window_y)
             for key in the_dead_one_remove:
                 del the_dead_one[key]
             #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
