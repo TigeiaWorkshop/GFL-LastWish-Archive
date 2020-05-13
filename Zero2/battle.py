@@ -113,8 +113,7 @@ def battle(chapter_name,screen,lang,fps):
         i+=1
 
     #计算光亮区域 并初始化地图
-    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-    theMap.process_map(window_x,window_y)
+    theMap.calculate_darkness(characters_data,window_x,window_y)
 
     #加载对话时角色的图标
     character_icon_img_list={}
@@ -149,7 +148,6 @@ def battle(chapter_name,screen,lang,fps):
         "bullets_number_brown" : loadImg("Assets/image/UI/bullets_number.png"),
         "green" : loadImg("Assets/image/UI/green.png",None,None,150),
         "red" : loadImg("Assets/image/UI/red.png",None,None,150),
-        "black" : loadImg("Assets/image/UI/shadow.png",None,None,150),
         "yellow": loadImg("Assets/image/UI/yellow.png",None,None,150),
         "blue": loadImg("Assets/image/UI/blue.png",None,None,150),
         "orange": loadImg("Assets/image/UI/orange.png",None,None,150),
@@ -161,13 +159,11 @@ def battle(chapter_name,screen,lang,fps):
     UI_img = {
         "green" : resizeImg(original_UI_img["green"], (perBlockWidth*0.9, None)),
         "red" : resizeImg(original_UI_img["red"], (perBlockWidth*0.9, None)),
-        "black" : resizeImg(original_UI_img["black"], (perBlockWidth*0.9, None)),
         "yellow" : resizeImg(original_UI_img["yellow"], (perBlockWidth*0.9, None)),
         "blue" : resizeImg(original_UI_img["blue"], (perBlockWidth*0.9, None)),
         "orange": resizeImg(original_UI_img["orange"], (perBlockWidth*0.9, None))
     }
     theMap.greenBlockImg = UI_img["green"]
-    theMap.shadowImg = UI_img["black"]
     the_character_get_click_info_board = loadImage("Assets/image/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
     #加载对话框图片
     dialoguebox_up = loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
@@ -283,7 +279,7 @@ def battle(chapter_name,screen,lang,fps):
             #加载地图
             theMap.display_map(screen,local_x,local_y)
             #展示设施
-            theMap.display_facility(screen,local_x,local_y)
+            theMap.display_facility(characters_data,screen,local_x,local_y)
             #角色动画
             for every_chara in characters_data:
                 if theMap.mapData[characters_data[every_chara].y][characters_data[every_chara].x] == 2:
@@ -333,7 +329,7 @@ def battle(chapter_name,screen,lang,fps):
                 #加载地图
                 theMap.display_map(screen,local_x,local_y)
                 #展示设施
-                theMap.display_facility(screen,local_x,local_y)
+                theMap.display_facility(characters_data,screen,local_x,local_y)
                 #角色动画
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
                     if value.faction == "character" or (value.x,value.y) in theMap.lightArea or darkMode != True:
@@ -362,9 +358,8 @@ def battle(chapter_name,screen,lang,fps):
                                 if theMap.mapData[y][x].canPassThrough == False:
                                     map2d[x][y]=1
                         #历遍设施，设置障碍方块
-                        for key1 in theMap.facilityData:
-                            for key2,value2 in theMap.facilityData[key1].items():
-                                map2d[value2["x"]][value2["y"]]=1
+                        for key1,value1 in theMap.facilityData["campfire"].items():
+                            map2d[value1["x"]][value1["y"]]=1
                         all_characters_path = {}
                         # 历遍所有角色，将不需要移动的角色的坐标点设置为障碍方块，为需要移动的角色生成路径
                         for key,value in dicMerge(sangvisFerris_data,characters_data).items():
@@ -468,8 +463,7 @@ def battle(chapter_name,screen,lang,fps):
                             else:
                                 key_to_remove.append(key)
                         if darkMode == True and reProcessMap == True:
-                            theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                            theMap.process_map(window_x,window_y)
+                            theMap.calculate_darkness(characters_data,window_x,window_y)
                         for i in range(len(key_to_remove)):
                             all_characters_path.pop(key_to_remove[i])
                     else:
@@ -747,7 +741,6 @@ def battle(chapter_name,screen,lang,fps):
                 #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
                 UI_img["green"] = resizeImg(original_UI_img["green"], (perBlockWidth*0.9, None))
                 UI_img["red"] = resizeImg(original_UI_img["red"], (perBlockWidth*0.9, None))
-                UI_img["black"] = resizeImg(original_UI_img["black"], (perBlockWidth*0.9, None))
                 UI_img["yellow"] = resizeImg(original_UI_img["yellow"], (perBlockWidth*0.9, None))
                 UI_img["blue"] = resizeImg(original_UI_img["blue"], (perBlockWidth*0.9, None))
                 UI_img["orange"] = resizeImg(original_UI_img["orange"], (perBlockWidth*0.9, None))
@@ -936,10 +929,8 @@ def battle(chapter_name,screen,lang,fps):
                                     if theMap.mapData[y][x].canPassThrough == False:
                                         map2d[x][y]=1
                             #历遍设施，设置障碍方块
-                            for key1 in theMap.facilityData:
-                                if key1 != "chest":
-                                    for key2,value2 in theMap.facilityData[key1].items():
-                                        map2d[value2["x"]][value2["y"]]=1
+                            for key1,value1 in theMap.facilityData["campfire"].items():
+                                map2d[value1["x"]][value1["y"]]=1
                             # 历遍所有角色，将角色的坐标点设置为障碍方块
                             for key,value in dicMerge(characters_data,sangvisFerris_data).items():
                                 map2d[value.x][value.y] = 1
@@ -970,6 +961,8 @@ def battle(chapter_name,screen,lang,fps):
                                 areaDrawColorBlock["green"] = the_route
                                 xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,the_route[-1][0],the_route[-1][1],local_x,local_y)
                                 displayInCenter(fontRender("-"+str((i+1)*2)+"AP","green",perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
+                            else:
+                                areaDrawColorBlock["green"] = []
                         else:
                             areaDrawColorBlock["green"] = []
                     #显示攻击范围        
@@ -1156,8 +1149,7 @@ def battle(chapter_name,screen,lang,fps):
                             if theCharacterMoved == True:
                                 the_route.pop(0)
                                 if darkMode == True:
-                                    theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                                    theMap.process_map(window_x,window_y)
+                                    theMap.calculate_darkness(characters_data,window_x,window_y)
                             characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
                         else:
                             pygame.mixer.Channel(0).stop()
@@ -1237,8 +1229,7 @@ def battle(chapter_name,screen,lang,fps):
                             del temp_dic
                         if characters_data[the_character_get_click].gif_dic["skill"]["imgId"] == characters_data[the_character_get_click].gif_dic["skill"]["imgNum"]-1:
                             characters_data[the_character_get_click].gif_dic["skill"]["imgId"] = 0
-                            theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                            theMap.process_map(window_x,window_y)
+                            theMap.calculate_darkness(characters_data,window_x,window_y)
                             isWaiting =True
                             the_character_get_click = ""
                             action_choice = ""
@@ -1369,8 +1360,7 @@ def battle(chapter_name,screen,lang,fps):
                         if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
                             the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                             result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
-                            theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                            theMap.process_map(window_x,window_y)
+                            theMap.calculate_darkness(characters_data,window_x,window_y)
                             damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                         else:
                             damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
@@ -1428,8 +1418,7 @@ def battle(chapter_name,screen,lang,fps):
                             if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
                                 the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                                 result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
-                                theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                                theMap.process_map(window_x,window_y)
+                                theMap.calculate_darkness(characters_data,window_x,window_y)
                                 damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                             else:
                                 damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
@@ -1543,13 +1532,12 @@ def battle(chapter_name,screen,lang,fps):
                             the_dead_one_remove.append(key)
                             del characters_data[key]
                             result_of_round["times_characters_down"]+=1
-                            theMap.lightArea = calculate_darkness(characters_data,theMap.facilityData["campfire"])
-                            theMap.process_map(window_x,window_y)
+                            theMap.calculate_darkness(characters_data,window_x,window_y)
             for key in the_dead_one_remove:
                 del the_dead_one[key]
             #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
             #展示设施
-            theMap.display_facility(screen,local_x,local_y)
+            theMap.display_facility(characters_data,screen,local_x,local_y)
             #显示选择菜单
             if green_hide == "SelectMenu":
                 buttonGetHover = None

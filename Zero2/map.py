@@ -21,6 +21,7 @@ class MapObject:
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
         self.bgImg = loadImg("Assets\image\dialog_background\snowfield.jpg")
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
+    #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list:
@@ -32,22 +33,38 @@ class MapObject:
         self.surface_height = int(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
         self.process_map(window_x,window_y)
+    #把地图画到屏幕上
     def display_map(self,screen,local_x=0,local_y=0):
         screen.blit(self.mapSurface,(local_x,local_y))
-    def display_facility(self,screen,local_x=0,local_y=0):
-        #画上篝火
-        for key,value in self.facilityData["campfire"].items():
-            xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
-            screen.blit(pygame.transform.scale(self.facilityImg["campfire"][int(value["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
-            if value["imgId"] >= len(self.facilityImg["campfire"])-1:
-                value["imgId"] = 0
-            else:
-                value["imgId"] += 0.1
-        #画上箱子
-        for key,value in self.facilityData["chest"].items():
-            xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
-            chestImg = pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-            screen.blit(chestImg,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+    #画上设施
+    def display_facility(self,characters_data,screen,local_x=0,local_y=0):
+        for key,value in self.facilityData.items():
+            for key2,value2 in value.items():
+                imgToBlit = None
+                xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value2["x"],value2["y"],local_x,local_y)
+                if -self.perBlockWidth<=xTemp<screen.get_width() and -self.perBlockWidth<=yTemp<screen.get_height():
+                    #画上篝火
+                    if key == "campfire":
+                        imgToBlit = pygame.transform.scale(self.facilityImg["campfire"][int(value2["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        if value2["imgId"] >= len(self.facilityImg["campfire"])-1:
+                            value2["imgId"] = 0
+                        else:
+                            value2["imgId"] += 0.1
+                    #画上箱子
+                    elif key == "chest":
+                        imgToBlit = pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                    #画上树
+                    elif key == "tree":
+                        imgToBlit = pygame.transform.scale(self.facilityImg[value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
+                        xTemp -= self.perBlockWidth*0.125
+                        yTemp -= self.perBlockWidth*0.25
+                        for theCharacter in characters_data:
+                            if characters_data[theCharacter].x == value2["x"] and characters_data[theCharacter].y == value2["y"]:
+                                imgToBlit.set_alpha(100)
+                                break
+                    if imgToBlit != None:
+                        screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+    #重新绘制地图
     def process_map(self,window_x,window_y):
         if self.surface_width < window_x:
             self.surface_width = window_x
@@ -77,6 +94,7 @@ class MapObject:
                     block_get_click = {"x":x,"y":y}
                     break
         return block_get_click
+    #计算方块被画出的位置
     def getBlockExactLocation(self,x,y,local_x,local_y):
         xStart,yStart = calPosInMap(self.row,self.perBlockWidth,x,y,local_x,local_y)
         return {
@@ -85,6 +103,39 @@ class MapObject:
         "yStart": yStart,
         "yEnd": yStart + self.env_img_list[self.mapData[y][x].name].get_width()*0.5
         }
+    #计算光亮区域
+    def calculate_darkness(self,characters_data,window_x,window_y):
+        self.lightArea = []
+        for each_chara in characters_data:
+            the_character_effective_range = 2
+            if characters_data[each_chara].current_hp > 0 :
+                if characters_data[each_chara].effective_range["far"] != None:
+                    the_character_effective_range = characters_data[each_chara].effective_range["far"][1]+1
+                elif characters_data[each_chara].effective_range["middle"] != None:
+                    the_character_effective_range = characters_data[each_chara].effective_range["middle"][1]+1
+                elif characters_data[each_chara].effective_range["near"] != None:
+                    the_character_effective_range = characters_data[each_chara].effective_range["near"][1]+1
+            for y in range(int(characters_data[each_chara].y-the_character_effective_range),int(characters_data[each_chara].y+the_character_effective_range)):
+                if y < characters_data[each_chara].y:
+                    for x in range(int(characters_data[each_chara].x-the_character_effective_range-(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range+(y-characters_data[each_chara].y))):
+                        if (x,y) not in self.lightArea:
+                            self.lightArea.append((x,y))
+                else:
+                    for x in range(int(characters_data[each_chara].x-the_character_effective_range+(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range-(y-characters_data[each_chara].y))):
+                        if (x,y) not in self.lightArea:
+                            self.lightArea.append((x,y))
+        if self.facilityData["campfire"] != None:
+            for the_campfire in self.facilityData["campfire"]:
+                for y in range(int(self.facilityData["campfire"][the_campfire]["y"]-self.facilityData["campfire"][the_campfire]["range"]),int(self.facilityData["campfire"][the_campfire]["y"]+self.facilityData["campfire"][the_campfire]["range"])):
+                    if y < self.facilityData["campfire"][the_campfire]["y"]:
+                        for x in range(int(self.facilityData["campfire"][the_campfire]["x"]-self.facilityData["campfire"][the_campfire]["range"]-(y-self.facilityData["campfire"][the_campfire]["y"])+1),int(self.facilityData["campfire"][the_campfire]["x"]+self.facilityData["campfire"][the_campfire]["range"]+(y-self.facilityData["campfire"][the_campfire]["y"]))):
+                            if (x,y) not in self.lightArea:
+                                self.lightArea.append((x,y))
+                    else:
+                        for x in range(int(self.facilityData["campfire"][the_campfire]["x"]-self.facilityData["campfire"][the_campfire]["range"]+(y-self.facilityData["campfire"][the_campfire]["y"])+1),int(self.facilityData["campfire"][the_campfire]["x"]+self.facilityData["campfire"][the_campfire]["range"]-(y-self.facilityData["campfire"][the_campfire]["y"]))):
+                            if (x,y) not in self.lightArea:
+                                self.lightArea.append((x,y))
+        self.process_map(window_x,window_y)
 
 #初始化地图数据
 def initialBlockData(mapData,facilityData,blocks_setting):
@@ -147,22 +198,27 @@ class Snow:
 def loadFacilityImg(facilityData):
     Facility_images = {}
     #加载篝火的图片
-    if facilityData["campfire"] != None:
+    if "campfire" in facilityData and facilityData["campfire"] != None:
         Facility_images["campfire"] = []
         for i in range(1,11):
             try:
                 Facility_images["campfire"].append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
             except BaseException:
                 Facility_images["campfire"].append(loadImg("../Assets/image/environment/campfire/"+str(i)+".png"))
+    #加载箱子的图片
+    if "chest" in facilityData and facilityData["chest"] != None:
+        Facility_images["chest"] = loadImg("Assets/image/environment/decoration/chest.png")
+    #加载树的图片
+    if "tree" in facilityData and facilityData["tree"] != None:
+        for item in facilityData["tree"]:
+            imageName = facilityData["tree"][item]["image"]
+            if imageName not in Facility_images:
+                Facility_images[imageName] = loadImg("Assets/image/environment/decoration/"+imageName+".png")
     #加载其他设施的图片
-    allImg = glob.glob(r"Assets/image/environment/facility/*.png")
-    if len(allImg)>0:
-        for imgPath in allImg:
-            Facility_images[imgPath.lstrip("Assets/image/environment/facility/").rstrip(".png").replace("\\","")] = loadImg(imgPath)
-    else:
-        allImg = glob.glob(r"../Assets/image/environment/facility/*.png")
-        for imgPath in allImg:
-            Facility_images[imgPath.lstrip("../Assets/image/environment/facility/").rstrip(".png").replace("\\","")] = loadImg(imgPath)
+    if "decoration" in facilityData and facilityData["decoration"] != None:
+        for key,value in facilityData["decoration"].items():
+            if value["image"] not in Facility_images:
+                Facility_images[value["image"]] = loadImg("Assets/image/environment/decoration/"+value["image"]+".png")
     return Facility_images
 
 #读取需要的地图图片
@@ -183,40 +239,6 @@ def load_env_images(theMap,theWidth=None,theHeight=None,darkness=0):
         for img,value in env_img_list.items():
             env_img_list[img] = addDarkness(value,darkness)
     return env_img_list
-
-#计算光亮区域
-def calculate_darkness(characters_data,campfire_data):
-    light_area = []
-    for each_chara in characters_data:
-        the_character_effective_range = 2
-        if characters_data[each_chara].current_hp > 0 :
-            if characters_data[each_chara].effective_range["far"] != None:
-                the_character_effective_range = characters_data[each_chara].effective_range["far"][1]+1
-            elif characters_data[each_chara].effective_range["middle"] != None:
-                the_character_effective_range = characters_data[each_chara].effective_range["middle"][1]+1
-            elif characters_data[each_chara].effective_range["near"] != None:
-                the_character_effective_range = characters_data[each_chara].effective_range["near"][1]+1
-        for y in range(int(characters_data[each_chara].y-the_character_effective_range),int(characters_data[each_chara].y+the_character_effective_range)):
-            if y < characters_data[each_chara].y:
-                for x in range(int(characters_data[each_chara].x-the_character_effective_range-(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range+(y-characters_data[each_chara].y))):
-                    if (x,y) not in light_area:
-                        light_area.append((x,y))
-            else:
-                for x in range(int(characters_data[each_chara].x-the_character_effective_range+(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range-(y-characters_data[each_chara].y))):
-                    if (x,y) not in light_area:
-                        light_area.append((x,y))
-    if campfire_data != None:
-        for the_campfire in campfire_data:
-            for y in range(int(campfire_data[the_campfire]["y"]-campfire_data[the_campfire]["range"]),int(campfire_data[the_campfire]["y"]+campfire_data[the_campfire]["range"])):
-                if y < campfire_data[the_campfire]["y"]:
-                    for x in range(int(campfire_data[the_campfire]["x"]-campfire_data[the_campfire]["range"]-(y-campfire_data[the_campfire]["y"])+1),int(campfire_data[the_campfire]["x"]+campfire_data[the_campfire]["range"]+(y-campfire_data[the_campfire]["y"]))):
-                        if (x,y) not in light_area:
-                            light_area.append((x,y))
-                else:
-                    for x in range(int(campfire_data[the_campfire]["x"]-campfire_data[the_campfire]["range"]+(y-campfire_data[the_campfire]["y"])+1),int(campfire_data[the_campfire]["x"]+campfire_data[the_campfire]["range"]-(y-campfire_data[the_campfire]["y"]))):
-                        if (x,y) not in light_area:
-                            light_area.append((x,y))
-    return light_area
 
 class Array2D:
     """

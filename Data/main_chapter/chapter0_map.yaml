@@ -48,6 +48,16 @@ facility:
         hp: 10
       x: 3
       y: 4
+  tree:
+    t1:
+      image: Forest_big_tree_needle_03
+      x: 3
+      y: 5
+  decoration:
+    stone1:
+      image: Forest_big_stone_01
+      x: 7
+      y: 7
 local_x: 0
 local_y: 0
 map: 
