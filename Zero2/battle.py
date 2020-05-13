@@ -224,12 +224,13 @@ def battle(chapter_name,screen,lang,fps):
     screen_to_move_x=None
     screen_to_move_y=None
     pressKeyToMove={"up":False,"down":False,"left":False,"right":False}
-    rightClickCharacterAlpha = 0
+    rightClickCharacterAlpha = None
     battleSystemMainLoop = True
     txt_alpha = 250
     skill_target = None
     stayingTime = 0
     buttonGetHover = None
+    areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
     # 移动路径
     the_route = []
     #上个回合因为暴露被敌人发现的角色
@@ -661,7 +662,7 @@ def battle(chapter_name,screen,lang,fps):
                         action_choice = ""
                         attacking_range = None
                         skill_range = None
-                        theMap.greenBlockImgArea = []
+                        areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                     if event.key == K_w:
                         pressKeyToMove["up"]=True
                     if event.key == K_s:
@@ -813,6 +814,12 @@ def battle(chapter_name,screen,lang,fps):
             
             #加载地图
             theMap.display_map(screen,local_x,local_y)
+            #画出用彩色方块表示的范围
+            for area in areaDrawColorBlock:
+                for position in areaDrawColorBlock[area]:
+                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,position[0],position[1],local_x,local_y)
+                    drawImg(UI_img[area],(xTemp+perBlockWidth*0.05,yTemp),screen)
+
             block_get_click = theMap.calBlockInMap(UI_img["green"],local_x,local_y)
             #玩家回合
             if whose_round == "player":
@@ -822,11 +829,15 @@ def battle(chapter_name,screen,lang,fps):
                         whose_round = "playerToSangvisFerris"
                         the_character_get_click = ""
                         green_hide = True
+                        attacking_range = None
+                        skill_range = None
+                        areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                     #是否在显示移动范围后点击了且点击区域在移动范围内
                     elif len(the_route) != 0 and block_get_click != None and (block_get_click["x"], block_get_click["y"]) in the_route and green_hide==False:
                         isWaiting = False
                         green_hide = True
                         characters_data[the_character_get_click].current_action_point -= len(the_route)*2
+                        areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                     elif green_hide == "SelectMenu" and buttonGetHover == "attack":
                         if characters_data[the_character_get_click].current_bullets > 0 and characters_data[the_character_get_click].current_action_point >= 5:
                             action_choice = "attack"
@@ -861,6 +872,7 @@ def battle(chapter_name,screen,lang,fps):
                         isWaiting = False
                         green_hide = True
                         attacking_range = None
+                        areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                     elif action_choice == "skill" and green_hide == False and the_character_get_click != "" and skill_target != None:
                         if skill_target in characters_data:
                             if characters_data[skill_target].x < characters_data[the_character_get_click].x:
@@ -876,6 +888,7 @@ def battle(chapter_name,screen,lang,fps):
                         isWaiting = False
                         green_hide = True
                         skill_range = None
+                        areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                     #判断是否有被点击的角色
                     elif block_get_click != None:
                         for key in characters_data:
@@ -884,6 +897,7 @@ def battle(chapter_name,screen,lang,fps):
                                 screen_to_move_y = None
                                 attacking_range = None
                                 skill_range = None
+                                areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                                 the_character_get_click = key
                                 green_hide = "SelectMenu"
                                 break
@@ -953,11 +967,11 @@ def battle(chapter_name,screen,lang,fps):
                                         break
                                     the_route.append((star_point_x,star_point_y))
                                 #显示路径
-                                for i in range(len(the_route)):
-                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,the_route[i][0],the_route[i][1],local_x,local_y)
-                                    screen.blit(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp))
-                                    if i == len(the_route)-1:
-                                        displayInCenter(fontRender("-"+str((i+1)*2)+"AP","green",perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
+                                areaDrawColorBlock["green"] = the_route
+                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,the_route[-1][0],the_route[-1][1],local_x,local_y)
+                                displayInCenter(fontRender("-"+str((i+1)*2)+"AP","green",perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
+                        else:
+                            areaDrawColorBlock["green"] = []
                     #显示攻击范围        
                     elif action_choice == "attack":
                         if attacking_range == None:
@@ -989,15 +1003,9 @@ def battle(chapter_name,screen,lang,fps):
                                 any_character_in_attack_range = True
                                 break
                         if any_character_in_attack_range == True:
-                            for potion in attacking_range["near"]:
-                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,potion[0],potion[1],local_x,local_y)
-                                drawImg(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                            for potion in attacking_range["middle"]:
-                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,potion[0],potion[1],local_x,local_y)
-                                drawImg(UI_img["blue"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                            for potion in attacking_range["far"]:
-                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,potion[0],potion[1],local_x,local_y)
-                                drawImg(UI_img["yellow"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                            areaDrawColorBlock["green"] = attacking_range["near"]
+                            areaDrawColorBlock["blue"] = attacking_range["middle"]
+                            areaDrawColorBlock["yellow"] = attacking_range["far"]
                             if block_get_click != None:
                                 the_attacking_range_area = []
                                 for area in attacking_range:
@@ -1006,18 +1014,15 @@ def battle(chapter_name,screen,lang,fps):
                                             if y < block_get_click["y"]:
                                                 for x in range(block_get_click["x"]-characters_data[the_character_get_click].attack_range-(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].attack_range+(y-block_get_click["y"])):
                                                     if theMap.mapData[y][x].canPassThrough == True:
-                                                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                        drawImg(UI_img["orange"],(xTemp+perBlockWidth*0.05,yTemp),screen)
                                                         the_attacking_range_area.append([x,y])
                                             else:
                                                 for x in range(block_get_click["x"]-characters_data[the_character_get_click].attack_range+(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].attack_range-(y-block_get_click["y"])):
                                                     if theMap.mapData[y][x].canPassThrough == True:
-                                                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                        drawImg(UI_img["orange"],(xTemp+perBlockWidth*0.05,yTemp),screen)
                                                         the_attacking_range_area.append([x,y])
                                         break
                                 enemies_get_attack = {}
                                 if len(the_attacking_range_area) > 0:
+                                    areaDrawColorBlock["orange"] = the_attacking_range_area
                                     for enemies in sangvisFerris_data:
                                         if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in the_attacking_range_area and sangvisFerris_data[enemies].current_hp>0:
                                             if [sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y] in attacking_range["far"]:
@@ -1057,15 +1062,9 @@ def battle(chapter_name,screen,lang,fps):
                                                     skill_range["middle"].append([x,y])
                                                 elif "near" in characters_data[the_character_get_click].skill_effective_range and characters_data[the_character_get_click].skill_effective_range["near"] != None and characters_data[the_character_get_click].skill_effective_range["near"][0] <= abs(x-characters_data[the_character_get_click].x)+abs(y-characters_data[the_character_get_click].y) <= characters_data[the_character_get_click].skill_effective_range["near"][1]:
                                                     skill_range["near"].append([x,y])
-                            for position in skill_range["near"]:
-                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,position[0],position[1],local_x,local_y)
-                                drawImg(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                            for position in skill_range["middle"]:
-                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,position[0],position[1],local_x,local_y)
-                                drawImg(UI_img["yellow"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                            for position in skill_range["far"]:
-                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,position[0],position[1],local_x,local_y)
-                                drawImg(UI_img["blue"],(xTemp+perBlockWidth*0.05,yTemp),screen)
+                            areaDrawColorBlock["green"] = skill_range["near"]
+                            areaDrawColorBlock["blue"] = skill_range["middle"]
+                            areaDrawColorBlock["yellow"] = skill_range["far"]
                             if block_get_click != None:
                                 the_skill_cover_area = []
                                 for area in skill_range:
@@ -1074,16 +1073,13 @@ def battle(chapter_name,screen,lang,fps):
                                             if y < block_get_click["y"]:
                                                 for x in range(block_get_click["x"]-characters_data[the_character_get_click].skill_cover_range-(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].skill_cover_range+(y-block_get_click["y"])):
                                                     if theMap.mapData[y][x].canPassThrough == True:
-                                                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                        drawImg(UI_img["orange"],(xTemp+perBlockWidth*0.05,yTemp),screen)
                                                         the_skill_cover_area.append([x,y])
                                             else:
                                                 for x in range(block_get_click["x"]-characters_data[the_character_get_click].skill_cover_range+(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].skill_cover_range-(y-block_get_click["y"])):
                                                     if theMap.mapData[y][x].canPassThrough == True:
-                                                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                        drawImg(UI_img["orange"],(xTemp+perBlockWidth*0.05,yTemp),screen)
                                                         the_skill_cover_area.append([x,y])
-                                            skill_target = skill(the_character_get_click,{"x":block_get_click["x"],"y":block_get_click["y"]},the_skill_cover_area,sangvisFerris_data,characters_data)
+                                        areaDrawColorBlock["orange"] = the_skill_cover_area
+                                        skill_target = skill(the_character_get_click,{"x":block_get_click["x"],"y":block_get_click["y"]},the_skill_cover_area,sangvisFerris_data,characters_data)
                                         break
                         else:
                             skill_target = skill(the_character_get_click,{"x":None,"y":None},None,sangvisFerris_data,characters_data)
@@ -1270,7 +1266,7 @@ def battle(chapter_name,screen,lang,fps):
                 text_now_total_rounds = text_now_total_rounds_original
                 text_now_total_rounds = fontRender(text_now_total_rounds.replace("NaN",str(total_rounds)), "white",window_x/38)
                 if text_of_endround_move < (window_x-your_round_txt.get_width()*2)/2:
-                    text_of_endround_move += perBlockWidth/4
+                    text_of_endround_move += perBlockWidth/2
                 if text_of_endround_move >= (window_x-your_round_txt.get_width()*2)/2-30:
                     text_now_total_rounds.set_alpha(text_of_endround_alpha)
                     your_round_txt.set_alpha(text_of_endround_alpha)
@@ -1460,44 +1456,39 @@ def battle(chapter_name,screen,lang,fps):
                 #根据血量判断角色的动作
                 if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and darkMode != True:
                     if value.current_hp > 0:
-                        if green_hide == True and pygame.mouse.get_pressed()[2]:
-                            if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
-                                rightClickCharacterAlphaDeduct = False
-                                if rightClickCharacterAlpha < 150:
-                                    rightClickCharacterAlpha += 10
+                        if green_hide == True and pygame.mouse.get_pressed()[2] and block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
+                            rightClickCharacterAlphaDeduct = False
+                            if rightClickCharacterAlpha == None:
+                                rightClickCharacterAlpha = 0
+                            if rightClickCharacterAlpha < 150:
+                                rightClickCharacterAlpha += 10
                                 UI_img["yellow"].set_alpha(rightClickCharacterAlpha)
                                 UI_img["blue"].set_alpha(rightClickCharacterAlpha)
                                 UI_img["green"].set_alpha(rightClickCharacterAlpha)
-                                for y in range(value.y-value.max_effective_range,value.y+value.max_effective_range+1):
-                                    if y < value.y:
-                                        for x in range(value.x-value.max_effective_range-(y-value.y),value.x+value.max_effective_range+(y-value.y)+1):
-                                            if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
-                                                if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
-                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                    drawImg(UI_img["yellow"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                                                elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
-                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                    drawImg(UI_img["blue"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                                                elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
-                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                    drawImg(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                                    else:
-                                        for x in range(value.x-value.max_effective_range+(y-value.y),value.x+value.max_effective_range-(y-value.y)+1):
-                                            if x == value.x and y == value.y:
-                                                pass
-                                            elif len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
-                                                if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
-                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                    drawImg(UI_img["yellow"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                                                elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
-                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                    drawImg(UI_img["blue"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                                                elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
-                                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,x,y,local_x,local_y)
-                                                    drawImg(UI_img["green"],(xTemp+perBlockWidth*0.05,yTemp),screen)
-                                UI_img["yellow"].set_alpha(150)
-                                UI_img["blue"].set_alpha(150)
-                                UI_img["green"].set_alpha(150)
+                            areaDrawColorBlock["yellow"] = []
+                            areaDrawColorBlock["blue"] = []
+                            areaDrawColorBlock["green"] = []
+                            for y in range(value.y-value.max_effective_range,value.y+value.max_effective_range+1):
+                                if y < value.y:
+                                    for x in range(value.x-value.max_effective_range-(y-value.y),value.x+value.max_effective_range+(y-value.y)+1):
+                                        if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
+                                            if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
+                                                areaDrawColorBlock["yellow"].append((x,y))
+                                            elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
+                                                areaDrawColorBlock["blue"].append((x,y))
+                                            elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
+                                                areaDrawColorBlock["green"].append((x,y))
+                                else:
+                                    for x in range(value.x-value.max_effective_range+(y-value.y),value.x+value.max_effective_range-(y-value.y)+1):
+                                        if x == value.x and y == value.y:
+                                            pass
+                                        elif len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
+                                            if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
+                                                areaDrawColorBlock["yellow"].append((x,y))
+                                            elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
+                                                areaDrawColorBlock["blue"].append((x,y))
+                                            elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
+                                                areaDrawColorBlock["green"].append((x,y))
                         value.draw("wait",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
                     elif value.current_hp<=0:
                         value.draw("die",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
@@ -1517,9 +1508,21 @@ def battle(chapter_name,screen,lang,fps):
                     else:
                         del damage_do_to_character[key]
             
-            if rightClickCharacterAlphaDeduct == True and rightClickCharacterAlpha>0:
-                rightClickCharacterAlpha-=10
-
+            if rightClickCharacterAlphaDeduct == True and rightClickCharacterAlpha != None:
+                if rightClickCharacterAlpha>0:
+                    rightClickCharacterAlpha-=10
+                    UI_img["yellow"].set_alpha(rightClickCharacterAlpha)
+                    UI_img["blue"].set_alpha(rightClickCharacterAlpha)
+                    UI_img["green"].set_alpha(rightClickCharacterAlpha)
+                elif rightClickCharacterAlpha == 0:
+                    areaDrawColorBlock["yellow"] = []
+                    areaDrawColorBlock["blue"] = []
+                    areaDrawColorBlock["green"] = []
+                    UI_img["yellow"].set_alpha(150)
+                    UI_img["blue"].set_alpha(150)
+                    UI_img["green"].set_alpha(150)
+                    rightClickCharacterAlpha = None
+                
             the_dead_one_remove = []
             for key,value in the_dead_one.items():
                 if value == "sangvisFerri":
