@@ -45,8 +45,6 @@ def mainMenu(screen,lang,fps,mode=""):
     chapter_select_txt_start_height = (window_y-len(chapter_select)*window_x/38*2)/2
     #关卡选择的封面
     cover_img = loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
-    #视频面
-    surface = pygame.surface.Surface((window_x, window_y))
     #音效
     click_button_sound = pygame.mixer.Sound("Assets/sound/ui/main_menu_click_button.ogg")
     hover_on_button_sound = pygame.mixer.Sound("Assets/sound/ui/main_menu_hover_on_button.ogg")
@@ -76,7 +74,7 @@ def mainMenu(screen,lang,fps,mode=""):
     # 游戏主循环
     while True:
         #背景图片
-        videoCapture.display(surface,screen)
+        videoCapture.display(screen)
 
         if isHoverOn(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
@@ -133,7 +131,7 @@ def mainMenu(screen,lang,fps,mode=""):
                             dialog("chapter"+str(i+1),screen,lang,fps,"dialog_before_battle")
                             battle("chapter"+str(i+1),screen,lang,fps)
                             dialog("chapter"+str(i+1),screen,lang,fps,"dialog_after_battle")
-                            cutscene(screen,surface,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
+                            cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                             videoCapture.setFrame(1)
                             break
             

@@ -62,8 +62,57 @@ class MapObject:
                             if characters_data[theCharacter].x == value2["x"] and characters_data[theCharacter].y == value2["y"]:
                                 imgToBlit.set_alpha(100)
                                 break
+                    elif key == "decoration" or key == "obstacle":
+                        imgToBlit = pygame.transform.scale(self.facilityImg[value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     if imgToBlit != None:
                         screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+    def findPath(self,startPosition,endPosition,characters_data,sangvisFerris_data,routeLen=None,ignoreCharacter=[]):
+        startX = startPosition[0]
+        startY = startPosition[1]
+        endX = endPosition[0]
+        endY = endPosition[1]
+        #建立地图
+        map2d=Array2D(self.column,self.row)
+        #历遍地图，设置障碍方块
+        """
+        for y in range(theMap.row):
+            for x in range(theMap.column):
+                if theMap.mapData[y][x].canPassThrough == False:
+                    map2d[x][y]=1
+        """
+        #历遍设施，设置障碍方块
+        for key,value in self.facilityData.items():
+            if key == "obstacle" or key == "campfire":
+                for key2,value2 in value.items():
+                    map2d[value2["x"]][value2["y"]]=1
+
+        # 历遍所有角色，将角色的坐标点设置为障碍方块
+        for key,value in dicMerge(characters_data,sangvisFerris_data).items():
+            if key not in ignoreCharacter:
+                map2d[value.x][value.y] = 1
+        aStar=AStar(map2d,Point(startX,startY),Point(endX,endY))
+        #开始寻路
+        pathList=aStar.start()
+        #遍历路径点,讲指定数量的点放到路径列表中
+        the_route = []
+        if pathList != None:
+            if routeLen != None and len(pathList) < routeLen or routeLen == None:
+                routeLen = len(pathList)
+            for i in range(routeLen):
+                if Point(startX+1,startY) in pathList and (startX+1,startY) not in the_route:
+                    startX+=1
+                elif Point(startX-1,startY) in pathList and (startX-1,startY) not in the_route:
+                    startX-=1
+                elif Point(startX,startY+1) in pathList and (startX,startY+1) not in the_route:
+                    startY+=1
+                elif Point(startX,startY-1) in pathList and (startX,startY-1) not in the_route:
+                    startY-=1
+                else:
+                    #快速跳出
+                    break
+                the_route.append((startX,startY))
+        return the_route
+
     #重新绘制地图
     def process_map(self,window_x,window_y):
         if self.surface_width < window_x:

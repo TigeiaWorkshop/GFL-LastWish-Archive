@@ -56,7 +56,6 @@ def dialog(chapter_name,screen,lang,fps,part):
     displayed_line = 0
     mouse_gif_id = 1
     videoCapture = None
-    surface = pygame.surface.Surface((window_x,window_y))
     the_FPS = fps
 
     #加载完成-淡出效果
@@ -73,7 +72,7 @@ def dialog(chapter_name,screen,lang,fps,part):
                 frames_num = videoCapture.getFrameNum()
                 the_FPS = videoCapture.getFPS()
             else:
-                videoCapture.display(surface,screen)
+                videoCapture.display(screen)
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         Display.flip()
@@ -101,7 +100,7 @@ def dialog(chapter_name,screen,lang,fps,part):
                 frames_num = videoCapture.getFrameNum()
                 the_FPS = videoCapture.getFPS()
             else:
-                videoCapture.display(surface,screen)
+                videoCapture.display(screen)
 
         #加载对话人物立绘
         if dialog_content[dialogId]["characters_img"] != None:

@@ -185,7 +185,7 @@ facility:
       image: Forest_big_tree_needle_03
       x: 3
       y: 5
-local_x: -1500
+local_x: -3000
 local_y: -300
 map:
 - - TileSnow02
@@ -1635,4 +1635,4 @@ sangvisFerri:
     y: 13
 weather: snow
 zoomIn: 3
-darkMode: False
+darkMode: True

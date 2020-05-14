@@ -1,5 +1,35 @@
 background_music: BGM_Danger_1.ogg
 character:
+  gsh-18:
+    action_point: 10
+    attack_range: 1
+    bullets_carried: 200
+    current_bullets: 18
+    current_hp: 3500
+    effective_range:
+      far:
+      - 4
+      - 4
+      middle:
+      - 3
+      - 3
+      near:
+      - 1
+      - 2
+    kind: HG
+    magazine_capacity: 18
+    max_damage: 150
+    max_hp: 3500
+    min_damage: 100
+    skill_cover_range: 1
+    skill_effective_range:
+      near:
+      - 1
+      - 6
+    type: gsh-18
+    undetected: false
+    x: 4
+    y: 4
   asval:
     action_point: 100
     attack_range: 1
@@ -18,9 +48,9 @@ character:
       - 3
     kind: AR
     magazine_capacity: 20
-    max_damage: 350
+    max_damage: 100
     max_hp: 5500
-    min_damage: 250
+    min_damage: 50
     skill_cover_range: 1
     skill_effective_range:
       middle:
@@ -53,11 +83,20 @@ facility:
       image: Forest_big_tree_needle_03
       x: 3
       y: 5
+    t3:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 7
   decoration:
     stone1:
       image: Forest_big_stone_01
       x: 7
       y: 7
+  obstacle:
+    stone1:
+      image: Forest_big_stone_01
+      x: 2
+      y: 6
 local_x: 0
 local_y: 0
 map: 
@@ -168,15 +207,12 @@ sangvisFerri:
     current_bullets: 20
     current_hp: 1000
     effective_range:
-      far:
-      - 8
-      - 9
       middle:
-      - 5
-      - 7
+      - 3
+      - 4
       near:
       - 1
-      - 4
+      - 2
     kind: HG
     magazine_capacity: 20
     max_damage: 100
@@ -184,8 +220,8 @@ sangvisFerri:
     min_damage: 50
     patrol_path: []
     type: guard
-    x: 1
-    y: 1
+    x: 5
+    y: 5
 weather: null
 zoomIn: 1
 darkMode: False

@@ -14,6 +14,7 @@ from pygame.locals import *
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
 def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
+    img = None
     if isinstance(path,str):
         if ifConvertAlpha == False:
             img = pygame.image.load(os.path.join(path))
@@ -63,7 +64,7 @@ def resizeImg(img,imgSize=(None,None)):
 
 #高级图片加载模块：接收图片路径（或者已经载入的图片）,位置:[x,y],长,高,返回对应的图片class
 def loadImage(path,the_object_position,width=None,height=None,description="Default",ifConvertAlpha=True):
-    class theImage:
+    class ImageSurface:
         def __init__(self,img,x,y,width,height,description="Default"):
             self.img = img
             self.x = x
@@ -82,11 +83,11 @@ def loadImage(path,the_object_position,width=None,height=None,description="Defau
             return self.img.get_alpha()
     if isinstance(path,str):
         if ifConvertAlpha == False:
-            return theImage(pygame.image.load(os.path.join(path)),the_object_position[0],the_object_position[1],width,height,description)
+            return ImageSurface(pygame.image.load(os.path.join(path)),the_object_position[0],the_object_position[1],width,height,description)
         else:
-            return theImage(pygame.image.load(os.path.join(path)).convert_alpha(),the_object_position[0],the_object_position[1],width,height,description)
+            return ImageSurface(pygame.image.load(os.path.join(path)).convert_alpha(),the_object_position[0],the_object_position[1],width,height,description)
     else:
-        return theImage(path,the_object_position[0],the_object_position[1],width,height,description)
+        return ImageSurface(path,the_object_position[0],the_object_position[1],width,height,description)
 
 #文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
 def fontRender(txt,color,size=50,ifBold=False,ifItalic=False,font="simhei",mode=True):
@@ -107,7 +108,7 @@ def fontRender(txt,color,size=50,ifBold=False,ifItalic=False,font="simhei",mode=
 
 #高级文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字Class，该Class具有一大一普通的字号
 def fontRenderPro(txt,color,size=50,ifBold=False,ifItalic=False,font="simhei",mode=True):
-    class the_text:
+    class TextSurface:
         def __init__(self, n, b):
             self.n = n
             self.b = b
@@ -115,11 +116,11 @@ def fontRenderPro(txt,color,size=50,ifBold=False,ifItalic=False,font="simhei",mo
     normal_font = pygame.font.SysFont(font,int(size),ifBold,ifItalic)
     big_font = pygame.font.SysFont(font,int(size*1.5),ifBold,ifItalic)
     if color == "gray" or color == "grey" or color == "disable":
-        text_out = the_text(normal_font.render(txt, mode, (105,105,105)),big_font.render(txt, mode, (105,105,105)))
+        text_out = TextSurface(normal_font.render(txt, mode, (105,105,105)),big_font.render(txt, mode, (105,105,105)))
     elif color == "white" or color == "enable":
-        text_out = the_text(normal_font.render(txt, mode, (255, 255, 255)),big_font.render(txt, mode, (255, 255, 255)))
+        text_out = TextSurface(normal_font.render(txt, mode, (255, 255, 255)),big_font.render(txt, mode, (255, 255, 255)))
     else:
-        text_out = the_text(normal_font.render(txt, mode, color),big_font.render(txt, mode, color))
+        text_out = TextSurface(normal_font.render(txt, mode, color),big_font.render(txt, mode, color))
     return text_out
 
 #检测是否被点击
@@ -196,19 +197,18 @@ class VideoObject:
         return self.video.get(1)
     def setFrame(self,num):
         self.video.set(1,num)
-    def display(self,surface,screen):
+    def display(self,screen):
         if self.getFrame() >= self.endPoint:
             if self.ifLoop == True:
                 self.setFrame(self.loopStartPoint)
             else:
                 return True
         ret, frame = self.video.read()
-        if frame.shape[0] != surface.get_width() or frame.shape[1] != surface.get_height():
-            frame = cv2.resize(frame,(surface.get_width(),surface.get_height()))
+        if frame.shape[0] != screen.get_width() or frame.shape[1] != screen.get_height():
+            frame = cv2.resize(frame,(screen.get_width(),screen.get_height()))
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.transpose(frame)
-        pygame.surfarray.blit_array(surface, frame)
-        screen.blit(surface, (0,0))
+        pygame.surfarray.blit_array(screen, frame)
 
 #加载路径下的所有图片，储存到一个list当中，然后返回
 def loadAllImgInFile(pathRule,width=None,height=None):

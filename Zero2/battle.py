@@ -350,44 +350,17 @@ def battle(chapter_name,screen,lang,fps):
                 #如果操作是移动
                 if "move" in dialog_to_display[display_num]:
                     if all_characters_path == None:
-                        #建立地图
-                        map2d=Array2D(theMap.column,theMap.row)
-                        #历遍地图，设置障碍方块
-                        for y in range(theMap.row):
-                            for x in range(theMap.column):
-                                if theMap.mapData[y][x].canPassThrough == False:
-                                    map2d[x][y]=1
-                        #历遍设施，设置障碍方块
-                        for key1,value1 in theMap.facilityData["campfire"].items():
-                            map2d[value1["x"]][value1["y"]]=1
                         all_characters_path = {}
-                        # 历遍所有角色，将不需要移动的角色的坐标点设置为障碍方块，为需要移动的角色生成路径
                         for key,value in dicMerge(sangvisFerris_data,characters_data).items():
-                            if key not in dialog_to_display[display_num]["move"]:
-                                map2d[value.x][value.y] = 1
-                            else:
-                                #创建AStar对象,并设置起点和终点
-                                star_point_x = value.x
-                                star_point_y = value.y
-                                aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(dialog_to_display[display_num]["move"][key]["x"],dialog_to_display[display_num]["move"][key]["y"]))
-                                #开始寻路
-                                pathList=aStar.start()
-                                #遍历路径点,讲指定数量的点放到路径列表中
-                                the_route = []
-                                if pathList != None:
-                                    for i in range(len(pathList)):
-                                        if Point(star_point_x+1,star_point_y) in pathList and [star_point_x+1,star_point_y] not in the_route:
-                                            star_point_x+=1
-                                        elif Point(star_point_x-1,star_point_y) in pathList and [star_point_x-1,star_point_y] not in the_route:
-                                            star_point_x-=1
-                                        elif Point(star_point_x,star_point_y+1) in pathList and [star_point_x,star_point_y+1] not in the_route:
-                                            star_point_y+=1
-                                        elif Point(star_point_x,star_point_y-1) in pathList and [star_point_x,star_point_y-1] not in the_route:
-                                            star_point_y-=1
-                                        the_route.append([star_point_x,star_point_y])
-                                else:
-                                    raise Exception('Waring: '+key+" cannot find her path, please rewrite her start position!")
-                                all_characters_path[key] = the_route
+                            if key in dialog_to_display[display_num]["move"]:
+                                #创建AStar对象,并设置起点和终点为
+                                start_x = value.x
+                                start_y = value.y
+                                end_x = dialog_to_display[display_num]["move"][key]["x"]
+                                end_y = dialog_to_display[display_num]["move"][key]["y"]
+                                the_route = theMap.findPath((start_x,start_y),(end_x,end_y),characters_data,sangvisFerris_data,None,dialog_to_display[display_num]["move"])
+                                if len(the_route)>0:
+                                    all_characters_path[key] = the_route
                     if len(all_characters_path)>0:
                         if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
                             pygame.mixer.Channel(1).play(environment_sound)
@@ -870,11 +843,21 @@ def battle(chapter_name,screen,lang,fps):
                         if skill_target in characters_data:
                             if characters_data[skill_target].x < characters_data[the_character_get_click].x:
                                 characters_data[the_character_get_click].setFlip(True)
+                            elif characters_data[skill_target].x == characters_data[the_character_get_click].x:
+                                if characters_data[skill_target].y < characters_data[the_character_get_click].y:
+                                    characters_data[the_character_get_click].setFlip(False)
+                                else:
+                                    characters_data[the_character_get_click].setFlip(True)
                             else:
                                 characters_data[the_character_get_click].setFlip(False)
                         elif skill_target in sangvisFerris_data:
                             if sangvisFerris_data[skill_target].x < characters_data[the_character_get_click].x:
                                 characters_data[the_character_get_click].setFlip(True)
+                            elif sangvisFerris_data[skill_target].x == characters_data[the_character_get_click].x:
+                                if sangvisFerris_data[skill_target].y < characters_data[the_character_get_click].y:
+                                    characters_data[the_character_get_click].setFlip(False)
+                                else:
+                                    characters_data[the_character_get_click].setFlip(True)
                             else:
                                 characters_data[the_character_get_click].setFlip(False)
                         characters_data[the_character_get_click].current_action_point -= 8
@@ -915,52 +898,18 @@ def battle(chapter_name,screen,lang,fps):
                     #显示移动范围
                     if action_choice == "move" and block_get_click != None:
                         #创建AStar对象,并设置起点和终点为
-                        star_point_x = characters_data[the_character_get_click].x
-                        star_point_y = characters_data[the_character_get_click].y
-                        end_point_x = block_get_click["x"]
-                        end_point_y = block_get_click["y"]
+                        start_x = characters_data[the_character_get_click].x
+                        start_y = characters_data[the_character_get_click].y
+                        end_x = block_get_click["x"]
+                        end_y = block_get_click["y"]
                         max_blocks_can_move = int(characters_data[the_character_get_click].current_action_point/2)
-                        if abs(end_point_x-star_point_x)+abs(end_point_y-star_point_y)<=max_blocks_can_move:
-                            #建立地图
-                            map2d=Array2D(theMap.column,theMap.row)
-                            #历遍地图，设置障碍方块
-                            for y in range(theMap.row):
-                                for x in range(theMap.column):
-                                    if theMap.mapData[y][x].canPassThrough == False:
-                                        map2d[x][y]=1
-                            #历遍设施，设置障碍方块
-                            for key1,value1 in theMap.facilityData["campfire"].items():
-                                map2d[value1["x"]][value1["y"]]=1
-                            # 历遍所有角色，将角色的坐标点设置为障碍方块
-                            for key,value in dicMerge(characters_data,sangvisFerris_data).items():
-                                map2d[value.x][value.y] = 1
-                            aStar=AStar(map2d,Point(star_point_x,star_point_y),Point(end_point_x,end_point_y))
-                            #开始寻路
-                            pathList=aStar.start()
-                            #遍历路径点,讲指定数量的点放到路径列表中
-                            the_route = []
-                            if pathList != None:
-                                if len(pathList)>max_blocks_can_move:
-                                    route_len = max_blocks_can_move
-                                else:
-                                    route_len = len(pathList)
-                                for i in range(route_len):
-                                    if Point(star_point_x+1,star_point_y) in pathList and (star_point_x+1,star_point_y) not in the_route:
-                                        star_point_x+=1
-                                    elif Point(star_point_x-1,star_point_y) in pathList and (star_point_x-1,star_point_y) not in the_route:
-                                        star_point_x-=1
-                                    elif Point(star_point_x,star_point_y+1) in pathList and (star_point_x,star_point_y+1) not in the_route:
-                                        star_point_y+=1
-                                    elif Point(star_point_x,star_point_y-1) in pathList and (star_point_x,star_point_y-1) not in the_route:
-                                        star_point_y-=1
-                                    else:
-                                        #快速跳出
-                                        break
-                                    the_route.append((star_point_x,star_point_y))
+                        if abs(end_x-start_x)+abs(end_y-start_y)<=max_blocks_can_move:
+                            the_route = theMap.findPath((start_x,start_y),(end_x,end_y),characters_data,sangvisFerris_data,max_blocks_can_move)
+                            if len(the_route)>0:
                                 #显示路径
                                 areaDrawColorBlock["green"] = the_route
                                 xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,the_route[-1][0],the_route[-1][1],local_x,local_y)
-                                displayInCenter(fontRender("-"+str((i+1)*2)+"AP","green",perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
+                                displayInCenter(fontRender("-"+str(len(the_route)*2)+"AP","green",perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
                             else:
                                 areaDrawColorBlock["green"] = []
                         else:
@@ -1200,10 +1149,16 @@ def battle(chapter_name,screen,lang,fps):
                     elif action_choice == "attack":
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
-                        if block_get_click["x"] < characters_data[the_character_get_click].x:
-                            characters_data[the_character_get_click].setFlip(True)
-                        else:
-                            characters_data[the_character_get_click].setFlip(False)
+                        if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 0:
+                            if block_get_click["x"] < characters_data[the_character_get_click].x:
+                                characters_data[the_character_get_click].setFlip(True)
+                            elif block_get_click["x"] == characters_data[the_character_get_click].x:
+                                if block_get_click["y"] < characters_data[the_character_get_click].y:
+                                    characters_data[the_character_get_click].setFlip(False)
+                                else:
+                                    characters_data[the_character_get_click].setFlip(True)
+                            else:
+                                characters_data[the_character_get_click].setFlip(False)
                         characters_data[the_character_get_click].draw("attack",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == characters_data[the_character_get_click].gif_dic["attack"]["imgNum"]-2:
                             for each_enemy in enemies_get_attack:
@@ -1350,6 +1305,11 @@ def battle(chapter_name,screen,lang,fps):
                     if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or darkMode != True:
                         if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
                             sangvisFerris_data[enemies_in_control].setFlip(True)
+                        elif characters_data[enemy_action["target"]].x == sangvisFerris_data[enemies_in_control].x:
+                            if characters_data[enemy_action["target"]].y > sangvisFerris_data[enemies_in_control].y:
+                                sangvisFerris_data[enemies_in_control].setFlip(False)
+                            else:
+                                sangvisFerris_data[enemies_in_control].setFlip(True)
                         else:
                             sangvisFerris_data[enemies_in_control].setFlip(False)
                         sangvisFerris_data[enemies_in_control].draw("attack",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
@@ -1408,9 +1368,13 @@ def battle(chapter_name,screen,lang,fps):
                         if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or darkMode != True:
                             if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
                                 sangvisFerris_data[enemies_in_control].setFlip(True)
+                            elif characters_data[enemy_action["target"]].x == sangvisFerris_data[enemies_in_control].x:
+                                if characters_data[enemy_action["target"]].y > sangvisFerris_data[enemies_in_control].y:
+                                    sangvisFerris_data[enemies_in_control].setFlip(False)
+                                else:
+                                    sangvisFerris_data[enemies_in_control].setFlip(True)
                             else:
                                 sangvisFerris_data[enemies_in_control].setFlip(False)
-                            sangvisFerris_data[enemies_in_control].draw("attack",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
                         else:
                             sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] += 1
                         if sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] == sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgNum"]-1:
@@ -1461,22 +1425,22 @@ def battle(chapter_name,screen,lang,fps):
                                 if y < value.y:
                                     for x in range(value.x-value.max_effective_range-(y-value.y),value.x+value.max_effective_range+(y-value.y)+1):
                                         if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
-                                            if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
+                                            if "far" in value.effective_range and value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
                                                 areaDrawColorBlock["yellow"].append((x,y))
-                                            elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
+                                            elif "middle" in value.effective_range and value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
                                                 areaDrawColorBlock["blue"].append((x,y))
-                                            elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
+                                            elif "near" in value.effective_range and value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
                                                 areaDrawColorBlock["green"].append((x,y))
                                 else:
                                     for x in range(value.x-value.max_effective_range+(y-value.y),value.x+value.max_effective_range-(y-value.y)+1):
                                         if x == value.x and y == value.y:
                                             pass
                                         elif len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
-                                            if value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
+                                            if "far" in value.effective_range and value.effective_range["far"] != None and value.effective_range["far"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["far"][1]:
                                                 areaDrawColorBlock["yellow"].append((x,y))
-                                            elif value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
+                                            elif "middle" in value.effective_range and value.effective_range["middle"] != None and value.effective_range["middle"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["middle"][1]:
                                                 areaDrawColorBlock["blue"].append((x,y))
-                                            elif value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
+                                            elif "near" in value.effective_range and value.effective_range["near"] != None and value.effective_range["near"][0] <= abs(x-value.x)+abs(y-value.y) <= value.effective_range["near"][1]:
                                                 areaDrawColorBlock["green"].append((x,y))
                         value.draw("wait",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
                     elif value.current_hp<=0:

@@ -2,7 +2,7 @@
 from Zero2.basic import *
 from moviepy.editor import *
 
-def cutscene(screen,surface,videoPath,bgmPath):
+def cutscene(screen,videoPath,bgmPath):
     """
     thevideo = VideoObject(videoPath)
     fpsClock = pygame.time.Clock()

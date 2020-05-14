@@ -88,11 +88,11 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                 if character_with_min_hp == None or characters_data[key].current_hp < characters_data[character_with_min_hp[0]].current_hp:
                     character_with_min_hp = [key,characters_can_be_attacked[key]]
             temp_distance = abs(characters_data[character_with_min_hp[0]].x-character_with_min_hp[1][-1][0])+abs(characters_data[character_with_min_hp[0]].y-character_with_min_hp[1][-1][1])
-            if sangvisFerris_data[aiInControl].effective_range["far"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["far"][1]:
+            if "far" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["far"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["far"][1]:
                 temp_area = "far"
-            elif sangvisFerris_data[aiInControl].effective_range["middle"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["middle"][1]:
+            elif "middle" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["middle"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["middle"][1]:
                 temp_area = "middle"
-            elif sangvisFerris_data[aiInControl].effective_range["near"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["near"][1]:
+            elif "near" in sangvisFerris_data[aiInControl].effective_range and sangvisFerris_data[aiInControl].effective_range["near"][0] <= temp_distance <= sangvisFerris_data[aiInControl].effective_range["near"][1]:
                 temp_area = "near"
             else:
                 print('A character named '+aiInControl+' is causing trouble while attacking '+character_with_min_hp[0]+'. Then route is:')
