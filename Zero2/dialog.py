@@ -3,6 +3,8 @@ from Zero2.basic import *
 from Zero2.battle import *
 
 def dialog(chapter_name,screen,lang,fps,part):
+    #创建手柄组件
+    joystick = Joystick()
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #加载动画
@@ -181,9 +183,9 @@ def dialog(chapter_name,screen,lang,fps,part):
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     exit()
-            elif event.type == MOUSEBUTTONDOWN:
+            elif event.type == MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
                 #如果接来下没有文档了或者玩家按到了跳过按钮
-                if pygame.mouse.get_pressed()[0]:
+                if pygame.mouse.get_pressed()[0] or joystick.get_button(0) == 1:
                     if isHover(skip_button) or dialog_content[dialogId]["next_dialog_id"] == None:
                         if_skip = True
                     elif displayed_line < len(dialog_content[dialogId]["content"])-1:
@@ -203,7 +205,7 @@ def dialog(chapter_name,screen,lang,fps,part):
                             dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
                         dialogId = dialog_content[dialogId]["next_dialog_id"][1]
                         dialog_is_playing_sound.stop()
-                elif pygame.mouse.get_pressed()[2]:
+                elif pygame.mouse.get_pressed()[2] or joystick.get_button(1) == 1:
                     if dialog_content[dialogId]["last_dialog_id"] != None:
                         dialog_content_id = 1
                         displayed_line = 0

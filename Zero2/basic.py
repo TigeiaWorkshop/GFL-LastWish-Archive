@@ -210,6 +210,30 @@ class VideoObject:
         frame = cv2.transpose(frame)
         pygame.surfarray.blit_array(screen, frame)
 
+#手柄控制组件
+class Joystick:
+    def __init__(self):
+        if pygame.joystick.get_count()>0:
+            self.inputController = pygame.joystick.Joystick(0)
+            self.inputController.init()
+        else:
+            self.inputController = None
+    def get_init(self):
+        if self.inputController != None:
+            return self.inputController.get_init()
+        else:
+            return False
+    def get_button(self,buttonId):
+        if self.inputController != None and self.inputController.get_init() == True:
+            return self.inputController.get_button(buttonId)
+        else:
+            return None
+    def get_axis(self,buttonId):
+        if self.inputController != None and self.inputController.get_init() == True:
+            return self.inputController.get_axis(buttonId)
+        else:
+            return 0
+
 #加载路径下的所有图片，储存到一个list当中，然后返回
 def loadAllImgInFile(pathRule,width=None,height=None):
     allImg = glob.glob(pathRule)

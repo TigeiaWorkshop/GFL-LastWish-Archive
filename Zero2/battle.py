@@ -6,13 +6,9 @@ from Zero2.AI import *
 from Zero2.skills import *
 
 def battle(chapter_name,screen,lang,fps):
-    if pygame.joystick.get_count()>0:
-        pygame.joystick.init()
-        joystick = pygame.joystick.Joystick(0)
-        joystick.init()
-        ifJoystickInit = joystick.get_init()
-    else:
-        ifJoystickInit = False
+    #创建手柄组件
+    joystick = Joystick()
+
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #卸载音乐
@@ -558,7 +554,7 @@ def battle(chapter_name,screen,lang,fps):
                     if event.type == KEYDOWN:
                         if event.key == K_ESCAPE:
                             exit()
-                    elif event.type == MOUSEBUTTONDOWN and event.button == 1 or ifJoystickInit and event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
+                    elif event.type == MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
                         if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
                             display_num +=1
                             if display_num < len(dialog_to_display):
@@ -640,7 +636,6 @@ def battle(chapter_name,screen,lang,fps):
                         pressKeyToMove["right"]=True
                     if event.key == K_m:
                         exit()
-                    break
                 elif event.type == KEYUP:
                     if event.key == K_w:
                         pressKeyToMove["up"]=False
@@ -650,7 +645,6 @@ def battle(chapter_name,screen,lang,fps):
                         pressKeyToMove["left"]=False
                     if event.key == K_d:
                         pressKeyToMove["right"]=False
-                    break
                 #鼠标点击
                 elif event.type == MOUSEBUTTONDOWN:
                     #上下滚轮-放大和缩小地图
@@ -660,8 +654,7 @@ def battle(chapter_name,screen,lang,fps):
                         zoomIntoBe += 20
                     elif event.button == 5 and zoomIntoBe > 200:
                         zoomIntoBe -= 20
-                    break
-                if ifJoystickInit:
+                if joystick.get_init() == True:
                     if round(joystick.get_axis(1)) == -1:
                         pressKeyToMove["up"]=True
                     else:
@@ -724,25 +717,25 @@ def battle(chapter_name,screen,lang,fps):
 
             #根据按键情况设定要移动的数值
             if pressKeyToMove["up"] == True:
-                if screen_to_move_y== None:
-                    screen_to_move_y = perBlockHeight
+                if screen_to_move_y == None:
+                    screen_to_move_y = perBlockHeight/4
                 else:
-                    screen_to_move_y += perBlockHeight
+                    screen_to_move_y += perBlockHeight/4
             if pressKeyToMove["down"] == True:
-                if screen_to_move_y== None:
-                    screen_to_move_y = -perBlockHeight
+                if screen_to_move_y == None:
+                    screen_to_move_y = -perBlockHeight/4
                 else:
-                    screen_to_move_y -= perBlockHeight
+                    screen_to_move_y -= perBlockHeight/4
             if pressKeyToMove["left"] == True:
-                if screen_to_move_x== None:
-                    screen_to_move_x = perBlockWidth
+                if screen_to_move_x == None:
+                    screen_to_move_x = perBlockWidth/4
                 else:
-                    screen_to_move_x += perBlockWidth
+                    screen_to_move_x += perBlockWidth/4
             if pressKeyToMove["right"] == True:
-                if screen_to_move_x== None:
-                    screen_to_move_x = -perBlockWidth
+                if screen_to_move_x == None:
+                    screen_to_move_x = -perBlockWidth/4
                 else:
-                    screen_to_move_x -= perBlockWidth
+                    screen_to_move_x -= perBlockWidth/4
 
             #如果需要移动屏幕
             if screen_to_move_x != None and screen_to_move_x != 0:
