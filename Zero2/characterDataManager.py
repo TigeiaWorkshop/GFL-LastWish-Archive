@@ -51,15 +51,9 @@ class Doll:
                 hp_img = original_UI_img["hp_red"]
             current_hp_to_display = fontRender(str(self.dying)+"/3","black",10)
             percent_of_hp = self.dying/3
-        original_alpha = self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]].get_alpha()
+        #调整小人图片的尺寸
         img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*1.6), round(perBlockWidth*1.6)))
-        if self.faction == "character" and self.current_hp>0:
-            if self.undetected == True:
-                img_of_char.set_alpha(130)
-            else:
-                img_of_char.set_alpha(255)
-        else:
-            img_of_char.set_alpha(original_alpha)
+        #反转图片
         if self.ifFlip == True:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
         #把角色图片画到屏幕上
@@ -68,6 +62,11 @@ class Doll:
         yTemp2 = yTemp - perBlockWidth*0.1
         screen.blit(img_of_char,(xTemp-perBlockWidth*0.3,yTemp-perBlockWidth*0.8))
         if original_UI_img != None:
+            if self.faction == "character":
+                if self.undetected == True:
+                    screen.blit(resizeImg(original_UI_img["eye_red"], (None,round(perBlockWidth/10))),(xTemp2+perBlockWidth*0.51,yTemp2))
+                elif self.undetected == False:
+                    screen.blit(resizeImg(original_UI_img["eye_orange"], (None,round(perBlockWidth/10))),(xTemp2+perBlockWidth*0.51,yTemp2))
             hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(perBlockWidth/2), round(perBlockWidth/10)))
             screen.blit(hpEmptyScale,(xTemp2,yTemp2))
             screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp/2),round(perBlockWidth/10))),(xTemp2,yTemp2))
@@ -82,10 +81,47 @@ class Doll:
                 return True
             else:
                 return False
+    #设定角色特定动作的图片播放ID
     def set_imgId(self,action,theId):
         self.gif_dic[action]["imgId"] = theId
+    #重置角色特定动作的图片播放ID
     def reset_imgId(self,action):
         self.gif_dic[action]["imgId"] = 0
+    #调整角色的隐蔽度
+    def noticed(self,force=False):
+        if force == False:
+            if self.undetected == None:
+                self.undetected = False
+            elif self.undetected == False:
+                self.undetected = True
+        elif force == True:
+            self.undetected = True
+
+    #获取角色的攻击范围
+    def getAttackRange(self,theMap):
+        attacking_range = {"near":[],"middle":[],"far":[]}
+        for y in range(self.y-self.max_effective_range,self.y+self.max_effective_range+1):
+            if y < self.y:
+                for x in range(self.x-self.max_effective_range-(y-self.y),self.x+self.max_effective_range+(y-self.y)+1):
+                    if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
+                        if "far" in self.effective_range and self.effective_range["far"] != None and self.effective_range["far"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["far"][1]:
+                            attacking_range["far"].append((x,y))
+                        elif "middle" in self.effective_range and self.effective_range["middle"] != None and self.effective_range["middle"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["middle"][1]:
+                            attacking_range["middle"].append((x,y))
+                        elif "near" in self.effective_range and self.effective_range["near"] != None and self.effective_range["near"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["near"][1]:
+                            attacking_range["near"].append((x,y))
+            else:
+                for x in range(self.x-self.max_effective_range+(y-self.y),self.x+self.max_effective_range-(y-self.y)+1):
+                    if x == self.x and y == self.y:
+                        pass
+                    elif len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
+                        if "far" in self.effective_range and self.effective_range["far"] != None and self.effective_range["far"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["far"][1]:
+                            attacking_range["far"].append((x,y))
+                        elif "middle" in self.effective_range and self.effective_range["middle"] != None and self.effective_range["middle"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["middle"][1]:
+                            attacking_range["middle"].append((x,y))
+                        elif "near" in self.effective_range and self.effective_range["near"] != None and self.effective_range["near"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["near"][1]:
+                            attacking_range["near"].append((x,y))
+        return attacking_range
 
 class CharacterDataManager(Doll):
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,detect):

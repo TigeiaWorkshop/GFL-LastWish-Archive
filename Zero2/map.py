@@ -59,7 +59,7 @@ class MapObject:
                         xTemp -= self.perBlockWidth*0.125
                         yTemp -= self.perBlockWidth*0.25
                         for theCharacter in characters_data:
-                            if characters_data[theCharacter].x == value2["x"] and characters_data[theCharacter].y == value2["y"]:
+                            if characters_data[theCharacter].x == value2["x"] and characters_data[theCharacter].y == value2["y"] or characters_data[theCharacter].x+1 == value2["x"] and characters_data[theCharacter].y+1 == value2["y"]:
                                 imgToBlit.set_alpha(100)
                                 break
                     elif key == "decoration" or key == "obstacle":
