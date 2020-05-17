@@ -257,11 +257,6 @@ def battle(chapter_name,screen,lang,fps):
                 temp_secode.set_alpha(a)
                 drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
         Display.flip()
-    
-    #加载音乐
-    pygame.mixer.music.load("Assets/music/"+bg_music)
-    pygame.mixer.music.play(loops=9999, start=0.0)
-    pygame.mixer.music.set_volume(0.5)
 
     if dialogInfo["initial"] == None:
         dialog_to_display = None
@@ -1026,7 +1021,7 @@ def battle(chapter_name,screen,lang,fps):
                             break
                         
                 #当有角色被点击时
-                if the_character_get_click != "" and isWaiting == False:
+                if the_character_get_click != "" and isWaiting == False and block_get_click != None:
                     #被点击的角色动画
                     green_hide=True
                     if action_choice == "move":

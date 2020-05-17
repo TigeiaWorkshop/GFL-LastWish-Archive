@@ -222,6 +222,6 @@ sangvisFerri:
     type: guard
     x: 5
     y: 5
-weather: null
+weather: snow
 zoomIn: 1
-darkMode: False
+darkMode: True

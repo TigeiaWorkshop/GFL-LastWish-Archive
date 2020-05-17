@@ -59,8 +59,8 @@ class Doll:
         #把角色图片画到屏幕上
         xTemp,yTemp = calPosInMap(mapRow,perBlockWidth,self.x,self.y,local_x,local_y)
         xTemp2 = xTemp + perBlockWidth*0.25
-        yTemp2 = yTemp - perBlockWidth*0.1
-        screen.blit(img_of_char,(xTemp-perBlockWidth*0.3,yTemp-perBlockWidth*0.8))
+        yTemp2 = yTemp - perBlockWidth*0.15
+        screen.blit(img_of_char,(xTemp-perBlockWidth*0.3,yTemp-perBlockWidth*0.85))
         if original_UI_img != None:
             if self.faction == "character":
                 if self.undetected == True:

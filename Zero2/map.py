@@ -6,15 +6,11 @@ class MapObject:
         self.perBlockWidth = perBlockWidth
         self.row = len(mapData)
         self.column = len(mapData[0])
-        self.env_img_list_original = load_env_images(mapData)
-        self.env_img_list = load_env_images(mapData,perBlockWidth)
-        if dark_mode == True:
-            self.env_img_list_dark = load_env_images(mapData,perBlockWidth,None,150)
-        else:
-            self.env_img_list_dark = None
+        self.env_img_list_original = load_env_images(mapData,None,None,dark_mode)
+        self.env_img_list = load_env_images(mapData,perBlockWidth,None,dark_mode)
         self.dark_mode = dark_mode
         self.mapData = initialBlockData(mapData,facilityData,blocks_setting)
-        self.facilityImg = loadFacilityImg(facilityData)
+        self.facilityImg = loadFacilityImg(facilityData,dark_mode)
         self.facilityData = initialFacility(facilityData)
         self.lightArea = []
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
@@ -24,11 +20,11 @@ class MapObject:
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
-        for key in self.env_img_list:
-            self.env_img_list[key] = pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height())))
+        for key in self.env_img_list["normal"]:
+            self.env_img_list["normal"][key] = pygame.transform.scale(self.env_img_list_original["normal"][key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original["normal"][key].get_width()*self.env_img_list_original["normal"][key].get_height())))
         if self.dark_mode == True:
-            for key in self.env_img_list_dark:
-                self.env_img_list_dark[key] = addDarkness(pygame.transform.scale(self.env_img_list_original[key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original[key].get_width()*self.env_img_list_original[key].get_height()))),150)
+            for key in self.env_img_list["dark"]:
+                self.env_img_list["dark"][key] = pygame.transform.scale(self.env_img_list_original["dark"][key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original["dark"][key].get_width()*self.env_img_list_original["dark"][key].get_height())))
         self.surface_width = int(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
         self.surface_height = int(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
@@ -43,19 +39,23 @@ class MapObject:
                 imgToBlit = None
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value2["x"],value2["y"],local_x,local_y)
                 if -self.perBlockWidth<=xTemp<screen.get_width() and -self.perBlockWidth<=yTemp<screen.get_height():
+                    if self.dark_mode == True and (value2["x"],value2["y"]) not in self.lightArea:
+                        keyWordTemp = "dark"
+                    else:
+                        keyWordTemp = "normal"
                     #画上篝火
                     if key == "campfire":
-                        imgToBlit = pygame.transform.scale(self.facilityImg["campfire"][int(value2["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-                        if value2["imgId"] >= len(self.facilityImg["campfire"])-1:
+                        imgToBlit = pygame.transform.scale(self.facilityImg["normal"]["campfire"][int(value2["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        if value2["imgId"] >= len(self.facilityImg["normal"]["campfire"])-1:
                             value2["imgId"] = 0
                         else:
                             value2["imgId"] += 0.1
                     #画上箱子
                     elif key == "chest":
-                        imgToBlit = pygame.transform.scale(self.facilityImg["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-                    #画上树
+                        imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp]["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                    # 画上树
                     elif key == "tree":
-                        imgToBlit = pygame.transform.scale(self.facilityImg[value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
+                        imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
                         xTemp -= self.perBlockWidth*0.125
                         yTemp -= self.perBlockWidth*0.25
                         for theCharacter in characters_data:
@@ -63,7 +63,7 @@ class MapObject:
                                 imgToBlit.set_alpha(100)
                                 break
                     elif key == "decoration" or key == "obstacle":
-                        imgToBlit = pygame.transform.scale(self.facilityImg[value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     if imgToBlit != None:
                         screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
     def findPath(self,startPosition,endPosition,characters_data,sangvisFerris_data,routeLen=None,ignoreCharacter=[]):
@@ -126,9 +126,9 @@ class MapObject:
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)
                 #画上场景图片
                 if self.dark_mode == True and (x,y) not in self.lightArea:
-                    self.mapSurface.blit(self.env_img_list_dark[self.mapData[y][x].name],(xTemp,yTemp))
+                    self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
                 else:
-                    self.mapSurface.blit(self.env_img_list[self.mapData[y][x].name],(xTemp,yTemp))
+                    self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
     #计算在地图中的方块
     def calBlockInMap(self,block,local_x=0,local_y=0):
         block_get_click = None
@@ -148,9 +148,9 @@ class MapObject:
         xStart,yStart = calPosInMap(self.row,self.perBlockWidth,x,y,local_x,local_y)
         return {
         "xStart": xStart,
-        "xEnd": xStart + self.env_img_list[self.mapData[y][x].name].get_width(),
+        "xEnd": xStart + self.env_img_list["normal"][self.mapData[y][x].name].get_width(),
         "yStart": yStart,
-        "yEnd": yStart + self.env_img_list[self.mapData[y][x].name].get_width()*0.5
+        "yEnd": yStart + self.env_img_list["normal"][self.mapData[y][x].name].get_width()*0.5
         }
     #计算光亮区域
     def calculate_darkness(self,characters_data,window_x,window_y):
@@ -217,13 +217,13 @@ class WeatherSystem:
         self.ImgObject = []
         for i in range(50):
             imgId = random.randint(0,len(self.img_list)-1)
-            img_size = random.randint(3,10)
+            img_size = random.randint(4,9)
             img_speed = random.randint(1,3)
             img_x = random.randint(1,window_x*1.5)
             img_y = random.randint(1,window_y)
             self.ImgObject.append(Snow(imgId,img_size,img_speed,img_x,img_y))
     def display(self,screen,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
-        speed_unit = perBlockWidth/10
+        speed_unit = perBlockWidth/6
         for i in range(len(self.ImgObject)):
             if 0<=self.ImgObject[i].x<=screen.get_width() and 0<=self.ImgObject[i].y+local_y<=screen.get_height():
                 imgTemp = pygame.transform.scale(self.img_list[self.ImgObject[i].imgId], (round(perBlockWidth/self.ImgObject[i].size), round(perBlockWidth/self.ImgObject[i].size)))
@@ -244,49 +244,56 @@ class Snow:
         self.y = y
 
 #加载场地设施的图片
-def loadFacilityImg(facilityData):
-    Facility_images = {}
+def loadFacilityImg(facilityData,darkMode=False):
+    Facility_images = {"normal":{}}
     #加载篝火的图片
     if "campfire" in facilityData and facilityData["campfire"] != None:
-        Facility_images["campfire"] = []
+        Facility_images["normal"]["campfire"] = []
         for i in range(1,11):
             try:
-                Facility_images["campfire"].append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
+                Facility_images["normal"]["campfire"].append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
             except BaseException:
-                Facility_images["campfire"].append(loadImg("../Assets/image/environment/campfire/"+str(i)+".png"))
+                Facility_images["normal"]["campfire"].append(loadImg("../Assets/image/environment/campfire/"+str(i)+".png"))
     #加载箱子的图片
     if "chest" in facilityData and facilityData["chest"] != None:
-        Facility_images["chest"] = loadImg("Assets/image/environment/decoration/chest.png")
+        Facility_images["normal"]["chest"] = loadImg("Assets/image/environment/decoration/chest.png")
     #加载树的图片
     if "tree" in facilityData and facilityData["tree"] != None:
         for item in facilityData["tree"]:
             imageName = facilityData["tree"][item]["image"]
-            if imageName not in Facility_images:
-                Facility_images[imageName] = loadImg("Assets/image/environment/decoration/"+imageName+".png")
+            if imageName not in Facility_images["normal"]:
+                Facility_images["normal"][imageName] = loadImg("Assets/image/environment/decoration/"+imageName+".png")
     #加载其他设施的图片
     if "decoration" in facilityData and facilityData["decoration"] != None:
         for key,value in facilityData["decoration"].items():
-            if value["image"] not in Facility_images:
-                Facility_images[value["image"]] = loadImg("Assets/image/environment/decoration/"+value["image"]+".png")
+            if value["image"] not in Facility_images["normal"]:
+                Facility_images["normal"][value["image"]] = loadImg("Assets/image/environment/decoration/"+value["image"]+".png")
+    if darkMode == True:
+        Facility_images["dark"] = {}
+        for key,value in Facility_images["normal"].items():
+            if key != "campfire":
+                Facility_images["dark"][key] = addDarkness(value,150)
     return Facility_images
 
 #读取需要的地图图片
-def load_env_images(theMap,theWidth=None,theHeight=None,darkness=0):
+def load_env_images(theMap,theWidth=None,theHeight=None,darkMode=False):
     all_images_needed = []
     for i in range(len(theMap)):
         for a in range(len(theMap[i])):
             if theMap[i][a] not in all_images_needed:
                 all_images_needed.append(theMap[i][a])
     #加载背景图片
-    env_img_list={}
+    env_img_list={"normal":{}}
     for i in range(len(all_images_needed)):
         try:
-            env_img_list[all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
+            env_img_list["normal"][all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
         except BaseException:
-            env_img_list[all_images_needed[i]] = loadImg("../Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
-    if darkness>0:
-        for img,value in env_img_list.items():
-            env_img_list[img] = addDarkness(value,darkness)
+            env_img_list["normal"][all_images_needed[i]] = loadImg("../Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
+            
+    if darkMode==True:
+        env_img_list["dark"] = {}
+        for img,value in env_img_list["normal"].items():
+            env_img_list["dark"][img] = addDarkness(value,150)
     return env_img_list
 
 class Array2D:
