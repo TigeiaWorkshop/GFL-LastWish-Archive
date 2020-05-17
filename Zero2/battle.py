@@ -275,10 +275,12 @@ def battle(chapter_name,screen,lang,fps):
             theMap.display_facility(characters_data,screen,local_x,local_y)
             #角色动画
             for every_chara in characters_data:
-                characters_data[every_chara].draw("wait",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                characters_data[every_chara].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
+                characters_data[every_chara].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
             for enemies in sangvisFerris_data:
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or darkMode != True:
-                    sangvisFerris_data[enemies].draw("wait",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                    sangvisFerris_data[enemies].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
+                    sangvisFerris_data[enemies].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
             #加载雪花
             if weatherController != None:
                 weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
@@ -323,16 +325,16 @@ def battle(chapter_name,screen,lang,fps):
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
                     if value.faction == "character" or (value.x,value.y) in theMap.lightArea or darkMode != True:
                         if all_characters_path != None and key in all_characters_path:
-                            value.draw("move",screen,None,perBlockWidth,theMap.row,local_x,local_y)
+                            value.draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
                         elif theAction != None and key in theAction:
                             pass
                         elif key in actionLoop:
                             if actionLoop[key] != "die":
-                                value.draw(actionLoop[key],screen,None,perBlockWidth,theMap.row,local_x,local_y,False)
+                                value.draw(actionLoop[key],screen,perBlockWidth,theMap.row,local_x,local_y,False)
                             else:
-                                value.draw(actionLoop[key],screen,None,perBlockWidth,theMap.row,local_x,local_y)
+                                value.draw(actionLoop[key],screen,perBlockWidth,theMap.row,local_x,local_y)
                         else:
-                            value.draw("wait",screen,None,perBlockWidth,theMap.row,local_x,local_y)
+                            value.draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
                 #加载雪花
                 if weatherController != None:
                     weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
@@ -446,11 +448,11 @@ def battle(chapter_name,screen,lang,fps):
                         theActionNeedPop = []
                         if len(theAction) > 0:
                             for key,action in theAction.items():
-                                if key in characters_data and characters_data[key].draw(action,screen,None,perBlockWidth,theMap.row,local_x,local_y,False) == False:
+                                if key in characters_data and characters_data[key].draw(action,screen,perBlockWidth,theMap.row,local_x,local_y,False) == False:
                                     if action != "die":
                                         characters_data[key].reset_imgId(action)
                                     theActionNeedPop.append(key)
-                                elif key in sangvisFerris_data and sangvisFerris_data[key].draw(action,screen,None,perBlockWidth,theMap.row,local_x,local_y,False) == False:
+                                elif key in sangvisFerris_data and sangvisFerris_data[key].draw(action,screen,perBlockWidth,theMap.row,local_x,local_y,False) == False:
                                     if action != "die":
                                         sangvisFerris_data[key].reset_imgId(action)
                                     theActionNeedPop.append(key)
@@ -1063,7 +1065,7 @@ def battle(chapter_name,screen,lang,fps):
                                         break
                                 if darkMode == True:
                                     theMap.calculate_darkness(characters_data,window_x,window_y)
-                            characters_data[the_character_get_click].draw("move",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                            characters_data[the_character_get_click].draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
                         else:
                             pygame.mixer.Channel(0).stop()
                             #检测是不是站在补给上
@@ -1087,7 +1089,7 @@ def battle(chapter_name,screen,lang,fps):
                             keyTemp = str(characters_data[the_character_get_click].x)+"-"+str(characters_data[the_character_get_click].y) 
                             #检测是否角色有set的动画
                             if characters_data[the_character_get_click].gif_dic["set"] != None:
-                                characters_data[the_character_get_click].draw("set",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
+                                characters_data[the_character_get_click].draw("set",screen,perBlockWidth,theMap.row,local_x,local_y,False)
                                 if characters_data[the_character_get_click].gif_dic["set"]["imgId"] == characters_data[the_character_get_click].gif_dic["set"]["imgNum"]-1:
                                     characters_data[the_character_get_click].gif_dic["set"]["imgId"]=0
                                     isWaiting = True
@@ -1113,7 +1115,7 @@ def battle(chapter_name,screen,lang,fps):
                                     characters_data[the_character_get_click].setFlip(True)
                             else:
                                 characters_data[the_character_get_click].setFlip(False)
-                        characters_data[the_character_get_click].draw("attack",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
+                        characters_data[the_character_get_click].draw("attack",screen,perBlockWidth,theMap.row,local_x,local_y,False)
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == characters_data[the_character_get_click].gif_dic["attack"]["imgNum"]-2:
                             for each_enemy in enemies_get_attack:
                                 if enemies_get_attack[each_enemy] == "near" and random.randint(1,100) <= 95 or enemies_get_attack[each_enemy] == "middle" and random.randint(1,100) <= 80 or enemies_get_attack[each_enemy] == "far" and random.randint(1,100) <= 65:
@@ -1129,7 +1131,7 @@ def battle(chapter_name,screen,lang,fps):
                             the_character_get_click = ""
                             action_choice = ""
                     elif action_choice == "skill":
-                        characters_data[the_character_get_click].draw("skill",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
+                        characters_data[the_character_get_click].draw("skill",screen,perBlockWidth,theMap.row,local_x,local_y,False)
                         if characters_data[the_character_get_click].gif_dic["skill"]["imgId"] == characters_data[the_character_get_click].gif_dic["skill"]["imgNum"]-2:
                             temp_dic = skill(the_character_get_click,None,None,sangvisFerris_data,characters_data,"react",skill_target,damage_do_to_character)
                             characters_data = temp_dic["characters_data"]
@@ -1143,7 +1145,7 @@ def battle(chapter_name,screen,lang,fps):
                             the_character_get_click = ""
                             action_choice = ""
                     elif action_choice == "reload":
-                        characters_data[the_character_get_click].draw("reload",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
+                        characters_data[the_character_get_click].draw("reload",screen,perBlockWidth,theMap.row,local_x,local_y,False)
                         if characters_data[the_character_get_click].gif_dic["reload"]["imgId"] == characters_data[the_character_get_click].gif_dic["reload"]["imgNum"]-2:
                             characters_data[the_character_get_click].gif_dic["reload"]["imgId"] = 0
                             characters_data[the_character_get_click].current_action_point -= 5
@@ -1159,7 +1161,7 @@ def battle(chapter_name,screen,lang,fps):
                             the_character_get_click = ""
                             action_choice = ""
                 elif the_character_get_click != "" and isWaiting == True:
-                    characters_data[the_character_get_click].draw("wait",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                    characters_data[the_character_get_click].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
 
             #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
             if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
@@ -1245,7 +1247,7 @@ def battle(chapter_name,screen,lang,fps):
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or darkMode != True:
-                            sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                            sangvisFerris_data[enemies_in_control].draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
                             pygame.mixer.Channel(0).stop()
@@ -1266,7 +1268,7 @@ def battle(chapter_name,screen,lang,fps):
                                 sangvisFerris_data[enemies_in_control].setFlip(True)
                         else:
                             sangvisFerris_data[enemies_in_control].setFlip(False)
-                        sangvisFerris_data[enemies_in_control].draw("attack",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
+                        sangvisFerris_data[enemies_in_control].draw("attack",screen,perBlockWidth,theMap.row,local_x,local_y,False)
                     else:
                         sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] += 1
                     if sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] == sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgNum"]-1:
@@ -1315,7 +1317,7 @@ def battle(chapter_name,screen,lang,fps):
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or darkMode != True:
-                            sangvisFerris_data[enemies_in_control].draw("move",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                            sangvisFerris_data[enemies_in_control].draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
                             pygame.mixer.Channel(0).stop()
@@ -1376,9 +1378,9 @@ def battle(chapter_name,screen,lang,fps):
                             areaDrawColorBlock["yellow"] = rangeCanAttack["far"]
                             areaDrawColorBlock["blue"] =  rangeCanAttack["middle"]
                             areaDrawColorBlock["green"] = rangeCanAttack["near"]
-                        value.draw("wait",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                        value.draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
                     elif value.current_hp<=0:
-                        value.draw("die",screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y,False)
+                        value.draw("die",screen,perBlockWidth,theMap.row,local_x,local_y,False)
                 #是否有在播放死亡角色的动画（而不是倒地状态）
                 if value.current_hp<=0 and key not in the_dead_one:
                     if value.faction == "character" and value.kind == "HOC" or value.faction == "sangvisFerri":
@@ -1436,6 +1438,17 @@ def battle(chapter_name,screen,lang,fps):
             #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
             #展示设施
             theMap.display_facility(characters_data,screen,local_x,local_y)
+            #展示所有角色Ui
+            for every_chara in characters_data:
+                characters_data[every_chara].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+            if darkMode == True:
+                for enemies in sangvisFerris_data:
+                    if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea:
+                        sangvisFerris_data[enemies].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+            else:
+                for enemies in sangvisFerris_data:
+                    sangvisFerris_data[enemies].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+
             #显示选择菜单
             if green_hide == "SelectMenu":
                 buttonGetHover = None
@@ -1469,7 +1482,7 @@ def battle(chapter_name,screen,lang,fps):
                 txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",round(perBlockWidth/10))
                 txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/13))
                 txt_tempX = tempLocation["xStart"]-select_menu_button.get_width()*0.6
-                txt_tempY = tempLocation["yStart"]+select_menu_button.get_height()*0.6
+                txt_tempY = tempLocation["yStart"]
                 if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
                     buttonGetHover = "attack"
                 drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
@@ -1479,9 +1492,19 @@ def battle(chapter_name,screen,lang,fps):
                 txt_temp = fontRender(selectMenuButtons_dic["move"],"black",round(perBlockWidth/10))
                 txt_temp2 = fontRender("2N AP","black",round(perBlockWidth/13))
                 txt_tempX = tempLocation["xEnd"]-select_menu_button.get_width()*0.4
-                txt_tempY = tempLocation["yStart"]+select_menu_button.get_height()*0.6
+                #txt_tempY与攻击按钮一致
                 if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
                     buttonGetHover = "move"
+                drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
+                drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
+                drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
+                #换弹按钮 - 下
+                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(perBlockWidth/10))
+                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/13))
+                txt_tempX = tempLocation["xStart"]+perBlockWidth/4
+                txt_tempY = tempLocation["yStart"]+perBlockWidth*0.45
+                if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
+                    buttonGetHover = "reload"
                 drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
                 drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                 drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
@@ -1489,23 +1512,13 @@ def battle(chapter_name,screen,lang,fps):
                 if characters_data[the_character_get_click].kind != "HOC":
                     txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",round(perBlockWidth/10))
                     txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/13))
-                    txt_tempX = tempLocation["xStart"]+perBlockWidth/4
-                    txt_tempY = tempLocation["yStart"]-perBlockWidth*0.3
+                    #txt_tempX与换弹按钮一致
+                    txt_tempY = tempLocation["yStart"]-perBlockWidth*0.45
                     if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
                         buttonGetHover = "skill"
                     drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
                     drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                     drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
-                #换弹按钮 - 下
-                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(perBlockWidth/10))
-                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/13))
-                txt_tempX = tempLocation["xStart"]+perBlockWidth/4
-                txt_tempY = tempLocation["yStart"]+perBlockWidth*0.55
-                if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
-                    buttonGetHover = "reload"
-                drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
-                drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
-                drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
 
             #加载雪花
             if weatherController != None:

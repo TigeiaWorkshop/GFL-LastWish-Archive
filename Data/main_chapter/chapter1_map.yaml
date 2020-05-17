@@ -128,7 +128,7 @@ character:
     y: 3
   sv-98:
     action_point: 20
-    attack_range: 3
+    attack_range: 1
     bullets_carried: 200
     current_bullets: 10
     current_hp: 25
@@ -1635,4 +1635,4 @@ sangvisFerri:
     y: 13
 weather: snow
 zoomIn: 3
-darkMode: True
+darkMode: False

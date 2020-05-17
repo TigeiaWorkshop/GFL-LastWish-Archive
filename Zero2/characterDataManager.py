@@ -39,7 +39,26 @@ class Doll:
     def setFlip(self,theBool):
         if self.ifFlip != theBool:
             self.ifFlip = theBool
-    def draw(self,action,screen,original_UI_img,perBlockWidth,mapRow,local_x=0,local_y=0,isContinue=True):
+    def draw(self,action,screen,perBlockWidth,mapRow,local_x=0,local_y=0,isContinue=True):
+        #调整小人图片的尺寸
+        img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*1.6), round(perBlockWidth*1.6)))
+        #反转图片
+        if self.ifFlip == True:
+            img_of_char = pygame.transform.flip(img_of_char,True,False)
+        #把角色图片画到屏幕上
+        xTemp,yTemp = calPosInMap(mapRow,perBlockWidth,self.x,self.y,local_x,local_y)
+        screen.blit(img_of_char,(xTemp-perBlockWidth*0.3,yTemp-perBlockWidth*0.85))
+        #调整id，并返回对应的bool状态
+        if self.gif_dic[action]["imgId"] < self.gif_dic[action]["imgNum"]-1:
+            self.gif_dic[action]["imgId"] += 1
+            return True
+        else:
+            if isContinue == True:
+                self.gif_dic[action]["imgId"] = 0
+                return True
+            else:
+                return False
+    def drawUI(self,screen,original_UI_img,perBlockWidth,mapRow,local_x=0,local_y=0):
         hp_img = None
         if self.dying == False:
             if original_UI_img != None:
@@ -51,36 +70,19 @@ class Doll:
                 hp_img = original_UI_img["hp_red"]
             current_hp_to_display = fontRender(str(self.dying)+"/3","black",10)
             percent_of_hp = self.dying/3
-        #调整小人图片的尺寸
-        img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(perBlockWidth*1.6), round(perBlockWidth*1.6)))
-        #反转图片
-        if self.ifFlip == True:
-            img_of_char = pygame.transform.flip(img_of_char,True,False)
         #把角色图片画到屏幕上
         xTemp,yTemp = calPosInMap(mapRow,perBlockWidth,self.x,self.y,local_x,local_y)
-        xTemp2 = xTemp + perBlockWidth*0.25
-        yTemp2 = yTemp - perBlockWidth*0.15
-        screen.blit(img_of_char,(xTemp-perBlockWidth*0.3,yTemp-perBlockWidth*0.85))
-        if original_UI_img != None:
-            if self.faction == "character":
-                if self.undetected == True:
-                    screen.blit(resizeImg(original_UI_img["eye_red"], (None,round(perBlockWidth/10))),(xTemp2+perBlockWidth*0.51,yTemp2))
-                elif self.undetected == False:
-                    screen.blit(resizeImg(original_UI_img["eye_orange"], (None,round(perBlockWidth/10))),(xTemp2+perBlockWidth*0.51,yTemp2))
-            hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(perBlockWidth/2), round(perBlockWidth/10)))
-            screen.blit(hpEmptyScale,(xTemp2,yTemp2))
-            screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp/2),round(perBlockWidth/10))),(xTemp2,yTemp2))
-            displayInCenter(current_hp_to_display,hpEmptyScale,xTemp2,yTemp2,screen)
-        #调整id，并返回对应的bool状态
-        if self.gif_dic[action]["imgId"] < self.gif_dic[action]["imgNum"]-1:
-            self.gif_dic[action]["imgId"] += 1
-            return True
-        else:
-            if isContinue == True:
-                self.gif_dic[action]["imgId"] = 0
-                return True
-            else:
-                return False
+        xTemp += perBlockWidth*0.25
+        yTemp -= perBlockWidth*0.2
+        if self.faction == "character":
+            if self.undetected == True:
+                screen.blit(resizeImg(original_UI_img["eye_red"], (None,round(perBlockWidth/10))),(xTemp+perBlockWidth*0.51,yTemp))
+            elif self.undetected == False:
+                screen.blit(resizeImg(original_UI_img["eye_orange"], (None,round(perBlockWidth/10))),(xTemp+perBlockWidth*0.51,yTemp))
+        hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(perBlockWidth/2), round(perBlockWidth/10)))
+        screen.blit(hpEmptyScale,(xTemp,yTemp))
+        screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp/2),round(perBlockWidth/10))),(xTemp,yTemp))
+        displayInCenter(current_hp_to_display,hpEmptyScale,xTemp,yTemp,screen)
     #设定角色特定动作的图片播放ID
     def set_imgId(self,action,theId):
         self.gif_dic[action]["imgId"] = theId

@@ -16,7 +16,7 @@ class MapObject:
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
         self.bgImg = loadImg("Assets\image\dialog_background\snowfield.jpg")
-        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
+        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height)).convert()
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
@@ -119,7 +119,7 @@ class MapObject:
             self.surface_width = window_x
         if self.surface_height < window_y:
             self.surface_height = window_y
-        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
+        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height)).convert()
         self.mapSurface.blit(pygame.transform.scale(self.bgImg,(self.surface_width,self.surface_height)),(0,0))
         for y in range(len(self.mapData)):
             for x in range(len(self.mapData[y])):
@@ -217,13 +217,13 @@ class WeatherSystem:
         self.ImgObject = []
         for i in range(50):
             imgId = random.randint(0,len(self.img_list)-1)
-            img_size = random.randint(4,9)
+            img_size = random.randint(5,10)
             img_speed = random.randint(1,3)
             img_x = random.randint(1,window_x*1.5)
             img_y = random.randint(1,window_y)
             self.ImgObject.append(Snow(imgId,img_size,img_speed,img_x,img_y))
     def display(self,screen,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
-        speed_unit = perBlockWidth/6
+        speed_unit = perBlockWidth/5
         for i in range(len(self.ImgObject)):
             if 0<=self.ImgObject[i].x<=screen.get_width() and 0<=self.ImgObject[i].y+local_y<=screen.get_height():
                 imgTemp = pygame.transform.scale(self.img_list[self.ImgObject[i].imgId], (round(perBlockWidth/self.ImgObject[i].size), round(perBlockWidth/self.ImgObject[i].size)))
