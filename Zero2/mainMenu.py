@@ -8,12 +8,15 @@ def mainMenu(screen,lang,fps,mode=""):
     window_x,window_y = screen.get_size()
     #帧率控制器
     Display = DisplayController(fps)
+    HealthyGamingAdvice = []
     #加载主菜单文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         game_title = loadData['game_title']
         main_menu_txt = loadData['main_menu']
         chapter_select = loadData['chapter']
+        if lang == "zh_cn" and "HealthyGamingAdvice" in loadData:
+            HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
     
     #加载主菜单选择页面的文字
     for txt in main_menu_txt:
@@ -52,23 +55,32 @@ def mainMenu(screen,lang,fps,mode=""):
     last_hover_sound_play_on = None
 
     the_black = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
-    t1 = fontRender("缇吉娅工坊 呈现","white",30)
-    t2 = fontRender("警告：所有内容仍处于研发阶段，不代表最终效果","white",30)
+    t1 = fontRender("缇吉娅工坊 呈现","white",window_x/64)
+    t2 = fontRender("警告：所有内容仍处于研发阶段，不代表最终效果","white",window_x/64)
+    for i in range(len(HealthyGamingAdvice)):
+        HealthyGamingAdvice[i] = fontRender(HealthyGamingAdvice[i],"white",window_x/64)
+
 
     for i in range(0,250,2):
         the_black.draw(screen)
         t1.set_alpha(i)
-        drawImg(t1,(30,window_y-130),screen)
+        drawImg(t1,(window_x/64,window_y*0.9),screen)
         t2.set_alpha(i)
-        drawImg(t2,(30,window_y-80),screen)
+        drawImg(t2,(window_x/64,window_y*0.9-window_x/32),screen)
+        for a in range(len(HealthyGamingAdvice)):
+            HealthyGamingAdvice[a].set_alpha(i)
+            drawImg(HealthyGamingAdvice[a],(window_x-window_x/32-HealthyGamingAdvice[a].get_width(),window_y*0.9-window_x/64*a*1.5),screen)
         Display.flip()
     
     for i in range(250,0,-2):
         the_black.draw(screen)
         t1.set_alpha(i)
-        drawImg(t1,(30,window_y-130),screen)
+        drawImg(t1,(window_x/64,window_y*0.9),screen)
         t2.set_alpha(i)
-        drawImg(t2,(30,window_y-80),screen)
+        drawImg(t2,(window_x/64,window_y*0.9-window_x/32),screen)
+        for a in range(len(HealthyGamingAdvice)):
+            HealthyGamingAdvice[a].set_alpha(i)
+            drawImg(HealthyGamingAdvice[a],(window_x-window_x/32-HealthyGamingAdvice[a].get_width(),window_y*0.9-window_x/64*a*1.5),screen)
         Display.flip()
 
     # 游戏主循环

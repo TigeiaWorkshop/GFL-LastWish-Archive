@@ -7,7 +7,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
     characters_can_be_detect = []
     #检测是否有可以立马攻击的敌人
     for character in characters_data:
-        if characters_data[character].undetected == False and characters_data[character].current_hp>0:
+        if characters_data[character].undetected == True and characters_data[character].current_hp>0:
             #如果现在还没有可以直接攻击的角色或者当前历遍到角色的血量比最小值要高
             if character_with_min_hp == None or characters_data[character].current_hp <= characters_data[character_with_min_hp[0]].current_hp:
                 temp_distance = abs(characters_data[character].x-sangvisFerris_data[aiInControl].x)+abs(characters_data[character].y-sangvisFerris_data[aiInControl].y)
@@ -56,7 +56,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
         characters_can_be_attacked = {}
         #再次历遍所有characters_data以获取所有当前角色可以在移动后攻击到的敌对阵营角色
         for character in characters_data:
-            if characters_data[character].undetected == False and characters_data[character].current_hp>0:
+            if characters_data[character].undetected == True and characters_data[character].current_hp>0:
                 map2d[characters_data[character].x][characters_data[character].y] = 0
                 aStar=AStar(map2d,Point(sangvisFerris_data[aiInControl].x,sangvisFerris_data[aiInControl].y),Point(characters_data[character].x,characters_data[character].y))
                 pathList=aStar.start()

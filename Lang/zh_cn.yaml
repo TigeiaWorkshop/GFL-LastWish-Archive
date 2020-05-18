@@ -40,3 +40,8 @@ warnings:
   no_enough_ap_to_move: 当前角色没有足够的行动值用于移动
   no_enough_ap_to_reload: 当前角色没有足够的行动值用于换弹
   no_enough_ap_to_use_skill: 当前角色没有足够的行动值用于使用技能
+HealthyGamingAdvice:
+- 抵制不良游戏，拒绝盗版游戏。
+- 注意自我保护，谨防受骗上当。
+- 适度游戏益脑，沉迷游戏伤身。
+- 合理安排时间，享受健康生活。

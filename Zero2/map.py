@@ -66,6 +66,7 @@ class MapObject:
                         imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     if imgToBlit != None:
                         screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+    #寻路功能
     def findPath(self,startPosition,endPosition,characters_data,sangvisFerris_data,routeLen=None,ignoreCharacter=[]):
         startX = startPosition[0]
         startY = startPosition[1]
@@ -85,7 +86,6 @@ class MapObject:
             if key == "obstacle" or key == "campfire":
                 for key2,value2 in value.items():
                     map2d[value2["x"]][value2["y"]]=1
-
         # 历遍所有角色，将角色的坐标点设置为障碍方块
         for key,value in dicMerge(characters_data,sangvisFerris_data).items():
             if key not in ignoreCharacter:
@@ -112,7 +112,6 @@ class MapObject:
                     break
                 the_route.append((startX,startY))
         return the_route
-
     #重新绘制地图
     def process_map(self,window_x,window_y):
         if self.surface_width < window_x:
@@ -130,9 +129,8 @@ class MapObject:
                 else:
                     self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
     #计算在地图中的方块
-    def calBlockInMap(self,block,local_x=0,local_y=0):
+    def calBlockInMap(self,block,mouse_x,mouse_y,local_x=0,local_y=0):
         block_get_click = None
-        mouse_x,mouse_y=pygame.mouse.get_pos()
         lenUnitH = block.get_height()/4
         lenUnitW = block.get_width()/4
         for y in range(len(self.mapData)):

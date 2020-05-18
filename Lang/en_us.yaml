@@ -1,7 +1,7 @@
 Battle_UI:
   enemyRound: enemyRound
   numChapter: Chapter NaN
-  numRound: NaN Round
+  numRound: Round NaN
   yourRound: Your Round
 chapter:
 - chapter1
@@ -20,12 +20,12 @@ loading_info:
   now_loading_level: Now loading level data...
   now_loading_map: Now loading map data...
 main_menu:
-  text_chooseChapter: Select Chapter
   text_continue: Continue
+  text_chooseChapter: Select Chapter
   text_dlc: DLC
-  text_exit: Exit
-  text_setting: setting
   text_workshop: Workshop
+  text_setting: setting
+  text_exit: Exit
 select_menu:
   attack: Attack
   move: Move

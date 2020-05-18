@@ -89,7 +89,7 @@ def battle(chapter_name,screen,lang,fps):
     num_of_characters = len(characters)+len(sangvisFerris)
     characters_data = {}
     for each_character in characters:
-        characters_data[each_character] = CharacterDataManager(characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["type"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["skill_cover_range"],characters[each_character]["undetected"])
+        characters_data[each_character] = CharacterDataManager(window_y,characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["type"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["skill_cover_range"],characters[each_character]["undetected"])
         black_bg.draw(screen)
         drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
@@ -770,10 +770,10 @@ def battle(chapter_name,screen,lang,fps):
                     xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,position[0],position[1],local_x,local_y)
                     drawImg(UI_img[area],(xTemp+perBlockWidth*0.1,yTemp),screen)
 
-            block_get_click = theMap.calBlockInMap(UI_img["green"],local_x,local_y)
             #玩家回合
             if whose_round == "player":
                 if right_click == True:
+                    block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
                     #如果点击了回合结束的按钮
                     if isHover(end_round_button) and isWaiting == True:
                         whose_round = "playerToSangvisFerris"
@@ -881,25 +881,24 @@ def battle(chapter_name,screen,lang,fps):
                         
                 #显示攻击/移动/技能范围
                 if green_hide == False and the_character_get_click != "":
+                    block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
                     #显示移动范围
-                    if action_choice == "move" and block_get_click != None:
-                        #创建AStar对象,并设置起点和终点为
-                        start_x = characters_data[the_character_get_click].x
-                        start_y = characters_data[the_character_get_click].y
-                        end_x = block_get_click["x"]
-                        end_y = block_get_click["y"]
-                        max_blocks_can_move = int(characters_data[the_character_get_click].current_action_point/2)
-                        if abs(end_x-start_x)+abs(end_y-start_y)<=max_blocks_can_move:
-                            the_route = theMap.findPath((start_x,start_y),(end_x,end_y),characters_data,sangvisFerris_data,max_blocks_can_move)
-                            if len(the_route)>0:
-                                #显示路径
-                                areaDrawColorBlock["green"] = the_route
-                                xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,the_route[-1][0],the_route[-1][1],local_x,local_y)
-                                displayInCenter(fontRender("-"+str(len(the_route)*2)+"AP","green",perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
-                            else:
-                                areaDrawColorBlock["green"] = []
-                        else:
-                            areaDrawColorBlock["green"] = []
+                    if action_choice == "move":
+                        areaDrawColorBlock["green"] = []
+                        if block_get_click != None:
+                            #创建AStar对象,并设置起点和终点为
+                            start_x = characters_data[the_character_get_click].x
+                            start_y = characters_data[the_character_get_click].y
+                            end_x = block_get_click["x"]
+                            end_y = block_get_click["y"]
+                            max_blocks_can_move = int(characters_data[the_character_get_click].current_action_point/2)
+                            if abs(end_x-start_x)+abs(end_y-start_y)<=max_blocks_can_move:
+                                the_route = theMap.findPath((start_x,start_y),(end_x,end_y),characters_data,sangvisFerris_data,max_blocks_can_move)
+                                if len(the_route)>0:
+                                    #显示路径
+                                    areaDrawColorBlock["green"] = the_route
+                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,the_route[-1][0],the_route[-1][1],local_x,local_y)
+                                    displayInCenter(fontRender("-"+str(len(the_route)*2)+"AP","green",perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
                     #显示攻击范围        
                     elif action_choice == "attack":
                         if attacking_range == None:
@@ -972,6 +971,7 @@ def battle(chapter_name,screen,lang,fps):
                             areaDrawColorBlock["green"] = skill_range["near"]
                             areaDrawColorBlock["blue"] = skill_range["middle"]
                             areaDrawColorBlock["yellow"] = skill_range["far"]
+                            block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
                             if block_get_click != None:
                                 the_skill_cover_area = []
                                 for area in skill_range:
@@ -1023,7 +1023,7 @@ def battle(chapter_name,screen,lang,fps):
                             break
                         
                 #当有角色被点击时
-                if the_character_get_click != "" and isWaiting == False and block_get_click != None:
+                if the_character_get_click != "" and isWaiting == False:
                     #被点击的角色动画
                     green_hide=True
                     if action_choice == "move":
@@ -1106,6 +1106,7 @@ def battle(chapter_name,screen,lang,fps):
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 0:
+                            block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
                             if block_get_click["x"] < characters_data[the_character_get_click].x:
                                 characters_data[the_character_get_click].setFlip(True)
                             elif block_get_click["x"] == characters_data[the_character_get_click].x:
@@ -1365,19 +1366,21 @@ def battle(chapter_name,screen,lang,fps):
                 #根据血量判断角色的动作
                 if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and darkMode != True:
                     if value.current_hp > 0:
-                        if green_hide == True and pygame.mouse.get_pressed()[2] and block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
-                            rightClickCharacterAlphaDeduct = False
-                            if rightClickCharacterAlpha == None:
-                                rightClickCharacterAlpha = 0
-                            if rightClickCharacterAlpha < 150:
-                                rightClickCharacterAlpha += 10
-                                UI_img["yellow"].set_alpha(rightClickCharacterAlpha)
-                                UI_img["blue"].set_alpha(rightClickCharacterAlpha)
-                                UI_img["green"].set_alpha(rightClickCharacterAlpha)
-                            rangeCanAttack =  value.getAttackRange(theMap)
-                            areaDrawColorBlock["yellow"] = rangeCanAttack["far"]
-                            areaDrawColorBlock["blue"] =  rangeCanAttack["middle"]
-                            areaDrawColorBlock["green"] = rangeCanAttack["near"]
+                        if green_hide == True and pygame.mouse.get_pressed()[2]:
+                            block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
+                            if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
+                                rightClickCharacterAlphaDeduct = False
+                                if rightClickCharacterAlpha == None:
+                                    rightClickCharacterAlpha = 0
+                                if rightClickCharacterAlpha < 150:
+                                    rightClickCharacterAlpha += 10
+                                    UI_img["yellow"].set_alpha(rightClickCharacterAlpha)
+                                    UI_img["blue"].set_alpha(rightClickCharacterAlpha)
+                                    UI_img["green"].set_alpha(rightClickCharacterAlpha)
+                                rangeCanAttack =  value.getAttackRange(theMap)
+                                areaDrawColorBlock["yellow"] = rangeCanAttack["far"]
+                                areaDrawColorBlock["blue"] =  rangeCanAttack["middle"]
+                                areaDrawColorBlock["green"] = rangeCanAttack["near"]
                         value.draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
                     elif value.current_hp<=0:
                         value.draw("die",screen,perBlockWidth,theMap.row,local_x,local_y,False)
