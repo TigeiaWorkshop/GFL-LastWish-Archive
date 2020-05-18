@@ -74,11 +74,17 @@ class Doll:
         xTemp,yTemp = calPosInMap(mapRow,perBlockWidth,self.x,self.y,local_x,local_y)
         xTemp += perBlockWidth*0.25
         yTemp -= perBlockWidth*0.2
-        if self.faction == "character":
+        if self.faction == "character" and self.undetected != None:
+            eyeImgWidth = round(perBlockWidth/6*self.eyeImgSize)
+            eyeImgHeight = round(perBlockWidth/10*self.eyeImgSize)
+            numberX = (eyeImgWidth - perBlockWidth/6)/2
+            numberY = (eyeImgHeight - perBlockWidth/10)/2
             if self.undetected == True:
-                screen.blit(resizeImg(original_UI_img["eye_red"], (None,round(perBlockWidth/10))),(xTemp+perBlockWidth*0.51,yTemp))
+                screen.blit(resizeImg(original_UI_img["eye_red"], (eyeImgWidth,eyeImgHeight)),(xTemp+perBlockWidth*0.51-numberX,yTemp-numberY))
             elif self.undetected == False:
-                screen.blit(resizeImg(original_UI_img["eye_orange"], (None,round(perBlockWidth/10))),(xTemp+perBlockWidth*0.51,yTemp))
+                screen.blit(resizeImg(original_UI_img["eye_orange"], (eyeImgWidth,eyeImgHeight)),(xTemp+perBlockWidth*0.51-numberX,yTemp-numberY))
+            if self.eyeImgSize > 1:
+                self.eyeImgSize-=1
         hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(perBlockWidth/2), round(perBlockWidth/10)))
         screen.blit(hpEmptyScale,(xTemp,yTemp))
         screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp/2),round(perBlockWidth/10))),(xTemp,yTemp))
@@ -93,12 +99,14 @@ class Doll:
     def noticed(self,force=False):
         if force == False:
             if self.undetected == None:
+                self.eyeImgSize = 10
                 self.undetected = False
             elif self.undetected == False:
+                self.eyeImgSize = 10
                 self.undetected = True
         elif force == True:
+            self.eyeImgSize = 10
             self.undetected = True
-
     #获取角色的攻击范围
     def getAttackRange(self,theMap):
         attacking_range = {"near":[],"middle":[],"far":[]}
@@ -133,6 +141,7 @@ class CharacterDataManager(Doll):
         self.max_skill_range = calculate_range(skill_effective_range)
         self.skill_cover_range = skill_cover_range
         self.undetected = detect
+        self.eyeImgSize = 0
 
 class SangvisFerriDataManager(Doll):
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,patrol_path):
