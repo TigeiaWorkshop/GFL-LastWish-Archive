@@ -30,6 +30,8 @@ class Doll:
         if self.faction == "character" and self.dying == False and self.current_hp == 0 and self.kind != "HOC":
             self.dying = 3
             self.ImageGetHurt.x = -self.ImageGetHurt.width
+            self.ImageGetHurt.set_alpha(255)
+            self.ImageGetHurt.yToGo = 255
             result_of_round["times_characters_down"] += 1
         return result_of_round
     def heal(self,hpHealed):
@@ -86,16 +88,19 @@ class Doll:
                 screen.blit(resizeImg(original_UI_img["eye_orange"], (eyeImgWidth,eyeImgHeight)),(xTemp+perBlockWidth*0.51-numberX,yTemp-numberY))
             if self.eyeImgSize > 1:
                 self.eyeImgSize-=1
-            if self.ImageGetHurt.x != None:
+            if self.kind != "HOC" and self.ImageGetHurt.x != None:
                 self.ImageGetHurt.draw(screen)
-                if self.ImageGetHurt.x < self.ImageGetHurt.width/2:
+                if self.ImageGetHurt.x < self.ImageGetHurt.width/4:
                     self.ImageGetHurt.x += self.ImageGetHurt.width/25
                 else:
-                    alphaTemp = self.ImageGetHurt.get_alpha()
-                    if alphaTemp > 0:
-                        self.ImageGetHurt.set_alpha(alphaTemp-2)
+                    if self.ImageGetHurt.yToGo > 0:
+                        self.ImageGetHurt.yToGo -= 5
                     else:
-                        self.ImageGetHurt.x = None
+                        alphaTemp = self.ImageGetHurt.get_alpha()
+                        if alphaTemp > 0:
+                            self.ImageGetHurt.set_alpha(alphaTemp-2)
+                        else:
+                            self.ImageGetHurt.x = None
         hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(perBlockWidth/2), round(perBlockWidth/10)))
         screen.blit(hpEmptyScale,(xTemp,yTemp))
         screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp/2),round(perBlockWidth/10))),(xTemp,yTemp))
@@ -153,7 +158,8 @@ class CharacterDataManager(Doll):
         self.skill_cover_range = skill_cover_range
         self.undetected = detect
         self.eyeImgSize = 0
-        self.ImageGetHurt = loadImage("Assets/image/npc/"+type+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
+        if kind != "HOC":
+            self.ImageGetHurt = loadImage("Assets/image/npc/"+type+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
 
 class SangvisFerriDataManager(Doll):
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,patrol_path):
