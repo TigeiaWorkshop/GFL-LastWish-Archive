@@ -80,8 +80,9 @@ def dialog(chapter_name,screen,lang,fps,part):
         Display.flip()
     
     #音效
-    pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".mp3")
-    pygame.mixer.music.play(loops=9999, start=0.0)
+    if dialog_content[dialogId]["background_music"] != None:
+        pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".mp3")
+        pygame.mixer.music.play(loops=9999, start=0.0)
     dialog_is_playing_sound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")
 
     #玩家在对话时做出的选择
@@ -197,8 +198,11 @@ def dialog(chapter_name,screen,lang,fps,part):
                         if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_img"] != dialog_content[dialogId]["background_img"]:
                             videoCapture = None
                             the_FPS = fps
-                        if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
-                            pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".mp3")
+                        if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != None and dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
+                            try:
+                                pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".mp3")
+                            except BaseException:
+                                pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".ogg")
                             pygame.mixer.music.play(loops=9999, start=0.0)
                         if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["narrator"] != dialog_content[dialogId]["narrator"]:
                             dialoguebox.height = 0
@@ -212,8 +216,11 @@ def dialog(chapter_name,screen,lang,fps,part):
                         if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_img"] != dialog_content[dialogId]["background_img"]:
                             videoCapture = None
                             the_FPS = fps
-                        if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != dialog_content[dialogId]["background_music"]:
-                            pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".mp3")
+                        if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != None and dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != dialog_content[dialogId]["background_music"]:
+                            try:
+                                pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".mp3")
+                            except BaseException:
+                                pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".ogg")
                             pygame.mixer.music.play(loops=9999, start=0.0)
                         dialogId = dialog_content[dialogId]["last_dialog_id"]
                         dialog_is_playing_sound.stop()

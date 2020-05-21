@@ -121,40 +121,35 @@ dialog_after_battle:
     next_dialog_id: null
 dialog_before_battle:
   head:
-    background_img: research
-    background_music: Room_1
+    background_img: null
+    background_music: null
     characters_img: null
     content:
-    - 撤离前一星期，临时据点内
+    - 在我的潜意识中，我曾担心过意外
     last_dialog_id: null
     narrator: null
     next_dialog_id:
-    - option
-    - - choice1
-      - 1
-    - - choice2
-      - 2
-    - - choice3
-      - 3
+    - default
+    - 1
   1:
-    background_img: research
-    background_music: Room_1
-    characters_img:
-    - kalina_dark_5
+    background_img: null
+    background_music: null
+    characters_img: null
     content:
-    - 格林娜，撤离情况怎么样了？
+    - 然而我却没有想到，意外会来得如此之快
     last_dialog_id: head
-    narrator: 我
+    narrator: null
     next_dialog_id:
     - default
     - 2
   2:
     background_img: research
-    background_music: Room_1
+    background_music: BGM_Boss_1
     characters_img:
     - kalina_5
     content:
-    - 已经准备就绪了，只要她们一到就可以立马开始撤离了
+    - 指挥官，铁血的攻势越来越猛烈了，再这样下去，仅存的梯队很快会被击溃
+    - 是时候该下令开始标准的撤离程序了
     last_dialog_id: 1
     narrator: 格林娜
     next_dialog_id:
@@ -162,7 +157,7 @@ dialog_before_battle:
     - 3
   3:
     background_img: research
-    background_music: Room_1
+    background_music: BGM_Boss_1
     characters_img:
     - kalina_dark_5
     content:
@@ -175,7 +170,7 @@ dialog_before_battle:
     - 4
   4:
     background_img: research
-    background_music: Room_1
+    background_music: BGM_Boss_1
     characters_img:
     - kalina_8
     content:
@@ -184,39 +179,43 @@ dialog_before_battle:
     last_dialog_id: 3
     narrator: 格林娜
     next_dialog_id:
-    - default
-    - 5
+    - option
+    - - 她们最后出现的坐标在哪?
+      - 5
   5:
     background_img: research
-    background_music: Room_1
+    background_music: BGM_Boss_1
     characters_img:
-    - kalina_dark_8
+    - kalina_5
     content:
-    - 我相信她们，她们一定会没事的
+    - 在距离这里以东约50公里的某片平原上
+    - 在13个小时之前落入铁血的控制范围内
     last_dialog_id: 4
-    narrator: 我
+    narrator: 格林娜
     next_dialog_id:
     - default
     - 6
   6:
     background_img: research
-    background_music: Room_1
+    background_music: BGM_Boss_1
     characters_img:
-    - kalina_dark_8
+    - kalina_dark_5
     content:
-    - 滴滴滴...
+    - 能派一些人形去搜索吗？
     last_dialog_id: 5
-    narrator: null
+    narrator: 我
     next_dialog_id:
     - default
     - 7
   7:
     background_img: research
-    background_music: Room_1
+    background_music: BGM_Boss_1
     characters_img:
-    - kalina_5
+    - kalina_8
     content:
-    - 你好，临时指挥部，请讲...
+    - 目前还能行动的梯队目前全在第一防线上
+    - 别说突围了，勉强的挡住铁血的攻势已经是万幸了
+    - 如果这时候再抽出人手，防线可能很快就会被铁血击溃
     last_dialog_id: 6
     narrator: 格林娜
     next_dialog_id:
@@ -224,37 +223,86 @@ dialog_before_battle:
     - 8
   8:
     background_img: research
-    background_music: Room_1
+    background_music: BGM_Boss_1
     characters_img:
-    - kalina_5
+    - kalina_dark_8
     content:
-    - 指挥官，克鲁格先生希望您去见他
+    - 该死，说好的支援呢
+    - 而且这只是一座什么资源都没有的孤岛而已，为什么安全局会如此重视
     last_dialog_id: 7
-    narrator: 格林娜
+    narrator: 我
     next_dialog_id:
     - default
     - 9
   9:
     background_img: research
-    background_music: Room_1
+    background_music: BGM_Boss_1
     characters_img:
-    - kalina_dark_5
+    - kalina_5
     content:
-    - 好的，我知道了
+    - 我也不是很清楚，据说是和安全局截取到的情报有关
+    - 除此之外就没有透露更多信息了
     last_dialog_id: 8
-    narrator: 我
+    narrator: 格林娜
     next_dialog_id:
     - default
     - 10
   10:
     background_img: research
-    background_music: Room_1
+    background_music: BGM_Boss_1
     characters_img:
     - kalina_dark_5
     content:
-    - 我知道克鲁格想告诉我什么
-    - 但此时，我是多么希望她们能出现在我的面前
+    - 格林娜
     last_dialog_id: 9
+    narrator: 我
+    next_dialog_id: 
+    - default
+    - 11
+  11:
+    background_img: research
+    background_music: BGM_Boss_1
+    characters_img:
+    - kalina_3
+    content:
+    - 是
+    last_dialog_id: 10
+    narrator: 格林娜
+    next_dialog_id: 
+    - default
+    - 12
+  12:
+    background_img: research
+    background_music: BGM_Boss_1
+    characters_img:
+    - kalina_dark_3
+    content:
+    - 开始撤离程序吧，然后帮我接通K，我需要和他谈谈
+    last_dialog_id: 11
+    narrator: 我
+    next_dialog_id: 
+    - default
+    - 13
+  13:
+    background_img: research
+    background_music: BGM_Boss_1
+    characters_img:
+    - kalina_5
+    content:
+    - 好的，我这就去
+    last_dialog_id: 12
+    narrator: 格林娜
+    next_dialog_id: 
+    - default
+    - 14
+  14:
+    background_img: research
+    background_music: BGM_Boss_1
+    characters_img: null
+    content:
+    - 此时此刻，我的内心十分不安，sv-98她们能不能在撤离前赶回来是一件事
+    - 但我总感觉这座岛上，有着格里芬甚至安全局自己都还不知道的谜团
+    last_dialog_id: 13
     narrator: null
     next_dialog_id: null
 dialog_during_battle:
