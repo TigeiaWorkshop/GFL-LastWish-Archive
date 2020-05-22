@@ -304,6 +304,31 @@ dialog_before_battle:
     - 但我总感觉这座岛上，有着格里芬甚至安全局自己都还不知道的谜团
     last_dialog_id: 13
     narrator: null
+    next_dialog_id:
+      - changeScene
+      - 15
+  15:
+    background_img: snowfield
+    background_music: BGM_Brain_1
+    characters_img:
+    - sv-98
+    content:
+    - 嗯。。。额
+    - 这里是哪里
+    last_dialog_id: null
+    narrator: sv-98
+    next_dialog_id:
+    - default
+    - 16
+  16:
+    background_img: snowfield
+    background_music: BGM_Brain_1
+    characters_img:
+    - sv-98
+    content:
+    - 看来是刚才的爆炸让大家都分散了
+    last_dialog_id: 15
+    narrator: sv-98
     next_dialog_id: null
 dialog_during_battle:
   tutorial1:

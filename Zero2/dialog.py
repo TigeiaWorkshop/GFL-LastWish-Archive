@@ -79,159 +79,197 @@ def dialog(chapter_name,screen,lang,fps,part):
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         Display.flip()
     
-    #音效
-    if dialog_content[dialogId]["background_music"] != None:
-        pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".mp3")
-        pygame.mixer.music.play(loops=9999, start=0.0)
-    dialog_is_playing_sound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")
+    while if_skip == False:
+        #音效
+        if dialog_content[dialogId]["background_music"] != None:
+            try:
+                pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".mp3")
+            except BaseException:
+                pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".ogg")
+            pygame.mixer.music.play(loops=9999, start=0.0)
+        dialog_is_playing_sound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")
 
-    #玩家在对话时做出的选择
-    dialog_options = {}
-    the_FPS = fps
-    #主循环
-    while len(dialog_content)!=0 and if_skip == False:
-        #背景
-        if dialog_content[dialogId]["background_img"] == None:
-            black_bg.draw(screen)
-        elif dialog_content[dialogId]["background_img"] in dialog_bg_img_dic:
-            dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
-        else:
-            if videoCapture == None:
-                if os.path.exists("Assets/movie/"+dialog_content[dialogId]["background_img"]) == False:
-                    raise Exception('The video file is not exist')
-                videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
-                frames_num = videoCapture.getFrameNum()
-                the_FPS = videoCapture.getFPS()
+        #玩家在对话时做出的选择
+        dialog_options = {}
+        the_FPS = fps
+        #主循环
+        while len(dialog_content)!=0 and if_skip == False:
+            #背景
+            if dialog_content[dialogId]["background_img"] == None:
+                black_bg.draw(screen)
+            elif dialog_content[dialogId]["background_img"] in dialog_bg_img_dic:
+                dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
             else:
-                videoCapture.display(screen)
+                if videoCapture == None:
+                    if os.path.exists("Assets/movie/"+dialog_content[dialogId]["background_img"]) == False:
+                        raise Exception('The video file is not exist')
+                    videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
+                    frames_num = videoCapture.getFrameNum()
+                    the_FPS = videoCapture.getFPS()
+                else:
+                    videoCapture.display(screen)
 
-        #加载对话人物立绘
-        if dialog_content[dialogId]["characters_img"] != None:
-            if len(dialog_content[dialogId]["characters_img"])==2:
-                drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][0]],(0,window_y-window_x/2),screen)
-                drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][1]],(window_x/2,window_y-window_x/2),screen)
-            elif len(dialog_content[dialogId]["characters_img"])==1:
-                drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][0]],(window_x/4,window_y-window_x/2),screen)
-        # 对话框图片
-        dialoguebox.draw(screen)
-        #跳过按钮
-        skip_button.draw(screen)
+            #加载对话人物立绘
+            if dialog_content[dialogId]["characters_img"] != None:
+                if len(dialog_content[dialogId]["characters_img"])==2:
+                    drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][0]],(0,window_y-window_x/2),screen)
+                    drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][1]],(window_x/2,window_y-window_x/2),screen)
+                elif len(dialog_content[dialogId]["characters_img"])==1:
+                    drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][0]],(window_x/4,window_y-window_x/2),screen)
+            # 对话框图片
+            dialoguebox.draw(screen)
+            #跳过按钮
+            skip_button.draw(screen)
 
-        if dialoguebox.height < dialoguebox_max_height:
-            dialoguebox.height += dialoguebox_max_height/12
-            dialoguebox.y -= dialoguebox_max_height/24
-        else:
-            #讲述者名称
-            if dialog_content[dialogId]["narrator"] != None:
-                drawImg(fontRender(dialog_content[dialogId]["narrator"],"white",window_x*0.017),(dialoguebox.width*0.1,dialoguebox.height/8),screen,dialoguebox.x,dialoguebox.y)
-            #对话框已播放的内容
-            for i in range(displayed_line):
-                drawImg(fontRender(dialog_content[dialogId]["content"][i],"white",window_x*0.015),(dialoguebox.width*0.075,dialoguebox.height*0.33+window_x*0.02*i),screen,dialoguebox.x,dialoguebox.y)
-            #对话框正在播放的内容
-            drawImg(fontRender(dialog_content[dialogId]["content"][displayed_line][0:dialog_content_id],"white",window_x*0.015),(dialoguebox.width*0.075,dialoguebox.height*0.33+window_x*0.02*displayed_line),screen,dialoguebox.x,dialoguebox.y)
-            #检测所有字是否都已经播出
-            if dialog_content_id < len(dialog_content[dialogId]["content"][displayed_line]):
-                if pygame.mixer.get_busy() == False:
-                    dialog_is_playing_sound.play()
-                dialog_content_id +=1
-            #当前行的所有字都播出后，播出下一行
-            elif displayed_line < len(dialog_content[dialogId]["content"])-1:
-                if pygame.mixer.get_busy() == False:
-                    dialog_is_playing_sound.play()
-                dialog_content_id = 1
-                displayed_line += 1
-            #当所有行都播出后
+            if dialoguebox.height < dialoguebox_max_height:
+                dialoguebox.height += dialoguebox_max_height/12
+                dialoguebox.y -= dialoguebox_max_height/24
             else:
-                if pygame.mixer.get_busy() == True:
-                    dialog_is_playing_sound.stop()
-                if dialog_content[dialogId]["next_dialog_id"] != None and dialog_content[dialogId]["next_dialog_id"][0] == "option":
-                    optionBox_y_base = (window_y*3/4-(len(dialog_content[dialogId]["next_dialog_id"])-1)*2*window_x*0.03)/4
-                    for i in range(1,len(dialog_content[dialogId]["next_dialog_id"])):
-                        option_txt = fontRender(dialog_content[dialogId]["next_dialog_id"][i][0],"white",window_x*0.025)
-                        optionBox_scaled = pygame.transform.scale(optionBox,(int(option_txt.get_width()*2),int(window_x*0.05)))
-                        optionBox_x = (window_x-optionBox_scaled.get_width())/2
-                        optionBox_y = i*2*window_x*0.03+optionBox_y_base
-                        displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
-                        if pygame.mouse.get_pressed()[0] and isHoverOn(optionBox_scaled,(optionBox_x,optionBox_y)):
+                #讲述者名称
+                if dialog_content[dialogId]["narrator"] != None:
+                    drawImg(fontRender(dialog_content[dialogId]["narrator"],"white",window_x*0.017),(dialoguebox.width*0.1,dialoguebox.height/8),screen,dialoguebox.x,dialoguebox.y)
+                #对话框已播放的内容
+                for i in range(displayed_line):
+                    drawImg(fontRender(dialog_content[dialogId]["content"][i],"white",window_x*0.015),(dialoguebox.width*0.075,dialoguebox.height*0.33+window_x*0.02*i),screen,dialoguebox.x,dialoguebox.y)
+                #对话框正在播放的内容
+                drawImg(fontRender(dialog_content[dialogId]["content"][displayed_line][0:dialog_content_id],"white",window_x*0.015),(dialoguebox.width*0.075,dialoguebox.height*0.33+window_x*0.02*displayed_line),screen,dialoguebox.x,dialoguebox.y)
+                #检测所有字是否都已经播出
+                if dialog_content_id < len(dialog_content[dialogId]["content"][displayed_line]):
+                    if pygame.mixer.get_busy() == False:
+                        dialog_is_playing_sound.play()
+                    dialog_content_id +=1
+                #当前行的所有字都播出后，播出下一行
+                elif displayed_line < len(dialog_content[dialogId]["content"])-1:
+                    if pygame.mixer.get_busy() == False:
+                        dialog_is_playing_sound.play()
+                    dialog_content_id = 1
+                    displayed_line += 1
+                #当所有行都播出后
+                else:
+                    if pygame.mixer.get_busy() == True:
+                        dialog_is_playing_sound.stop()
+                    if dialog_content[dialogId]["next_dialog_id"] != None and dialog_content[dialogId]["next_dialog_id"][0] == "option":
+                        optionBox_y_base = (window_y*3/4-(len(dialog_content[dialogId]["next_dialog_id"])-1)*2*window_x*0.03)/4
+                        for i in range(1,len(dialog_content[dialogId]["next_dialog_id"])):
+                            option_txt = fontRender(dialog_content[dialogId]["next_dialog_id"][i][0],"white",window_x*0.025)
+                            optionBox_scaled = pygame.transform.scale(optionBox,(int(option_txt.get_width()*2),int(window_x*0.05)))
+                            optionBox_x = (window_x-optionBox_scaled.get_width())/2
+                            optionBox_y = i*2*window_x*0.03+optionBox_y_base
+                            displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
+                            if pygame.mouse.get_pressed()[0] and isHoverOn(optionBox_scaled,(optionBox_x,optionBox_y)):
+                                dialog_content_id = 1
+                                displayed_line = 0
+                                if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_img"] != dialog_content[dialogId]["background_img"]:
+                                    videoCapture = None
+                                    the_FPS = fps
+                                if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
+                                    pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_music"]+".mp3")
+                                    pygame.mixer.music.play(loops=9999, start=0.0)
+                                if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["narrator"] != dialog_content[dialogId]["narrator"]:
+                                    dialoguebox.height = 0
+                                    dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
+                                dialog_options[len(dialog_options)] = i
+                                dialogId = dialog_content[dialogId]["next_dialog_id"][i][1]
+                                break
+
+                #鼠标gif
+                if mouse_gif_id<=20:
+                    mouse_gif_id+=1
+                    drawImg(mouse_click,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
+                elif mouse_gif_id==40:
+                    mouse_gif_id=1
+                    drawImg(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
+                else:
+                    mouse_gif_id+=1
+                    drawImg(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
+
+            #按键判定
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        exit()
+                elif event.type == MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
+                    #如果接来下没有文档了或者玩家按到了跳过按钮
+                    if pygame.mouse.get_pressed()[0] or joystick.get_button(0) == 1:
+                        if isHover(skip_button) or dialog_content[dialogId]["next_dialog_id"] == None:
+                            if_skip = True
+                        elif displayed_line < len(dialog_content[dialogId]["content"])-1:
+                            displayed_line = len(dialog_content[dialogId]["content"])-1
+                            dialog_content_id = len(dialog_content[dialogId]["content"][displayed_line])-1
+                        elif dialog_content[dialogId]["next_dialog_id"][0] == "default":
                             dialog_content_id = 1
                             displayed_line = 0
-                            if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_img"] != dialog_content[dialogId]["background_img"]:
+                            if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_img"] != dialog_content[dialogId]["background_img"]:
                                 videoCapture = None
                                 the_FPS = fps
-                            if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
-                                pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_music"]+".mp3")
+                            if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != None and dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
+                                try:
+                                    pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".mp3")
+                                except BaseException:
+                                    pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".ogg")
                                 pygame.mixer.music.play(loops=9999, start=0.0)
-                            if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["narrator"] != dialog_content[dialogId]["narrator"]:
+                            if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["narrator"] != dialog_content[dialogId]["narrator"]:
                                 dialoguebox.height = 0
                                 dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
-                            dialog_options[len(dialog_options)] = i
-                            dialogId = dialog_content[dialogId]["next_dialog_id"][i][1]
-                            break
-
-            #鼠标gif
-            if mouse_gif_id<=20:
-                mouse_gif_id+=1
-                drawImg(mouse_click,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
-            elif mouse_gif_id==40:
-                mouse_gif_id=1
-                drawImg(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
-            else:
-                mouse_gif_id+=1
-                drawImg(mouse_none,(dialoguebox.x+dialoguebox.width*0.95,dialoguebox.y+dialoguebox.height*0.7),screen)
-
-        #按键判定
-        for event in pygame.event.get():
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    exit()
-            elif event.type == MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
-                #如果接来下没有文档了或者玩家按到了跳过按钮
-                if pygame.mouse.get_pressed()[0] or joystick.get_button(0) == 1:
-                    if isHover(skip_button) or dialog_content[dialogId]["next_dialog_id"] == None:
-                        if_skip = True
-                    elif displayed_line < len(dialog_content[dialogId]["content"])-1:
-                        displayed_line = len(dialog_content[dialogId]["content"])-1
-                        dialog_content_id = len(dialog_content[dialogId]["content"][displayed_line])-1
-                    elif dialog_content[dialogId]["next_dialog_id"][0] == "default":
-                        dialog_content_id = 1
-                        displayed_line = 0
-                        if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_img"] != dialog_content[dialogId]["background_img"]:
-                            videoCapture = None
-                            the_FPS = fps
-                        if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != None and dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
-                            try:
-                                pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".mp3")
-                            except BaseException:
-                                pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".ogg")
-                            pygame.mixer.music.play(loops=9999, start=0.0)
-                        if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["narrator"] != dialog_content[dialogId]["narrator"]:
-                            dialoguebox.height = 0
-                            dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
-                        dialogId = dialog_content[dialogId]["next_dialog_id"][1]
-                        dialog_is_playing_sound.stop()
-                elif pygame.mouse.get_pressed()[2] or joystick.get_button(1) == 1:
-                    if dialog_content[dialogId]["last_dialog_id"] != None:
-                        dialog_content_id = 1
-                        displayed_line = 0
-                        if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_img"] != dialog_content[dialogId]["background_img"]:
-                            videoCapture = None
-                            the_FPS = fps
-                        if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != None and dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != dialog_content[dialogId]["background_music"]:
-                            try:
-                                pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".mp3")
-                            except BaseException:
-                                pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".ogg")
-                            pygame.mixer.music.play(loops=9999, start=0.0)
-                        dialogId = dialog_content[dialogId]["last_dialog_id"]
-                        dialog_is_playing_sound.stop()
-        Display.flip()
-    
-    #淡出
-    pygame.mixer.music.fadeout(1000)
-    for i in range(0,55,2):
-        black_bg.set_alpha(i)
-        black_bg.draw(screen)
-        Display.flip()
+                            dialogId = dialog_content[dialogId]["next_dialog_id"][1]
+                            dialog_is_playing_sound.stop()
+                        elif dialog_content[dialogId]["next_dialog_id"][0] == "changeScene":
+                            if_skip = True
+                    elif pygame.mouse.get_pressed()[2] or joystick.get_button(1) == 1:
+                        if dialog_content[dialogId]["last_dialog_id"] != None:
+                            dialog_content_id = 1
+                            displayed_line = 0
+                            if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_img"] != dialog_content[dialogId]["background_img"]:
+                                videoCapture = None
+                                the_FPS = fps
+                            if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != None and dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != dialog_content[dialogId]["background_music"]:
+                                try:
+                                    pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".mp3")
+                                except BaseException:
+                                    pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".ogg")
+                                pygame.mixer.music.play(loops=9999, start=0.0)
+                            dialogId = dialog_content[dialogId]["last_dialog_id"]
+                            dialog_is_playing_sound.stop()
+            Display.flip()
+        
+        #淡出
+        pygame.mixer.music.fadeout(1000)
+        for i in range(0,255,5):
+            black_bg.set_alpha(i)
+            black_bg.draw(screen)
+            Display.flip()
+        
+        #如果是因changeScene跳出
+        if dialog_content[dialogId]["next_dialog_id"] != None and dialog_content[dialogId]["next_dialog_id"][0] == "changeScene":
+            dialog_content_id = 1
+            displayed_line = 0
+            dialoguebox.height = 0
+            dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
+            if_skip = False
+            videoCapture = None
+            the_FPS = fps
+            time.sleep(2)
+            dialogId = dialog_content[dialogId]["next_dialog_id"][1]
+            for i in range(255,0,-5):
+                if dialog_content[dialogId]["background_img"] == None:
+                    black_bg.draw(screen)
+                else:
+                    if dialog_content[dialogId]["background_img"] in dialog_bg_img_dic:
+                        dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
+                    else:
+                        if videoCapture == None:
+                            if os.path.exists("Assets/movie/"+dialog_content[dialogId]["background_img"]) == False:
+                                raise Exception('The video file is not exist')
+                            videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
+                            frames_num = videoCapture.getFrameNum()
+                            the_FPS = videoCapture.getFPS()
+                        else:
+                            videoCapture.display(screen)
+                    black_bg.set_alpha(i)
+                    black_bg.draw(screen)
+                Display.flip()
+            #重设black_bg的alpha值以便下一次使用
+            black_bg.set_alpha(255)
 
     if len(dialog_options) == 0:
         return True
