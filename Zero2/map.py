@@ -119,7 +119,8 @@ class MapObject:
         if self.surface_height < window_y:
             self.surface_height = window_y
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height)).convert()
-        self.mapSurface.blit(pygame.transform.scale(self.bgImg,(self.surface_width,self.surface_height)),(0,0))
+        if self.bgImg != None:
+            self.mapSurface.blit(pygame.transform.scale(self.bgImg,(self.surface_width,self.surface_height)),(0,0))
         for y in range(len(self.mapData)):
             for x in range(len(self.mapData[y])):
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)

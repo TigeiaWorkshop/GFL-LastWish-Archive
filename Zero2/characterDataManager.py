@@ -3,7 +3,7 @@ from Zero2.basic import *
 from Zero2.map import calPosInMap
 
 class Doll:
-    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,faction,magazine_capacity,max_damage,max_hp,min_damage,type,x,y):
+    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,faction,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,mode):
         self.current_action_point = action_point
         self.max_action_point = action_point
         self.attack_range = attack_range
@@ -14,7 +14,7 @@ class Doll:
         self.max_effective_range = calculate_range(effective_range)
         self.kind = kind
         self.faction = faction
-        self.gif_dic = character_gif_dic(type,faction)
+        self.gif_dic = character_gif_dic(type,faction,mode)
         self.magazine_capacity = magazine_capacity
         self.max_damage = max_damage
         self.max_hp = max_hp
@@ -150,8 +150,8 @@ class Doll:
         return attacking_range
 
 class CharacterDataManager(Doll):
-    def __init__(self,window_y,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,detect):
-        Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"character",magazine_capacity,max_damage,max_hp,min_damage,type,x,y)
+    def __init__(self,window_y,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,detect,mode=None):
+        Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"character",magazine_capacity,max_damage,max_hp,min_damage,type,x,y,mode)
         self.bullets_carried = bullets_carried
         self.skill_effective_range = skill_effective_range
         self.max_skill_range = calculate_range(skill_effective_range)
@@ -162,8 +162,8 @@ class CharacterDataManager(Doll):
             self.ImageGetHurt = loadImage("Assets/image/npc/"+type+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
 
 class SangvisFerriDataManager(Doll):
-    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,patrol_path):
-        Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"sangvisFerri",magazine_capacity,max_damage,max_hp,min_damage,type,x,y)
+    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,patrol_path,mode=None):
+        Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"sangvisFerri",magazine_capacity,max_damage,max_hp,min_damage,type,x,y,mode)
         self.patrol_path = patrol_path
 
 #计算最远攻击距离
@@ -182,13 +182,10 @@ def calculate_range(effective_range_dic):
 
 #动图制作模块：接受一个友方角色名和动作,当前的方块标准长和高，返回对应角色动作list或者因为没图片而返回None
 #810*810 possition:405/567
-def character_creator(character_name,action,faction="character"):
+def character_creator(character_name,action,faction):
     if os.path.exists("Assets/image/"+faction+"/"+character_name+"/"+action):
         files_amount = len(glob.glob("Assets/image/"+faction+"/"+character_name+"/"+action+"/*.png"))
         path = "Assets/image/"+faction+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_NaN.png"
-    elif os.path.exists("../Assets/image/"+faction+"/"+character_name+"/"+action):
-        files_amount = len(glob.glob("../Assets/image/"+faction+"/"+character_name+"/"+action+"/*.png"))
-        path = "../Assets/image/"+faction+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_NaN.png"
     else:
         return None
     character_gif=[]
@@ -204,7 +201,7 @@ def character_creator(character_name,action,faction="character"):
         return None
 
 #动图字典制作模块：接受一个友方角色名，返回对应的动图字典：
-def character_gif_dic(character_name,faction="character",mode=None):
+def character_gif_dic(character_name,faction,mode):
     if mode == None:
         gif_dic = {
             "attack":character_creator(character_name,"attack",faction),

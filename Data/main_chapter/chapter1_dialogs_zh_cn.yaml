@@ -149,7 +149,7 @@ dialog_before_battle:
     - kalina_5
     content:
     - 指挥官，铁血的攻势越来越猛烈了，再这样下去，仅存的梯队很快会被击溃
-    - 是时候该下令开始标准的撤离程序了
+    - 是时候该下令开始执行标准的撤离程序了
     last_dialog_id: 1
     narrator: 格林娜
     next_dialog_id:
@@ -180,7 +180,7 @@ dialog_before_battle:
     narrator: 格林娜
     next_dialog_id:
     - option
-    - - 她们最后出现的坐标在哪?
+    - - 最后发出呼救的坐标在哪？
       - 5
   5:
     background_img: research
@@ -201,7 +201,7 @@ dialog_before_battle:
     characters_img:
     - kalina_dark_5
     content:
-    - 能派一些人形去搜索吗？
+    - 能派一些人形前去搜索吗？
     last_dialog_id: 5
     narrator: 我
     next_dialog_id:
@@ -213,8 +213,8 @@ dialog_before_battle:
     characters_img:
     - kalina_8
     content:
-    - 目前还能行动的梯队目前全在第一防线上
-    - 别说突围了，勉强的挡住铁血的攻势已经是万幸了
+    - 目前还能行动的梯队目前全都分布在第一防线上
+    - 别说突围了，能勉强挡住铁血的攻势已经是万幸了
     - 如果这时候再抽出人手，防线可能很快就会被铁血击溃
     last_dialog_id: 6
     narrator: 格林娜
@@ -240,7 +240,7 @@ dialog_before_battle:
     characters_img:
     - kalina_5
     content:
-    - 我也不是很清楚，据说是和安全局截取到的情报有关
+    - 我也不是很清楚，委托中只提到这和安全局截取到的情报有关
     - 除此之外就没有透露更多信息了
     last_dialog_id: 8
     narrator: 格林娜
@@ -310,13 +310,11 @@ dialog_before_battle:
   15:
     background_img: snowfield
     background_music: BGM_Brain_1
-    characters_img:
-    - sv-98
+    characters_img: null
     content:
-    - 嗯。。。额
-    - 这里是哪里
+    - 24小时以前
     last_dialog_id: null
-    narrator: sv-98
+    narrator: null
     next_dialog_id:
     - default
     - 16
@@ -326,9 +324,59 @@ dialog_before_battle:
     characters_img:
     - sv-98
     content:
-    - 看来是刚才的爆炸让大家都分散了
+    - asval，情况怎么样？
     last_dialog_id: 15
     narrator: sv-98
+    next_dialog_id:
+    - default
+    - 17
+  17:
+    background_img: snowfield
+    background_music: BGM_Brain_1
+    characters_img:
+    - asval
+    - sv-98_dark
+    content:
+    - 指挥官已经派直升机来接我们了，我们只需要清空地面上铁血火力，防止直升机降落时出现意外
+    last_dialog_id: 16
+    narrator: asval
+    next_dialog_id:
+    - default
+    - 18
+  18:
+    background_img: snowfield
+    background_music: BGM_Brain_1
+    characters_img:
+    - sv-98
+    content:
+    - 大家再加把劲，只要我们在直升机到来前尽可能消灭当前区域内的铁血势力
+    - 到时候我们就能安全撤离了。
+    last_dialog_id: 17
+    narrator: asval
+    next_dialog_id: 
+    - default
+    - 19
+  19:
+    background_img: snowfield
+    background_music: BGM_Brain_1
+    characters_img:
+    - sv-98_dark
+    content:
+    - 好！
+    last_dialog_id: 18
+    narrator: 众人
+    next_dialog_id:
+    - default
+    - 20
+  20:
+    background_img: snowfield
+    background_music: BGM_Brain_1
+    characters_img:
+    - sv-98
+    content:
+    - 小声点！铁血又不是没长耳朵。
+    last_dialog_id: 19
+    narrator: asval
     next_dialog_id: null
 dialog_during_battle:
   tutorial1:

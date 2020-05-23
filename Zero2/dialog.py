@@ -152,7 +152,7 @@ def dialog(chapter_name,screen,lang,fps,part):
                         optionBox_y_base = (window_y*3/4-(len(dialog_content[dialogId]["next_dialog_id"])-1)*2*window_x*0.03)/4
                         for i in range(1,len(dialog_content[dialogId]["next_dialog_id"])):
                             option_txt = fontRender(dialog_content[dialogId]["next_dialog_id"][i][0],"white",window_x*0.025)
-                            optionBox_scaled = pygame.transform.scale(optionBox,(int(option_txt.get_width()*2),int(window_x*0.05)))
+                            optionBox_scaled = pygame.transform.scale(optionBox,(int(option_txt.get_width()+window_x*0.05),int(window_x*0.05)))
                             optionBox_x = (window_x-optionBox_scaled.get_width())/2
                             optionBox_y = i*2*window_x*0.03+optionBox_y_base
                             displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
