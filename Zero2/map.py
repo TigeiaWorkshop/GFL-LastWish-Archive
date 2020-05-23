@@ -2,27 +2,32 @@
 from Zero2.basic import *
 
 class MapObject:
-    def  __init__(self,mapData,facilityData,blocks_setting,dark_mode,perBlockWidth):
+    def  __init__(self,mapDataDic,perBlockWidth):
+        #加载地图设置
+        with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
+            blocks_setting = yaml.load(f.read(),Loader=yaml.FullLoader)["blocks"]
+        mapData = mapDataDic["map"]
+        facilityData = mapDataDic["facility"]
+        self.darkMode = mapDataDic["darkMode"]
         self.perBlockWidth = perBlockWidth
         self.row = len(mapData)
         self.column = len(mapData[0])
-        self.env_img_list_original = load_env_images(mapData,None,None,dark_mode)
-        self.env_img_list = load_env_images(mapData,perBlockWidth,None,dark_mode)
-        self.dark_mode = dark_mode
+        self.env_img_list_original = load_env_images(mapData,None,None,self.darkMode)
+        self.env_img_list = load_env_images(mapData,perBlockWidth,None,self.darkMode)
         self.mapData = initialBlockData(mapData,facilityData,blocks_setting)
-        self.facilityImg = loadFacilityImg(facilityData,dark_mode)
+        self.facilityImg = loadFacilityImg(facilityData,self.darkMode)
         self.facilityData = initialFacility(facilityData)
         self.lightArea = []
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
-        self.bgImg = loadImg("Assets\image\dialog_background\snowfield.jpg")
+        self.bgImg = loadImg("Assets/image/dialog_background/"+mapDataDic["backgroundImage"])
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height)).convert()
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
         for key in self.env_img_list["normal"]:
             self.env_img_list["normal"][key] = pygame.transform.scale(self.env_img_list_original["normal"][key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original["normal"][key].get_width()*self.env_img_list_original["normal"][key].get_height())))
-        if self.dark_mode == True:
+        if self.darkMode == True:
             for key in self.env_img_list["dark"]:
                 self.env_img_list["dark"][key] = pygame.transform.scale(self.env_img_list_original["dark"][key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original["dark"][key].get_width()*self.env_img_list_original["dark"][key].get_height())))
         self.surface_width = int(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
@@ -39,7 +44,7 @@ class MapObject:
                 imgToBlit = None
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value2["x"],value2["y"],local_x,local_y)
                 if -self.perBlockWidth<=xTemp<screen.get_width() and -self.perBlockWidth<=yTemp<screen.get_height():
-                    if self.dark_mode == True and (value2["x"],value2["y"]) not in self.lightArea:
+                    if self.darkMode == True and (value2["x"],value2["y"]) not in self.lightArea:
                         keyWordTemp = "dark"
                     else:
                         keyWordTemp = "normal"
@@ -125,7 +130,7 @@ class MapObject:
             for x in range(len(self.mapData[y])):
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)
                 #画上场景图片
-                if self.dark_mode == True and (x,y) not in self.lightArea:
+                if self.darkMode == True and (x,y) not in self.lightArea:
                     self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
                 else:
                     self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))

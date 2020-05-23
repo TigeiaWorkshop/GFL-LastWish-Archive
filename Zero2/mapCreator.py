@@ -44,7 +44,7 @@ def mapCreator(chapterName,screen,lang):
     perBlockWidth = int(window_x/block_x*0.9)
     perBlockHeight = int(window_y/block_y*0.9)
     #加载地图
-    theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,False,int(window_x/block_x*0.9))
+    theMap = MapObject(loadData,int(window_x/block_x*0.9))
     theMap.bgImg = None
     theMap.process_map(window_x,window_y)
 

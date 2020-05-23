@@ -55,15 +55,9 @@ def battle(chapter_name,screen,lang,fps):
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     Display.flip()
 
-    #加载地图设置
-    with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
-        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        blocks_setting = loadData["blocks"]
     #读取并初始化章节信息
     with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        block_y = len(loadData["map"])
-        block_x = len(loadData["map"][0])
         zoomIn = loadData["zoomIn"]*100
         local_x = loadData["local_x"]
         local_y = loadData["local_y"]
@@ -72,7 +66,6 @@ def battle(chapter_name,screen,lang,fps):
         bg_music = loadData["background_music"]
         theWeather = loadData["weather"]
         dialogInfo = loadData["dialogs"]
-        darkMode = loadData["darkMode"]
 
     if zoomIn < 200:
         zoomIn = 200
@@ -82,7 +75,7 @@ def battle(chapter_name,screen,lang,fps):
     perBlockWidth = round(window_x/10)
     perBlockHeight = round(window_y/10)
     #初始化地图模块
-    theMap = MapObject(loadData["map"],loadData["facility"],blocks_setting,darkMode,perBlockWidth)
+    theMap = MapObject(loadData,perBlockWidth)
     
     #初始化角色信息
     i = 1
@@ -278,7 +271,7 @@ def battle(chapter_name,screen,lang,fps):
                 characters_data[every_chara].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
                 characters_data[every_chara].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
             for enemies in sangvisFerris_data:
-                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or darkMode != True:
+                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
                     sangvisFerris_data[enemies].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
                     sangvisFerris_data[enemies].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
             #加载雪花
@@ -323,7 +316,7 @@ def battle(chapter_name,screen,lang,fps):
                 theMap.display_facility(characters_data,screen,local_x,local_y)
                 #角色动画
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
-                    if value.faction == "character" or (value.x,value.y) in theMap.lightArea or darkMode != True:
+                    if value.faction == "character" or (value.x,value.y) in theMap.lightArea or theMap.darkMode != True:
                         if all_characters_path != None and key in all_characters_path:
                             value.draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
                         elif theAction != None and key in theAction:
@@ -422,7 +415,7 @@ def battle(chapter_name,screen,lang,fps):
                                             reProcessMap = True
                             else:
                                 key_to_remove.append(key)
-                        if darkMode == True and reProcessMap == True:
+                        if theMap.darkMode == True and reProcessMap == True:
                             theMap.calculate_darkness(characters_data,window_x,window_y)
                         for i in range(len(key_to_remove)):
                             all_characters_path.pop(key_to_remove[i])
@@ -689,8 +682,8 @@ def battle(chapter_name,screen,lang,fps):
                     zoomIn -= 5
                 elif zoomIntoBe > zoomIn:
                     zoomIn += 5
-                newPerBlockWidth = round(window_x/block_x*zoomIn/100)
-                newPerBlockHeight = round(window_y/block_y*zoomIn/100)
+                newPerBlockWidth = round(window_x/theMap.column*zoomIn/100)
+                newPerBlockHeight = round(window_y/theMap.row*zoomIn/100)
                 local_x += (perBlockWidth-newPerBlockWidth)*theMap.column/2
                 local_y += (perBlockHeight-newPerBlockHeight)*theMap.row/2
                 perBlockWidth = newPerBlockWidth
@@ -1063,7 +1056,7 @@ def battle(chapter_name,screen,lang,fps):
                                     if (characters_data[the_character_get_click].x,characters_data[the_character_get_click].y) in enemyAttackRange["near"] or (characters_data[the_character_get_click].x,characters_data[the_character_get_click].y) in enemyAttackRange["middle"] or (characters_data[the_character_get_click].x,characters_data[the_character_get_click].y) in enemyAttackRange["far"]:
                                         characters_data[the_character_get_click].noticed()
                                         break
-                                if darkMode == True:
+                                if theMap.darkMode == True:
                                     theMap.calculate_darkness(characters_data,window_x,window_y)
                             characters_data[the_character_get_click].draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
                         else:
@@ -1216,7 +1209,7 @@ def battle(chapter_name,screen,lang,fps):
             if whose_round == "sangvisFerris":
                 enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]
                 if enemy_action == None:
-                    enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting)
+                    enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round)
                     print(enemies_in_control+" choses "+enemy_action["action"])
                 if enemy_action["action"] == "move":
                     if enemy_action["route"] != []:
@@ -1247,7 +1240,7 @@ def battle(chapter_name,screen,lang,fps):
                             if sangvisFerris_data[enemies_in_control].y <= enemy_action["route"][0][1]:
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
-                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or darkMode != True:
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or theMap.darkMode != True:
                             sangvisFerris_data[enemies_in_control].draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
@@ -1259,7 +1252,7 @@ def battle(chapter_name,screen,lang,fps):
                         enemy_action = None
                         enemies_in_control = ""
                 elif enemy_action["action"] == "attack":
-                    if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or darkMode != True:
+                    if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or theMap.darkMode != True:
                         if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
                             sangvisFerris_data[enemies_in_control].setFlip(True)
                         elif characters_data[enemy_action["target"]].x == sangvisFerris_data[enemies_in_control].x:
@@ -1317,12 +1310,12 @@ def battle(chapter_name,screen,lang,fps):
                             if sangvisFerris_data[enemies_in_control].y <= enemy_action["route"][0][1]:
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
-                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or darkMode != True:
+                        if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or theMap.darkMode != True:
                             sangvisFerris_data[enemies_in_control].draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
                             pygame.mixer.Channel(0).stop()
-                        if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or darkMode != True:
+                        if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or theMap.darkMode != True:
                             if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
                                 sangvisFerris_data[enemies_in_control].setFlip(True)
                             elif characters_data[enemy_action["target"]].x == sangvisFerris_data[enemies_in_control].x:
@@ -1364,7 +1357,7 @@ def battle(chapter_name,screen,lang,fps):
             rightClickCharacterAlphaDeduct = True
             for key,value in dicMerge(characters_data,sangvisFerris_data).items():
                 #根据血量判断角色的动作
-                if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and darkMode != True:
+                if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and theMap.darkMode != True:
                     if value.current_hp > 0:
                         if green_hide == True and pygame.mouse.get_pressed()[2]:
                             block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
@@ -1444,7 +1437,7 @@ def battle(chapter_name,screen,lang,fps):
             #展示所有角色Ui
             for every_chara in characters_data:
                 characters_data[every_chara].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
-            if darkMode == True:
+            if theMap.darkMode == True:
                 for enemies in sangvisFerris_data:
                     if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea:
                         sangvisFerris_data[enemies].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)

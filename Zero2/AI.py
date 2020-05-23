@@ -2,7 +2,7 @@
 from Zero2.basic import *
 from Zero2.map import *
 
-def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round,blocks_setting):
+def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round):
     character_with_min_hp = None
     characters_can_be_detect = []
     #检测是否有可以立马攻击的敌人
