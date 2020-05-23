@@ -58,11 +58,10 @@ def mapCreator(chapterName,screen,lang):
     #初始化角色信息
     characters_data = {}
     for each_character in characters:
-        characters_data[each_character] = CharacterDataManager(window_y,characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["type"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["skill_cover_range"],characters[each_character]["undetected"],"dev")
+        characters_data[each_character] = CharacterDataManager(window_y,characters[each_character],"dev")
     sangvisFerris_data = {}
     for each_character in sangvisFerris:
-        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],sangvisFerris[each_character]["kind"],sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["type"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"],"dev")
-
+        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character],"dev")
 
     #加载所有的角色的图片文件
     all_characters_list  = glob.glob(r'Assets/image/character/*')
@@ -86,7 +85,7 @@ def mapCreator(chapterName,screen,lang):
 
     # 游戏主循环
     while True:
-        pygame.draw.rect(screen,(255,255,255),(0,0,window_x,window_y))
+        pygame.draw.rect(theMap.mapSurface,(255,255,255),(0,0,window_x,window_y))
         mouse_x,mouse_y=pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == KEYDOWN:

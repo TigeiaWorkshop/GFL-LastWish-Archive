@@ -82,7 +82,7 @@ def battle(chapter_name,screen,lang,fps):
     num_of_characters = len(characters)+len(sangvisFerris)
     characters_data = {}
     for each_character in characters:
-        characters_data[each_character] = CharacterDataManager(window_y,characters[each_character]["action_point"],characters[each_character]["attack_range"],characters[each_character]["current_bullets"],characters[each_character]["current_hp"],characters[each_character]["effective_range"],characters[each_character]["kind"],characters[each_character]["magazine_capacity"],characters[each_character]["max_damage"],characters[each_character]["max_hp"],characters[each_character]["min_damage"],characters[each_character]["type"],characters[each_character]["x"],characters[each_character]["y"],characters[each_character]["bullets_carried"],characters[each_character]["skill_effective_range"],characters[each_character]["skill_cover_range"],characters[each_character]["undetected"])
+        characters_data[each_character] = CharacterDataManager(window_y,characters[each_character])
         black_bg.draw(screen)
         drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
@@ -92,7 +92,7 @@ def battle(chapter_name,screen,lang,fps):
         i+=1
     sangvisFerris_data = {}
     for each_character in sangvisFerris:
-        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character]["action_point"],sangvisFerris[each_character]["attack_range"],sangvisFerris[each_character]["current_bullets"],sangvisFerris[each_character]["current_hp"],sangvisFerris[each_character]["effective_range"],sangvisFerris[each_character]["kind"],sangvisFerris[each_character]["magazine_capacity"],sangvisFerris[each_character]["max_damage"],sangvisFerris[each_character]["max_hp"],sangvisFerris[each_character]["min_damage"],sangvisFerris[each_character]["type"],sangvisFerris[each_character]["x"],sangvisFerris[each_character]["y"],sangvisFerris[each_character]["patrol_path"])
+        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character])
         black_bg.draw(screen)
         drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
         drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
@@ -1189,7 +1189,7 @@ def battle(chapter_name,screen,lang,fps):
                         characters_detect_this_round = {}
                         for key in characters_data:
                             characters_data[key].current_action_point = characters_data[key].max_action_point
-                            if characters_data[key].undetected == False:
+                            if characters_data[key].detection == False:
                                 characters_detect_this_round[key] = [characters_data[key].x,characters_data[key].y]
                         whose_round = "player"
                     text_of_endround_alpha = 400

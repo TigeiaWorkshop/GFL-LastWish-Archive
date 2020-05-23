@@ -77,14 +77,14 @@ class Doll:
         xTemp,yTemp = calPosInMap(mapRow,perBlockWidth,self.x,self.y,local_x,local_y)
         xTemp += perBlockWidth*0.25
         yTemp -= perBlockWidth*0.2
-        if self.faction == "character" and self.undetected != None:
+        if self.faction == "character" and self.detection != None:
             eyeImgWidth = round(perBlockWidth/6*self.eyeImgSize)
             eyeImgHeight = round(perBlockWidth/10*self.eyeImgSize)
             numberX = (eyeImgWidth - perBlockWidth/6)/2
             numberY = (eyeImgHeight - perBlockWidth/10)/2
-            if self.undetected == True:
+            if self.detection == True:
                 screen.blit(resizeImg(original_UI_img["eye_red"], (eyeImgWidth,eyeImgHeight)),(xTemp+perBlockWidth*0.51-numberX,yTemp-numberY))
-            elif self.undetected == False:
+            elif self.detection == False:
                 screen.blit(resizeImg(original_UI_img["eye_orange"], (eyeImgWidth,eyeImgHeight)),(xTemp+perBlockWidth*0.51-numberX,yTemp-numberY))
             if self.eyeImgSize > 1:
                 self.eyeImgSize-=1
@@ -114,15 +114,15 @@ class Doll:
     #调整角色的隐蔽度
     def noticed(self,force=False):
         if force == False:
-            if self.undetected == None:
+            if self.detection == None:
                 self.eyeImgSize = 10
-                self.undetected = False
-            elif self.undetected == False:
+                self.detection = False
+            elif self.detection == False:
                 self.eyeImgSize = 10
-                self.undetected = True
+                self.detection = True
         elif force == True:
             self.eyeImgSize = 10
-            self.undetected = True
+            self.detection = True
     #获取角色的攻击范围
     def getAttackRange(self,theMap):
         attacking_range = {"near":[],"middle":[],"far":[]}
@@ -150,21 +150,21 @@ class Doll:
         return attacking_range
 
 class CharacterDataManager(Doll):
-    def __init__(self,window_y,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,bullets_carried,skill_effective_range,skill_cover_range,detect,mode=None):
-        Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"character",magazine_capacity,max_damage,max_hp,min_damage,type,x,y,mode)
-        self.bullets_carried = bullets_carried
-        self.skill_effective_range = skill_effective_range
-        self.max_skill_range = calculate_range(skill_effective_range)
-        self.skill_cover_range = skill_cover_range
-        self.undetected = detect
+    def __init__(self,window_y,theCharacterDataDic,mode=None):
+        Doll.__init__(self,theCharacterDataDic["action_point"],theCharacterDataDic["attack_range"],theCharacterDataDic["current_bullets"],theCharacterDataDic["current_hp"],theCharacterDataDic["effective_range"],theCharacterDataDic["kind"],"character",theCharacterDataDic["magazine_capacity"],theCharacterDataDic["max_damage"],theCharacterDataDic["max_hp"],theCharacterDataDic["min_damage"],theCharacterDataDic["type"],theCharacterDataDic["x"],theCharacterDataDic["y"],mode)
+        self.bullets_carried = theCharacterDataDic["bullets_carried"]
+        self.skill_effective_range = theCharacterDataDic["skill_effective_range"]
+        self.max_skill_range = calculate_range(theCharacterDataDic["skill_effective_range"])
+        self.skill_cover_range = theCharacterDataDic["skill_cover_range"]
+        self.detection = theCharacterDataDic["detection"]
         self.eyeImgSize = 0
-        if kind != "HOC":
-            self.ImageGetHurt = loadImage("Assets/image/npc/"+type+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
+        if theCharacterDataDic["kind"] != "HOC":
+            self.ImageGetHurt = loadImage("Assets/image/npc/"+theCharacterDataDic["type"]+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
 
 class SangvisFerriDataManager(Doll):
-    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,patrol_path,mode=None):
-        Doll.__init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,"sangvisFerri",magazine_capacity,max_damage,max_hp,min_damage,type,x,y,mode)
-        self.patrol_path = patrol_path
+    def __init__(self,theSangvisFerrisDataDic,mode=None):
+        Doll.__init__(self,theSangvisFerrisDataDic["action_point"],theSangvisFerrisDataDic["attack_range"],theSangvisFerrisDataDic["current_bullets"],theSangvisFerrisDataDic["current_hp"],theSangvisFerrisDataDic["effective_range"],theSangvisFerrisDataDic["kind"],"sangvisFerri",theSangvisFerrisDataDic["magazine_capacity"],theSangvisFerrisDataDic["max_damage"],theSangvisFerrisDataDic["max_hp"],theSangvisFerrisDataDic["min_damage"],theSangvisFerrisDataDic["type"],theSangvisFerrisDataDic["x"],theSangvisFerrisDataDic["y"],mode)
+        self.patrol_path = theSangvisFerrisDataDic["patrol_path"]
 
 #计算最远攻击距离
 def calculate_range(effective_range_dic):
