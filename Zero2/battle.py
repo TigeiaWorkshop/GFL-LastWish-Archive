@@ -264,8 +264,6 @@ def battle(chapter_name,screen,lang,fps):
         for a in range(250,0,-5):
             #加载地图
             theMap.display_map(screen,local_x,local_y)
-            #展示设施
-            theMap.display_facility(characters_data,screen,local_x,local_y)
             #角色动画
             for every_chara in characters_data:
                 characters_data[every_chara].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
@@ -274,6 +272,8 @@ def battle(chapter_name,screen,lang,fps):
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
                     sangvisFerris_data[enemies].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
                     sangvisFerris_data[enemies].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+            #展示设施
+            theMap.display_facility(characters_data,screen,local_x,local_y)
             #加载雪花
             if weatherController != None:
                 weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
@@ -312,8 +312,6 @@ def battle(chapter_name,screen,lang,fps):
                     pygame.mixer.Channel(1).play(environment_sound)
                 #加载地图
                 theMap.display_map(screen,local_x,local_y)
-                #展示设施
-                theMap.display_facility(characters_data,screen,local_x,local_y)
                 #角色动画
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
                     if value.faction == "character" or (value.x,value.y) in theMap.lightArea or theMap.darkMode != True:
@@ -328,6 +326,8 @@ def battle(chapter_name,screen,lang,fps):
                                 value.draw(actionLoop[key],screen,perBlockWidth,theMap.row,local_x,local_y)
                         else:
                             value.draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
+                #展示设施
+                theMap.display_facility(characters_data,screen,local_x,local_y)
                 #加载雪花
                 if weatherController != None:
                     weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
@@ -1100,15 +1100,16 @@ def battle(chapter_name,screen,lang,fps):
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 0:
                             block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
-                            if block_get_click["x"] < characters_data[the_character_get_click].x:
-                                characters_data[the_character_get_click].setFlip(True)
-                            elif block_get_click["x"] == characters_data[the_character_get_click].x:
-                                if block_get_click["y"] < characters_data[the_character_get_click].y:
-                                    characters_data[the_character_get_click].setFlip(False)
-                                else:
+                            if block_get_click != None:
+                                if block_get_click["x"] < characters_data[the_character_get_click].x:
                                     characters_data[the_character_get_click].setFlip(True)
-                            else:
-                                characters_data[the_character_get_click].setFlip(False)
+                                elif block_get_click["x"] == characters_data[the_character_get_click].x:
+                                    if block_get_click["y"] < characters_data[the_character_get_click].y:
+                                        characters_data[the_character_get_click].setFlip(False)
+                                    else:
+                                        characters_data[the_character_get_click].setFlip(True)
+                                else:
+                                    characters_data[the_character_get_click].setFlip(False)
                         characters_data[the_character_get_click].draw("attack",screen,perBlockWidth,theMap.row,local_x,local_y,False)
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == characters_data[the_character_get_click].gif_dic["attack"]["imgNum"]-2:
                             for each_enemy in enemies_get_attack:
@@ -1325,6 +1326,7 @@ def battle(chapter_name,screen,lang,fps):
                                     sangvisFerris_data[enemies_in_control].setFlip(True)
                             else:
                                 sangvisFerris_data[enemies_in_control].setFlip(False)
+                            sangvisFerris_data[enemies_in_control].draw("attack",screen,perBlockWidth,theMap.row,local_x,local_y,False)
                         else:
                             sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] += 1
                         if sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] == sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgNum"]-1:

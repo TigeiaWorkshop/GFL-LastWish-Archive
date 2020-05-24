@@ -37,6 +37,7 @@ class MapObject:
     #把地图画到屏幕上
     def display_map(self,screen,local_x=0,local_y=0):
         screen.blit(self.mapSurface,(local_x,local_y))
+        self.drawChest(screen,local_x,local_y)
     #画上设施
     def display_facility(self,characters_data,screen,local_x=0,local_y=0):
         for key,value in self.facilityData.items():
@@ -55,9 +56,6 @@ class MapObject:
                             value2["imgId"] = 0
                         else:
                             value2["imgId"] += 0.1
-                    #画上箱子
-                    elif key == "chest":
-                        imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp]["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     # 画上树
                     elif key == "tree":
                         imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
@@ -71,6 +69,14 @@ class MapObject:
                         imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     if imgToBlit != None:
                         screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+    #画上箱子
+    def drawChest(self,screen,local_x,local_y):
+        for key,value in self.facilityData["chest"].items():
+            xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
+            if self.darkMode == True and (value["x"],value["y"]) not in self.lightArea:
+                screen.blit(pygame.transform.scale(self.facilityImg["dark"]["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+            else:
+                screen.blit(pygame.transform.scale(self.facilityImg["normal"]["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
     #寻路功能
     def findPath(self,startPosition,endPosition,characters_data,sangvisFerris_data,routeLen=None,ignoreCharacter=[]):
         startX = startPosition[0]
