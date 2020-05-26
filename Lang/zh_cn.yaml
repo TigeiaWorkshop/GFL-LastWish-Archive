@@ -31,6 +31,7 @@ select_menu:
   move: 移动
   reload: 换弹
   skill: 技能
+  rescue: 救助
 warnings:
   magazine_is_empty: 当前角色已经没有子弹，请及时换弹
   magazine_is_full: 当前弹夹已满，无需换弹

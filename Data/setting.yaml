@@ -1,5 +1,17 @@
+#语言
 Language: 'zh_cn'
+#屏幕宽度
 Screen_size_x: 1920
+#屏幕高度
 Screen_size_y: 1080
-Sound: 100
+#帧数
 FPS: 60
+#声音(0-100)
+Sound:
+  #背景音乐
+  background_music: 100
+  #音效
+  sound_effects: 100
+  #环境声
+  sound_environment: 100
+

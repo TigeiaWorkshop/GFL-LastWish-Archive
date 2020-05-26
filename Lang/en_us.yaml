@@ -31,6 +31,7 @@ select_menu:
   move: Move
   reload: Reload
   skill: Skill
+  rescue: Rescue
 warnings:
   magazine_is_empty: Current character has an empty magazine, please reload.
   magazine_is_full: Current character has a full magazine, no need to reload.

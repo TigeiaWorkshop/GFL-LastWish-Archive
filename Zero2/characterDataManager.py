@@ -9,7 +9,10 @@ class Doll:
         self.attack_range = attack_range
         self.current_bullets = current_bullets
         self.current_hp = current_hp
-        self.dying = False
+        if current_hp > 0:
+            self.dying = False
+        else:
+            self.dying = 3
         self.effective_range = effective_range
         self.max_effective_range = calculate_range(effective_range)
         self.kind = kind
@@ -37,8 +40,7 @@ class Doll:
     def heal(self,hpHealed):
         self.current_hp+=hpHealed
         if self.faction == "character" and self.dying != False:
-            self.dying == False
-            self.gif_dic["die"]["imgId"] = 0
+            self.dying = False
     def setFlip(self,theBool):
         if self.ifFlip != theBool:
             self.ifFlip = theBool
@@ -105,6 +107,9 @@ class Doll:
         screen.blit(hpEmptyScale,(xTemp,yTemp))
         screen.blit(pygame.transform.scale(hp_img,(round(perBlockWidth*percent_of_hp/2),round(perBlockWidth/10))),(xTemp,yTemp))
         displayInCenter(current_hp_to_display,hpEmptyScale,xTemp,yTemp,screen)
+    #获取角色特定动作的图片播放ID
+    def get_imgId(self,action):
+        return self.gif_dic[action]["imgId"]
     #设定角色特定动作的图片播放ID
     def set_imgId(self,action,theId):
         self.gif_dic[action]["imgId"] = theId

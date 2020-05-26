@@ -228,6 +228,7 @@ def battle(chapter_name,screen,lang,fps):
     skill_target = None
     stayingTime = 0
     buttonGetHover = None
+    theFriendGetHelp = None
     areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
     # 移动路径
     the_route = []
@@ -824,6 +825,12 @@ def battle(chapter_name,screen,lang,fps):
                             warnings_to_display.add(warnings_info["no_bullets_left"])
                         if characters_data[the_character_get_click].current_action_point < 5:
                             warnings_to_display.add(warnings_info["no_enough_ap_to_reload"])
+                    elif green_hide == "SelectMenu" and buttonGetHover == "rescue":
+                        if characters_data[the_character_get_click].current_action_point >= 8:
+                            action_choice = "rescue"
+                            green_hide = False
+                        else:
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_reload"])
                     #攻击判定
                     elif action_choice == "attack" and green_hide == False and the_character_get_click != "" and len(enemies_get_attack)>0:
                         characters_data[the_character_get_click].current_action_point -= 5
@@ -859,6 +866,16 @@ def battle(chapter_name,screen,lang,fps):
                         green_hide = True
                         skill_range = None
                         areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
+                    elif action_choice == "rescue" and green_hide == False and the_character_get_click != "" and theFriendGetHelp != None:
+                        characters_data[the_character_get_click].current_action_point -= 8
+                        characters_data[the_character_get_click].noticed()
+                        characters_data[theFriendGetHelp].heal(1)
+                        the_character_get_click = ""
+                        action_choice = ""
+                        isWaiting = True
+                        green_hide = True
+                        attacking_range = None
+                        areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                     #判断是否有被点击的角色
                     elif block_get_click != None:
                         for key in characters_data:
@@ -869,6 +886,15 @@ def battle(chapter_name,screen,lang,fps):
                                 skill_range = None
                                 areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                                 the_character_get_click = key
+                                friendsCanSave = []
+                                for key2 in characters_data:
+                                    if characters_data[key2].dying != False:
+                                        if characters_data[key2].x == characters_data[key].x:
+                                            if characters_data[key2].y+1 == characters_data[key].y or characters_data[key2].y-1 == characters_data[key].y:
+                                                friendsCanSave.append(key2)
+                                        elif characters_data[key2].y == characters_data[key].y:
+                                            if characters_data[key2].x+1 == characters_data[key].x or characters_data[key2].x-1 == characters_data[key].x:
+                                                friendsCanSave.append(key2)
                                 green_hide = "SelectMenu"
                                 break
                         
@@ -1029,7 +1055,17 @@ def battle(chapter_name,screen,lang,fps):
                         else:
                             print(the_character_get_click+" is causing trouble, please double check the files or reporting this issue")
                             break
-                        
+                    elif action_choice == "rescue":
+                        areaDrawColorBlock["green"] = []
+                        areaDrawColorBlock["orange"] = []
+                        theFriendGetHelp = None
+                        for friendNeedHelp in friendsCanSave:
+                            if block_get_click != None and block_get_click["x"] == characters_data[friendNeedHelp].x and block_get_click["y"] == characters_data[friendNeedHelp].y:
+                                areaDrawColorBlock["orange"] = [(block_get_click["x"],block_get_click["y"])]
+                                theFriendGetHelp = friendNeedHelp
+                            else:
+                                areaDrawColorBlock["green"].append((characters_data[friendNeedHelp].x,characters_data[friendNeedHelp].y))
+
                 #当有角色被点击时
                 if the_character_get_click != "" and isWaiting == False:
                     #被点击的角色动画
@@ -1376,24 +1412,31 @@ def battle(chapter_name,screen,lang,fps):
                 #根据血量判断角色的动作
                 if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and theMap.darkMode != True:
                     if value.current_hp > 0:
-                        if green_hide == True and pygame.mouse.get_pressed()[2]:
-                            block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
-                            if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
-                                rightClickCharacterAlphaDeduct = False
-                                if rightClickCharacterAlpha == None:
-                                    rightClickCharacterAlpha = 0
-                                if rightClickCharacterAlpha < 150:
-                                    rightClickCharacterAlpha += 10
-                                    UI_img["yellow"].set_alpha(rightClickCharacterAlpha)
-                                    UI_img["blue"].set_alpha(rightClickCharacterAlpha)
-                                    UI_img["green"].set_alpha(rightClickCharacterAlpha)
-                                rangeCanAttack =  value.getAttackRange(theMap)
-                                areaDrawColorBlock["yellow"] = rangeCanAttack["far"]
-                                areaDrawColorBlock["blue"] =  rangeCanAttack["middle"]
-                                areaDrawColorBlock["green"] = rangeCanAttack["near"]
-                        value.draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
+                        if value.faction == "character" and value.get_imgId("die") > 0:
+                            value.draw("die",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                            value.gif_dic["die"]["imgId"] -= 2
+                            if value.get_imgId("die") <= 0:
+                                value.set_imgId("die",0)
+                        else:
+                            if green_hide == True and pygame.mouse.get_pressed()[2]:
+                                block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
+                                if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
+                                    rightClickCharacterAlphaDeduct = False
+                                    if rightClickCharacterAlpha == None:
+                                        rightClickCharacterAlpha = 0
+                                    if rightClickCharacterAlpha < 150:
+                                        rightClickCharacterAlpha += 10
+                                        UI_img["yellow"].set_alpha(rightClickCharacterAlpha)
+                                        UI_img["blue"].set_alpha(rightClickCharacterAlpha)
+                                        UI_img["green"].set_alpha(rightClickCharacterAlpha)
+                                    rangeCanAttack =  value.getAttackRange(theMap)
+                                    areaDrawColorBlock["yellow"] = rangeCanAttack["far"]
+                                    areaDrawColorBlock["blue"] =  rangeCanAttack["middle"]
+                                    areaDrawColorBlock["green"] = rangeCanAttack["near"]
+                            value.draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
                     elif value.current_hp<=0:
                         value.draw("die",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+
                 #是否有在播放死亡角色的动画（而不是倒地状态）
                 if value.current_hp<=0 and key not in the_dead_one:
                     if value.faction == "character" and value.kind == "HOC" or value.faction == "sangvisFerri":
@@ -1532,7 +1575,17 @@ def battle(chapter_name,screen,lang,fps):
                     drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
                     drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                     drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
-
+                #救助队友
+                if len(friendsCanSave)>0:
+                    txt_temp = fontRender(selectMenuButtons_dic["rescue"],"black",round(perBlockWidth/10))
+                    txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/13))
+                    txt_tempX = tempLocation["xStart"]-select_menu_button.get_width()*0.6
+                    txt_tempY = tempLocation["yStart"]-perBlockWidth*0.45
+                    drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
+                    drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
+                    drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
+                    if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
+                        buttonGetHover = "rescue"
             #加载雪花
             if weatherController != None:
                 weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
