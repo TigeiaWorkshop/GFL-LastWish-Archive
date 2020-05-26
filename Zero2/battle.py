@@ -26,31 +26,39 @@ def battle(chapter_name,screen,lang,fps):
         chapter_no = loadData["Battle_UI"]["numChapter"]
         warnings_info = loadData["warnings"]
         loading_info = loadData["loading_info"]
-    
+
     with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         chapter_title = loadData["title"]
         battle_info = loadData["battle_info"]
         dialog_during_battle = loadData["dialog_during_battle"]
+        chapterDesc = loadData["description"]
 
     #章节标题显示
     black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
-    title_number_display = fontRender(chapter_no.replace("NaN",chapter_name.replace("chapter","")),"white",window_x/38)
-    title_main_display = fontRender(chapter_title,"white",window_x/38)
+    title_chapterNum = fontRender(chapter_no.replace("NaN",chapter_name.replace("chapter","")),"white",window_x/38)
+    title_chapterNum = ImageSurface(title_chapterNum,(window_x-title_chapterNum.get_width())/2,window_y*0.37)
+    title_chapterName = fontRender(chapter_title,"white",window_x/38)
+    title_chapterName = ImageSurface(title_chapterName,(window_x-title_chapterName.get_width())/2,window_y*0.46)
+    title_description = fontRender(chapterDesc,"white",window_x/76)
+    title_description = ImageSurface(title_description,(window_x-title_description.get_width())/2,window_y*0.6)
 
     #渐入效果
     for i in range(0,250,2):
         black_bg.draw(screen)
-        title_number_display.set_alpha(i)
-        title_main_display.set_alpha(i)
-        drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-        drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        title_chapterNum.set_alpha(i)
+        title_chapterName.set_alpha(i)
+        title_description.set_alpha(i)
+        title_chapterNum.draw(screen)
+        title_chapterName.draw(screen)
+        title_description.draw(screen)
         Display.flip()
 
     #开始加载地图场景
     black_bg.draw(screen)
-    drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-    drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+    title_chapterNum.draw(screen)
+    title_chapterName.draw(screen)
+    title_description.draw(screen)
     now_loading = fontRender(loading_info["now_loading_map"], "white",window_x/76)
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     Display.flip()
@@ -84,8 +92,9 @@ def battle(chapter_name,screen,lang,fps):
     for each_character in characters:
         characters_data[each_character] = CharacterDataManager(window_y,characters[each_character])
         black_bg.draw(screen)
-        drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-        drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        title_chapterNum.draw(screen)
+        title_chapterName.draw(screen)
+        title_description.draw(screen)
         now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
         drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
         Display.flip()
@@ -94,8 +103,9 @@ def battle(chapter_name,screen,lang,fps):
     for each_character in sangvisFerris:
         sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character])
         black_bg.draw(screen)
-        drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-        drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        title_chapterNum.draw(screen)
+        title_chapterName.draw(screen)
+        title_description.draw(screen)
         now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
         drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
         Display.flip()
@@ -114,8 +124,9 @@ def battle(chapter_name,screen,lang,fps):
     
     #开始加载关卡设定
     black_bg.draw(screen)
-    drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-    drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+    title_chapterNum.draw(screen)
+    title_chapterName.draw(screen)
+    title_description.draw(screen)
     now_loading = fontRender(loading_info["now_loading_level"], "white",window_x/76)
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     Display.flip()
@@ -240,8 +251,9 @@ def battle(chapter_name,screen,lang,fps):
     #显示章节信息
     for a in range(0,250,2):
         black_bg.draw(screen)
-        drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-        drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+        title_chapterNum.draw(screen)
+        title_chapterName.draw(screen)
+        title_description.draw(screen)
         for i in range(len(battle_info)):
             battle_info[i].set_alpha(a)
             drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
@@ -280,8 +292,9 @@ def battle(chapter_name,screen,lang,fps):
 
             black_bg.set_alpha(a)
             black_bg.draw(screen)
-            drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-            drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+            title_chapterNum.draw(screen)
+            title_chapterName.draw(screen)
+            title_description.draw(screen)
             for i in range(len(battle_info)):
                 battle_info[i].set_alpha(a)
                 drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
@@ -577,10 +590,12 @@ def battle(chapter_name,screen,lang,fps):
                 if txt_alpha >= 0:
                     black_bg.set_alpha(txt_alpha)
                     black_bg.draw(screen)
-                    title_number_display.set_alpha(txt_alpha)
-                    title_main_display.set_alpha(txt_alpha)
-                    drawImg(title_number_display,((window_x-title_number_display.get_width())/2,400),screen)
-                    drawImg(title_main_display,((window_x-title_main_display.get_width())/2,500),screen)
+                    title_chapterNum.set_alpha(txt_alpha)
+                    title_chapterName.set_alpha(txt_alpha)
+                    title_description.set_alpha(txt_alpha)
+                    title_chapterNum.draw(screen)
+                    title_chapterName.draw(screen)
+                    title_description.draw(screen)
                     for i in range(len(battle_info)):
                         battle_info[i].set_alpha(txt_alpha)
                         drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)

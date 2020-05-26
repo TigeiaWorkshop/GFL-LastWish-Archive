@@ -350,4 +350,5 @@ dialog_during_battle:
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null
-title: 雪上之路
+title: 测试关卡
+description: 测试人员专用

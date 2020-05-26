@@ -62,25 +62,30 @@ def resizeImg(img,imgSize=(None,None)):
         raise Exception('Both width and height must be positive interger!')
     return img
 
+#高级图形类
+class ImageSurface:
+    def __init__(self,img,x,y,width=None,height=None,description="Default"):
+        self.img = img
+        self.x = x
+        self.y = y
+        self.xTogo = x
+        self.yTogo = y
+        self.items = []
+        self.width = width
+        self.height = height
+        self.description = description
+    def draw(self,screen,local_x=0,local_y=0):
+        if self.width != None and self.height != None:
+            screen.blit(pygame.transform.scale(self.img, (int(self.width),int(self.height))),(self.x+local_x,self.y+local_y))
+        else:
+            screen.blit(self.img,(self.x+local_x,self.y+local_y))
+    def set_alpha(self,value):
+        self.img.set_alpha(value)
+    def get_alpha(self):
+        return self.img.get_alpha()
+
 #高级图片加载模块：接收图片路径（或者已经载入的图片）,位置:[x,y],长,高,返回对应的图片class
 def loadImage(path,the_object_position,width=None,height=None,description="Default",ifConvertAlpha=True):
-    class ImageSurface:
-        def __init__(self,img,x,y,width,height,description="Default"):
-            self.img = img
-            self.x = x
-            self.y = y
-            self.xTogo = x
-            self.yTogo = y
-            self.items = []
-            self.width = width
-            self.height = height
-            self.description = description
-        def draw(self,screen,local_x=0,local_y=0):
-            screen.blit(pygame.transform.scale(self.img, (int(self.width),int(self.height))),(self.x+local_x,self.y+local_y))
-        def set_alpha(self,value):
-            self.img.set_alpha(value)
-        def get_alpha(self):
-            return self.img.get_alpha()
     if isinstance(path,str):
         if ifConvertAlpha == False:
             return ImageSurface(pygame.image.load(os.path.join(path)),the_object_position[0],the_object_position[1],width,height,description)
