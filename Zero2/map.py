@@ -90,7 +90,7 @@ class MapObject:
         endX = endPosition[0]
         endY = endPosition[1]
         #建立地图
-        map2d=Array2D(self.column,self.row)
+        map2d=numpy.zeros((self.column,self.row), dtype=numpy.int8)
         #历遍地图，设置障碍方块
         """
         for y in range(theMap.row):
@@ -375,29 +375,6 @@ def load_env_images(theMap,theWidth=None,theHeight=None,darkMode=False):
             env_img_list["dark"][img] = addDarkness(value,150)
     return env_img_list
 
-class Array2D:
-    """
-        说明：
-            1.构造方法需要两个参数，即二维数组的宽和高
-            2.成员变量w和h是二维数组的宽和高
-            3.使用：‘对象[x][y]’可以直接取到相应的值
-            4.数组的默认值都是0
-    """
-    def __init__(self,w,h):
-        self.w=w
-        self.h=h
-        self.data=[]
-        self.data=[[0 for y in range(h)] for x in range(w)]
-
-    def showArray2D(self):
-        for y in range(self.h):
-            for x in range(self.w):
-                print(self.data[x][y])
-            print("")
-
-    def __getitem__(self, item):
-        return self.data[item]
-
 class Point:
     """
     表示一个点
@@ -405,14 +382,11 @@ class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-
     def __eq__(self, other):
         if self.x == other.x and self.y == other.y:
             return True
         return False
 
-    def __str__(self):
-        return "x:" + str(self.x) + ",y:" + str(self.y)
 
 class AStar:
     class Node:  # 描述AStar算法中的节点数据
@@ -484,7 +458,8 @@ class AStar:
         :return:
         """
         # 越界检测
-        if minF.point.x + offsetX < 0 or minF.point.x + offsetX > self.map2d.w - 1 or minF.point.y + offsetY < 0 or minF.point.y + offsetY > self.map2d.h - 1:
+        mapRow,mapCol = self.map2d.shape
+        if minF.point.x + offsetX < 0 or minF.point.x + offsetX > mapCol - 1 or minF.point.y + offsetY < 0 or minF.point.y + offsetY > mapRow - 1:
             return
         # 如果是障碍，就忽略
         if self.map2d[minF.point.x + offsetX][minF.point.y + offsetY] != self.passTag:
@@ -515,7 +490,8 @@ class AStar:
         :return: None或Point列表（路径）
         """
         # 判断寻路终点是否是障碍
-        if self.map2d[self.endPoint.x][self.endPoint.y] != self.passTag:
+        mapRow,mapCol = self.map2d.shape
+        if self.endPoint.y < 0 or self.endPoint.y >= mapRow or self.endPoint.x < 0 or self.endPoint.x >= mapCol or self.map2d[self.endPoint.y][self.endPoint.x] != self.passTag:
             return None
         # 1.将起点放入开启列表
         startNode = AStar.Node(self.startPoint, self.endPoint)
