@@ -2,7 +2,7 @@
 from Zero2.basic import *
 from Zero2.battle import *
 
-def dialog(chapter_name,screen,lang,fps,part):
+def dialog(chapter_name,screen,setting,part):
     #创建手柄组件
     joystick = Joystick()
     #获取屏幕的尺寸
@@ -11,7 +11,7 @@ def dialog(chapter_name,screen,lang,fps,part):
     LoadingImgAbove = loadImg("Assets/image/loading_img/LoadingImgAbove.png",window_x+8,window_y/1.7)
     LoadingImgBelow = loadImg("Assets/image/loading_img/LoadingImgBelow.png",window_x+8,window_y/2.05)
     #帧率控制器
-    Display = DisplayController(fps)
+    Display = DisplayController(setting['FPS'])
 
     #开始加载-渐入效果
     for i in range(101):
@@ -22,6 +22,8 @@ def dialog(chapter_name,screen,lang,fps,part):
     #卸载音乐
     pygame.mixer.music.unload()
 
+    #从设置中获取语言文件
+    lang = setting['Language']
     #读取章节信息
     with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
         dialog_content = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
@@ -58,7 +60,6 @@ def dialog(chapter_name,screen,lang,fps,part):
     displayed_line = 0
     mouse_gif_id = 1
     videoCapture = None
-    the_FPS = fps
 
     #加载完成-淡出效果
     for i in range(100,-1,-1):
@@ -72,7 +73,6 @@ def dialog(chapter_name,screen,lang,fps,part):
                     raise Exception('The video file is not exist')
                 videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
                 frames_num = videoCapture.getFrameNum()
-                the_FPS = videoCapture.getFPS()
             else:
                 videoCapture.display(screen)
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
@@ -87,11 +87,12 @@ def dialog(chapter_name,screen,lang,fps,part):
             except BaseException:
                 pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".ogg")
             pygame.mixer.music.play(loops=9999, start=0.0)
+            pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
         dialog_is_playing_sound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")
+        dialog_is_playing_sound.set_volume(setting["Sound"]["sound_effects"]/100.0)
 
         #玩家在对话时做出的选择
         dialog_options = {}
-        the_FPS = fps
         #主循环
         while len(dialog_content)!=0 and if_skip == False:
             #背景
@@ -105,7 +106,6 @@ def dialog(chapter_name,screen,lang,fps,part):
                         raise Exception('The video file is not exist')
                     videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
                     frames_num = videoCapture.getFrameNum()
-                    the_FPS = videoCapture.getFPS()
                 else:
                     videoCapture.display(screen)
 
@@ -161,10 +161,10 @@ def dialog(chapter_name,screen,lang,fps,part):
                                 displayed_line = 0
                                 if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_img"] != dialog_content[dialogId]["background_img"]:
                                     videoCapture = None
-                                    the_FPS = fps
                                 if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
                                     pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["background_music"]+".mp3")
                                     pygame.mixer.music.play(loops=9999, start=0.0)
+                                    pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
                                 if dialog_content[dialog_content[dialogId]["next_dialog_id"][i][1]]["narrator"] != dialog_content[dialogId]["narrator"]:
                                     dialoguebox.height = 0
                                     dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
@@ -201,13 +201,13 @@ def dialog(chapter_name,screen,lang,fps,part):
                             displayed_line = 0
                             if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_img"] != dialog_content[dialogId]["background_img"]:
                                 videoCapture = None
-                                the_FPS = fps
                             if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != None and dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"] != dialog_content[dialogId]["background_music"]:
                                 try:
                                     pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".mp3")
                                 except BaseException:
                                     pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["background_music"]+".ogg")
                                 pygame.mixer.music.play(loops=9999, start=0.0)
+                                pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
                             if dialog_content[dialog_content[dialogId]["next_dialog_id"][1]]["narrator"] != dialog_content[dialogId]["narrator"]:
                                 dialoguebox.height = 0
                                 dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
@@ -221,13 +221,13 @@ def dialog(chapter_name,screen,lang,fps,part):
                             displayed_line = 0
                             if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_img"] != dialog_content[dialogId]["background_img"]:
                                 videoCapture = None
-                                the_FPS = fps
                             if dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != None and dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"] != dialog_content[dialogId]["background_music"]:
                                 try:
                                     pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".mp3")
                                 except BaseException:
                                     pygame.mixer.music.load("Assets/music/"+dialog_content[dialog_content[dialogId]["last_dialog_id"]]["background_music"]+".ogg")
                                 pygame.mixer.music.play(loops=9999, start=0.0)
+                                pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
                             dialogId = dialog_content[dialogId]["last_dialog_id"]
                             dialog_is_playing_sound.stop()
             Display.flip()
@@ -247,7 +247,6 @@ def dialog(chapter_name,screen,lang,fps,part):
             dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
             if_skip = False
             videoCapture = None
-            the_FPS = fps
             time.sleep(2)
             dialogId = dialog_content[dialogId]["next_dialog_id"][1]
             for i in range(255,0,-5):
@@ -262,7 +261,6 @@ def dialog(chapter_name,screen,lang,fps,part):
                                 raise Exception('The video file is not exist')
                             videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
                             frames_num = videoCapture.getFrameNum()
-                            the_FPS = videoCapture.getFPS()
                         else:
                             videoCapture.display(screen)
                     black_bg.set_alpha(i)

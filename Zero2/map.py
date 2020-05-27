@@ -1,5 +1,6 @@
 # cython: language_level=3
 from Zero2.basic import *
+import numpy
 
 class MapObject:
     def  __init__(self,mapDataDic,perBlockWidth):
@@ -157,8 +158,8 @@ class MapObject:
         block_get_click = None
         lenUnitH = block.get_height()/4
         lenUnitW = block.get_width()/4
-        for y in range(guess_y-1,guess_y+5):
-            for x in range(guess_x-1,guess_x+5):
+        for y in range(guess_y-1,guess_y+4):
+            for x in range(guess_x-1,guess_x+4):
                 xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y,local_x,local_y)
                 xTemp+=self.perBlockWidth*0.05
                 if xTemp+lenUnitW<mouse_x<xTemp+lenUnitW*3 and yTemp<mouse_y<yTemp+lenUnitH*4:
@@ -213,7 +214,8 @@ def initialBlockData(mapData,facilityData,blocks_setting):
     for y in range(len(mapData)):
         for x in range(len(mapData[y])):
             mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
-    return mapData
+    mapDataNumpyArray = numpy.asarray(mapData)
+    return mapDataNumpyArray
 
 #计算在地图中的位置
 def calPosInMap(row,perBlockWidth,x,y,local_x=0,local_y=0):

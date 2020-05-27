@@ -5,7 +5,7 @@ from Zero2.map import *
 from Zero2.AI import *
 from Zero2.skills import *
 
-def battle(chapter_name,screen,lang,fps):
+def battle(chapter_name,screen,setting):
     #创建手柄组件
     joystick = Joystick()
 
@@ -14,7 +14,9 @@ def battle(chapter_name,screen,lang,fps):
     #卸载音乐
     pygame.mixer.music.unload()
     #帧率控制器
-    Display = DisplayController(fps)
+    Display = DisplayController(setting['FPS'])
+    #从设置中获取语言文件
+    lang = setting['Language']
 
     #加载按钮的文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
@@ -178,12 +180,14 @@ def battle(chapter_name,screen,lang,fps):
     walking_sound = []
     for i in range(len(all_walking_sounds)):
         walking_sound.append(pygame.mixer.Sound(all_walking_sounds[i]))
+        walking_sound[-1].set_volume(setting["Sound"]["sound_effects"]/100.0)
     the_sound_id = None
     #加载天气和环境的音效 -- 频道1
     environment_sound = None
     weatherController = None
     if theWeather != None:
         environment_sound = pygame.mixer.Sound("Assets/sound/environment/"+theWeather+".ogg")
+        environment_sound.set_volume(setting["Sound"]["sound_environment"]/100.0)
         weatherController = WeatherSystem(theWeather,window_x,window_y)    
     #攻击的音效 -- 频道2
     all_attacking_sounds = {
@@ -201,6 +205,7 @@ def battle(chapter_name,screen,lang,fps):
     for key in all_attacking_sounds:
         for i in range(len(all_attacking_sounds[key])):
             all_attacking_sounds[key][i] = pygame.mixer.Sound(all_attacking_sounds[key][i])
+            all_attacking_sounds[key][i].set_volume(setting["Sound"]["sound_effects"]/100.0)
     
     #部分设定初始化
     the_character_get_click = ""
@@ -539,7 +544,7 @@ def battle(chapter_name,screen,lang,fps):
                 #闲置一定时间（秒）
                 elif "idle" in dialog_to_display[display_num]:
                     if seconde_to_idle == None:
-                        seconde_to_idle = dialog_to_display[display_num]["idle"]*fps
+                        seconde_to_idle = dialog_to_display[display_num]["idle"]*Display.fps
                     else:
                         if idle_seconde < seconde_to_idle:
                             idle_seconde += 1
@@ -1622,11 +1627,11 @@ def battle(chapter_name,screen,lang,fps):
             #显示警告
             warnings_to_display.display(screen,window_x,window_y)
 
-            #加载音乐
+            #加载并播放音乐
             while pygame.mixer.music.get_busy() != 1:
                 pygame.mixer.music.load("Assets/music/"+bg_music)
                 pygame.mixer.music.play(loops=9999, start=0.0)
-                pygame.mixer.music.set_volume(0.5)
+                pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
 
             #结束动画
             if whose_round == "result_win":
