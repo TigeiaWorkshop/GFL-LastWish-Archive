@@ -3,7 +3,7 @@ from Zero2.basic import *
 from Zero2.characterDataManager import *
 from Zero2.map import *
 
-def mapCreator(chapterName,screen,lang):
+def mapCreator(chapterName,screen):
     window_x = screen.get_width()
     window_y = screen.get_height()
     #窗口标题
@@ -76,13 +76,17 @@ def mapCreator(chapterName,screen,lang):
         all_sangvisFerris_img_list[img_name] = loadImg(all_sangvisFerris_list[i]+"/wait/"+img_name+"_wait_0.png",perBlockWidth*2.5,perBlockWidth*2.5)
 
     #绿色方块/方块标准
-    green = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/green.png")), (perBlockWidth, int(perBlockHeight)))
+    green = loadImg("Assets/image/UI/green.png",int(perBlockWidth*0.8))
     green.set_alpha(100)
     object_to_put_down = None
     #加载容器图片
-    UIContainer = loadImage(pygame.image.load(os.path.join("Assets/image/UI/container.png")),(-2,window_y*0.8),int(window_x-window_y*0.3), int(window_y*0.2))
+    UIContainer = loadImage("Assets/image/UI/container.png",(-2,window_y*0.8),int(window_x*0.8), int(window_y*0.2))
+    UIContainerRight = loadImage("Assets/image/UI/container.png",(window_x*0.825,0),int(window_x*0.175), int(window_y*1.025))
     #数据控制器
     data_to_edit = None
+
+    local_x = 0
+    local_y = 0
 
     # 游戏主循环
     while True:
@@ -102,19 +106,26 @@ def mapCreator(chapterName,screen,lang):
                         yaml.dump(loadData, f)
                     exit()
             elif event.type == MOUSEBUTTONDOWN:
-                all_characters_data = dicMerge(characters_data,sangvisFerris_data)
-                block_get_click_x = int(mouse_x/green.get_width())
-                block_get_click_y = int(mouse_y/green.get_height())
-                if block_get_click_y < len(theMap.mapData) and block_get_click_x < len(theMap.mapData[block_get_click_y]):
-                    if pygame.mouse.get_pressed()[0]:
+                if isHover(UIContainerRight):
+                    #上下滚轮-放大和缩小地图
+                    if event.button == 4 and local_y<0:
+                        local_y += window_y*0.1
+                    elif event.button == 5:
+                        local_y -= window_y*0.1
+                else:
+                    all_characters_data = dicMerge(characters_data,sangvisFerris_data)
+                    block_get_click = theMap.calBlockInMap(green,mouse_x,mouse_y)
+                    if pygame.mouse.get_pressed()[0] and block_get_click != None:
                         if object_to_put_down != None:
                             if object_to_put_down["type"] == "block":
-                                theMap.mapData[block_get_click_y][block_get_click_x] = object_to_put_down["id"]
-                                map_img_list[block_get_click_y][block_get_click_x] = object_to_put_down["name"]
+                                theMap.mapData[block_get_click["y"]][block_get_click["x"]] = Block(object_to_put_down["name"],False)
+                                if object_to_put_down["name"] not in theMap.env_img_list["normal"]:
+                                    theMap.env_img_list["normal"][object_to_put_down["name"]] = loadImg("Assets/image/environment/block/"+object_to_put_down["name"]+".png",perBlockWidth)
+                                theMap.process_map(window_x,window_y)
                             elif object_to_put_down["type"] == "character" or object_to_put_down["type"] == "sangvisFerri":
                                 any_chara_replace = None
                                 for chara in all_characters_data:
-                                    if all_characters_data[chara].x == block_get_click_x and all_characters_data[chara].y == block_get_click_y:
+                                    if all_characters_data[chara].x == block_get_click["x"] and all_characters_data[chara].y == block_get_click["y"]:
                                         any_chara_replace = chara
                                         break
                                 if any_chara_replace != None:
@@ -128,17 +139,17 @@ def mapCreator(chapterName,screen,lang):
                                 if object_to_put_down["type"] == "character":
                                     while object_to_put_down["id"]+"_"+str(the_id) in characters_data:
                                         the_id+=1
-                                    characters_data[object_to_put_down["id"]+"_"+str(the_id)] = CharacterDataManager(1,1,1,1,1,None,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"character"),1,1,1,1,block_get_click_x,block_get_click_y,1,None,[],False)
-                                    characters[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"bullets_carried": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"magazine_capacity": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"start_position": [],"type": object_to_put_down["id"],"undetected": False,"x": block_get_click_x,"y": block_get_click_y}
+                                    #characters_data[object_to_put_down["id"]+"_"+str(the_id)] = CharacterDataManager(1,1,1,1,1,None,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"character"),1,1,1,1,block_get_click_x,block_get_click_y,1,None,[],False)
+                                    #characters[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"bullets_carried": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"magazine_capacity": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"start_position": [],"type": object_to_put_down["id"],"undetected": False,"x": block_get_click_x,"y": block_get_click_y}
                                 elif object_to_put_down["type"] == "sangvisFerri":
                                     while object_to_put_down["id"]+"_"+str(the_id) in sangvisFerris_data:
                                         the_id+=1
-                                    sangvisFerris_data[object_to_put_down["id"]+"_"+str(the_id)] = SangvisFerriDataManager(1,1,1,1,1,None,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"sangvisFerri"),1,1,1,1,block_get_click_x,block_get_click_y,[])
-                                    sangvisFerris[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"max_bullets": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"type": object_to_put_down["id"],"patrol_path": [],"x": block_get_click_x,"y": block_get_click_y}
+                                    #sangvisFerris_data[object_to_put_down["id"]+"_"+str(the_id)] = SangvisFerriDataManager(1,1,1,1,1,None,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"sangvisFerri"),1,1,1,1,block_get_click_x,block_get_click_y,[])
+                                    #sangvisFerris[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"max_bullets": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"type": object_to_put_down["id"],"patrol_path": [],"x": block_get_click_x,"y": block_get_click_y}
                     if pygame.mouse.get_pressed()[2]:
                         any_chara_replace = None
                         for chara in all_characters_data:
-                            if all_characters_data[chara].x == block_get_click_x and all_characters_data[chara].y == block_get_click_y:
+                            if all_characters_data[chara].x == block_get_click["x"] and all_characters_data[chara].y == block_get_click["y"]:
                                 any_chara_replace = chara
                                 break
                         if any_chara_replace != None:
@@ -151,6 +162,7 @@ def mapCreator(chapterName,screen,lang):
         #加载地图
         theMap.display_map(screen)
         UIContainer.draw(screen)
+        UIContainerRight.draw(screen)
         #角色动画
         for every_chara in characters_data:
             characters_data[every_chara].draw("wait",screen,perBlockWidth,theMap.row)
@@ -178,8 +190,11 @@ def mapCreator(chapterName,screen,lang):
         #显示所有可放置的环境方块
         i=0
         for img_name in env_img_list:
-            drawImg(env_img_list[img_name],(window_x*0.85+perBlockWidth*1.5*(i%5),perBlockHeight*1.5*int(i/5)),screen)
-            if pygame.mouse.get_pressed()[0] and isHoverOn(env_img_list[img_name],(window_x*0.92+perBlockWidth*1.5*(i%3),perBlockHeight*1.5*int(i/3))):
+            posX = window_x*0.845+perBlockWidth*1.5*(i%4)
+            posY = window_y*0.05+perBlockHeight*2*int(i/4)+local_y
+            if window_y*0.05<posY<window_y*0.9:
+                drawImg(env_img_list[img_name],(posX,posY),screen)
+            if pygame.mouse.get_pressed()[0] and isHoverOn(env_img_list[img_name],(posX,posY)):
                 object_to_put_down = {"type":"block","id":img_name,"name":img_name}
             i+=1
         
