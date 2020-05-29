@@ -37,7 +37,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
         ap_need_to_attack = 5
         max_moving_routes_for_attacking = int((sangvisFerris_data[aiInControl].max_action_point - ap_need_to_attack)/2)
         #建立地图
-        map2d=Array2D(len(theMap.mapData[0]),len(theMap.mapData))
+        map2d=numpy.zeros((theMap.column,theMap.row), dtype=numpy.int8)
         #历遍地图，设置障碍方块
         for y in range(len(theMap.mapData)):
             for x in range(len(theMap.mapData[y])):

@@ -69,8 +69,6 @@ def battle(chapter_name,screen,setting):
     with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         zoomIn = loadData["zoomIn"]*100
-        local_x = loadData["local_x"]
-        local_y = loadData["local_y"]
         characters = loadData["character"]
         sangvisFerris = loadData["sangvisFerri"]
         bg_music = loadData["background_music"]
@@ -82,10 +80,9 @@ def battle(chapter_name,screen,setting):
     elif zoomIn > 400:
         zoomIn = 400
     zoomIntoBe = zoomIn
-    perBlockWidth = round(window_x/10)
     perBlockHeight = round(window_y/10)
     #初始化地图模块
-    theMap = MapObject(loadData,perBlockWidth)
+    theMap = MapObject(loadData,round(window_x/10),loadData["local_x"],loadData["local_y"])
     
     #初始化角色信息
     i = 1
@@ -139,7 +136,7 @@ def battle(chapter_name,screen,setting):
     #加载选择菜单的图片
     select_menu_button_original = loadImg("Assets/image/UI/menu.png")
     #加载子弹图片
-    bullet_img = loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, perBlockHeight/12)
+    #bullet_img = loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, perBlockHeight/12)
     bullets_list = []
     #加载血条,各色方块等UI图片 size:perBlockWidth, perBlockHeight/5
     original_UI_img = {
@@ -161,19 +158,18 @@ def battle(chapter_name,screen,setting):
     }
     #UI - 变形后
     UI_img = {
-        "green" : resizeImg(original_UI_img["green"], (perBlockWidth*0.8, None)),
-        "red" : resizeImg(original_UI_img["red"], (perBlockWidth*0.8, None)),
-        "yellow" : resizeImg(original_UI_img["yellow"], (perBlockWidth*0.8, None)),
-        "blue" : resizeImg(original_UI_img["blue"], (perBlockWidth*0.8, None)),
-        "orange": resizeImg(original_UI_img["orange"], (perBlockWidth*0.8, None))
+        "green" : resizeImg(original_UI_img["green"], (theMap.perBlockWidth*0.8, None)),
+        "red" : resizeImg(original_UI_img["red"], (theMap.perBlockWidth*0.8, None)),
+        "yellow" : resizeImg(original_UI_img["yellow"], (theMap.perBlockWidth*0.8, None)),
+        "blue" : resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None)),
+        "orange": resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
     }
-    theMap.greenBlockImg = UI_img["green"]
     the_character_get_click_info_board = loadImage("Assets/image/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
     #加载对话框图片
     dialoguebox_up = loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
     dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
     #选择菜单按钮底图
-    select_menu_button = resizeImg(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
+    select_menu_button = resizeImg(select_menu_button_original, (round(theMap.perBlockWidth/2), round(theMap.perBlockWidth/4)))
     #-----加载音效-----
     #行走的音效 -- 频道0
     all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
@@ -281,20 +277,20 @@ def battle(chapter_name,screen,setting):
             pygame.mixer.Channel(1).play(environment_sound)
         for a in range(250,0,-5):
             #加载地图
-            theMap.display_map(screen,local_x,local_y)
+            theMap.display_map(screen)
             #角色动画
             for every_chara in characters_data:
-                characters_data[every_chara].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
-                characters_data[every_chara].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                characters_data[every_chara].draw("wait",screen,theMap)
+                characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
             for enemies in sangvisFerris_data:
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
-                    sangvisFerris_data[enemies].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
-                    sangvisFerris_data[enemies].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                    sangvisFerris_data[enemies].draw("wait",screen,theMap)
+                    sangvisFerris_data[enemies].drawUI(screen,original_UI_img,theMap)
             #展示设施
-            theMap.display_facility(characters_data,screen,local_x,local_y)
+            theMap.display_facility(characters_data,screen)
             #加载雪花
             if weatherController != None:
-                weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
+                weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
 
             black_bg.set_alpha(a)
             black_bg.draw(screen)
@@ -330,26 +326,26 @@ def battle(chapter_name,screen,setting):
                 if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
                     pygame.mixer.Channel(1).play(environment_sound)
                 #加载地图
-                theMap.display_map(screen,local_x,local_y)
+                theMap.display_map(screen)
                 #角色动画
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
                     if value.faction == "character" or (value.x,value.y) in theMap.lightArea or theMap.darkMode != True:
                         if all_characters_path != None and key in all_characters_path:
-                            value.draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
+                            value.draw("move",screen,theMap)
                         elif theAction != None and key in theAction:
                             pass
                         elif key in actionLoop:
                             if actionLoop[key] != "die":
-                                value.draw(actionLoop[key],screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                                value.draw(actionLoop[key],screen,theMap,False)
                             else:
-                                value.draw(actionLoop[key],screen,perBlockWidth,theMap.row,local_x,local_y)
+                                value.draw(actionLoop[key],screen,theMap)
                         else:
-                            value.draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
+                            value.draw("wait",screen,theMap)
                 #展示设施
-                theMap.display_facility(characters_data,screen,local_x,local_y)
+                theMap.display_facility(characters_data,screen)
                 #加载雪花
                 if weatherController != None:
-                    weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
+                    weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
                 #如果操作是移动
                 if "move" in dialog_to_display[display_num]:
                     if all_characters_path == None:
@@ -460,11 +456,11 @@ def battle(chapter_name,screen,setting):
                         theActionNeedPop = []
                         if len(theAction) > 0:
                             for key,action in theAction.items():
-                                if key in characters_data and characters_data[key].draw(action,screen,perBlockWidth,theMap.row,local_x,local_y,False) == False:
+                                if key in characters_data and characters_data[key].draw(action,screen,theMap,False) == False:
                                     if action != "die":
                                         characters_data[key].reset_imgId(action)
                                     theActionNeedPop.append(key)
-                                elif key in sangvisFerris_data and sangvisFerris_data[key].draw(action,screen,perBlockWidth,theMap.row,local_x,local_y,False) == False:
+                                elif key in sangvisFerris_data and sangvisFerris_data[key].draw(action,screen,theMap,False) == False:
                                     if action != "die":
                                         sangvisFerris_data[key].reset_imgId(action)
                                     theActionNeedPop.append(key)
@@ -684,13 +680,13 @@ def battle(chapter_name,screen,setting):
                 else:
                     if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
                         if mouse_move_temp_x > mouse_x:
-                            local_x += mouse_move_temp_x-mouse_x
+                            theMap.local_x += mouse_move_temp_x-mouse_x
                         elif mouse_move_temp_x < mouse_x:
-                            local_x -= mouse_x-mouse_move_temp_x
+                            theMap.local_x -= mouse_x-mouse_move_temp_x
                         if mouse_move_temp_y > mouse_y:
-                            local_y += mouse_move_temp_y-mouse_y
+                            theMap.local_y += mouse_move_temp_y-mouse_y
                         elif mouse_move_temp_y < mouse_y:
-                            local_y -= mouse_y-mouse_move_temp_y
+                            theMap.local_y -= mouse_y-mouse_move_temp_y
                         mouse_move_temp_x = mouse_x
                         mouse_move_temp_y = mouse_y
             else:
@@ -705,18 +701,18 @@ def battle(chapter_name,screen,setting):
                     zoomIn += 5
                 newPerBlockWidth = round(window_x/theMap.column*zoomIn/100)
                 newPerBlockHeight = round(window_y/theMap.row*zoomIn/100)
-                local_x += (perBlockWidth-newPerBlockWidth)*theMap.column/2
-                local_y += (perBlockHeight-newPerBlockHeight)*theMap.row/2
-                perBlockWidth = newPerBlockWidth
+                theMap.local_x += (theMap.perBlockWidth-newPerBlockWidth)*theMap.column/2
+                theMap.local_y += (perBlockHeight-newPerBlockHeight)*theMap.row/2
+                theMap.perBlockWidth = newPerBlockWidth
                 perBlockHeight = newPerBlockHeight
                 #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
-                UI_img["green"] = resizeImg(original_UI_img["green"], (perBlockWidth*0.8, None))
-                UI_img["red"] = resizeImg(original_UI_img["red"], (perBlockWidth*0.8, None))
-                UI_img["yellow"] = resizeImg(original_UI_img["yellow"], (perBlockWidth*0.8, None))
-                UI_img["blue"] = resizeImg(original_UI_img["blue"], (perBlockWidth*0.8, None))
-                UI_img["orange"] = resizeImg(original_UI_img["orange"], (perBlockWidth*0.8, None))
-                select_menu_button =  resizeImg(select_menu_button_original, (round(perBlockWidth/2), round(perBlockWidth/4)))
-                theMap.changePerBlockSize(perBlockWidth,window_x,window_y)
+                UI_img["green"] = resizeImg(original_UI_img["green"], (theMap.perBlockWidth*0.8, None))
+                UI_img["red"] = resizeImg(original_UI_img["red"], (theMap.perBlockWidth*0.8, None))
+                UI_img["yellow"] = resizeImg(original_UI_img["yellow"], (theMap.perBlockWidth*0.8, None))
+                UI_img["blue"] = resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None))
+                UI_img["orange"] = resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
+                select_menu_button =  resizeImg(select_menu_button_original, (round(theMap.perBlockWidth/2), round(theMap.perBlockWidth/4)))
+                theMap.changePerBlockSize(theMap.perBlockWidth,window_x,window_y)
             else:
                 zoomIn = zoomIntoBe
 
@@ -733,29 +729,29 @@ def battle(chapter_name,screen,setting):
                     screen_to_move_y -= perBlockHeight/4
             if pressKeyToMove["left"] == True:
                 if screen_to_move_x == None:
-                    screen_to_move_x = perBlockWidth/4
+                    screen_to_move_x = theMap.perBlockWidth/4
                 else:
-                    screen_to_move_x += perBlockWidth/4
+                    screen_to_move_x += theMap.perBlockWidth/4
             if pressKeyToMove["right"] == True:
                 if screen_to_move_x == None:
-                    screen_to_move_x = -perBlockWidth/4
+                    screen_to_move_x = -theMap.perBlockWidth/4
                 else:
-                    screen_to_move_x -= perBlockWidth/4
+                    screen_to_move_x -= theMap.perBlockWidth/4
 
             #如果需要移动屏幕
             if screen_to_move_x != None and screen_to_move_x != 0:
-                temp_value = local_x + screen_to_move_x*0.2
+                temp_value = theMap.local_x + screen_to_move_x*0.2
                 if window_x-theMap.mapSurface.get_width()<=temp_value<=0:
-                    local_x = temp_value
+                    theMap.local_x = temp_value
                     screen_to_move_x*=0.8
                     if int(screen_to_move_x) == 0:
                         screen_to_move_x = 0
                 else:
                     screen_to_move_x = 0
             if screen_to_move_y != None and screen_to_move_y !=0:
-                temp_value = local_y + screen_to_move_y*0.2
+                temp_value = theMap.local_y + screen_to_move_y*0.2
                 if window_y-theMap.mapSurface.get_height()<=temp_value<=0:
-                    local_y = temp_value
+                    theMap.local_y = temp_value
                     screen_to_move_y*=0.8
                     if int(screen_to_move_y) == 0:
                         screen_to_move_y = 0
@@ -763,31 +759,31 @@ def battle(chapter_name,screen,setting):
                     screen_to_move_y = 0
 
             #检测屏幕是不是移到了不移到的地方
-            if local_x < window_x-theMap.mapSurface.get_width():
-                local_x = window_x-theMap.mapSurface.get_width()
+            if theMap.local_x < window_x-theMap.mapSurface.get_width():
+                theMap.local_x = window_x-theMap.mapSurface.get_width()
                 screen_to_move_x = 0
-            elif local_x > 0:
-                local_x = 0
+            elif theMap.local_x > 0:
+                theMap.local_x = 0
                 screen_to_move_x = 0
-            if local_y < window_y-theMap.mapSurface.get_height():
-                local_y = window_y-theMap.mapSurface.get_height()
+            if theMap.local_y < window_y-theMap.mapSurface.get_height():
+                theMap.local_y = window_y-theMap.mapSurface.get_height()
                 screen_to_move_y = 0
-            elif local_y > 0:
-                local_y = 0
+            elif theMap.local_y > 0:
+                theMap.local_y = 0
                 screen_to_move_y = 0
             
             #加载地图
-            theMap.display_map(screen,local_x,local_y)
+            theMap.display_map(screen)
             #画出用彩色方块表示的范围
             for area in areaDrawColorBlock:
                 for position in areaDrawColorBlock[area]:
-                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,position[0],position[1],local_x,local_y)
-                    drawImg(UI_img[area],(xTemp+perBlockWidth*0.1,yTemp),screen)
+                    xTemp,yTemp = theMap.calPosInMap(position[0],position[1])
+                    drawImg(UI_img[area],(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
 
             #玩家回合
             if whose_round == "player":
                 if right_click == True:
-                    block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
+                    block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y)
                     #如果点击了回合结束的按钮
                     if isHover(end_round_button) and isWaiting == True:
                         whose_round = "playerToSangvisFerris"
@@ -907,20 +903,20 @@ def battle(chapter_name,screen,setting):
                 if green_hide == "SelectMenu":
                     #移动画面以使得被点击的角色可以被更好的操作
                     if screen_to_move_x == None:
-                        tempX,tempY = calPosInMap(theMap.row,perBlockWidth,characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,local_x,local_y)
-                        if tempX < window_x*0.2 and local_x<=0:
+                        tempX,tempY = theMap.calPosInMap(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
+                        if tempX < window_x*0.2 and theMap.local_x<=0:
                             screen_to_move_x = window_x*0.2-tempX
-                        elif tempX > window_x*0.8 and local_x>=theMap.column*perBlockWidth*-1:
+                        elif tempX > window_x*0.8 and theMap.local_x>=theMap.column*theMap.perBlockWidth*-1:
                             screen_to_move_x = window_x*0.8-tempX
                     if screen_to_move_y == None:
-                        if tempY < window_y*0.2 and local_y<=0:
+                        if tempY < window_y*0.2 and theMap.local_y<=0:
                             screen_to_move_y = window_y*0.2-tempY
-                        elif tempY > window_y*0.8 and local_y>=theMap.row*perBlockHeight*-1:
+                        elif tempY > window_y*0.8 and theMap.local_y>=theMap.row*perBlockHeight*-1:
                             screen_to_move_y = window_y*0.8-tempY
                         
                 #显示攻击/移动/技能范围
                 if green_hide == False and the_character_get_click != "":
-                    block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
+                    block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y)
                     #显示移动范围
                     if action_choice == "move":
                         areaDrawColorBlock["green"] = []
@@ -936,8 +932,8 @@ def battle(chapter_name,screen,setting):
                                 if len(the_route)>0:
                                     #显示路径
                                     areaDrawColorBlock["green"] = the_route
-                                    xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,the_route[-1][0],the_route[-1][1],local_x,local_y)
-                                    displayInCenter(fontRender("-"+str(len(the_route)*2)+"AP","green",perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
+                                    xTemp,yTemp = theMap.calPosInMap(the_route[-1][0],the_route[-1][1])
+                                    displayInCenter(fontRender("-"+str(len(the_route)*2)+"AP","green",theMap.perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
                     #显示攻击范围        
                     elif action_choice == "attack":
                         if attacking_range == None:
@@ -1010,7 +1006,7 @@ def battle(chapter_name,screen,setting):
                             areaDrawColorBlock["green"] = skill_range["near"]
                             areaDrawColorBlock["blue"] = skill_range["middle"]
                             areaDrawColorBlock["yellow"] = skill_range["far"]
-                            block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
+                            block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y)
                             if block_get_click != None:
                                 the_skill_cover_area = []
                                 for area in skill_range:
@@ -1114,7 +1110,7 @@ def battle(chapter_name,screen,setting):
                                         break
                                 if theMap.darkMode == True:
                                     theMap.calculate_darkness(characters_data,window_x,window_y)
-                            characters_data[the_character_get_click].draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
+                            characters_data[the_character_get_click].draw("move",screen,theMap)
                         else:
                             pygame.mixer.Channel(0).stop()
                             #检测是不是站在补给上
@@ -1138,7 +1134,7 @@ def battle(chapter_name,screen,setting):
                             keyTemp = str(characters_data[the_character_get_click].x)+"-"+str(characters_data[the_character_get_click].y) 
                             #检测是否角色有set的动画
                             if characters_data[the_character_get_click].gif_dic["set"] != None:
-                                characters_data[the_character_get_click].draw("set",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                                characters_data[the_character_get_click].draw("set",screen,theMap,False)
                                 if characters_data[the_character_get_click].gif_dic["set"]["imgId"] == characters_data[the_character_get_click].gif_dic["set"]["imgNum"]-1:
                                     characters_data[the_character_get_click].gif_dic["set"]["imgId"]=0
                                     isWaiting = True
@@ -1155,7 +1151,7 @@ def battle(chapter_name,screen,setting):
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 0:
-                            block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
+                            block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y)
                             if block_get_click != None:
                                 if block_get_click["x"] < characters_data[the_character_get_click].x:
                                     characters_data[the_character_get_click].setFlip(True)
@@ -1166,7 +1162,7 @@ def battle(chapter_name,screen,setting):
                                         characters_data[the_character_get_click].setFlip(True)
                                 else:
                                     characters_data[the_character_get_click].setFlip(False)
-                        characters_data[the_character_get_click].draw("attack",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                        characters_data[the_character_get_click].draw("attack",screen,theMap,False)
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == characters_data[the_character_get_click].gif_dic["attack"]["imgNum"]-2:
                             for each_enemy in enemies_get_attack:
                                 if enemies_get_attack[each_enemy] == "near" and random.randint(1,100) <= 95 or enemies_get_attack[each_enemy] == "middle" and random.randint(1,100) <= 80 or enemies_get_attack[each_enemy] == "far" and random.randint(1,100) <= 65:
@@ -1182,7 +1178,7 @@ def battle(chapter_name,screen,setting):
                             the_character_get_click = ""
                             action_choice = ""
                     elif action_choice == "skill":
-                        characters_data[the_character_get_click].draw("skill",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                        characters_data[the_character_get_click].draw("skill",screen,theMap,False)
                         if characters_data[the_character_get_click].gif_dic["skill"]["imgId"] == characters_data[the_character_get_click].gif_dic["skill"]["imgNum"]-2:
                             temp_dic = skill(the_character_get_click,None,None,sangvisFerris_data,characters_data,"react",skill_target,damage_do_to_character)
                             characters_data = temp_dic["characters_data"]
@@ -1196,7 +1192,7 @@ def battle(chapter_name,screen,setting):
                             the_character_get_click = ""
                             action_choice = ""
                     elif action_choice == "reload":
-                        characters_data[the_character_get_click].draw("reload",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                        characters_data[the_character_get_click].draw("reload",screen,theMap,False)
                         if characters_data[the_character_get_click].gif_dic["reload"]["imgId"] == characters_data[the_character_get_click].gif_dic["reload"]["imgNum"]-2:
                             characters_data[the_character_get_click].gif_dic["reload"]["imgId"] = 0
                             characters_data[the_character_get_click].current_action_point -= 5
@@ -1212,14 +1208,14 @@ def battle(chapter_name,screen,setting):
                             the_character_get_click = ""
                             action_choice = ""
                 elif the_character_get_click != "" and isWaiting == True:
-                    characters_data[the_character_get_click].draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
+                    characters_data[the_character_get_click].draw("wait",screen,theMap)
 
             #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
             if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
                 text_now_total_rounds = text_now_total_rounds_original
                 text_now_total_rounds = fontRender(text_now_total_rounds.replace("NaN",str(total_rounds)), "white",window_x/38)
                 if text_of_endround_move < (window_x-your_round_txt.get_width()*2)/2:
-                    text_of_endround_move += perBlockWidth/2
+                    text_of_endround_move += theMap.perBlockWidth/2
                 if text_of_endround_move >= (window_x-your_round_txt.get_width()*2)/2-30:
                     text_now_total_rounds.set_alpha(text_of_endround_alpha)
                     your_round_txt.set_alpha(text_of_endround_alpha)
@@ -1298,7 +1294,7 @@ def battle(chapter_name,screen,setting):
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or theMap.darkMode != True:
-                            sangvisFerris_data[enemies_in_control].draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
+                            sangvisFerris_data[enemies_in_control].draw("move",screen,theMap)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
                             pygame.mixer.Channel(0).stop()
@@ -1319,7 +1315,7 @@ def battle(chapter_name,screen,setting):
                                 sangvisFerris_data[enemies_in_control].setFlip(True)
                         else:
                             sangvisFerris_data[enemies_in_control].setFlip(False)
-                        sangvisFerris_data[enemies_in_control].draw("attack",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                        sangvisFerris_data[enemies_in_control].draw("attack",screen,theMap,False)
                     else:
                         sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] += 1
                     if sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] == sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgNum"]-1:
@@ -1368,7 +1364,7 @@ def battle(chapter_name,screen,setting):
                                 sangvisFerris_data[enemies_in_control].y = enemy_action["route"][0][1]
                                 enemy_action["route"].pop(0)
                         if (int(sangvisFerris_data[enemies_in_control].x),int(sangvisFerris_data[enemies_in_control].y)) in theMap.lightArea or theMap.darkMode != True:
-                            sangvisFerris_data[enemies_in_control].draw("move",screen,perBlockWidth,theMap.row,local_x,local_y)
+                            sangvisFerris_data[enemies_in_control].draw("move",screen,theMap)
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
                             pygame.mixer.Channel(0).stop()
@@ -1382,7 +1378,7 @@ def battle(chapter_name,screen,setting):
                                     sangvisFerris_data[enemies_in_control].setFlip(True)
                             else:
                                 sangvisFerris_data[enemies_in_control].setFlip(False)
-                            sangvisFerris_data[enemies_in_control].draw("attack",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                            sangvisFerris_data[enemies_in_control].draw("attack",screen,theMap,False)
                         else:
                             sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] += 1
                         if sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] == sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgNum"]-1:
@@ -1418,13 +1414,13 @@ def battle(chapter_name,screen,setting):
                 if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and theMap.darkMode != True:
                     if value.current_hp > 0:
                         if value.faction == "character" and value.get_imgId("die") > 0:
-                            value.draw("die",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                            value.draw("die",screen,theMap,False)
                             value.gif_dic["die"]["imgId"] -= 2
                             if value.get_imgId("die") <= 0:
                                 value.set_imgId("die",0)
                         else:
                             if green_hide == True and pygame.mouse.get_pressed()[2]:
-                                block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y,local_x,local_y)
+                                block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y)
                                 if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
                                     rightClickCharacterAlphaDeduct = False
                                     if rightClickCharacterAlpha == None:
@@ -1438,9 +1434,9 @@ def battle(chapter_name,screen,setting):
                                     areaDrawColorBlock["yellow"] = rangeCanAttack["far"]
                                     areaDrawColorBlock["blue"] =  rangeCanAttack["middle"]
                                     areaDrawColorBlock["green"] = rangeCanAttack["near"]
-                            value.draw("wait",screen,perBlockWidth,theMap.row,local_x,local_y)
+                            value.draw("wait",screen,theMap)
                     elif value.current_hp<=0:
-                        value.draw("die",screen,perBlockWidth,theMap.row,local_x,local_y,False)
+                        value.draw("die",screen,theMap,False)
 
                 #是否有在播放死亡角色的动画（而不是倒地状态）
                 if value.current_hp<=0 and key not in the_dead_one:
@@ -1450,9 +1446,9 @@ def battle(chapter_name,screen,setting):
                 if key in damage_do_to_character:
                     the_alpha_to_check = damage_do_to_character[key].get_alpha()
                     if the_alpha_to_check > 0:
-                        xTemp,yTemp = calPosInMap(theMap.row,perBlockWidth,value.x,value.y,local_x,local_y)
-                        xTemp+=perBlockWidth*0.05
-                        yTemp-=perBlockWidth*0.05
+                        xTemp,yTemp = theMap.calPosInMap(value.x,value.y)
+                        xTemp+=theMap.perBlockWidth*0.05
+                        yTemp-=theMap.perBlockWidth*0.05
                         displayInCenter(damage_do_to_character[key],UI_img["green"],xTemp,yTemp,screen)
                         damage_do_to_character[key].set_alpha(the_alpha_to_check-5)
                     else:
@@ -1498,17 +1494,17 @@ def battle(chapter_name,screen,setting):
                 del the_dead_one[key]
             #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
             #展示设施
-            theMap.display_facility(characters_data,screen,local_x,local_y)
+            theMap.display_facility(characters_data,screen)
             #展示所有角色Ui
             for every_chara in characters_data:
-                characters_data[every_chara].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
             if theMap.darkMode == True:
                 for enemies in sangvisFerris_data:
-                    if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea:
-                        sangvisFerris_data[enemies].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                    if (int(sangvisFerris_data[enemies].x),int(sangvisFerris_data[enemies].y)) in theMap.lightArea:
+                        sangvisFerris_data[enemies].drawUI(screen,original_UI_img,theMap)
             else:
                 for enemies in sangvisFerris_data:
-                    sangvisFerris_data[enemies].drawUI(screen,original_UI_img,perBlockWidth,theMap.row,local_x,local_y)
+                    sangvisFerris_data[enemies].drawUI(screen,original_UI_img,theMap)
 
             #显示选择菜单
             if green_hide == "SelectMenu":
@@ -1538,10 +1534,10 @@ def battle(chapter_name,screen,setting):
                 displayInCenter(tcgc_action_point2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
                 #----选择菜单----
-                tempLocation = theMap.getBlockExactLocation(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y,local_x,local_y)
+                tempLocation = theMap.getBlockExactLocation(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
                 #攻击按钮 - 左
-                txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",round(perBlockWidth/10))
-                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/13))
+                txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",round(theMap.perBlockWidth/10))
+                txt_temp2 = fontRender("5 AP","black",round(theMap.perBlockWidth/13))
                 txt_tempX = tempLocation["xStart"]-select_menu_button.get_width()*0.6
                 txt_tempY = tempLocation["yStart"]
                 if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
@@ -1550,8 +1546,8 @@ def battle(chapter_name,screen,setting):
                 drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                 drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
                 #移动按钮 - 右
-                txt_temp = fontRender(selectMenuButtons_dic["move"],"black",round(perBlockWidth/10))
-                txt_temp2 = fontRender("2N AP","black",round(perBlockWidth/13))
+                txt_temp = fontRender(selectMenuButtons_dic["move"],"black",round(theMap.perBlockWidth/10))
+                txt_temp2 = fontRender("2N AP","black",round(theMap.perBlockWidth/13))
                 txt_tempX = tempLocation["xEnd"]-select_menu_button.get_width()*0.4
                 #txt_tempY与攻击按钮一致
                 if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
@@ -1560,10 +1556,10 @@ def battle(chapter_name,screen,setting):
                 drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                 drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
                 #换弹按钮 - 下
-                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(perBlockWidth/10))
-                txt_temp2 = fontRender("5 AP","black",round(perBlockWidth/13))
-                txt_tempX = tempLocation["xStart"]+perBlockWidth/4
-                txt_tempY = tempLocation["yStart"]+perBlockWidth*0.45
+                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(theMap.perBlockWidth/10))
+                txt_temp2 = fontRender("5 AP","black",round(theMap.perBlockWidth/13))
+                txt_tempX = tempLocation["xStart"]+theMap.perBlockWidth/4
+                txt_tempY = tempLocation["yStart"]+theMap.perBlockWidth*0.45
                 if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
                     buttonGetHover = "reload"
                 drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
@@ -1571,10 +1567,10 @@ def battle(chapter_name,screen,setting):
                 drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
                 #技能按钮 - 上
                 if characters_data[the_character_get_click].kind != "HOC":
-                    txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",round(perBlockWidth/10))
-                    txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/13))
+                    txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",round(theMap.perBlockWidth/10))
+                    txt_temp2 = fontRender("8 AP","black",round(theMap.perBlockWidth/13))
                     #txt_tempX与换弹按钮一致
-                    txt_tempY = tempLocation["yStart"]-perBlockWidth*0.45
+                    txt_tempY = tempLocation["yStart"]-theMap.perBlockWidth*0.45
                     if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
                         buttonGetHover = "skill"
                     drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
@@ -1582,10 +1578,10 @@ def battle(chapter_name,screen,setting):
                     drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
                 #救助队友
                 if len(friendsCanSave)>0:
-                    txt_temp = fontRender(selectMenuButtons_dic["rescue"],"black",round(perBlockWidth/10))
-                    txt_temp2 = fontRender("8 AP","black",round(perBlockWidth/13))
+                    txt_temp = fontRender(selectMenuButtons_dic["rescue"],"black",round(theMap.perBlockWidth/10))
+                    txt_temp2 = fontRender("8 AP","black",round(theMap.perBlockWidth/13))
                     txt_tempX = tempLocation["xStart"]-select_menu_button.get_width()*0.6
-                    txt_tempY = tempLocation["yStart"]-perBlockWidth*0.45
+                    txt_tempY = tempLocation["yStart"]-theMap.perBlockWidth*0.45
                     drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
                     drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
                     drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
@@ -1593,7 +1589,7 @@ def battle(chapter_name,screen,setting):
                         buttonGetHover = "rescue"
             #加载雪花
             if weatherController != None:
-                weatherController.display(screen,perBlockWidth,perBlockHeight,local_x,local_y)
+                weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
             
             #显示获取到的物资
             if original_UI_img["supplyBoard"].yTogo == 10:

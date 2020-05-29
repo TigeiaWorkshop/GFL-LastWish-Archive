@@ -3,7 +3,7 @@ from Zero2.basic import *
 import numpy
 
 class MapObject:
-    def  __init__(self,mapDataDic,perBlockWidth):
+    def  __init__(self,mapDataDic,perBlockWidth,local_x=0,local_y=0):
         #加载地图设置
         with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
             blocks_setting = yaml.load(f.read(),Loader=yaml.FullLoader)["blocks"]
@@ -23,6 +23,8 @@ class MapObject:
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
         self.bgImg = loadImg("Assets/image/dialog_background/"+mapDataDic["backgroundImage"])
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height)).convert()
+        self.local_x = local_x
+        self.local_y = local_y
         """
         self.mapBlocks =  initalBlocks(mapData)
         for eachBlock in self.mapBlocks:
@@ -41,15 +43,15 @@ class MapObject:
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
         self.process_map(window_x,window_y)
     #把地图画到屏幕上
-    def display_map(self,screen,local_x=0,local_y=0):
-        screen.blit(self.mapSurface,(local_x,local_y))
-        self.drawChest(screen,local_x,local_y)
+    def display_map(self,screen):
+        screen.blit(self.mapSurface,(self.local_x,self.local_y))
+        self.drawChest(screen)
     #画上设施
-    def display_facility(self,characters_data,screen,local_x=0,local_y=0):
+    def display_facility(self,characters_data,screen):
         for key,value in self.facilityData.items():
             for key2,value2 in value.items():
                 imgToBlit = None
-                xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value2["x"],value2["y"],local_x,local_y)
+                xTemp,yTemp = self.calPosInMap(value2["x"],value2["y"])
                 if -self.perBlockWidth<=xTemp<screen.get_width() and -self.perBlockWidth<=yTemp<screen.get_height():
                     if self.darkMode == True and (value2["x"],value2["y"]) not in self.lightArea:
                         keyWordTemp = "dark"
@@ -76,9 +78,9 @@ class MapObject:
                     if imgToBlit != None:
                         screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
     #画上箱子
-    def drawChest(self,screen,local_x,local_y):
+    def drawChest(self,screen):
         for key,value in self.facilityData["chest"].items():
-            xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,value["x"],value["y"],local_x,local_y)
+            xTemp,yTemp = self.calPosInMap(value["x"],value["y"])
             if self.darkMode == True and (value["x"],value["y"]) not in self.lightArea:
                 screen.blit(pygame.transform.scale(self.facilityImg["dark"]["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
             else:
@@ -104,9 +106,14 @@ class MapObject:
                 for key2,value2 in value.items():
                     map2d[value2["x"]][value2["y"]]=1
         # 历遍所有角色，将角色的坐标点设置为障碍方块
-        for key,value in dicMerge(characters_data,sangvisFerris_data).items():
+        for key,value in characters_data.items():
             if key not in ignoreCharacter:
                 map2d[value.x][value.y] = 1
+        for key,value in sangvisFerris_data.items():
+            if key not in ignoreCharacter and value.current_hp>0:
+                map2d[value.x][value.y] = 1
+        if map2d[endX][endY] != 0:
+            return []
         aStar=AStar(map2d,Point(startX,startY),Point(endX,endY))
         #开始寻路
         pathList=aStar.start()
@@ -145,30 +152,32 @@ class MapObject:
         """
         for y in range(len(self.mapData)):
             for x in range(len(self.mapData[y])):
-                xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y)
+                xTemp,yTemp = self.calPosInMap(x,y)
+                xTemp-=self.local_x
+                yTemp-=self.local_y
                 #画上场景图片
                 if self.darkMode == True and (x,y) not in self.lightArea:
                     self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
                 else:
                     self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
     #计算在地图中的方块
-    def calBlockInMap(self,block,mouse_x,mouse_y,local_x=0,local_y=0):
-        guess_x = int(((mouse_x-local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
-        guess_y = int((mouse_y-local_y-self.perBlockWidth*0.4)/self.perBlockWidth/0.22) - guess_x
+    def calBlockInMap(self,block,mouse_x,mouse_y):
+        guess_x = int(((mouse_x-self.local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
+        guess_y = int((mouse_y-self.local_y-self.perBlockWidth*0.4)/self.perBlockWidth/0.22) - guess_x
         block_get_click = None
         lenUnitH = block.get_height()/4
         lenUnitW = block.get_width()/4
         for y in range(guess_y-1,guess_y+4):
             for x in range(guess_x-1,guess_x+4):
-                xTemp,yTemp = calPosInMap(self.row,self.perBlockWidth,x,y,local_x,local_y)
+                xTemp,yTemp = self.calPosInMap(x,y)
                 xTemp+=self.perBlockWidth*0.05
                 if xTemp+lenUnitW<mouse_x<xTemp+lenUnitW*3 and yTemp<mouse_y<yTemp+lenUnitH*4:
                     block_get_click = {"x":x,"y":y}
                     break
         return block_get_click
     #计算方块被画出的位置
-    def getBlockExactLocation(self,x,y,local_x,local_y):
-        xStart,yStart = calPosInMap(self.row,self.perBlockWidth,x,y,local_x,local_y)
+    def getBlockExactLocation(self,x,y):
+        xStart,yStart = self.calPosInMap(x,y)
         return {
         "xStart": xStart,
         "xEnd": xStart + self.env_img_list["normal"][self.mapData[y][x].name].get_width(),
@@ -208,6 +217,9 @@ class MapObject:
                             if (x,y) not in self.lightArea:
                                 self.lightArea.append((x,y))
         self.process_map(window_x,window_y)
+    #计算在地图中的位置
+    def calPosInMap(self,x,y):
+        return (x-y)*self.perBlockWidth*0.43+self.local_x+self.row*self.perBlockWidth*0.43,(y+x)*self.perBlockWidth*0.22+self.local_y+self.perBlockWidth*0.4
 
 #初始化地图数据
 def initialBlockData(mapData,facilityData,blocks_setting):
@@ -216,10 +228,6 @@ def initialBlockData(mapData,facilityData,blocks_setting):
             mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
     mapDataNumpyArray = numpy.asarray(mapData)
     return mapDataNumpyArray
-
-#计算在地图中的位置
-def calPosInMap(row,perBlockWidth,x,y,local_x=0,local_y=0):
-    return (x-y)*perBlockWidth*0.43+local_x+row*perBlockWidth*0.43,(y+x)*perBlockWidth*0.22+local_y+perBlockWidth*0.4
 
 #初始化设施数据
 def initialFacility(facilityData):
@@ -233,6 +241,8 @@ class Block:
         self.name = name
         self.canPassThrough = canPassThrough
 
+"""
+#区块 - 待修复
 class BlockArea:
     def  __init__(self,areaData,x,y):
         self.areaData = areaData
@@ -287,6 +297,7 @@ def initalBlocks(mapData):
                 tempArea[i] = tempArea[i][x*columnPerBlockArea:(x+1)*columnPerBlockArea-1]
             allBlockArea.append(BlockArea(tempArea,x*columnPerBlockArea,y*rowPerBlockArea))
     return allBlockArea
+"""
 
 #环境系统
 class WeatherSystem:
