@@ -278,16 +278,21 @@ def battle(chapter_name,screen,setting):
         for a in range(250,0,-5):
             #加载地图
             theMap.display_map(screen)
+            theMap.display_facility_ahead(screen)
             #角色动画
             for every_chara in characters_data:
                 characters_data[every_chara].draw("wait",screen,theMap)
-                characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
             for enemies in sangvisFerris_data:
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
                     sangvisFerris_data[enemies].draw("wait",screen,theMap)
-                    sangvisFerris_data[enemies].drawUI(screen,original_UI_img,theMap)
             #展示设施
             theMap.display_facility(characters_data,screen)
+            #角色动画
+            for every_chara in characters_data:
+                characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
+            for enemies in sangvisFerris_data:
+                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
+                    sangvisFerris_data[enemies].drawUI(screen,original_UI_img,theMap)
             #加载雪花
             if weatherController != None:
                 weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
@@ -327,6 +332,7 @@ def battle(chapter_name,screen,setting):
                     pygame.mixer.Channel(1).play(environment_sound)
                 #加载地图
                 theMap.display_map(screen)
+                theMap.display_facility_ahead(screen)
                 #角色动画
                 for key,value in dicMerge(sangvisFerris_data,characters_data).items():
                     if value.faction == "character" or (value.x,value.y) in theMap.lightArea or theMap.darkMode != True:
@@ -779,7 +785,8 @@ def battle(chapter_name,screen,setting):
                 for position in areaDrawColorBlock[area]:
                     xTemp,yTemp = theMap.calPosInMap(position[0],position[1])
                     drawImg(UI_img[area],(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
-
+            #显示设施
+            theMap.display_facility_ahead(screen)   
             #玩家回合
             if whose_round == "player":
                 if right_click == True:
@@ -1140,13 +1147,16 @@ def battle(chapter_name,screen,setting):
                                     isWaiting = True
                                     the_character_get_click = ""
                                     action_choice = ""
+                                    if "move" in dialogInfo and keyTemp in dialogInfo["move"]:
+                                        dialog_to_display = dialog_during_battle[dialogInfo["move"][keyTemp]]
+                                        break
                             else:
                                 isWaiting = True
                                 the_character_get_click = ""
                                 action_choice = ""
-                            if "move" in dialogInfo and keyTemp in dialogInfo["move"]:
-                                dialog_to_display = dialog_during_battle[dialogInfo["move"][keyTemp]]
-                                break
+                                if "move" in dialogInfo and keyTemp in dialogInfo["move"]:
+                                    dialog_to_display = dialog_during_battle[dialogInfo["move"][keyTemp]]
+                                    break
                     elif action_choice == "attack":
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
                             pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])

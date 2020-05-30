@@ -45,7 +45,6 @@ class MapObject:
     #把地图画到屏幕上
     def display_map(self,screen):
         screen.blit(self.mapSurface,(self.local_x,self.local_y))
-        self.drawChest(screen)
     #画上设施
     def display_facility(self,characters_data,screen):
         for key,value in self.facilityData.items():
@@ -77,8 +76,8 @@ class MapObject:
                         imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     if imgToBlit != None:
                         screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
-    #画上箱子
-    def drawChest(self,screen):
+    #画上比角色图层先画的装饰物
+    def display_facility_ahead(self,screen):
         for key,value in self.facilityData["chest"].items():
             xTemp,yTemp = self.calPosInMap(value["x"],value["y"])
             if self.darkMode == True and (value["x"],value["y"]) not in self.lightArea:
