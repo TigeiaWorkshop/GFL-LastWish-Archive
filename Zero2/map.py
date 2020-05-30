@@ -156,9 +156,21 @@ class MapObject:
                 yTemp-=self.local_y
                 #画上场景图片
                 if self.darkMode == True and (x,y) not in self.lightArea:
-                    self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
+                    try:
+                        self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
+                    #如果图片没找到
+                    except BaseException:
+                        self.env_img_list_original["dark"][self.mapData[y][x].name] = addDarkness(loadImg("Assets/image/environment/block/"+self.mapData[y][x].name+".png"),150)
+                        self.env_img_list["dark"][self.mapData[y][x].name] = resizeImg(self.env_img_list_original["dark"][self.mapData[y][x].name],(self.perBlockWidth,None))
+                        self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
                 else:
-                    self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
+                    try:
+                        self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
+                    #如果图片没找到
+                    except BaseException:
+                        self.env_img_list_original["normal"][self.mapData[y][x].name] = loadImg("Assets/image/environment/block/"+self.mapData[y][x].name+".png")
+                        self.env_img_list["normal"][self.mapData[y][x].name] = resizeImg(self.env_img_list_original["normal"][self.mapData[y][x].name],(self.perBlockWidth,None))
+                        self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
     #计算在地图中的方块
     def calBlockInMap(self,block,mouse_x,mouse_y):
         guess_x = int(((mouse_x-self.local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)

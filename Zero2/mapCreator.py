@@ -101,6 +101,10 @@ def mapCreator(chapterName,screen):
     mouse_move_temp_y = -1
     pressKeyToMove={"up":False,"down":False,"left":False,"right":False}
 
+    #读取地图
+    with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
+        originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
+
     # 游戏主循环
     while True:
         mouse_x,mouse_y=pygame.mouse.get_pos()
@@ -114,10 +118,7 @@ def mapCreator(chapterName,screen):
                     exit()
                 if event.key == K_o:
                     with open("Data/main_chapter/"+chapterName+"_map.yaml", "w", encoding='utf-8') as f:
-                        loadData["map"] = theMap.mapData
-                        loadData["character"] = characters
-                        loadData["sangvisFerri"] = sangvisFerris
-                        yaml.dump(loadData, f)
+                        yaml.dump(originalData, f)
                     exit()
                 if event.key == K_w:
                     pressKeyToMove["up"]=True
@@ -145,15 +146,22 @@ def mapCreator(chapterName,screen):
                         UI_local_y += window_y*0.1
                     elif event.button == 5:
                         UI_local_y -= window_y*0.1
+                elif isHover(UIContainer):
+                    #上下滚轮-放大和缩小地图
+                    if event.button == 4 and UI_local_x<0:
+                        UI_local_x += window_x*0.05
+                    elif event.button == 5:
+                        UI_local_x -= window_x*0.05
                 else:
                     all_characters_data = dicMerge(characters_data,sangvisFerris_data)
                     if pygame.mouse.get_pressed()[0] and block_get_click != None:
                         if object_to_put_down != None:
                             if object_to_put_down["type"] == "block":
+                                originalData["map"][block_get_click["y"]][block_get_click["x"]] = object_to_put_down["id"]
                                 theMap.mapData[block_get_click["y"]][block_get_click["x"]] = Block(object_to_put_down["id"],False)
-                                if object_to_put_down["id"] not in theMap.env_img_list["normal"]:
-                                    theMap.env_img_list["normal"][object_to_put_down["id"]] = loadImg("Assets/image/environment/block/"+object_to_put_down["id"]+".png",theMap.perBlockWidth)
                                 theMap.process_map(window_x,window_y)
+                            elif object_to_put_down["type"] == "decoration":
+                                pass
                             elif object_to_put_down["type"] == "character" or object_to_put_down["type"] == "sangvisFerri":
                                 any_chara_replace = None
                                 for chara in all_characters_data:
@@ -265,53 +273,56 @@ def mapCreator(chapterName,screen):
         #显示所有可放置的友方角色
         i=1
         for every_chara in all_characters_img_list:
-            drawImg(all_characters_img_list[every_chara],(theMap.perBlockWidth*i*0.5,window_y*0.75),screen)
-            if pygame.mouse.get_pressed()[0] and isHoverOn(all_characters_img_list[every_chara],(theMap.perBlockWidth*i,window_y*0.9-perBlockHeight*0.9)):
-                object_to_put_down = {"type":"character","id":every_chara}
+            tempX = theMap.perBlockWidth*i*0.3+UI_local_x
+            if 0 < tempX :
+                tempY = window_y*0.75
+                drawImg(all_characters_img_list[every_chara],(tempX,tempY),screen)
+                if pygame.mouse.get_pressed()[0] and isHoverOn(all_characters_img_list[every_chara],(tempX,tempY)):
+                    object_to_put_down = {"type":"character","id":every_chara}
             i+=2
         i=1
         for enemies in all_sangvisFerris_img_list:
-            drawImg(all_sangvisFerris_img_list[enemies],(theMap.perBlockWidth*i*0.5,window_y*0.83),screen)
-            if pygame.mouse.get_pressed()[0] and isHoverOn(all_sangvisFerris_img_list[enemies],(theMap.perBlockWidth*i,window_y*0.9+perBlockHeight*0.7)):
-                object_to_put_down = {"type":"sangvisFerri","id":enemies}
+            tempX = theMap.perBlockWidth*i*0.3+UI_local_x
+            if 0 < tempX:
+                tempY = window_y*0.83
+                drawImg(all_sangvisFerris_img_list[enemies],(tempX,tempY),screen)
+                if pygame.mouse.get_pressed()[0] and isHoverOn(all_sangvisFerris_img_list[enemies],(tempX,tempY)):
+                    object_to_put_down = {"type":"sangvisFerri","id":enemies}
             i+=2
         
         #显示所有可放置的环境方块
         i=0
         for img_name in env_img_list:
-            posX = window_x*0.84+theMap.perBlockWidth/2.7*(i%4)
             posY = perBlockHeight*3*int(i/4)+UI_local_y
             if window_y*0.05<posY<window_y*0.9:
+                posX = window_x*0.84+theMap.perBlockWidth/2.7*(i%4)
                 drawImg(env_img_list[img_name],(posX,posY),screen)
-            if pygame.mouse.get_pressed()[0] and isHoverOn(env_img_list[img_name],(posX,posY)):
-                object_to_put_down = {"type":"block","id":img_name}
+                if pygame.mouse.get_pressed()[0] and isHoverOn(env_img_list[img_name],(posX,posY)):
+                    object_to_put_down = {"type":"block","id":img_name}
             i+=1
         for img_name in all_decorations_img_list:
-            posX = window_x*0.84+theMap.perBlockWidth/2.7*(i%4)
             posY = perBlockHeight*3*int(i/4)+UI_local_y
             if window_y*0.05<posY<window_y*0.9:
+                posX = window_x*0.84+theMap.perBlockWidth/2.7*(i%4)
                 drawImg(all_decorations_img_list[img_name],(posX,posY),screen)
-            if pygame.mouse.get_pressed()[0] and isHoverOn(all_decorations_img_list[img_name],(posX,posY)):
-                object_to_put_down = {"type":"decoration","id":img_name}
+                if pygame.mouse.get_pressed()[0] and isHoverOn(all_decorations_img_list[img_name],(posX,posY)):
+                    object_to_put_down = {"type":"decoration","id":img_name}
             i+=1
         
         #跟随鼠标显示即将被放下的物品
         if object_to_put_down != None:
+            if block_get_click != None and isHover(UIContainerRight)==False and isHover(UIContainer)==False:
+                xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
+                drawImg(green,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
             if object_to_put_down["type"] == "block":
                 drawImg(env_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
-                if block_get_click != None and isHover(UIContainerRight)==False and isHover(UIContainer)==False:
-                    xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
-                    drawImg(green,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
-            if object_to_put_down["type"] == "decoration":
+            elif object_to_put_down["type"] == "decoration":
                 drawImg(all_decorations_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
-                if block_get_click != None and isHover(UIContainerRight)==False and isHover(UIContainer)==False:
-                    xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
-                    drawImg(green,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
             elif object_to_put_down["type"] == "character":
-                drawImg(all_characters_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth,mouse_y-perBlockHeight),screen)
+                drawImg(all_characters_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
             elif object_to_put_down["type"] == "sangvisFerri":
-                drawImg(all_sangvisFerris_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth,mouse_y-perBlockHeight),screen)
-
+                drawImg(all_sangvisFerris_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
+            
         #显示即将被编辑的数据
         object_edit_id = 0
         if data_to_edit != None:

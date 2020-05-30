@@ -11,7 +11,7 @@ Sound:
   #背景音乐
   background_music: 100
   #音效
-  sound_effects: 0
+  sound_effects: 100
   #环境声
   sound_environment: 100
 
