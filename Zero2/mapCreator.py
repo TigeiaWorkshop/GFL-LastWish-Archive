@@ -3,7 +3,7 @@ from Zero2.basic import *
 from Zero2.characterDataManager import *
 from Zero2.map import *
 
-def mapCreator(chapterName,screen):
+def mapCreator(chapterName,screen,setting):
     window_x = screen.get_width()
     window_y = screen.get_height()
     #窗口标题
@@ -17,29 +17,31 @@ def mapCreator(chapterName,screen):
     #读取地图
     with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        characters = loadData["character"]
-        sangvisFerris = loadData["sangvisFerri"]
+        #初始化角色信息
+        characters_data = {}
+        for each_character in loadData["character"]:
+            characters_data[each_character] = CharacterDataManager(window_y,loadData["character"][each_character],"dev")
+        sangvisFerris_data = {}
+        for each_character in loadData["sangvisFerri"]:
+            sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],"dev")
+        #初始化地图
         theMap = loadData["map"]
-
-    #初始化地图
-    if len(theMap) == 0:
-        SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
-        block_y = 36
-        block_x = 36
-        default_map = []
-        for i in range(block_y):
-            map_per_line = []
-            for a in range(block_x):
-                map_per_line.append(SnowEnvImg[random.randint(0,5)])
-            default_map.append(map_per_line)
-
-        with open("Data/main_chapter/"+chapterName+"_map.yaml", "w", encoding='utf-8') as f:
-            loadData["map"] = default_map
-            yaml.dump(loadData, f)
-    else:
-        block_y = len(loadData["map"])
-        block_x = len(loadData["map"][0])
-
+        if len(theMap) == 0:
+            SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
+            block_y = 36
+            block_x = 36
+            default_map = []
+            for i in range(block_y):
+                map_per_line = []
+                for a in range(block_x):
+                    map_per_line.append(SnowEnvImg[random.randint(0,5)])
+                default_map.append(map_per_line)
+            with open("Data/main_chapter/"+chapterName+"_map.yaml", "w", encoding='utf-8') as f:
+                loadData["map"] = default_map
+                yaml.dump(loadData, f)
+        else:
+            block_y = len(loadData["map"])
+            block_x = len(loadData["map"][0])
     
     perBlockHeight = int(window_y/block_y*0.9)
     #加载地图
@@ -52,14 +54,6 @@ def mapCreator(chapterName,screen):
     for i in range(len(all_env_file_list)):
         img_name = all_env_file_list[i].replace(".","").replace("Assets","").replace("block","").replace("image","").replace("environment","").replace("png","").replace("\\","").replace("/","")
         env_img_list[img_name] = loadImg(all_env_file_list[i],int(theMap.perBlockWidth/3))
-
-    #初始化角色信息
-    characters_data = {}
-    for each_character in characters:
-        characters_data[each_character] = CharacterDataManager(window_y,characters[each_character],"dev")
-    sangvisFerris_data = {}
-    for each_character in sangvisFerris:
-        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character],"dev")
 
     #加载所有的角色的图片文件
     all_characters_list  = glob.glob(r'Assets/image/character/*')
@@ -90,6 +84,15 @@ def mapCreator(chapterName,screen):
     #加载容器图片
     UIContainer = loadImage("Assets/image/UI/container.png",(-2,window_y*0.8),int(window_x*0.8), int(window_y*0.2))
     UIContainerRight = loadImage("Assets/image/UI/container.png",(window_x*0.825,0),int(window_x*0.175), int(window_y*1.025))
+    #按钮
+    UIButton_Save = loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*0.2,window_y*0.01),int(theMap.perBlockWidth*0.65))
+    UIButton_Back = loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*1,window_y*0.01),int(theMap.perBlockWidth*0.65))
+    #加载按钮的文字
+    with open("Lang/"+setting["Language"]+".yaml", "r", encoding='utf-8') as f:
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        UIButton_SaveText = fontRender(loadData["mapCreator"]["save"],"black",window_x/80) 
+        UIButton_BackText = fontRender(loadData["mapCreator"]["back"],"black",window_x/80)
+
     #数据控制器
     data_to_edit = None
 
@@ -105,8 +108,9 @@ def mapCreator(chapterName,screen):
     with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
         originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
 
+    isBuilding = True
     # 游戏主循环
-    while True:
+    while isBuilding == True:
         mouse_x,mouse_y=pygame.mouse.get_pos()
         block_get_click = theMap.calBlockInMap(green,mouse_x,mouse_y)
         for event in pygame.event.get():
@@ -114,12 +118,6 @@ def mapCreator(chapterName,screen):
                 if event.key == K_ESCAPE:
                     object_to_put_down = None
                     data_to_edit = None
-                if event.key == K_m:
-                    exit()
-                if event.key == K_o:
-                    with open("Data/main_chapter/"+chapterName+"_map.yaml", "w", encoding='utf-8') as f:
-                        yaml.dump(originalData, f)
-                    exit()
                 if event.key == K_w:
                     pressKeyToMove["up"]=True
                 if event.key == K_s:
@@ -128,8 +126,6 @@ def mapCreator(chapterName,screen):
                     pressKeyToMove["left"]=True
                 if event.key == K_d:
                     pressKeyToMove["right"]=True
-                if event.key == K_m:
-                    exit()
             elif event.type == KEYUP:
                 if event.key == K_w:
                     pressKeyToMove["up"]=False
@@ -152,8 +148,13 @@ def mapCreator(chapterName,screen):
                         UI_local_x += window_x*0.05
                     elif event.button == 5:
                         UI_local_x -= window_x*0.05
+                elif isHover(UIButton_Save) and object_to_put_down == None:
+                    with open("Data/main_chapter/"+chapterName+"_map.yaml", "w", encoding='utf-8') as f:
+                        yaml.dump(originalData, f)
+                elif isHover(UIButton_Back) and object_to_put_down == None:
+                    isBuilding = False
+                    break
                 else:
-                    all_characters_data = dicMerge(characters_data,sangvisFerris_data)
                     if pygame.mouse.get_pressed()[0] and block_get_click != None:
                         if object_to_put_down != None:
                             if object_to_put_down["type"] == "block":
@@ -164,28 +165,63 @@ def mapCreator(chapterName,screen):
                                 pass
                             elif object_to_put_down["type"] == "character" or object_to_put_down["type"] == "sangvisFerri":
                                 any_chara_replace = None
-                                for chara in all_characters_data:
-                                    if all_characters_data[chara].x == block_get_click["x"] and all_characters_data[chara].y == block_get_click["y"]:
-                                        any_chara_replace = chara
+                                for key,value in dicMerge(characters_data,sangvisFerris_data).items():
+                                    if value.x == block_get_click["x"] and value.y == block_get_click["y"]:
+                                        any_chara_replace = key
                                         break
                                 if any_chara_replace != None:
                                     if any_chara_replace in characters_data:
                                         characters_data.pop(any_chara_replace)
-                                        characters.pop(any_chara_replace)
+                                        originalData["character"].pop(any_chara_replace)
                                     elif any_chara_replace in sangvisFerris_data:
                                         sangvisFerris_data.pop(any_chara_replace)
-                                        sangvisFerris.pop(any_chara_replace)
+                                        originalData["sangvisFerri"].pop(any_chara_replace)
                                 the_id = 0
                                 if object_to_put_down["type"] == "character":
                                     while object_to_put_down["id"]+"_"+str(the_id) in characters_data:
                                         the_id+=1
-                                    #characters_data[object_to_put_down["id"]+"_"+str(the_id)] = CharacterDataManager(1,1,1,1,1,None,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"character"),1,1,1,1,block_get_click_x,block_get_click_y,1,None,[],False)
-                                    #characters[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"bullets_carried": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"magazine_capacity": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"start_position": [],"type": object_to_put_down["id"],"undetected": False,"x": block_get_click_x,"y": block_get_click_y}
+                                    nameTemp = object_to_put_down["id"]+"_"+str(the_id)
+                                    originalData["character"][nameTemp] = {
+                                        "action_point": 1,
+                                        "attack_range": 1,
+                                        "bullets_carried": 1,
+                                        "current_bullets": 1,
+                                        "current_hp": 1,
+                                        "effective_range": {"far":[3,3],"middle":[2,2],"near":[1,1]},
+                                        "kind": "HG",
+                                        "magazine_capacity": 1,
+                                        "max_damage": 1,
+                                        "max_hp": 1,
+                                        "min_damage": 1,
+                                        "skill_cover_range": 1,
+                                        "skill_effective_range":{"near":[1,1]},
+                                        "type": object_to_put_down["id"],
+                                        "detection": None,
+                                        "x": block_get_click["x"],
+                                        "y": block_get_click["y"],
+                                    }
+                                    characters_data[nameTemp] = CharacterDataManager(window_y,originalData["character"][nameTemp],"dev")
                                 elif object_to_put_down["type"] == "sangvisFerri":
                                     while object_to_put_down["id"]+"_"+str(the_id) in sangvisFerris_data:
                                         the_id+=1
-                                    #sangvisFerris_data[object_to_put_down["id"]+"_"+str(the_id)] = SangvisFerriDataManager(1,1,1,1,1,None,character_gif_dic(object_to_put_down["id"],perBlockWidth,perBlockHeight,"sangvisFerri"),1,1,1,1,block_get_click_x,block_get_click_y,[])
-                                    #sangvisFerris[object_to_put_down["id"]+"_"+str(the_id)] = {"action_point": 1,"attack_range": 1,"current_bullets": 1,"current_hp": 1,"effective_range": 1,"max_bullets": 1,"max_damage": 1,"max_hp": 1,"min_damage": 1,"type": object_to_put_down["id"],"patrol_path": [],"x": block_get_click_x,"y": block_get_click_y}
+                                    nameTemp = object_to_put_down["id"]+"_"+str(the_id)
+                                    originalData["sangvisFerri"][nameTemp] = {
+                                        "action_point": 1,
+                                        "attack_range": 1,
+                                        "current_bullets": 1,
+                                        "current_hp": 1,
+                                        "effective_range": {"far":[3,3],"middle":[2,2],"near":[1,1]},
+                                        "kind": "HG",
+                                        "magazine_capacity": 1,
+                                        "max_damage": 1,
+                                        "max_hp": 1,
+                                        "min_damage": 1,
+                                        "patrol_path": [],
+                                        "type": object_to_put_down["id"],
+                                        "x": block_get_click["x"],
+                                        "y": block_get_click["y"],
+                                    }
+                                    sangvisFerris_data[nameTemp] = SangvisFerriDataManager(originalData["sangvisFerri"][nameTemp],"dev")
         #移动屏幕
         if pygame.mouse.get_pressed()[2]:
             if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:
@@ -266,9 +302,25 @@ def mapCreator(chapterName,screen):
         #展示设施
         theMap.display_facility(characters_data,screen)
 
-        #Ui方格
+        #画出UI
         UIContainer.draw(screen)
         UIContainerRight.draw(screen)
+        if isHover(UIButton_Save) and object_to_put_down == None:
+            UIButton_Save.set_alpha(255)
+            UIButton_SaveText.set_alpha(255)
+        else:
+            UIButton_Save.set_alpha(100)
+            UIButton_SaveText.set_alpha(100)
+        if isHover(UIButton_Back) and object_to_put_down == None:
+            UIButton_Back.set_alpha(255)
+            UIButton_BackText.set_alpha(255)
+        else:
+            UIButton_Back.set_alpha(100)
+            UIButton_BackText.set_alpha(100)
+        UIButton_Save.draw(screen)
+        UIButton_Back.draw(screen)
+        drawImg(UIButton_SaveText,(UIButton_Save.x+UIButton_Save.width/3.5,UIButton_Save.y+UIButton_Save.width/10),screen)
+        drawImg(UIButton_BackText,(UIButton_Back.x+UIButton_Back.width/3.5,UIButton_Back.y+UIButton_Back.width/10),screen)
 
         #显示所有可放置的友方角色
         i=1

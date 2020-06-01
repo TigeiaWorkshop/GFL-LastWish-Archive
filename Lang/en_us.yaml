@@ -1,5 +1,5 @@
 Battle_UI:
-  enemyRound: enemyRound
+  enemyRound: Enemy Round
   numChapter: Chapter NaN
   numRound: Round NaN
   yourRound: Your Round
@@ -13,25 +13,29 @@ chapter:
 - chapter7
 - chapter8
 - back
-game_title: Girls' Frontline-Last wish
+game_title: Girls' Frontline - Last wish
 loading_info:
   now_loading: Loading...
   now_loading_characters: Now loading characters' data...
   now_loading_level: Now loading level data...
   now_loading_map: Now loading map data...
 main_menu:
-  text_continue: Continue
-  text_chooseChapter: Select Chapter
-  text_dlc: DLC
-  text_workshop: Workshop
-  text_setting: setting
-  text_exit: Exit
+  text0_continue: Continue
+  text1_chooseChapter: Select Chapter
+  text2_dlc: DLC
+  text3_workshop: Workshop
+  text4_mapCreator: Map Creator
+  text5_setting: Setting
+  text6_exit: Exit
+mapCreator:
+  back: Back
+  save: Save
 select_menu:
   attack: Attack
   move: Move
   reload: Reload
-  skill: Skill
   rescue: Rescue
+  skill: Skill
 warnings:
   magazine_is_empty: Current character has an empty magazine, please reload.
   magazine_is_full: Current character has a full magazine, no need to reload.

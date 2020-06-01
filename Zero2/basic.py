@@ -57,7 +57,7 @@ def resizeImg(img,imgSize=(None,None)):
     elif imgSize[1] == None and imgSize[0]!= None and imgSize[0] >= 0:
         img = pygame.transform.scale(img,(round(imgSize[0]), round(imgSize[0]/img.get_width()*img.get_height())))
     elif imgSize[0] >= 0 and imgSize[1] >= 0:
-        img = pygame.transform.scale(img, (int(imgSize[0]), int(imgSize[1])))
+        img = pygame.transform.scale(img, (round(imgSize[0]), round(imgSize[1])))
     elif imgSize[0] < 0 or imgSize[1] < 0:
         raise Exception('Both width and height must be positive interger!')
     return img
@@ -77,6 +77,14 @@ class ImageSurface:
     def draw(self,screen,local_x=0,local_y=0):
         if self.width != None and self.height != None:
             screen.blit(pygame.transform.scale(self.img, (int(self.width),int(self.height))),(self.x+local_x,self.y+local_y))
+        elif self.width != None:
+            image = resizeImg(self.img, (self.width,None))
+            screen.blit(image,(self.x+local_x,self.y+local_y))
+            self.height = image.get_height()
+        elif self.height != None:
+            image = resizeImg(self.img, (None,self.height))
+            screen.blit(image,(self.x+local_x,self.y+local_y))
+            self.width = image.get_width()
         else:
             screen.blit(self.img,(self.x+local_x,self.y+local_y))
     def set_alpha(self,value):

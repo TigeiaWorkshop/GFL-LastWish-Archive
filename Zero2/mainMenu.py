@@ -2,6 +2,7 @@
 from Zero2.basic import *
 from Zero2.cutscene import *
 from Zero2.dialog import *
+from Zero2.mapCreator import *
 
 def mainMenu(screen,setting):
     #获取屏幕的尺寸
@@ -22,7 +23,7 @@ def mainMenu(screen,setting):
     
     #加载主菜单选择页面的文字
     for txt in main_menu_txt:
-        if txt == "text_exit" or txt == "text_chooseChapter":
+        if txt == "text6_exit" or txt == "text1_chooseChapter" or txt == "text4_mapCreator":
             main_menu_txt[txt] = fontRenderPro(main_menu_txt[txt],"enable",window_x/38)
         else:
             main_menu_txt[txt] = fontRenderPro(main_menu_txt[txt],"disable",window_x/38)
@@ -132,10 +133,12 @@ def mainMenu(screen,setting):
                 if menu_type == 0:
                     i=0
                     for txt in main_menu_txt:
-                        if txt == "text_exit" and isHoverOn(main_menu_txt["text_exit"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
+                        if txt == "text6_exit" and isHoverOn(main_menu_txt["text6_exit"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
                             exit()
+                        elif txt == "text4_mapCreator" and isHoverOn(main_menu_txt["text4_mapCreator"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
+                            mapCreator("chapter1",screen,setting)
                         #选择章节
-                        elif txt == "text_chooseChapter" and isHoverOn(main_menu_txt["text_chooseChapter"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
+                        elif txt == "text1_chooseChapter" and isHoverOn(main_menu_txt["text1_chooseChapter"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
                             menu_type = 1
                         i+=1
                 elif menu_type == 1:
