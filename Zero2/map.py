@@ -47,6 +47,7 @@ class MapObject:
         screen.blit(self.mapSurface,(self.local_x,self.local_y))
     #画上设施
     def display_facility(self,screen,characters_data,sangvisFerris_data):
+        charatcersPos = None
         for key,value in self.facilityData.items():
             for key2,value2 in value.items():
                 imgToBlit = None
@@ -75,10 +76,14 @@ class MapObject:
                             imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
                         xTemp -= self.perBlockWidth*0.125
                         yTemp -= self.perBlockWidth*0.25
-                        for name,dataDic in dicMerge(characters_data,sangvisFerris_data).items():
-                            if dataDic.x == value2["x"] and dataDic.y == value2["y"] or dataDic.x+1 == value2["x"] and dataDic.y+1 == value2["y"]:
-                                imgToBlit.set_alpha(100)
-                                break
+                        #如果的确有树需要被画出
+                        if charatcersPos == None:
+                            charatcersPos = []
+                            for name,dataDic in dicMerge(characters_data,sangvisFerris_data).items():
+                                charatcersPos.append((dataDic.x,dataDic.y))
+                                charatcersPos.append((dataDic.x+1,dataDic.y+1))
+                        if (value2["x"],value2["y"]) in charatcersPos:
+                            imgToBlit.set_alpha(100)
                     elif key == "decoration" or key == "obstacle":
                         try:
                             imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))

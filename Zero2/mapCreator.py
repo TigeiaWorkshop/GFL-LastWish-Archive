@@ -8,6 +8,8 @@ def mapCreator(chapterName,screen,setting):
     window_y = screen.get_height()
     #窗口标题
     pygame.display.set_caption("Girls frontline-Last Wish: MapCreator") 
+    #卸载音乐
+    pygame.mixer.music.unload()
 
     #加载地图设置
     with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
