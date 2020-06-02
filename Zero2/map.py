@@ -46,7 +46,7 @@ class MapObject:
     def display_map(self,screen):
         screen.blit(self.mapSurface,(self.local_x,self.local_y))
     #画上设施
-    def display_facility(self,characters_data,screen):
+    def display_facility(self,screen,characters_data,sangvisFerris_data):
         for key,value in self.facilityData.items():
             for key2,value2 in value.items():
                 imgToBlit = None
@@ -75,8 +75,8 @@ class MapObject:
                             imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
                         xTemp -= self.perBlockWidth*0.125
                         yTemp -= self.perBlockWidth*0.25
-                        for theCharacter in characters_data:
-                            if characters_data[theCharacter].x == value2["x"] and characters_data[theCharacter].y == value2["y"] or characters_data[theCharacter].x+1 == value2["x"] and characters_data[theCharacter].y+1 == value2["y"]:
+                        for name,dataDic in dicMerge(characters_data,sangvisFerris_data).items():
+                            if dataDic.x == value2["x"] and dataDic.y == value2["y"] or dataDic.x+1 == value2["x"] and dataDic.y+1 == value2["y"]:
                                 imgToBlit.set_alpha(100)
                                 break
                     elif key == "decoration" or key == "obstacle":

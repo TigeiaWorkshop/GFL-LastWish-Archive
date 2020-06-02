@@ -286,7 +286,7 @@ def battle(chapter_name,screen,setting):
                 if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
                     sangvisFerris_data[enemies].draw("wait",screen,theMap)
             #展示设施
-            theMap.display_facility(characters_data,screen)
+            theMap.display_facility(screen,characters_data,sangvisFerris_data)
             #角色动画
             for every_chara in characters_data:
                 characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
@@ -348,7 +348,7 @@ def battle(chapter_name,screen,setting):
                         else:
                             value.draw("wait",screen,theMap)
                 #展示设施
-                theMap.display_facility(characters_data,screen)
+                theMap.display_facility(screen,characters_data,sangvisFerris_data)
                 #加载雪花
                 if weatherController != None:
                     weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
@@ -1504,7 +1504,7 @@ def battle(chapter_name,screen,setting):
                 del the_dead_one[key]
             #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
             #展示设施
-            theMap.display_facility(characters_data,screen)
+            theMap.display_facility(screen,characters_data,sangvisFerris_data)
             #展示所有角色Ui
             for every_chara in characters_data:
                 characters_data[every_chara].drawUI(screen,original_UI_img,theMap)

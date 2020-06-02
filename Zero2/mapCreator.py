@@ -325,7 +325,7 @@ def mapCreator(chapterName,screen,setting):
                 data_to_edit = sangvisFerris_data[enemies]
         
         #展示设施
-        theMap.display_facility(characters_data,screen)
+        theMap.display_facility(screen,characters_data,sangvisFerris_data)
 
         #画出UI
         UIContainer.draw(screen)

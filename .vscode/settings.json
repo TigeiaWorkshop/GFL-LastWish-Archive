@@ -31,5 +31,6 @@
     ],
     "cSpell.ignoreWords": [
         "pyyaml"
-    ]
+    ],
+    "cmake.configureOnOpen": false
 }
