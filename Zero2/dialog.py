@@ -8,8 +8,8 @@ def dialog(chapter_name,screen,setting,part):
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #加载动画
-    LoadingImgAbove = loadImg("Assets/image/loading_img/LoadingImgAbove.png",window_x+8,window_y/1.7)
-    LoadingImgBelow = loadImg("Assets/image/loading_img/LoadingImgBelow.png",window_x+8,window_y/2.05)
+    LoadingImgAbove = loadImg("Assets/image/UI/LoadingImgAbove.png",window_x+8,window_y/1.7)
+    LoadingImgBelow = loadImg("Assets/image/UI/LoadingImgBelow.png",window_x+8,window_y/2.05)
     #帧率控制器
     Display = DisplayController(setting['FPS'])
 

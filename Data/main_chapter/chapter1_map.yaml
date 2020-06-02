@@ -182,7 +182,85 @@ facility:
         hp: 10
       x: 13
       y: 14
+  decoration:
+    Forest_small_grass_06_0:
+      image: Forest_small_grass_06
+      x: 4
+      y: 4
+  obstacle:
+    Forest_big_stone_01_0:
+      image: Forest_big_stone_01
+      x: 6
+      y: 10
+    Forest_small_tree_stump_02_0:
+      image: Forest_small_tree_stump_02
+      x: 5
+      y: 5
+    stone1_0:
+      image: stone1
+      x: 11
+      y: 7
+    stone1_1:
+      image: stone1
+      x: 11
+      y: 8
+    stone1_2:
+      image: stone1
+      x: 10
+      y: 7
   tree:
+    Forest_big_tree_needle_03_0:
+      image: Forest_big_tree_needle_03
+      x: 6
+      y: 5
+    Forest_big_tree_needle_03_1:
+      image: Forest_big_tree_needle_03
+      x: 6
+      y: 6
+    Forest_big_tree_needle_03_10:
+      image: Forest_big_tree_needle_03
+      x: 8
+      y: 9
+    Forest_big_tree_needle_03_2:
+      image: Forest_big_tree_needle_03
+      x: 5
+      y: 6
+    Forest_big_tree_needle_03_4:
+      image: Forest_big_tree_needle_03
+      x: 7
+      y: 5
+    Forest_big_tree_needle_03_5:
+      image: Forest_big_tree_needle_03
+      x: 7
+      y: 6
+    Forest_big_tree_needle_03_6:
+      image: Forest_big_tree_needle_03
+      x: 6
+      y: 7
+    Forest_big_tree_needle_03_7:
+      image: Forest_big_tree_needle_03
+      x: 7
+      y: 7
+    Forest_big_tree_needle_03_8:
+      image: Forest_big_tree_needle_03
+      x: 5
+      y: 7
+    Forest_big_tree_needle_03_9:
+      image: Forest_big_tree_needle_03
+      x: 7
+      y: 9
+    Forest_small_bush_01_0:
+      image: Forest_small_bush_01
+      x: 9
+      y: 4
+    Forest_small_bush_01_1:
+      image: Forest_small_bush_01
+      x: 6
+      y: 3
+    Forest_small_bush_01_2:
+      image: Forest_small_bush_01
+      x: 3
+      y: 4
     t1:
       image: Forest_big_tree_needle_03
       x: 3

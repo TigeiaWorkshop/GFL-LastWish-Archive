@@ -65,7 +65,14 @@ class MapObject:
                             value2["imgId"] += 0.1
                     # 画上树
                     elif key == "tree":
-                        imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
+                        try:
+                            imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
+                        #如果图片没找到
+                        except BaseException:
+                            self.facilityImg["normal"][value2["image"]] = loadImg("Assets/image/environment/decoration/"+value2["image"]+".png")
+                            if self.darkMode == True:
+                                self.facilityImg["dark"][value2["image"]] = addDarkness(loadImg("Assets/image/environment/decoration/"+value2["image"]+".png"),150)
+                            imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
                         xTemp -= self.perBlockWidth*0.125
                         yTemp -= self.perBlockWidth*0.25
                         for theCharacter in characters_data:
@@ -73,7 +80,14 @@ class MapObject:
                                 imgToBlit.set_alpha(100)
                                 break
                     elif key == "decoration" or key == "obstacle":
-                        imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        try:
+                            imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        #如果图片没找到
+                        except BaseException:
+                            self.facilityImg["normal"][value2["image"]] = loadImg("Assets/image/environment/decoration/"+value2["image"]+".png")
+                            if self.darkMode == True:
+                                self.facilityImg["dark"][value2["image"]] = addDarkness(loadImg("Assets/image/environment/decoration/"+value2["image"]+".png"),150)
+                            imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     if imgToBlit != None:
                         screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
     #画上比角色图层先画的装饰物

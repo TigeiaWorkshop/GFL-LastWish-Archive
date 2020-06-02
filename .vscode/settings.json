@@ -9,7 +9,9 @@
         "SRCALPHA",
         "Synari",
         "asval",
+        "berrybush",
         "chara",
+        "deadbush",
         "dialoguebox",
         "dizzys",
         "dtype",
@@ -23,7 +25,9 @@
         "sangvis",
         "simhei",
         "strftime",
-        "tcgc"
+        "tcgc",
+        "waterbuds",
+        "waterplant"
     ],
     "cSpell.ignoreWords": [
         "pyyaml"

@@ -13,6 +13,9 @@ def mapCreator(chapterName,screen,setting):
     with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         blocks_setting = loadData["blocks"]
+    with open("Data/decorations.yaml", "r", encoding='utf-8') as f:
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        decorations_setting = loadData["decorations"]
 
     #读取地图
     with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
@@ -72,7 +75,7 @@ def mapCreator(chapterName,screen,setting):
     all_decorations  = glob.glob(r'Assets/image/environment/decoration/*')
     all_decorations_img_list = {}
     for i in range(len(all_decorations)):
-        img_name = all_decorations[i].replace(".","").replace("Assets","").replace("image","").replace("environment","").replace("decoration","").replace("\\","").replace("/","")
+        img_name = all_decorations[i].replace(".png","").replace(".","").replace("Assets","").replace("image","").replace("environment","").replace("decoration","").replace("\\","").replace("/","")
         all_decorations_img_list[img_name] = loadImg(all_decorations[i],theMap.perBlockWidth/5)
     
     del all_characters_list,all_sangvisFerris_list,all_decorations,all_env_file_list
@@ -162,7 +165,29 @@ def mapCreator(chapterName,screen,setting):
                                 theMap.mapData[block_get_click["y"]][block_get_click["x"]] = Block(object_to_put_down["id"],False)
                                 theMap.process_map(window_x,window_y)
                             elif object_to_put_down["type"] == "decoration":
-                                pass
+                                #查看当前位置是否有物品
+                                any_dec_replace_name = None
+                                any_dec_replace_type = None
+                                for key,value in theMap.facilityData.items():
+                                    for key2,value2 in value.items():
+                                        if value2["x"] == block_get_click["x"] and value2["y"] == block_get_click["y"]:
+                                            any_dec_replace_name = key2
+                                            any_dec_replace_type = key
+                                            break
+                                #如果发现有冲突的装饰物
+                                if any_dec_replace_name != None and any_dec_replace_type!=None:
+                                    originalData["facility"][any_dec_replace_type].pop(any_dec_replace_name)
+                                    theMap.facilityData[any_dec_replace_type].pop(any_dec_replace_name)
+                                decorationType = decorations_setting[object_to_put_down["id"]]
+                                if decorationType not in originalData["facility"]:
+                                    originalData["facility"][decorationType] = {}
+                                    theMap.facilityData[decorationType] = {}
+                                the_id = 0
+                                while object_to_put_down["id"]+"_"+str(the_id) in originalData["facility"][decorationType]:
+                                    the_id+=1
+                                nameTemp = object_to_put_down["id"]+"_"+str(the_id)
+                                originalData["facility"][decorationType][nameTemp] = {"image": object_to_put_down["id"],"x": block_get_click["x"],"y": block_get_click["y"]}
+                                theMap.facilityData[decorationType][nameTemp] = {"image": object_to_put_down["id"],"x": block_get_click["x"],"y": block_get_click["y"]}
                             elif object_to_put_down["type"] == "character" or object_to_put_down["type"] == "sangvisFerri":
                                 any_chara_replace = None
                                 for key,value in dicMerge(characters_data,sangvisFerris_data).items():
