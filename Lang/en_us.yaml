@@ -29,6 +29,8 @@ main_menu:
   text6_exit: Exit
 mapCreator:
   back: Back
+  delete: Delete
+  reload: Reload
   save: Save
 select_menu:
   attack: Attack

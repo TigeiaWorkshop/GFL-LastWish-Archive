@@ -1,33 +1,6 @@
 backgroundImage: snowfield.jpg
 background_music: Combat_02_RemnantFantasyPackage_Synari.ogg
 character:
-  2b14_0:
-    action_point: 20
-    attack_range: 3
-    bullets_carried: 20
-    current_bullets: 1
-    current_hp: 250
-    detection: null
-    effective_range:
-      far:
-      - 8
-      - 9
-      middle:
-      - 5
-      - 7
-      near:
-      - 1
-      - 4
-    kind: HOC
-    magazine_capacity: 1
-    max_damage: 300
-    max_hp: 250
-    min_damage: 200
-    skill_cover_range: null
-    skill_effective_range: null
-    type: 2b14
-    x: 28
-    y: 17
   asval:
     action_point: 10
     attack_range: 1
@@ -89,8 +62,8 @@ character:
       - 1
       - 6
     type: gsh-18
-    x: 3
-    y: 4
+    x: 1
+    y: 0
   pp1901:
     action_point: 15
     attack_range: 2
@@ -125,8 +98,8 @@ character:
       - 1
       - 3
     type: pp1901
-    x: 6
-    y: 3
+    x: 0
+    y: 0
   sv-98:
     action_point: 20
     attack_range: 1
@@ -183,31 +156,115 @@ facility:
       x: 13
       y: 14
   decoration:
-    Forest_small_grass_06_0:
-      image: Forest_small_grass_06
-      x: 4
-      y: 4
+    Desert_small_Agave_Cactus_03_0:
+      image: Desert_small_Agave_Cactus_03
+      x: 8
+      y: 16
+    Desert_small_Agave_Cactus_03_2:
+      image: Desert_small_Agave_Cactus_03
+      x: 6
+      y: 14
+    Desert_small_Agave_Cactus_04_0:
+      image: Desert_small_Agave_Cactus_04
+      x: 6
+      y: 13
+    Forest_deadBush3_0:
+      image: Forest_deadBush3
+      x: 15
+      y: 21
+    Forest_deadBush3_1:
+      image: Forest_deadBush3
+      x: 16
+      y: 3
+    Forest_deadTree1_0:
+      image: Forest_deadTree1
+      x: 10
+      y: 22
+    Forest_deadTree4_0:
+      image: Forest_deadTree4
+      x: 19
+      y: 2
+    Forest_deadTree4_1:
+      image: Forest_deadTree4
+      x: 10
+      y: 18
+    Forest_deadbush5_0:
+      image: Forest_deadbush5
+      x: 11
+      y: 15
   obstacle:
     Forest_big_stone_01_0:
       image: Forest_big_stone_01
       x: 6
       y: 10
+    Forest_big_stone_01_1:
+      image: Forest_big_stone_01
+      x: 13
+      y: 18
+    Forest_big_stone_02_0:
+      image: Forest_big_stone_02
+      x: 15
+      y: 17
+    Forest_big_stone_02_1:
+      image: Forest_big_stone_02
+      x: 15
+      y: 5
+    Forest_small_tree_log_01_0:
+      image: Forest_small_tree_log_01
+      x: 12
+      y: 4
+    Forest_small_tree_log_03_0:
+      image: Forest_small_tree_log_03
+      x: 15
+      y: 7
+    Forest_small_tree_stump_01_0:
+      image: Forest_small_tree_stump_01
+      x: 16
+      y: 10
     Forest_small_tree_stump_02_0:
       image: Forest_small_tree_stump_02
       x: 5
       y: 5
+    Forest_small_tree_stump_02_1:
+      image: Forest_small_tree_stump_02
+      x: 8
+      y: 7
+    Forest_small_tree_stump_02_2:
+      image: Forest_small_tree_stump_02
+      x: 8
+      y: 8
+    Forest_small_tree_stump_02_3:
+      image: Forest_small_tree_stump_02
+      x: 7
+      y: 8
+    desert_skull_01_0:
+      image: desert_skull_01
+      x: 12
+      y: 8
+    desert_skull_02_0:
+      image: desert_skull_02
+      x: 12
+      y: 7
+    desert_skull_03_0:
+      image: desert_skull_03
+      x: 12
+      y: 6
     stone1_0:
       image: stone1
-      x: 11
-      y: 7
+      x: 15
+      y: 3
     stone1_1:
       image: stone1
-      x: 11
-      y: 8
-    stone1_2:
-      image: stone1
-      x: 10
-      y: 7
+      x: 20
+      y: 18
+    stone2_0:
+      image: stone2
+      x: 13
+      y: 1
+    stone3_0:
+      image: stone3
+      x: 20
+      y: 4
   tree:
     Forest_big_tree_needle_03_0:
       image: Forest_big_tree_needle_03
@@ -220,23 +277,263 @@ facility:
     Forest_big_tree_needle_03_10:
       image: Forest_big_tree_needle_03
       x: 8
-      y: 9
+      y: 3
+    Forest_big_tree_needle_03_11:
+      image: Forest_big_tree_needle_03
+      x: 7
+      y: 3
+    Forest_big_tree_needle_03_12:
+      image: Forest_big_tree_needle_03
+      x: 6
+      y: 3
+    Forest_big_tree_needle_03_13:
+      image: Forest_big_tree_needle_03
+      x: 6
+      y: 4
+    Forest_big_tree_needle_03_14:
+      image: Forest_big_tree_needle_03
+      x: 5
+      y: 3
+    Forest_big_tree_needle_03_15:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 3
+    Forest_big_tree_needle_03_16:
+      image: Forest_big_tree_needle_03
+      x: 3
+      y: 3
+    Forest_big_tree_needle_03_17:
+      image: Forest_big_tree_needle_03
+      x: 3
+      y: 4
+    Forest_big_tree_needle_03_18:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 4
+    Forest_big_tree_needle_03_19:
+      image: Forest_big_tree_needle_03
+      x: 5
+      y: 4
     Forest_big_tree_needle_03_2:
       image: Forest_big_tree_needle_03
       x: 5
       y: 6
+    Forest_big_tree_needle_03_20:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 5
+    Forest_big_tree_needle_03_21:
+      image: Forest_big_tree_needle_03
+      x: 3
+      y: 6
+    Forest_big_tree_needle_03_22:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 6
+    Forest_big_tree_needle_03_23:
+      image: Forest_big_tree_needle_03
+      x: 7
+      y: 1
+    Forest_big_tree_needle_03_24:
+      image: Forest_big_tree_needle_03
+      x: 3
+      y: 7
+    Forest_big_tree_needle_03_25:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 7
+    Forest_big_tree_needle_03_26:
+      image: Forest_big_tree_needle_03
+      x: 8
+      y: 0
+    Forest_big_tree_needle_03_27:
+      image: Forest_big_tree_needle_03
+      x: 8
+      y: 1
+    Forest_big_tree_needle_03_28:
+      image: Forest_big_tree_needle_03
+      x: 7
+      y: 0
+    Forest_big_tree_needle_03_29:
+      image: Forest_big_tree_needle_03
+      x: 21
+      y: 2
+    Forest_big_tree_needle_03_3:
+      image: Forest_big_tree_needle_03
+      x: 7
+      y: 4
+    Forest_big_tree_needle_03_30:
+      image: Forest_big_tree_needle_03
+      x: 8
+      y: 6
+    Forest_big_tree_needle_03_31:
+      image: Forest_big_tree_needle_03
+      x: 8
+      y: 5
+    Forest_big_tree_needle_03_32:
+      image: Forest_big_tree_needle_03
+      x: 5
+      y: 0
+    Forest_big_tree_needle_03_33:
+      image: Forest_big_tree_needle_03
+      x: 6
+      y: 1
+    Forest_big_tree_needle_03_34:
+      image: Forest_big_tree_needle_03
+      x: 5
+      y: 1
+    Forest_big_tree_needle_03_35:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 0
+    Forest_big_tree_needle_03_36:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 1
+    Forest_big_tree_needle_03_37:
+      image: Forest_big_tree_needle_03
+      x: 3
+      y: 1
+    Forest_big_tree_needle_03_38:
+      image: Forest_big_tree_needle_03
+      x: 3
+      y: 0
+    Forest_big_tree_needle_03_39:
+      image: Forest_big_tree_needle_03
+      x: 1
+      y: 0
     Forest_big_tree_needle_03_4:
       image: Forest_big_tree_needle_03
       x: 7
+      y: 5
+    Forest_big_tree_needle_03_40:
+      image: Forest_big_tree_needle_03
+      x: 0
+      y: 0
+    Forest_big_tree_needle_03_41:
+      image: Forest_big_tree_needle_03
+      x: 2
+      y: 0
+    Forest_big_tree_needle_03_42:
+      image: Forest_big_tree_needle_03
+      x: 2
+      y: 1
+    Forest_big_tree_needle_03_43:
+      image: Forest_big_tree_needle_03
+      x: 1
+      y: 1
+    Forest_big_tree_needle_03_44:
+      image: Forest_big_tree_needle_03
+      x: 0
+      y: 1
+    Forest_big_tree_needle_03_45:
+      image: Forest_big_tree_needle_03
+      x: 2
+      y: 3
+    Forest_big_tree_needle_03_46:
+      image: Forest_big_tree_needle_03
+      x: 0
+      y: 3
+    Forest_big_tree_needle_03_47:
+      image: Forest_big_tree_needle_03
+      x: 1
+      y: 3
+    Forest_big_tree_needle_03_48:
+      image: Forest_big_tree_needle_03
+      x: 1
+      y: 4
+    Forest_big_tree_needle_03_49:
+      image: Forest_big_tree_needle_03
+      x: 1
       y: 5
     Forest_big_tree_needle_03_5:
       image: Forest_big_tree_needle_03
       x: 7
       y: 6
+    Forest_big_tree_needle_03_50:
+      image: Forest_big_tree_needle_03
+      x: 1
+      y: 6
+    Forest_big_tree_needle_03_51:
+      image: Forest_big_tree_needle_03
+      x: 0
+      y: 6
+    Forest_big_tree_needle_03_52:
+      image: Forest_big_tree_needle_03
+      x: 0
+      y: 5
+    Forest_big_tree_needle_03_53:
+      image: Forest_big_tree_needle_03
+      x: 0
+      y: 4
+    Forest_big_tree_needle_03_54:
+      image: Forest_big_tree_needle_03
+      x: 2
+      y: 4
+    Forest_big_tree_needle_03_55:
+      image: Forest_big_tree_needle_03
+      x: 2
+      y: 5
+    Forest_big_tree_needle_03_56:
+      image: Forest_big_tree_needle_03
+      x: 2
+      y: 6
+    Forest_big_tree_needle_03_57:
+      image: Forest_big_tree_needle_03
+      x: 2
+      y: 7
+    Forest_big_tree_needle_03_58:
+      image: Forest_big_tree_needle_03
+      x: 1
+      y: 7
+    Forest_big_tree_needle_03_59:
+      image: Forest_big_tree_needle_03
+      x: 0
+      y: 7
     Forest_big_tree_needle_03_6:
       image: Forest_big_tree_needle_03
       x: 6
       y: 7
+    Forest_big_tree_needle_03_60:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 16
+    Forest_big_tree_needle_03_61:
+      image: Forest_big_tree_needle_03
+      x: 5
+      y: 18
+    Forest_big_tree_needle_03_62:
+      image: Forest_big_tree_needle_03
+      x: 1
+      y: 19
+    Forest_big_tree_needle_03_63:
+      image: Forest_big_tree_needle_03
+      x: 8
+      y: 20
+    Forest_big_tree_needle_03_64:
+      image: Forest_big_tree_needle_03
+      x: 5
+      y: 12
+    Forest_big_tree_needle_03_65:
+      image: Forest_big_tree_needle_03
+      x: 20
+      y: 8
+    Forest_big_tree_needle_03_66:
+      image: Forest_big_tree_needle_03
+      x: 18
+      y: 11
+    Forest_big_tree_needle_03_67:
+      image: Forest_big_tree_needle_03
+      x: 17
+      y: 8
+    Forest_big_tree_needle_03_68:
+      image: Forest_big_tree_needle_03
+      x: 20
+      y: 11
+    Forest_big_tree_needle_03_69:
+      image: Forest_big_tree_needle_03
+      x: 15
+      y: 1
     Forest_big_tree_needle_03_7:
       image: Forest_big_tree_needle_03
       x: 7
@@ -247,1323 +544,591 @@ facility:
       y: 7
     Forest_big_tree_needle_03_9:
       image: Forest_big_tree_needle_03
-      x: 7
-      y: 9
-    Forest_small_bush_01_0:
-      image: Forest_small_bush_01
-      x: 9
-      y: 4
-    Forest_small_bush_01_1:
-      image: Forest_small_bush_01
-      x: 6
-      y: 3
-    Forest_small_bush_01_2:
-      image: Forest_small_bush_01
-      x: 3
+      x: 8
       y: 4
     t1:
       image: Forest_big_tree_needle_03
       x: 3
       y: 5
-local_x: -3000
-local_y: -300
+local_x: -1000
+local_y: -100
 map:
-- - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01
+- - TileSnow01ToStone02
   - TileSnow02ToStone01
   - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02
-- - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-- - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02
-- - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-- - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
   - TileSnow02
   - TileSnow01ToStone02
   - TileSnow01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
   - TileSnow01ToStone02
-  - TileSnow02ToStone01
+  - TileSnow01ToStone02
+  - TileSnow02
+  - TileSnow02
   - TileSnow01
-  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow02
+  - TileSnow01
+  - TileSnow01
   - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-- - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
   - TileSnow02ToStone01
   - TileSnow01ToStone01
   - TileSnow02ToStone02
   - TileSnow01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02
-- - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
   - TileSnow01ToStone01
   - TileSnow01ToStone02
   - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01
-- - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01
   - TileSnow02
 - - TileSnow02ToStone02
   - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
+  - TileSnow02ToStone02
   - TileSnow01
+  - TileSnow01ToStone01
+  - TileSnow01ToStone02
+  - TileSnow02ToStone01
   - TileSnow01ToStone02
   - TileSnow01ToStone02
   - TileSnow02
   - TileSnow02ToStone02
   - TileSnow01
   - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone01
-- - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01ToStone02
-- - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
   - TileSnow01
   - TileSnow01ToStone02
   - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow01ToStone01
+  - TileSnow02ToStone01
+  - TileSnow01ToStone01
   - TileSnow01ToStone02
   - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
   - TileSnow02ToStone01
+  - TileSnow01ToStone01
+- - TileSnow02ToStone02
   - TileSnow01
-  - TileSnow01
+  - TileSnow02
+  - TileSnow02
+  - TileSnow02
+  - TileSnow01ToStone02
   - TileSnow01ToStone02
   - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow01ToStone01
   - TileSnow02ToStone02
-  - TileSnow01
-- - TileSnow01
-  - TileSnow01
-  - TileSnow02
-  - TileSnow02ToStone01
   - TileSnow01ToStone01
   - TileSnow01ToStone01
   - TileSnow02ToStone01
   - TileSnow02ToStone02
-  - TileSnow01
   - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
+  - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02
+  - TileSnow02ToStone02
   - TileSnow02ToStone02
   - TileSnow02ToStone01
   - TileSnow01
+  - TileSnow02ToStone01
+  - TileSnow02ToStone01
+- - TileSnow01ToStone01
   - TileSnow02
-  - TileSnow01ToStone02
+  - TileSnow02ToStone01
   - TileSnow02ToStone02
-  - TileSnow01ToStone01
+  - TileSnow02ToStone02
   - TileSnow02ToStone01
   - TileSnow01
+  - TileSnow02ToStone01
+  - TileSnow02
+  - TileSnow02ToStone01
   - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-- - TileSnow02ToStone01
-  - TileSnow02ToStone02
   - TileSnow01ToStone02
   - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01
   - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02
   - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone02
   - TileSnow01
   - TileSnow01
+  - TileSnow01
+  - TileSnow02ToStone02
+- - TileSnow02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
   - TileSnow01ToStone01
   - TileSnow01
   - TileSnow02
+  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow01ToStone02
+  - TileSnow02
+  - TileSnow01
+  - TileSnow02ToStone01
+  - TileSnow02ToStone01
+  - TileSnow02ToStone02
+  - TileSnow02
+  - TileSnow02
+  - TileSnow02ToStone01
+  - TileSnow01
+  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02
+- - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow02ToStone01
   - TileSnow02
   - TileSnow01
   - TileSnow01ToStone02
+  - TileSnow01ToStone01
   - TileSnow02ToStone01
+  - TileSnow01ToStone02
   - TileSnow02ToStone01
   - TileSnow01
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02
   - TileSnow01
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone02
   - TileSnow01ToStone01
 - - TileSnow02
   - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone01
+  - TileSnow01
   - TileSnow02ToStone02
   - TileSnow01ToStone02
   - TileSnow01
   - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-- - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
   - TileSnow01ToStone02
   - TileSnow02ToStone02
   - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02
+  - TileSnow02ToStone01
+  - TileSnow01ToStone02
   - TileSnow01
-  - TileSnow01ToStone01
+  - TileSnow02
   - TileSnow01
   - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
   - TileSnow01ToStone02
   - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01ToStone02
+  - TileSnow02ToStone01
 - - TileSnow01ToStone02
-  - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone02
   - TileSnow02ToStone01
   - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
   - TileSnow01
-  - TileSnow02ToStone01
   - TileSnow01ToStone02
   - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
   - TileSnow01
+  - TileSnow01
+  - TileSnow01
+  - TileSnow02ToStone02
   - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone01
+  - TileSnow02
+  - TileSnow02
 - - TileSnow01ToStone02
   - TileSnow02ToStone01
-  - TileSnow01
+  - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02ToStone01
+  - TileSnow01ToStone01
   - TileSnow01ToStone02
   - TileSnow01ToStone02
   - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
   - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-- - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01
   - TileSnow01ToStone02
   - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
+  - TileSnow01ToStone02
+  - TileSnow02
+  - TileSnow01ToStone02
   - TileSnow02
   - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02
   - TileSnow01
   - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
 - - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01
   - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-- - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01
   - TileSnow01
   - TileSnow02
   - TileSnow01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01
   - TileSnow02ToStone01
   - TileSnow02ToStone02
-  - TileSnow02ToStone02
-- - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02
   - TileSnow01ToStone01
   - TileSnow02
-  - TileSnow01ToStone02
+  - TileSnow01
   - TileSnow01
   - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-- - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
   - TileSnow02ToStone01
   - TileSnow01ToStone02
   - TileSnow01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
   - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
   - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
   - TileSnow02ToStone02
   - TileSnow01
   - TileSnow01ToStone01
-  - TileSnow02
-- - TileSnow01
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
+  - TileSnow01
   - TileSnow01ToStone01
-  - TileSnow02ToStone02
   - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
   - TileSnow02ToStone02
 - - TileSnow02ToStone02
   - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
   - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-- - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01
   - TileSnow02
   - TileSnow01
   - TileSnow02ToStone02
   - TileSnow02ToStone02
   - TileSnow02
-- - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
   - TileSnow01ToStone02
-  - TileSnow01
+  - TileSnow02
+  - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone01
   - TileSnow02
   - TileSnow01ToStone01
-  - TileSnow01ToStone02
+  - TileSnow01
   - TileSnow01ToStone01
   - TileSnow01
   - TileSnow02
-  - TileSnow01ToStone02
   - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02
-- - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
   - TileSnow02ToStone02
   - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
   - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02
 - - TileSnow02
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01
   - TileSnow01
   - TileSnow01ToStone02
   - TileSnow02
-  - TileSnow02
-- - TileSnow01ToStone01
   - TileSnow01
   - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01ToStone01
+  - TileSnow01ToStone02
   - TileSnow02ToStone02
   - TileSnow02ToStone01
   - TileSnow02ToStone01
-  - TileSnow01
   - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01
   - TileSnow01
   - TileSnow01ToStone01
   - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
   - TileSnow01ToStone02
   - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
   - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01ToStone02
   - TileSnow02ToStone02
-  - TileSnow02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow01ToStone01
+  - TileSnow01
 - - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow01ToStone01
   - TileSnow02
   - TileSnow02
   - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-- - TileSnow02ToStone02
   - TileSnow02ToStone02
   - TileSnow01ToStone02
   - TileSnow02
-  - TileSnow02
-  - TileSnow02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone02
   - TileSnow02
   - TileSnow01ToStone02
   - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone01
   - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow01ToStone01
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
   - TileSnow01ToStone02
   - TileSnow01ToStone01
   - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01
-- - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02
   - TileSnow02
 - - TileSnow02ToStone02
   - TileSnow01ToStone02
+  - TileSnow01ToStone02
+  - TileSnow02ToStone01
   - TileSnow01ToStone01
   - TileSnow02
   - TileSnow02ToStone02
   - TileSnow01ToStone02
+  - TileSnow02
+  - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
   - TileSnow02ToStone01
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow02ToStone01
+  - TileSnow01ToStone01
+  - TileSnow01
+- - TileSnow02ToStone01
+  - TileSnow01ToStone02
+  - TileSnow02
+  - TileSnow02
+  - TileSnow02
+  - TileSnow01
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow01
+  - TileSnow01
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+- - TileSnow01
+  - TileSnow02
+  - TileSnow02ToStone01
+  - TileSnow01ToStone01
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow02
+  - TileSnow02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
   - TileSnow01ToStone02
   - TileSnow02
   - TileSnow01ToStone02
   - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
   - TileSnow01
   - TileSnow01ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow01
   - TileSnow02ToStone01
+  - TileSnow01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01
+- - TileSnow02ToStone02
+  - TileSnow02
+  - TileSnow02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow01
+  - TileSnow02ToStone02
+  - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01
+  - TileSnow02
+  - TileSnow02
+  - TileSnow01
+  - TileSnow02ToStone02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+- - TileSnow02
+  - TileSnow01
+  - TileSnow02
+  - TileSnow02
+  - TileSnow02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone02
+  - TileSnow02
+  - TileSnow01ToStone02
+  - TileSnow02ToStone01
+  - TileSnow01ToStone01
+  - TileSnow01
+  - TileSnow02
+  - TileSnow02ToStone02
+  - TileSnow02
+  - TileSnow02ToStone02
   - TileSnow02ToStone01
   - TileSnow02
-  - TileSnow02ToStone01
+  - TileSnow02ToStone02
+  - TileSnow02
   - TileSnow01ToStone01
+  - TileSnow02
   - TileSnow02ToStone01
+- - TileSnow01ToStone02
   - TileSnow01
+  - TileSnow02ToStone01
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone01
+  - TileSnow02ToStone02
+  - TileSnow02ToStone02
+  - TileSnow02ToStone02
   - TileSnow02
   - TileSnow01
   - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow02ToStone01
   - TileSnow01ToStone02
+  - TileSnow02ToStone01
   - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01
 - - TileSnow01ToStone01
   - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
   - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02
+  - TileSnow01ToStone02
   - TileSnow01ToStone01
   - TileSnow02ToStone02
   - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow01ToStone02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
   - TileSnow02ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01ToStone01
   - TileSnow02ToStone01
   - TileSnow01ToStone02
+  - TileSnow02ToStone01
+  - TileSnow01ToStone01
+  - TileSnow01ToStone01
+  - TileSnow01ToStone01
+  - TileSnow01
   - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01
+- - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone02
+  - TileSnow02ToStone02
+  - TileSnow02
+  - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01
+  - TileSnow01
+  - TileSnow01ToStone01
+  - TileSnow02ToStone01
+  - TileSnow02
+  - TileSnow01ToStone01
+  - TileSnow01
+  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow01ToStone02
+  - TileSnow02ToStone01
+  - TileSnow01
+  - TileSnow01ToStone01
+  - TileSnow01ToStone02
+  - TileSnow02ToStone01
+- - TileSnow02ToStone02
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01ToStone01
+  - TileSnow02ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01
+  - TileSnow02
+  - TileSnow02
+  - TileSnow01ToStone02
+  - TileSnow02ToStone01
+  - TileSnow02
+  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow01
+  - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow01ToStone01
+- - TileSnow02
+  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow01ToStone01
+  - TileSnow01
+  - TileSnow02ToStone01
+  - TileSnow02ToStone01
+  - TileSnow01ToStone01
+  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01
+  - TileSnow01ToStone02
+  - TileSnow01
+  - TileSnow01ToStone01
+  - TileSnow02
+  - TileSnow02
+  - TileSnow01
+  - TileSnow01
 - - TileSnow02ToStone02
   - TileSnow01
-  - TileSnow02ToStone01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-  - TileSnow01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone02
-  - TileSnow02ToStone02
-- - TileSnow02ToStone01
-  - TileSnow02
-  - TileSnow01
-  - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow01ToStone01
-  - TileSnow02ToStone02
-  - TileSnow02
-  - TileSnow02ToStone01
   - TileSnow02
   - TileSnow01ToStone01
   - TileSnow02ToStone02
   - TileSnow02ToStone01
-  - TileSnow02ToStone01
+  - TileSnow01ToStone02
   - TileSnow01
-  - TileSnow01ToStone01
   - TileSnow01ToStone02
   - TileSnow02ToStone02
-  - TileSnow01ToStone01
-  - TileSnow02ToStone01
-  - TileSnow01ToStone02
   - TileSnow02
+  - TileSnow01
+  - TileSnow01ToStone02
   - TileSnow02ToStone02
   - TileSnow01ToStone02
-  - TileSnow01
   - TileSnow01ToStone02
-  - TileSnow02ToStone01
+  - TileSnow01ToStone01
   - TileSnow02
-  - TileSnow01ToStone02
-  - TileSnow01
+  - TileSnow01ToStone01
   - TileSnow02ToStone01
   - TileSnow01ToStone01
   - TileSnow02ToStone02
+  - TileSnow01ToStone01
+  - TileSnow01
 sangvisFerri:
   guard:
     action_point: 20
@@ -1587,8 +1152,8 @@ sangvisFerri:
     min_damage: 50
     patrol_path: []
     type: guard
-    x: 28
-    y: 9
+    x: 19
+    y: 19
   jaeger:
     action_point: 20
     attack_range: 1
@@ -1613,30 +1178,6 @@ sangvisFerri:
     type: jaeger
     x: 9
     y: 11
-  jupiter:
-    action_point: 15
-    attack_range: 1
-    current_bullets: 20
-    current_hp: 400
-    effective_range:
-      far:
-      - 8
-      - 9
-      middle:
-      - 5
-      - 7
-      near:
-      - 1
-      - 4
-    kind: HOC
-    magazine_capacity: 20
-    max_damage: 400
-    max_hp: 400
-    min_damage: 300
-    patrol_path: []
-    type: jupiter
-    x: 11
-    y: 15
   prowler:
     action_point: 10
     attack_range: 1
@@ -1659,7 +1200,7 @@ sangvisFerri:
     min_damage: 100
     patrol_path: []
     type: prowler
-    x: 28
+    x: 12
     y: 11
   ripper:
     action_point: 10
@@ -1687,7 +1228,7 @@ sangvisFerri:
     - - 4
       - 7
     type: ripper
-    x: 28
+    x: 12
     y: 12
   vespid:
     action_point: 15
@@ -1711,7 +1252,7 @@ sangvisFerri:
     min_damage: 400
     patrol_path: []
     type: vespid
-    x: 28
+    x: 12
     y: 13
 weather: snow
 zoomIn: 3

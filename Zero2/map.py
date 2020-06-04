@@ -43,8 +43,22 @@ class MapObject:
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
         self.process_map(window_x,window_y)
     #把地图画到屏幕上
-    def display_map(self,screen):
+    def display_map(self,screen,screen_to_move_x=0,screen_to_move_y=0):
+        #检测屏幕是不是移到了不移到的地方
+        if self.local_x < screen.get_width()-self.mapSurface.get_width():
+            self.local_x = screen.get_width()-self.mapSurface.get_width()
+            screen_to_move_x = 0
+        elif self.local_x > 0:
+            self.local_x = 0
+            screen_to_move_x = 0
+        if self.local_y < screen.get_height()-self.mapSurface.get_height():
+            self.local_y = screen.get_height()-self.mapSurface.get_height()
+            screen_to_move_y = 0
+        elif self.local_y > 0:
+            self.local_y = 0
+            screen_to_move_y = 0
         screen.blit(self.mapSurface,(self.local_x,self.local_y))
+        return (screen_to_move_x,screen_to_move_y)
     #画上设施
     def display_facility(self,screen,characters_data,sangvisFerris_data):
         charatcersPos = None
@@ -80,8 +94,8 @@ class MapObject:
                         if charatcersPos == None:
                             charatcersPos = []
                             for name,dataDic in dicMerge(characters_data,sangvisFerris_data).items():
-                                charatcersPos.append((dataDic.x,dataDic.y))
-                                charatcersPos.append((dataDic.x+1,dataDic.y+1))
+                                charatcersPos.append((int(dataDic.x),int(dataDic.y)))
+                                charatcersPos.append((int(dataDic.x)+1,int(dataDic.y)+1))
                         if (value2["x"],value2["y"]) in charatcersPos:
                             imgToBlit.set_alpha(100)
                     elif key == "decoration" or key == "obstacle":

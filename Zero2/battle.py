@@ -763,30 +763,17 @@ def battle(chapter_name,screen,setting):
                         screen_to_move_y = 0
                 else:
                     screen_to_move_y = 0
-
-            #检测屏幕是不是移到了不移到的地方
-            if theMap.local_x < window_x-theMap.mapSurface.get_width():
-                theMap.local_x = window_x-theMap.mapSurface.get_width()
-                screen_to_move_x = 0
-            elif theMap.local_x > 0:
-                theMap.local_x = 0
-                screen_to_move_x = 0
-            if theMap.local_y < window_y-theMap.mapSurface.get_height():
-                theMap.local_y = window_y-theMap.mapSurface.get_height()
-                screen_to_move_y = 0
-            elif theMap.local_y > 0:
-                theMap.local_y = 0
-                screen_to_move_y = 0
             
             #加载地图
-            theMap.display_map(screen)
+            screen_to_move_x,screen_to_move_y = theMap.display_map(screen,screen_to_move_x,screen_to_move_y)
             #画出用彩色方块表示的范围
             for area in areaDrawColorBlock:
                 for position in areaDrawColorBlock[area]:
                     xTemp,yTemp = theMap.calPosInMap(position[0],position[1])
                     drawImg(UI_img[area],(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
             #显示设施
-            theMap.display_facility_ahead(screen)   
+            theMap.display_facility_ahead(screen)
+
             #玩家回合
             if whose_round == "player":
                 if right_click == True:

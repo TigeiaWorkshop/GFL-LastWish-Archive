@@ -394,12 +394,12 @@ dialog_during_battle:
     dialoguebox_up: null
   initial_dialog:
   - move:
-      2b14_0:
-        x: 12
-        y: 9
       gsh-18:
-        x: 14
-        y: 7
+        x: 8
+        y: 4
+      pp1901:
+        x: 8
+        y: 3
   - dialoguebox_down:
       content:
       - 另一头，以sv-98为队长的第十后勤小

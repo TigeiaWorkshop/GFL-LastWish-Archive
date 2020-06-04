@@ -1,5 +1,32 @@
 background_music: BGM_Danger_1.ogg
 character:
+  2b14_0:
+    action_point: 20
+    attack_range: 3
+    bullets_carried: 20
+    current_bullets: 1
+    current_hp: 250
+    detection: null
+    effective_range:
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
+    kind: HOC
+    magazine_capacity: 1
+    max_damage: 300
+    max_hp: 250
+    min_damage: 200
+    skill_cover_range: null
+    skill_effective_range: null
+    type: 2b14
+    x: 28
+    y: 17
   gsh-18:
     action_point: 10
     attack_range: 1
@@ -222,6 +249,30 @@ sangvisFerri:
     type: guard
     x: 5
     y: 5
+  jupiter:
+    action_point: 15
+    attack_range: 1
+    current_bullets: 20
+    current_hp: 400
+    effective_range:
+      far:
+      - 8
+      - 9
+      middle:
+      - 5
+      - 7
+      near:
+      - 1
+      - 4
+    kind: HOC
+    magazine_capacity: 20
+    max_damage: 400
+    max_hp: 400
+    min_damage: 300
+    patrol_path: []
+    type: jupiter
+    x: 11
+    y: 15
 weather: snow
 zoomIn: 1
 darkMode: True

@@ -33,8 +33,8 @@ def mapCreator(chapterName,screen,setting):
         theMap = loadData["map"]
         if len(theMap) == 0:
             SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
-            block_y = 36
-            block_x = 36
+            block_y = 24
+            block_x = 24
             default_map = []
             for i in range(block_y):
                 map_per_line = []
@@ -84,20 +84,29 @@ def mapCreator(chapterName,screen,setting):
 
     #绿色方块/方块标准
     green = loadImg("Assets/image/UI/green.png",int(theMap.perBlockWidth*0.8))
-    green.set_alpha(100)
+    green.set_alpha(150)
+    red = loadImg("Assets/image/UI/red.png",int(theMap.perBlockWidth*0.8))
+    red.set_alpha(150)
+    deleteMode = False
     object_to_put_down = None
     #加载容器图片
     UIContainer = loadImage("Assets/image/UI/container.png",(-2,window_y*0.8),int(window_x*0.8), int(window_y*0.2))
     UIContainerRight = loadImage("Assets/image/UI/container.png",(window_x*0.825,0),int(window_x*0.175), int(window_y*1.025))
     #按钮
-    UIButton_Save = loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*0.2,window_y*0.01),int(theMap.perBlockWidth*0.65))
-    UIButton_Back = loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*1,window_y*0.01),int(theMap.perBlockWidth*0.65))
+    UIButton = {
+        "save": loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*0.2,window_y*0.01),int(theMap.perBlockWidth*0.7)),
+        "back": loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*1,window_y*0.01),int(theMap.perBlockWidth*0.7)),
+        "delete": loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*1.8,window_y*0.01),int(theMap.perBlockWidth*0.7)),
+        "reload": loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*2.6,window_y*0.01),int(theMap.perBlockWidth*0.7)),
+    }
+    UIButtonTxt = {}
+
     #加载按钮的文字
     with open("Lang/"+setting["Language"]+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        UIButton_SaveText = fontRender(loadData["mapCreator"]["save"],"black",window_x/80) 
-        UIButton_BackText = fontRender(loadData["mapCreator"]["back"],"black",window_x/80)
-
+        for txt in UIButton:
+            UIButtonTxt[txt] = fontRender(loadData["mapCreator"][txt],"black",window_x/80)
+            
     #数据控制器
     data_to_edit = None
 
@@ -123,6 +132,7 @@ def mapCreator(chapterName,screen,setting):
                 if event.key == K_ESCAPE:
                     object_to_put_down = None
                     data_to_edit = None
+                    deleteMode = False
                 if event.key == K_w:
                     pressKeyToMove["up"]=True
                 if event.key == K_s:
@@ -153,12 +163,62 @@ def mapCreator(chapterName,screen,setting):
                         UI_local_x += window_x*0.05
                     elif event.button == 5:
                         UI_local_x -= window_x*0.05
-                elif isHover(UIButton_Save) and object_to_put_down == None:
+                elif deleteMode == True and block_get_click != None:
+                    any_dec_replace_name = None
+                    any_dec_replace_type = None
+                    for key,value in theMap.facilityData.items():
+                        for key2,value2 in value.items():
+                            if value2["x"] == block_get_click["x"] and value2["y"] == block_get_click["y"]:
+                                any_dec_replace_name = key2
+                                any_dec_replace_type = key
+                                break
+                    #如果发现有冲突的装饰物
+                    if any_dec_replace_name != None:
+                        originalData["facility"][any_dec_replace_type].pop(any_dec_replace_name)
+                        theMap.facilityData[any_dec_replace_type].pop(any_dec_replace_name)
+                    else:
+                        for key,value in dicMerge(characters_data,sangvisFerris_data).items():
+                            if value.x == block_get_click["x"] and value.y == block_get_click["y"]:
+                                any_chara_replace = key
+                                break
+                        if any_chara_replace != None:
+                            if any_chara_replace in characters_data:
+                                characters_data.pop(any_chara_replace)
+                                originalData["character"].pop(any_chara_replace)
+                            elif any_chara_replace in sangvisFerris_data:
+                                sangvisFerris_data.pop(any_chara_replace)
+                                originalData["sangvisFerri"].pop(any_chara_replace)
+                elif isHover(UIButton["save"]) and object_to_put_down == None and deleteMode == False:
                     with open("Data/main_chapter/"+chapterName+"_map.yaml", "w", encoding='utf-8') as f:
                         yaml.dump(originalData, f)
-                elif isHover(UIButton_Back) and object_to_put_down == None:
+                elif isHover(UIButton["back"]) and object_to_put_down == None and deleteMode == False:
                     isBuilding = False
                     break
+                elif isHover(UIButton["delete"]) and object_to_put_down == None and deleteMode == False:
+                    object_to_put_down = None
+                    data_to_edit = None
+                    deleteMode = True
+                elif isHover(UIButton["reload"]) and object_to_put_down == None and deleteMode == False:
+                    tempLocal_x = theMap.local_x
+                    tempLocal_y = theMap.local_y
+                    #读取地图
+                    with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
+                        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+                        #初始化角色信息
+                        characters_data = {}
+                        for each_character in loadData["character"]:
+                            characters_data[each_character] = CharacterDataManager(window_y,loadData["character"][each_character],"dev")
+                        sangvisFerris_data = {}
+                        for each_character in loadData["sangvisFerri"]:
+                            sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],"dev")
+                    #加载地图
+                    theMap = MapObject(loadData,int(window_x/10))
+                    theMap.process_map(window_x,window_y)
+                    theMap.local_x = tempLocal_x
+                    theMap.local_y = tempLocal_y
+                    #读取地图
+                    with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
+                        originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
                 else:
                     if pygame.mouse.get_pressed()[0] and block_get_click != None:
                         if object_to_put_down != None:
@@ -177,7 +237,7 @@ def mapCreator(chapterName,screen,setting):
                                             any_dec_replace_type = key
                                             break
                                 #如果发现有冲突的装饰物
-                                if any_dec_replace_name != None and any_dec_replace_type!=None:
+                                if any_dec_replace_name != None:
                                     originalData["facility"][any_dec_replace_type].pop(any_dec_replace_name)
                                     theMap.facilityData[any_dec_replace_type].pop(any_dec_replace_name)
                                 decorationType = decorations_setting[object_to_put_down["id"]]
@@ -314,7 +374,7 @@ def mapCreator(chapterName,screen,setting):
                 screen_to_move_y = 0
 
         #加载地图
-        theMap.display_map(screen)
+        screen_to_move_x,screen_to_move_y = theMap.display_map(screen,screen_to_move_x,screen_to_move_y)
         theMap.display_facility_ahead(screen)
         #角色动画
         for every_chara in characters_data:
@@ -332,23 +392,18 @@ def mapCreator(chapterName,screen,setting):
         #画出UI
         UIContainer.draw(screen)
         UIContainerRight.draw(screen)
-        if isHover(UIButton_Save) and object_to_put_down == None:
-            UIButton_Save.set_alpha(255)
-            UIButton_SaveText.set_alpha(255)
-        else:
-            UIButton_Save.set_alpha(100)
-            UIButton_SaveText.set_alpha(100)
-        if isHover(UIButton_Back) and object_to_put_down == None:
-            UIButton_Back.set_alpha(255)
-            UIButton_BackText.set_alpha(255)
-        else:
-            UIButton_Back.set_alpha(100)
-            UIButton_BackText.set_alpha(100)
-        UIButton_Save.draw(screen)
-        UIButton_Back.draw(screen)
-        drawImg(UIButton_SaveText,(UIButton_Save.x+UIButton_Save.width/3.5,UIButton_Save.y+UIButton_Save.width/10),screen)
-        drawImg(UIButton_BackText,(UIButton_Back.x+UIButton_Back.width/3.5,UIButton_Back.y+UIButton_Back.width/10),screen)
-
+        for Image in UIButton:
+            if isHover(UIButton[Image]) and object_to_put_down == None and deleteMode == False:
+                UIButton[Image].set_alpha(255)
+                UIButtonTxt[Image].set_alpha(255)
+            else:
+                UIButton[Image].set_alpha(100)
+                UIButtonTxt[Image].set_alpha(100)
+            UIButton[Image].draw(screen)
+            posTempX = UIButton[Image].x+(UIButton[Image].width - UIButtonTxt[Image].get_width())/2
+            posTempY = UIButton[Image].y+(UIButton[Image].height - UIButtonTxt[Image].get_height())/2
+            drawImg(UIButtonTxt[Image],(posTempX,posTempY),screen)
+            
         #显示所有可放置的友方角色
         i=1
         for every_chara in all_characters_img_list:
@@ -389,19 +444,23 @@ def mapCreator(chapterName,screen,setting):
             i+=1
         
         #跟随鼠标显示即将被放下的物品
-        if object_to_put_down != None:
-            if block_get_click != None and isHover(UIContainerRight)==False and isHover(UIContainer)==False:
-                xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
-                drawImg(green,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
-            if object_to_put_down["type"] == "block":
-                drawImg(env_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
-            elif object_to_put_down["type"] == "decoration":
-                drawImg(all_decorations_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
-            elif object_to_put_down["type"] == "character":
-                drawImg(all_characters_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
-            elif object_to_put_down["type"] == "sangvisFerri":
-                drawImg(all_sangvisFerris_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
-            
+        if deleteMode == True and block_get_click != None:
+            xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
+            drawImg(red,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
+        else:
+            if object_to_put_down != None:
+                if block_get_click != None and isHover(UIContainerRight)==False and isHover(UIContainer)==False:
+                    xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
+                    drawImg(green,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
+                if object_to_put_down["type"] == "block":
+                    drawImg(env_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
+                elif object_to_put_down["type"] == "decoration":
+                    drawImg(all_decorations_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
+                elif object_to_put_down["type"] == "character":
+                    drawImg(all_characters_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
+                elif object_to_put_down["type"] == "sangvisFerri":
+                    drawImg(all_sangvisFerris_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
+        
         #显示即将被编辑的数据
         object_edit_id = 0
         if data_to_edit != None:

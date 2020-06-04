@@ -34,8 +34,9 @@ main_menu:
   text6_exit: 退出
 mapCreator:
   back: 返回
-  save: 保存
   delete: 删除
+  reload: 重新加载
+  save: 保存
 select_menu:
   attack: 攻击
   move: 移动
