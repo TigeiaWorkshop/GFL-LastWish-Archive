@@ -278,3 +278,6 @@ class DisplayController:
     def flip(self):
         self.clock.tick(self.fps)
         pygame.display.flip()
+
+def quitGame():
+    exit()

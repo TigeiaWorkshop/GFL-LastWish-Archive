@@ -187,7 +187,7 @@ def dialog(chapter_name,screen,setting,part):
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        exit()
+                        quitGame()
                 elif event.type == MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
                     #如果接来下没有文档了或者玩家按到了跳过按钮
                     if pygame.mouse.get_pressed()[0] or joystick.get_button(0) == 1:

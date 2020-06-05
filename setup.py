@@ -5,7 +5,7 @@ import os
 import shutil
 
 #python setup.py build_ext
-#pyinstaller -i main.ico main.py
+#pyinstaller -i icon.ico main.py
 
 #生成c和pyd文件
 all_Zero2_py_files = glob.glob(r'Zero2/*.py')

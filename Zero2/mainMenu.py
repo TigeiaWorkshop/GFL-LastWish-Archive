@@ -134,7 +134,7 @@ def mainMenu(screen,setting):
                     i=0
                     for txt in main_menu_txt:
                         if txt == "text6_exit" and isHoverOn(main_menu_txt["text6_exit"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
-                            exit()
+                            quitGame()
                         elif txt == "text4_mapCreator" and isHoverOn(main_menu_txt["text4_mapCreator"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
                             mapCreator("chapter1",screen,setting)
                         #选择章节

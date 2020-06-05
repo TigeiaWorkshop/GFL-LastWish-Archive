@@ -585,7 +585,7 @@ def battle(chapter_name,screen,setting):
                 for event in pygame.event.get():
                     if event.type == KEYDOWN:
                         if event.key == K_ESCAPE:
-                            exit()
+                            quitGame()
                     elif event.type == MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
                         if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
                             display_num +=1
@@ -669,7 +669,7 @@ def battle(chapter_name,screen,setting):
                     if event.key == K_d:
                         pressKeyToMove["right"]=True
                     if event.key == K_m:
-                        exit()
+                        quitGame()
                 elif event.type == KEYUP:
                     if event.key == K_w:
                         pressKeyToMove["up"]=False
