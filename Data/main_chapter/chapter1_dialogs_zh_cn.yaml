@@ -20,7 +20,7 @@ dialog_after_battle:
     background_img: duel
     background_music: Room_1
     characters_img:
-    - helianthus_dark_1
+    - helianthus_1&dark
     - kryuger
     content:
     - 你来了，指挥官，请坐吧
@@ -33,7 +33,7 @@ dialog_after_battle:
     background_img: duel
     background_music: Room_1
     characters_img:
-    - helianthus_dark_1
+    - helianthus_1&dark
     - kryuger
     content:
     - 你知道我找你来是为什么吧
@@ -46,8 +46,8 @@ dialog_after_battle:
     background_img: duel
     background_music: Room_1
     characters_img:
-    - helianthus_dark_1
-    - kryuger_dark
+    - helianthus_1&dark
+    - kryuger&dark
     content:
     - 我知道，但您也知道，我不会轻易抛弃任何一名人形
     last_dialog_id: 2
@@ -60,7 +60,7 @@ dialog_after_battle:
     background_music: Room_1
     characters_img:
     - helianthus_1
-    - kryuger_dark
+    - kryuger&dark
     content:
     - 抱歉，现在你没有选择的权利。时间一到，你必须指挥你的人形掩护大部队撤离
     - 如果一切顺利，等回到总部后我会让I.O.P补发给你人形的素体
@@ -73,8 +73,8 @@ dialog_after_battle:
     background_img: duel
     background_music: Room_1
     characters_img:
-    - helianthus_dark_1
-    - kryuger_dark
+    - helianthus_1&dark
+    - kryuger&dark
     content:
     - 这...
     last_dialog_id: 4
@@ -87,7 +87,7 @@ dialog_after_battle:
     background_music: Room_1
     characters_img:
     - helianthus_1
-    - kryuger_dark
+    - kryuger&dark
     content:
     - 留给你的时间不多了，请好好利用，指挥官先生
     last_dialog_id: 5
@@ -99,8 +99,8 @@ dialog_after_battle:
     background_img: duel
     background_music: Room_1
     characters_img:
-    - helianthus_dark_1
-    - kryuger_dark
+    - helianthus_1&dark
+    - kryuger&dark
     content:
     - 未完待续
     last_dialog_id: 6
@@ -112,8 +112,8 @@ dialog_after_battle:
     background_img: duel
     background_music: Room_1
     characters_img:
-    - helianthus_dark_1
-    - kryuger_dark
+    - helianthus_1&dark
+    - kryuger&dark
     content:
     - 感谢试玩《少女前线-遗愿》，更多内容仍在研发当中，敬请期待
     last_dialog_id: 7
@@ -159,7 +159,7 @@ dialog_before_battle:
     background_img: research
     background_music: BGM_Boss_1
     characters_img:
-    - kalina_dark_5
+    - kalina_5&dark
     content:
     - 还是没有一点关于她们的消息吗
     - 后勤第十小队...
@@ -199,7 +199,7 @@ dialog_before_battle:
     background_img: research
     background_music: BGM_Boss_1
     characters_img:
-    - kalina_dark_5
+    - kalina_5&dark
     content:
     - 能派一些人形前去搜索吗？
     last_dialog_id: 5
@@ -225,7 +225,7 @@ dialog_before_battle:
     background_img: research
     background_music: BGM_Boss_1
     characters_img:
-    - kalina_dark_8
+    - kalina_8&dark
     content:
     - 该死，说好的支援呢
     - 而且这只是一座什么资源都没有的孤岛而已，为什么安全局会如此重视
@@ -251,7 +251,7 @@ dialog_before_battle:
     background_img: research
     background_music: BGM_Boss_1
     characters_img:
-    - kalina_dark_5
+    - kalina_5&dark
     content:
     - 格林娜
     last_dialog_id: 9
@@ -275,7 +275,7 @@ dialog_before_battle:
     background_img: research
     background_music: BGM_Boss_1
     characters_img:
-    - kalina_dark_3
+    - kalina_3&dark
     content:
     - 开始撤离程序吧，然后帮我接通K，我需要和他谈谈
     last_dialog_id: 11
@@ -335,7 +335,7 @@ dialog_before_battle:
     background_music: BGM_Brain_1
     characters_img:
     - asval
-    - sv-98_dark
+    - sv-98&dark
     content:
     - 指挥官已经派直升机来接我们了，我们只需要清空地面上铁血火力，防止直升机降落时出现意外
     last_dialog_id: 16
@@ -360,7 +360,7 @@ dialog_before_battle:
     background_img: snowfield
     background_music: BGM_Brain_1
     characters_img:
-    - sv-98_dark
+    - sv-98&dark
     content:
     - 好！
     last_dialog_id: 18

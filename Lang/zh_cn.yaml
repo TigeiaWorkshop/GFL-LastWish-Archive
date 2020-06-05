@@ -51,4 +51,5 @@ warnings:
   no_enough_ap_to_attack: 当前角色没有足够的行动值用于攻击
   no_enough_ap_to_move: 当前角色没有足够的行动值用于移动
   no_enough_ap_to_reload: 当前角色没有足够的行动值用于换弹
+  no_enough_ap_to_rescue: 当前角色没有足够的行动值用于救助
   no_enough_ap_to_use_skill: 当前角色没有足够的行动值用于使用技能

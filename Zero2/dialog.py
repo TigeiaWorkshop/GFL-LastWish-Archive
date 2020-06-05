@@ -29,11 +29,8 @@ def dialog(chapter_name,screen,setting,part):
         dialog_content = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
     
     #加载npc立绘
-    all_npc_file_list = glob.glob(r'Assets/image/npc/*.png')
-    npc_img_dic={}
-    for i in range(len(all_npc_file_list)):
-        img_name = all_npc_file_list[i].replace("Assets","").replace("image","").replace("npc","").replace(".png","").replace("\\","").replace("/","")
-        npc_img_dic[img_name] = loadImg(all_npc_file_list[i],window_x/2,window_x/2)
+    npc_img_dic = NpcImage()
+
     #加载对话的背景图片（注意是jpg）
     all_dialog_bg_file_list = glob.glob(r'Assets/image/dialog_background/*.jpg')
     dialog_bg_img_dic={}
@@ -112,10 +109,11 @@ def dialog(chapter_name,screen,setting,part):
             #加载对话人物立绘
             if dialog_content[dialogId]["characters_img"] != None:
                 if len(dialog_content[dialogId]["characters_img"])==2:
-                    drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][0]],(0,window_y-window_x/2),screen)
-                    drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][1]],(window_x/2,window_y-window_x/2),screen)
+                    npc_img_dic.display(dialog_content[dialogId]["characters_img"][0],0,window_y-window_x/2,screen)
+                    npc_img_dic.display(dialog_content[dialogId]["characters_img"][1],window_x/2,window_y-window_x/2,screen)
                 elif len(dialog_content[dialogId]["characters_img"])==1:
-                    drawImg(npc_img_dic[dialog_content[dialogId]["characters_img"][0]],(window_x/4,window_y-window_x/2),screen)
+                    npc_img_dic.display(dialog_content[dialogId]["characters_img"][0],window_x/4,window_y-window_x/2,screen)
+            
             # 对话框图片
             dialoguebox.draw(screen)
             #跳过按钮

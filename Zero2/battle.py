@@ -852,7 +852,7 @@ def battle(chapter_name,screen,setting):
                             action_choice = "rescue"
                             green_hide = False
                         else:
-                            warnings_to_display.add(warnings_info["no_enough_ap_to_reload"])
+                            warnings_to_display.add(warnings_info["no_enough_ap_to_rescue"])
                     #攻击判定
                     elif action_choice == "attack" and green_hide == False and the_character_get_click != "" and len(enemies_get_attack)>0:
                         characters_data[the_character_get_click].current_action_point -= 5
@@ -1069,7 +1069,10 @@ def battle(chapter_name,screen,setting):
                                 else:
                                     characters_data[the_character_get_click].current_bullets += characters_data[the_character_get_click].bullets_carried
                                     characters_data[the_character_get_click].bullets_carried = 0
+                                isWaiting = True
+                                the_character_get_click = ""
                                 action_choice = ""
+                                green_hide = True
                         #无需换弹
                         elif bullets_to_add <= 0:
                             warnings_to_display.add(warnings_info["magazine_is_full"])

@@ -279,5 +279,21 @@ class DisplayController:
         self.clock.tick(self.fps)
         pygame.display.flip()
 
+#npc立绘系统
+class NpcImage:
+    def __init__(self):
+        self.imgDic = {}
+    def display(self,name,x,y,screen):
+        if name not in self.imgDic:
+            if "&dark" in name:
+                nameTemp = name.replace("&dark","")
+                if nameTemp not in self.imgDic:
+                    self.imgDic[nameTemp] = loadImg("Assets/image/npc/"+nameTemp+".png")
+                self.imgDic[name] = addDarkness(self.imgDic[nameTemp],50)
+            else:
+                self.imgDic[name] = loadImg("Assets/image/npc/"+name+".png")
+        screen.blit(pygame.transform.scale(self.imgDic[name], (int(screen.get_width()/2),int(screen.get_width()/2))),(x,y))
+
+#退出游戏
 def quitGame():
     exit()

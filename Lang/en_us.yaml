@@ -46,4 +46,5 @@ warnings:
   no_enough_ap_to_attack: You don't have enough action points for attacking.
   no_enough_ap_to_move: You don't have enough action points for moving.
   no_enough_ap_to_reload: You don't have enough action points for reloading.
+  no_enough_ap_to_rescue: You don't have enough action points for rescuing.
   no_enough_ap_to_use_skill: You don't have enough action points for using skill.
