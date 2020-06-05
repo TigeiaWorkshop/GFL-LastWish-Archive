@@ -554,6 +554,33 @@ def battle(chapter_name,screen,setting):
                             display_num += 1
                             idle_seconde = 0
                             seconde_to_idle = None
+                elif "changePos" in dialog_to_display[display_num]:
+                    if screen_to_move_x == None and "x" in dialog_to_display[display_num]["changePos"]:
+                        screen_to_move_x = dialog_to_display[display_num]["changePos"]["x"]
+                    if screen_to_move_y == None and "y" in dialog_to_display[display_num]["changePos"]:
+                        screen_to_move_y = dialog_to_display[display_num]["changePos"]["y"]
+                    if screen_to_move_x != None and screen_to_move_x != 0:
+                        temp_value = theMap.local_x + screen_to_move_x*0.2
+                        if window_x-theMap.mapSurface.get_width()<=temp_value<=0:
+                            theMap.local_x = temp_value
+                            screen_to_move_x*=0.8
+                            if int(screen_to_move_x) == 0:
+                                screen_to_move_x = 0
+                        else:
+                            screen_to_move_x = 0
+                    if screen_to_move_y != None and screen_to_move_y !=0:
+                        temp_value = theMap.local_y + screen_to_move_y*0.2
+                        if window_y-theMap.mapSurface.get_height()<=temp_value<=0:
+                            theMap.local_y = temp_value
+                            screen_to_move_y*=0.8
+                            if int(screen_to_move_y) == 0:
+                                screen_to_move_y = 0
+                        else:
+                            screen_to_move_y = 0
+                    if screen_to_move_x == 0 and screen_to_move_y == 0 or screen_to_move_x == None and screen_to_move_y == None:
+                        screen_to_move_x = None
+                        screen_to_move_y = None
+                        display_num += 1
                 #玩家输入按键判定
                 for event in pygame.event.get():
                     if event.type == KEYDOWN:

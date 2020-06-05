@@ -376,6 +376,15 @@ def mapCreator(chapterName,screen,setting):
         #加载地图
         screen_to_move_x,screen_to_move_y = theMap.display_map(screen,screen_to_move_x,screen_to_move_y)
         theMap.display_facility_ahead(screen)
+
+        if block_get_click != None and isHover(UIContainerRight)==False and isHover(UIContainer)==False:
+            if deleteMode == True:
+                xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
+                drawImg(red,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
+            elif object_to_put_down != None:
+                xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
+                drawImg(green,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
+
         #角色动画
         for every_chara in characters_data:
             characters_data[every_chara].draw("wait",screen,theMap)
@@ -444,22 +453,15 @@ def mapCreator(chapterName,screen,setting):
             i+=1
         
         #跟随鼠标显示即将被放下的物品
-        if deleteMode == True and block_get_click != None:
-            xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
-            drawImg(red,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
-        else:
-            if object_to_put_down != None:
-                if block_get_click != None and isHover(UIContainerRight)==False and isHover(UIContainer)==False:
-                    xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
-                    drawImg(green,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
-                if object_to_put_down["type"] == "block":
-                    drawImg(env_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
-                elif object_to_put_down["type"] == "decoration":
-                    drawImg(all_decorations_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
-                elif object_to_put_down["type"] == "character":
-                    drawImg(all_characters_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
-                elif object_to_put_down["type"] == "sangvisFerri":
-                    drawImg(all_sangvisFerris_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
+        if object_to_put_down != None:
+            if object_to_put_down["type"] == "block":
+                drawImg(env_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
+            elif object_to_put_down["type"] == "decoration":
+                drawImg(all_decorations_img_list[object_to_put_down["id"]],(mouse_x,mouse_y),screen)
+            elif object_to_put_down["type"] == "character":
+                drawImg(all_characters_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
+            elif object_to_put_down["type"] == "sangvisFerri":
+                drawImg(all_sangvisFerris_img_list[object_to_put_down["id"]],(mouse_x-theMap.perBlockWidth/2,mouse_y-theMap.perBlockWidth/2.1),screen)
         
         #显示即将被编辑的数据
         object_edit_id = 0

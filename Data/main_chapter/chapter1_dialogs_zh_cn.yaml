@@ -382,15 +382,15 @@ dialog_during_battle:
   tutorial1:
   - dialoguebox_down:
       content:
-      - 这是一个测试
+      - 各位，我拿到补给了！
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - 看起来你获得了一些道具
-      speaker: sv-98
-      speaker_icon: sv-98
+      - 请注意换弹
+      speaker: 提示
+      speaker_icon: null
     dialoguebox_up: null
   initial_dialog:
   - move:
@@ -402,22 +402,15 @@ dialog_during_battle:
         y: 3
   - dialoguebox_down:
       content:
-      - 另一头，以sv-98为队长的第十后勤小
-      - 队正在拼命赶往撤离点。
-      speaker: null
-      speaker_icon: null
-    dialoguebox_up: null
-  - dialoguebox_down:
-      content:
-      - 终于逃出来了
-      - 大家没事吧
+      - 总算是摆脱铁血的追兵了
+      - 大家都没事吧
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - 终于逃出来了
-      - 大家没事吧
+      - 总算是拜托铁血的追兵了
+      - 大家都没事吧
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up:
@@ -425,51 +418,65 @@ dialog_during_battle:
       - 没事
       speaker: 众人
       speaker_icon: null
+  - direction:
+      asval: true
+  - idle: 1
+  - direction:
+      asval: false
+  - idle: 1
   - dialoguebox_down:
       content:
-      - asval, 这里离撤离点还有多远？
+      - sv-98，前方发现有铁血活动的痕迹
+      speaker: asval
+      speaker_icon: asval
+    dialoguebox_up: null
+  - changePos:
+      x: -400
+      y: -400
+  - idle: 1
+  - changePos:
+      x: 400
+      y: 400
+  - dialoguebox_down:
+      content:
+      - 该死...我已经没有弹药了
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - asval, 这里离撤离点还有多远？
-      speaker: sv-98
-      speaker_icon: sv-98
-    dialoguebox_up:
-      content:
-      - 还有约50公里。
-      speaker: asval
-      speaker_icon: asval
+      - 前方的铁血...好像在守着什么
+      speaker: pp1901
+      speaker_icon: pp1901
+    dialoguebox_up: null
   - move:
       sv-98:
-        x: 11
-        y: 9
-  - direction:
-      sv-98: true
-  - idle: 1
-  - direction:
-      sv-98: false
-  - idle: 1
+        x: 5
+        y: 12
   - dialoguebox_down:
       content:
-      - 还有好长的路要走啊...
+      - 远远看过去，好像是物资箱
       speaker: gsh-18
       speaker_icon: gsh-18
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - 大家小心，前方200米有敌人活动的痕迹
-      speaker: pp1901
-      speaker_icon: pp1901
+      - sv-98，上吧。我们会掩护你的。
+      speaker: asval
+      speaker_icon: asval
     dialoguebox_up: null
-  - actionLoopStop:
-    - sv-98
   - dialoguebox_down:
       content:
-      - 该死...子弹上膛，准备战斗！
+      - 那就拜托你们了...
+      - 各位，子弹上膛，准备战斗！
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null
-title: 雪上之路
-description: 茫茫雪原之上，刺骨的寒风拂过我的脸颊。但至少，还有你们
+  - dialoguebox_down:
+      content:
+      - 目前sv-98没有子弹，无法攻击
+      speaker: 提示
+      speaker_icon: null
+    dialoguebox_up: null
+title: 白色的希望
+description: 茫茫雪原之上，刺骨的寒风拂过我的脸颊。但至少，还有你们的陪伴
