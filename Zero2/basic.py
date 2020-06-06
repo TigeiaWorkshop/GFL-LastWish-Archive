@@ -294,6 +294,30 @@ class NpcImage:
                 self.imgDic[name] = loadImg("Assets/image/npc/"+name+".png")
         screen.blit(pygame.transform.scale(self.imgDic[name], (int(screen.get_width()/2),int(screen.get_width()/2))),(x,y))
 
+#射击音效 -- 频道2
+class attackingSoundManager:
+    def __init__(self,volume):
+        self.soundsData = {
+            #突击步枪
+            "AR": glob.glob(r'Assets/sound/attack/ar_*.ogg'),
+            #手枪
+            "HG": glob.glob(r'Assets/sound/attack/hg_*.ogg'),
+            #机枪
+            "MG": glob.glob(r'Assets/sound/attack/mg_*.ogg'),
+            #步枪
+            "RF": glob.glob(r'Assets/sound/attack/rf_*.ogg'),
+            #冲锋枪
+            "SMG": glob.glob(r'Assets/sound/attack/smg_*.ogg'),
+        }
+        self.volume = volume
+        for key in self.soundsData:
+            for i in range(len(self.soundsData[key])):
+                self.soundsData[key][i] = pygame.mixer.Sound(self.soundsData[key][i])
+                self.soundsData[key][i].set_volume(volume/100.0)
+    def play(self,kind):
+        if kind in self.soundsData:
+            pygame.mixer.Channel(2).play(self.soundsData[kind][random.randint(0,len(self.soundsData[kind])-1)])
+
 #退出游戏
 def quitGame():
     exit()

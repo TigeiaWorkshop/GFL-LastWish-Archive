@@ -4,6 +4,7 @@ from Zero2.characterDataManager import *
 from Zero2.map import *
 from Zero2.AI import *
 from Zero2.skills import *
+from Zero2.battleUI import *
 
 def battle(chapter_name,screen,setting):
     #创建手柄组件
@@ -22,9 +23,7 @@ def battle(chapter_name,screen,setting):
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         selectMenuButtons_dic = loadData["select_menu"]
-        your_round_txt = fontRender(loadData["Battle_UI"]["yourRound"], "white",window_x/38)
-        enemy_round_txt = fontRender(loadData["Battle_UI"]["enemyRound"], "white",window_x/38)
-        text_now_total_rounds_original = loadData["Battle_UI"]["numRound"]
+        battleUiTxt = loadData["Battle_UI"]
         chapter_no = loadData["Battle_UI"]["numChapter"]
         warnings_info = loadData["warnings"]
         loading_info = loadData["loading_info"]
@@ -186,23 +185,7 @@ def battle(chapter_name,screen,setting):
         environment_sound.set_volume(setting["Sound"]["sound_environment"]/100.0)
         weatherController = WeatherSystem(theWeather,window_x,window_y)    
     #攻击的音效 -- 频道2
-    all_attacking_sounds = {
-        #突击步枪
-        "AR": glob.glob(r'Assets/sound/attack/ar_*.ogg'),
-        #手枪
-        "HG": glob.glob(r'Assets/sound/attack/hg_*.ogg'),
-        #机枪
-        "MG": glob.glob(r'Assets/sound/attack/mg_*.ogg'),
-        #步枪
-        "RF": glob.glob(r'Assets/sound/attack/rf_*.ogg'),
-        #冲锋枪
-        "SMG": glob.glob(r'Assets/sound/attack/smg_*.ogg'),
-    }
-    for key in all_attacking_sounds:
-        for i in range(len(all_attacking_sounds[key])):
-            all_attacking_sounds[key][i] = pygame.mixer.Sound(all_attacking_sounds[key][i])
-            all_attacking_sounds[key][i].set_volume(setting["Sound"]["sound_effects"]/100.0)
-    
+    attackingSounds = attackingSoundManager(setting["Sound"]["sound_effects"])
     #部分设定初始化
     the_character_get_click = ""
     enemies_get_attack = {}
@@ -210,8 +193,6 @@ def battle(chapter_name,screen,setting):
     action_choice =""
     green_hide = True
     battle=True
-    how_many_to_move = 0
-    how_many_moved = 0
     isWaiting = True
     whose_round = "sangvisFerrisToPlayer"
     mouse_move_temp_x = -1
@@ -231,6 +212,9 @@ def battle(chapter_name,screen,setting):
     buttonGetHover = None
     theFriendGetHelp = None
     areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
+    RoundSwitchUI = RoundSwitch(window_x,window_y,battleUiTxt)
+    enemies_in_control_id = None
+    sangvisFerris_name_list = None
     # 移动路径
     the_route = []
     #上个回合因为暴露被敌人发现的角色
@@ -242,9 +226,6 @@ def battle(chapter_name,screen,setting):
         "total_time" : time.time(),
         "times_characters_down" : 0
     }
-    #文字
-    text_of_endround_move = 0
-    text_of_endround_alpha = 400
 
     #关卡背景介绍信息文字
     for i in range(len(battle_info)):
@@ -1175,8 +1156,8 @@ def battle(chapter_name,screen,setting):
                                     dialog_to_display = dialog_during_battle[dialogInfo["move"][keyTemp]]
                                     break
                     elif action_choice == "attack":
-                        if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3 and characters_data[the_character_get_click].kind !="HOC":
-                            pygame.mixer.Channel(2).play(all_attacking_sounds[characters_data[the_character_get_click].kind][random.randint(0,len(all_attacking_sounds[characters_data[the_character_get_click].kind])-1)])
+                        if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3:
+                            attackingSounds.play(characters_data[the_character_get_click].kind)
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 0:
                             block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y)
                             if block_get_click != None:
@@ -1237,52 +1218,6 @@ def battle(chapter_name,screen,setting):
                 elif the_character_get_click != "" and isWaiting == True:
                     characters_data[the_character_get_click].draw("wait",screen,theMap)
 
-            #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
-            if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
-                text_now_total_rounds = text_now_total_rounds_original
-                text_now_total_rounds = fontRender(text_now_total_rounds.replace("NaN",str(total_rounds)), "white",window_x/38)
-                if text_of_endround_move < (window_x-your_round_txt.get_width()*2)/2:
-                    text_of_endround_move += theMap.perBlockWidth/2
-                if text_of_endround_move >= (window_x-your_round_txt.get_width()*2)/2-30:
-                    text_now_total_rounds.set_alpha(text_of_endround_alpha)
-                    your_round_txt.set_alpha(text_of_endround_alpha)
-                    enemy_round_txt.set_alpha(text_of_endround_alpha)
-                    text_of_endround_alpha -= 5
-                
-                drawImg(text_now_total_rounds,(text_of_endround_move,(window_y-your_round_txt.get_height()*2.5)/2),screen)
-                if whose_round == "sangvisFerrisToPlayer":
-                    drawImg(your_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
-                if whose_round == "playerToSangvisFerris":
-                    drawImg(enemy_round_txt,(window_x-text_of_endround_move-your_round_txt.get_width(),(window_y-your_round_txt.get_height()*2.5)/2+your_round_txt.get_height()*1.5),screen)
-                if text_of_endround_alpha <=0:
-                    if whose_round == "playerToSangvisFerris":
-                        enemies_in_control_id = 0
-                        sangvisFerris_name_list = []
-                        for every_chara in sangvisFerris_data:
-                            if sangvisFerris_data[every_chara].current_hp>0:
-                                sangvisFerris_name_list.append(every_chara)
-                        for every_chara in characters_data:
-                            if characters_data[every_chara].dying != False:
-                                characters_data[every_chara].dying -= 1
-                        whose_round = "sangvisFerris"
-                    elif whose_round == "sangvisFerrisToPlayer":
-                        characters_detect_this_round = {}
-                        for key in characters_data:
-                            characters_data[key].current_action_point = characters_data[key].max_action_point
-                            if characters_data[key].detection == False:
-                                characters_detect_this_round[key] = [characters_data[key].x,characters_data[key].y]
-                        whose_round = "player"
-                    text_of_endround_alpha = 400
-                    text_of_endround_move = 0
-                    text_now_total_rounds.set_alpha(text_of_endround_alpha)
-                    your_round_txt.set_alpha(text_of_endround_alpha)
-                    enemy_round_txt.set_alpha(text_of_endround_alpha)
-
-            #检测所有敌人是否都已经被消灭
-            if len(sangvisFerris_data) == 0 and whose_round != "result":
-                the_character_get_click = ""
-                green_hide = False
-                whose_round = "result_win"
             
             #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑中间检测区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
             #敌方回合
@@ -1332,6 +1267,8 @@ def battle(chapter_name,screen,setting):
                         enemy_action = None
                         enemies_in_control = ""
                 elif enemy_action["action"] == "attack":
+                    if sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] == 3:
+                        attackingSounds.play(sangvisFerris_data[enemies_in_control].kind)
                     if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or theMap.darkMode != True:
                         if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
                             sangvisFerris_data[enemies_in_control].setFlip(True)
@@ -1395,6 +1332,8 @@ def battle(chapter_name,screen,setting):
                     else:
                         if pygame.mixer.Channel(0).get_busy() == True:
                             pygame.mixer.Channel(0).stop()
+                        if sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] == 3:
+                            attackingSounds.play(sangvisFerris_data[enemies_in_control].kind)
                         if (sangvisFerris_data[enemies_in_control].x,sangvisFerris_data[enemies_in_control].y) in theMap.lightArea or theMap.darkMode != True:
                             if characters_data[enemy_action["target"]].x > sangvisFerris_data[enemies_in_control].x:
                                 sangvisFerris_data[enemies_in_control].setFlip(True)
@@ -1618,6 +1557,32 @@ def battle(chapter_name,screen,setting):
             if weatherController != None:
                 weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
             
+            #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
+            if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
+                if RoundSwitchUI.display(screen,whose_round,total_rounds) == True:
+                    if whose_round == "playerToSangvisFerris":
+                        enemies_in_control_id = 0
+                        sangvisFerris_name_list = []
+                        for every_chara in sangvisFerris_data:
+                            if sangvisFerris_data[every_chara].current_hp>0:
+                                sangvisFerris_name_list.append(every_chara)
+                        for every_chara in characters_data:
+                            if characters_data[every_chara].dying != False:
+                                characters_data[every_chara].dying -= 1
+                        whose_round = "sangvisFerris"
+                    elif whose_round == "sangvisFerrisToPlayer":
+                        characters_detect_this_round = {}
+                        for key in characters_data:
+                            characters_data[key].current_action_point = characters_data[key].max_action_point
+                            if characters_data[key].detection == False:
+                                characters_detect_this_round[key] = [characters_data[key].x,characters_data[key].y]
+                        whose_round = "player"
+            #检测所有敌人是否都已经被消灭
+            if len(sangvisFerris_data) == 0 and whose_round != "result":
+                the_character_get_click = ""
+                green_hide = False
+                whose_round = "result_win"
+
             #显示获取到的物资
             if original_UI_img["supplyBoard"].yTogo == 10:
                 if original_UI_img["supplyBoard"].y < original_UI_img["supplyBoard"].yTogo:
