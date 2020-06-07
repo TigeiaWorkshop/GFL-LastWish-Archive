@@ -1,4 +1,4 @@
-from Zero2.basic import *
+from Zero3.basic import *
 class RoundSwitch:
     def __init__(self,window_x,window_y,battleUiTxt):
         self.lineRedDown = loadImg("Assets/image/UI/lineRed.png",window_x,window_y/50)

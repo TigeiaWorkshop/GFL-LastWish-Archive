@@ -3,6 +3,8 @@ Battle_UI:
   numChapter: 第NaN章
   numRound: 第NaN回合
   yourRound: 你的回合
+  getBullets: 获得备弹
+  getHealth: 获得血量
 HealthyGamingAdvice:
 - 抵制不良游戏，拒绝盗版游戏。
 - 注意自我保护，谨防受骗上当。

@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Zero2.basic import *
+from Zero3.basic import *
 import numpy
 
 class MapObject:
@@ -384,10 +384,7 @@ def loadFacilityImg(facilityData,darkMode=False):
     if "campfire" in facilityData and facilityData["campfire"] != None:
         Facility_images["normal"]["campfire"] = []
         for i in range(1,11):
-            try:
-                Facility_images["normal"]["campfire"].append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
-            except BaseException:
-                Facility_images["normal"]["campfire"].append(loadImg("../Assets/image/environment/campfire/"+str(i)+".png"))
+            Facility_images["normal"]["campfire"].append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
     #加载箱子的图片
     if "chest" in facilityData and facilityData["chest"] != None:
         Facility_images["normal"]["chest"] = loadImg("Assets/image/environment/decoration/chest.png")
@@ -422,8 +419,8 @@ def load_env_images(theMap,theWidth=None,theHeight=None,darkMode=False):
         try:
             env_img_list["normal"][all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
         except BaseException:
-            env_img_list["normal"][all_images_needed[i]] = loadImg("../Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
-            
+            raise Exception('Error: An map-block called '+all_images_needed[i]+' cannot find its image in the folder.')
+    #如果是夜战模式
     if darkMode==True:
         env_img_list["dark"] = {}
         for img,value in env_img_list["normal"].items():

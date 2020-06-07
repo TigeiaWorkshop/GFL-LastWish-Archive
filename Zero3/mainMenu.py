@@ -1,8 +1,8 @@
 # cython: language_level=3
-from Zero2.basic import *
-from Zero2.cutscene import *
-from Zero2.dialog import *
-from Zero2.mapCreator import *
+from Zero3.basic import *
+from Zero3.cutscene import *
+from Zero3.dialog import *
+from Zero3.mapCreator import *
 
 def mainMenu(screen,setting):
     #获取屏幕的尺寸
@@ -13,13 +13,16 @@ def mainMenu(screen,setting):
     #从设置中获取语言文件
     lang = setting['Language']
     #加载主菜单文字
-    with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
-        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        game_title = loadData['game_title']
-        main_menu_txt = loadData['main_menu']
-        chapter_select = loadData['chapter']
-        if lang == "zh_cn" and "HealthyGamingAdvice" in loadData:
-            HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
+    try:
+        with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
+            loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+            game_title = loadData['game_title']
+            main_menu_txt = loadData['main_menu']
+            chapter_select = loadData['chapter']
+            if "HealthyGamingAdvice" in loadData:
+                HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
+    except BaseException:
+        raise Exception('Error: Current language is not supported, please check the "setting.yaml" file in Save folder!')
     
     #加载主菜单选择页面的文字
     for txt in main_menu_txt:
@@ -65,7 +68,7 @@ def mainMenu(screen,setting):
     for i in range(len(HealthyGamingAdvice)):
         HealthyGamingAdvice[i] = fontRender(HealthyGamingAdvice[i],"white",window_x/64)
 
-
+    #载入页面 - 渐入渐出
     for i in range(0,250,2):
         the_black.draw(screen)
         t1.set_alpha(i)

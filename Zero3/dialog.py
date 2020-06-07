@@ -1,6 +1,6 @@
 # cython: language_level=3
-from Zero2.basic import *
-from Zero2.battle import *
+from Zero3.basic import *
+from Zero3.battle import *
 
 def dialog(chapter_name,screen,setting,part):
     #创建手柄组件

@@ -1,10 +1,10 @@
 # cython: language_level=3
-from Zero2.basic import *
-from Zero2.characterDataManager import *
-from Zero2.map import *
-from Zero2.AI import *
-from Zero2.skills import *
-from Zero2.battleUI import *
+from Zero3.basic import *
+from Zero3.characterDataManager import *
+from Zero3.map import *
+from Zero3.AI import *
+from Zero3.skills import *
+from Zero3.battleUI import *
 
 def battle(chapter_name,screen,setting):
     #创建手柄组件
@@ -24,7 +24,6 @@ def battle(chapter_name,screen,setting):
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         selectMenuButtons_dic = loadData["select_menu"]
         battleUiTxt = loadData["Battle_UI"]
-        chapter_no = loadData["Battle_UI"]["numChapter"]
         warnings_info = loadData["warnings"]
         loading_info = loadData["loading_info"]
 
@@ -37,7 +36,7 @@ def battle(chapter_name,screen,setting):
 
     #章节标题显示
     black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
-    title_chapterNum = fontRender(chapter_no.replace("NaN",chapter_name.replace("chapter","")),"white",window_x/38)
+    title_chapterNum = fontRender(battleUiTxt["numChapter"].replace("NaN",chapter_name.replace("chapter","")),"white",window_x/38)
     title_chapterNum = ImageSurface(title_chapterNum,(window_x-title_chapterNum.get_width())/2,window_y*0.37)
     title_chapterName = fontRender(chapter_title,"white",window_x/38)
     title_chapterName = ImageSurface(title_chapterName,(window_x-title_chapterName.get_width())/2,window_y*0.46)
@@ -472,7 +471,7 @@ def battle(chapter_name,screen,setting):
                             elif character_key in sangvisFerris_data:
                                 sangvisFerris_data[character_key].reset_imgId(actionLoop[character_key])
                             else:
-                                raise Exception("Warning: Cannot find",character_key," while system is trying to reset the action.")
+                                raise Exception("Error: Cannot find ",character_key," while the system is trying to reset the action.")
                             del actionLoop[character_key]
                     display_num += 1
                 #开始对话
@@ -1126,10 +1125,10 @@ def battle(chapter_name,screen,setting):
                                     for key2,value2 in value["item"].items():
                                         if key2 == "bullet":
                                             characters_data[the_character_get_click].bullets_carried += value2
-                                            original_UI_img["supplyBoard"].items.append(fontRender("获得子弹: "+str(value2),"white",window_x/80))
+                                            original_UI_img["supplyBoard"].items.append(fontRender(battleUiTxt["getBullets"]+": "+str(value2),"white",window_x/80))
                                         elif key2 == "hp":
                                             characters_data[the_character_get_click].current_hp += value2
-                                            original_UI_img["supplyBoard"].items.append(fontRender("获得血量: "+str(value2),"white",window_x/80))
+                                            original_UI_img["supplyBoard"].items.append(fontRender(battleUiTxt["getHealth"]+": "+str(value2),"white",window_x/80))
                                     if len(original_UI_img["supplyBoard"].items)>0:
                                         original_UI_img["supplyBoard"].yTogo = 10
                                     chest_need_to_remove = key

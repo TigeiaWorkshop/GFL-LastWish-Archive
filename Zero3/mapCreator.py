@@ -1,7 +1,7 @@
 # cython: language_level=3
-from Zero2.basic import *
-from Zero2.characterDataManager import *
-from Zero2.map import *
+from Zero3.basic import *
+from Zero3.characterDataManager import *
+from Zero3.map import *
 
 def mapCreator(chapterName,screen,setting):
     window_x = screen.get_width()

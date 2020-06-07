@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Zero2.basic import *
+from Zero3.basic import *
 
 class Doll:
     def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,faction,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,mode):

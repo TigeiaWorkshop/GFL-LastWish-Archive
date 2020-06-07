@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Zero2.basic import *
+from Zero3.basic import *
 from moviepy.editor import *
 
 def cutscene(screen,videoPath,bgmPath):

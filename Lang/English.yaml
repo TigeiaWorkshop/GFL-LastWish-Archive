@@ -3,6 +3,8 @@ Battle_UI:
   numChapter: Chapter NaN
   numRound: Round NaN
   yourRound: Your Round
+  getBullets: Get Bullets
+  getHealth: Gain Health
 chapter:
 - chapter1
 - chapter2

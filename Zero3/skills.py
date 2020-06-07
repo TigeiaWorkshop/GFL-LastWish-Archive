@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Zero2.basic import *
+from Zero3.basic import *
 
 def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,characters_data,action="detect",skill_target=None,damage_do_to_character=None):
     if action=="detect":
