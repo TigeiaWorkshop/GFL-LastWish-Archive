@@ -22,7 +22,7 @@ def battle(chapter_name,screen,setting):
     #加载按钮的文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        selectMenuButtons_dic = loadData["select_menu"]
+        selectMenuUI = SelectMenu(loadData["select_menu"])
         battleUiTxt = loadData["Battle_UI"]
         warnings_info = loadData["warnings"]
         loading_info = loadData["loading_info"]
@@ -110,14 +110,6 @@ def battle(chapter_name,screen,setting):
 
     #计算光亮区域 并初始化地图
     theMap.calculate_darkness(characters_data,window_x,window_y)
-
-    #加载对话时角色的图标
-    character_icon_img_list={}
-    all_icon_file_list = glob.glob(r'Assets/image/npc_icon/*.png')
-    for i in range(len(all_icon_file_list)):
-        img_name = all_icon_file_list[i].replace("Assets","").replace("image","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
-        character_icon_img_list[img_name] = loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
-    del all_icon_file_list
     
     #开始加载关卡设定
     black_bg.draw(screen)
@@ -131,8 +123,6 @@ def battle(chapter_name,screen,setting):
     #加载UI
     #加载结束回合的图片
     end_round_button = loadImage("Assets/image/UI/endRound.png",(window_x*0.8,window_y*0.7),window_x/10, window_y/10)
-    #加载选择菜单的图片
-    select_menu_button_original = loadImg("Assets/image/UI/menu.png")
     #加载子弹图片
     #bullet_img = loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, perBlockHeight/12)
     bullets_list = []
@@ -162,12 +152,11 @@ def battle(chapter_name,screen,setting):
         "blue" : resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None)),
         "orange": resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
     }
-    the_character_get_click_info_board = loadImage("Assets/image/UI/score.png",(0,window_y-window_y/6),window_x/5,window_y/6)
+    #角色信息UI管理
+    characterInfoBoardUI = CharacterInfoBoard(window_x,window_y)
     #加载对话框图片
     dialoguebox_up = loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
     dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
-    #选择菜单按钮底图
-    select_menu_button = resizeImg(select_menu_button_original, (round(theMap.perBlockWidth/2), round(theMap.perBlockWidth/4)))
     #-----加载音效-----
     #行走的音效 -- 频道0
     all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
@@ -501,7 +490,7 @@ def battle(chapter_name,screen,setting):
                             drawImg(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
                         #角色图标
                         if dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"] != None:
-                            drawImg(character_icon_img_list[dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
+                            drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
                     #下方对话框
                     if dialog_to_display[display_num]["dialoguebox_down"] != None:
                         #对话框图片
@@ -522,7 +511,7 @@ def battle(chapter_name,screen,setting):
                             drawImg(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
                         #角色图标
                         if dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"] != None:
-                            drawImg(character_icon_img_list[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
+                            drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
                 #闲置一定时间（秒）
                 elif "idle" in dialog_to_display[display_num]:
                     if seconde_to_idle == None:
@@ -724,7 +713,6 @@ def battle(chapter_name,screen,setting):
                 UI_img["yellow"] = resizeImg(original_UI_img["yellow"], (theMap.perBlockWidth*0.8, None))
                 UI_img["blue"] = resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None))
                 UI_img["orange"] = resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
-                select_menu_button =  resizeImg(select_menu_button_original, (round(theMap.perBlockWidth/2), round(theMap.perBlockWidth/4)))
                 theMap.changePerBlockSize(theMap.perBlockWidth,window_x,window_y)
             else:
                 zoomIn = zoomIntoBe
@@ -1462,7 +1450,8 @@ def battle(chapter_name,screen,setting):
             theMap.display_facility(screen,characters_data,sangvisFerris_data)
             #展示所有角色Ui
             for every_chara in characters_data:
-                characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
+                if every_chara != the_character_get_click:
+                    characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
             if theMap.darkMode == True:
                 for enemies in sangvisFerris_data:
                     if (int(sangvisFerris_data[enemies].x),int(sangvisFerris_data[enemies].y)) in theMap.lightArea:
@@ -1473,85 +1462,10 @@ def battle(chapter_name,screen,setting):
 
             #显示选择菜单
             if green_hide == "SelectMenu":
-                buttonGetHover = None
                 #左下角的角色信息
-                text_size = 20
-                the_character_get_click_info_board.draw(screen)
-                padding = (the_character_get_click_info_board.height-character_icon_img_list[characters_data[the_character_get_click].type].get_height())/2
-                drawImg(character_icon_img_list[characters_data[the_character_get_click].type],(padding,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                tcgc_hp1 = fontRender("HP: ","white",window_x/96)
-                tcgc_hp2 = fontRender(str(characters_data[the_character_get_click].current_hp)+"/"+str(characters_data[the_character_get_click].max_hp),"black",window_x/96)
-                tcgc_action_point1 = fontRender("AP: ","white",window_x/96)
-                tcgc_action_point2 = fontRender(str(characters_data[the_character_get_click].current_action_point)+"/"+str(characters_data[the_character_get_click].max_action_point),"black",window_x/96)
-                tcgc_bullets_situation1 = fontRender("BP: ","white",window_x/96)
-                tcgc_bullets_situation2 = fontRender(str(characters_data[the_character_get_click].current_bullets)+"/"+str(characters_data[the_character_get_click].bullets_carried),"black",window_x/96)
-                drawImg(tcgc_hp1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(tcgc_action_point1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(tcgc_bullets_situation1,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                hp_empty = resizeImg(original_UI_img["hp_empty"],(int(the_character_get_click_info_board.width/3),int(text_size)))
-                drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(hp_empty,(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(resizeImg(original_UI_img["hp_green"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_hp/characters_data[the_character_get_click].max_hp),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(resizeImg(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_action_point/characters_data[the_character_get_click].max_action_point),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                drawImg(resizeImg(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*characters_data[the_character_get_click].current_bullets/characters_data[the_character_get_click].magazine_capacity),int(text_size))),(character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3),screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                displayInCenter(tcgc_hp2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                displayInCenter(tcgc_action_point2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*1.5,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
-                displayInCenter(tcgc_bullets_situation2,hp_empty,character_icon_img_list[characters_data[the_character_get_click].type].get_width()*2.4,padding+text_size*3,screen,the_character_get_click_info_board.x,the_character_get_click_info_board.y)
+                characterInfoBoardUI.display(screen,characters_data[the_character_get_click],original_UI_img)
                 #----选择菜单----
-                tempLocation = theMap.getBlockExactLocation(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
-                #攻击按钮 - 左
-                txt_temp = fontRender(selectMenuButtons_dic["attack"],"black",round(theMap.perBlockWidth/10))
-                txt_temp2 = fontRender("5 AP","black",round(theMap.perBlockWidth/13))
-                txt_tempX = tempLocation["xStart"]-select_menu_button.get_width()*0.6
-                txt_tempY = tempLocation["yStart"]
-                if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
-                    buttonGetHover = "attack"
-                drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
-                drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
-                drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
-                #移动按钮 - 右
-                txt_temp = fontRender(selectMenuButtons_dic["move"],"black",round(theMap.perBlockWidth/10))
-                txt_temp2 = fontRender("2N AP","black",round(theMap.perBlockWidth/13))
-                txt_tempX = tempLocation["xEnd"]-select_menu_button.get_width()*0.4
-                #txt_tempY与攻击按钮一致
-                if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
-                    buttonGetHover = "move"
-                drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
-                drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
-                drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
-                #换弹按钮 - 下
-                txt_temp = fontRender(selectMenuButtons_dic["reload"],"black",round(theMap.perBlockWidth/10))
-                txt_temp2 = fontRender("5 AP","black",round(theMap.perBlockWidth/13))
-                txt_tempX = tempLocation["xStart"]+theMap.perBlockWidth/4
-                txt_tempY = tempLocation["yStart"]+theMap.perBlockWidth*0.45
-                if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
-                    buttonGetHover = "reload"
-                drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
-                drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
-                drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
-                #技能按钮 - 上
-                if characters_data[the_character_get_click].kind != "HOC":
-                    txt_temp = fontRender(selectMenuButtons_dic["skill"],"black",round(theMap.perBlockWidth/10))
-                    txt_temp2 = fontRender("8 AP","black",round(theMap.perBlockWidth/13))
-                    #txt_tempX与换弹按钮一致
-                    txt_tempY = tempLocation["yStart"]-theMap.perBlockWidth*0.45
-                    if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
-                        buttonGetHover = "skill"
-                    drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
-                    drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
-                    drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
-                #救助队友
-                if len(friendsCanSave)>0:
-                    txt_temp = fontRender(selectMenuButtons_dic["rescue"],"black",round(theMap.perBlockWidth/10))
-                    txt_temp2 = fontRender("8 AP","black",round(theMap.perBlockWidth/13))
-                    txt_tempX = tempLocation["xStart"]-select_menu_button.get_width()*0.6
-                    txt_tempY = tempLocation["yStart"]-theMap.perBlockWidth*0.45
-                    drawImg(select_menu_button,(txt_tempX,txt_tempY),screen)
-                    drawImg(txt_temp,((select_menu_button.get_width()-txt_temp.get_width())/2,txt_temp.get_height()*0.4),screen,txt_tempX,txt_tempY)
-                    drawImg(txt_temp2,((select_menu_button.get_width()-txt_temp2.get_width())/2,txt_temp.get_height()*1.5),screen,txt_tempX,txt_tempY)
-                    if isHoverOn(select_menu_button,(txt_tempX,txt_tempY)):
-                        buttonGetHover = "rescue"
+                buttonGetHover = selectMenuUI.display(screen,round(theMap.perBlockWidth/10),theMap.getBlockExactLocation(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y),characters_data[the_character_get_click].kind,friendsCanSave)
             #加载雪花
             if weatherController != None:
                 weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)

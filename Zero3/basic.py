@@ -168,26 +168,7 @@ def displayWithInCenter(item1,item2,x,y,screen,local_x=0,local_y=0):
 #字典合并
 def dicMerge(dict1, dict2): 
     res = {**dict1, **dict2} 
-    return res 
-
-#警告系统
-class WarningSystem:
-    def __init__(self):
-        self.all_warnings = []
-    def add(self,the_warning):
-        if len(self.all_warnings)>=5:
-            self.all_warnings.pop()
-        self.all_warnings.insert(0,fontRender(the_warning,"red",30,True))
-    def display(self,screen,window_x,window_y):
-        for i in range(len(self.all_warnings)):
-            img_alpha = self.all_warnings[i].get_alpha()
-            if img_alpha > 0:
-                screen.blit(self.all_warnings[i],((window_x-self.all_warnings[i].get_width())/2,(window_y-self.all_warnings[i].get_height())/2+i*self.all_warnings[i].get_height()*1.2))
-                self.all_warnings[i].set_alpha(img_alpha-5)
-            else:
-                del self.all_warnings[i]
-    def empty(self):
-        self.all_warnings = []
+    return res
 
 #视频捕捉系统
 class VideoObject:

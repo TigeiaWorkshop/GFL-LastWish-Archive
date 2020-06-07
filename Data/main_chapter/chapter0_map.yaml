@@ -25,8 +25,8 @@ character:
     skill_cover_range: null
     skill_effective_range: null
     type: 2b14
-    x: 28
-    y: 17
+    x: 3
+    y: 8
   gsh-18:
     action_point: 10
     attack_range: 1
@@ -271,8 +271,8 @@ sangvisFerri:
     min_damage: 300
     patrol_path: []
     type: jupiter
-    x: 11
-    y: 15
+    x: 9
+    y: 7
 weather: snow
 zoomIn: 1
 darkMode: True

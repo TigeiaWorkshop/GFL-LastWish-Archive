@@ -409,7 +409,7 @@ dialog_during_battle:
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - 总算是拜托铁血的追兵了
+      - 总算是摆脱铁血的追兵了
       - 大家都没事吧
       speaker: sv-98
       speaker_icon: sv-98
