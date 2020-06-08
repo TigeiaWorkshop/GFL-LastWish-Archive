@@ -24,8 +24,9 @@ def battle(chapter_name,screen,setting):
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         selectMenuUI = SelectMenu(loadData["select_menu"])
         battleUiTxt = loadData["Battle_UI"]
-        warnings_info = loadData["warnings"]
+        warnings_to_display = WarningSystem(loadData["Warnings"])
         loading_info = loadData["loading_info"]
+        resultTxt = loadData["ResultBoard"]
 
     with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -140,8 +141,6 @@ def battle(chapter_name,screen,setting):
         "orange": loadImg("Assets/image/UI/orange.png",None,None,150),
         "eye_orange": loadImg("Assets/image/UI/eye_orange.png"),
         "eye_red": loadImg("Assets/image/UI/eye_red.png"),
-        #计分板
-        "score" : loadImage("Assets/image/UI/score.png",(200,200),300,600),
         "supplyBoard":loadImage("Assets/image/UI/score.png",((window_x-window_x/3)/2,-window_y/12),window_x/3,window_y/12),
     }
     #UI - 变形后
@@ -185,8 +184,6 @@ def battle(chapter_name,screen,setting):
     whose_round = "sangvisFerrisToPlayer"
     mouse_move_temp_x = -1
     mouse_move_temp_y = -1
-    total_rounds = 1
-    warnings_to_display = WarningSystem()
     damage_do_to_character = {}
     the_dead_one = {}
     screen_to_move_x=None
@@ -209,7 +206,8 @@ def battle(chapter_name,screen,setting):
     #格式：角色：[x,y]
     the_characters_detected_last_round = {}
     enemy_action = None
-    result_of_round = {
+    resultInfo = {
+        "total_rounds" : 1,
         "total_kills" : 0,
         "total_time" : time.time(),
         "times_characters_down" : 0
@@ -792,35 +790,35 @@ def battle(chapter_name,screen,setting):
                             action_choice = "attack"
                             green_hide = False
                         if characters_data[the_character_get_click].current_bullets <= 0:
-                            warnings_to_display.add(warnings_info["magazine_is_empty"])
+                            warnings_to_display.add("magazine_is_empty")
                         if characters_data[the_character_get_click].current_action_point < 5:
-                            warnings_to_display.add(warnings_info["no_enough_ap_to_attack"])
+                            warnings_to_display.add("no_enough_ap_to_attack")
                     elif green_hide == "SelectMenu" and buttonGetHover == "move":
                         if characters_data[the_character_get_click].current_action_point >= 2:
                             action_choice = "move"
                             green_hide = False
                         else:
-                            warnings_to_display.add(warnings_info["no_enough_ap_to_move"])
+                            warnings_to_display.add("no_enough_ap_to_move")
                     elif green_hide == "SelectMenu" and buttonGetHover == "skill":
                         if characters_data[the_character_get_click].current_action_point >= 8:
                             action_choice = "skill"
                             green_hide = False
                         else:
-                            warnings_to_display.add(warnings_info["no_enough_ap_to_use_skill"])
+                            warnings_to_display.add("no_enough_ap_to_use_skill")
                     elif green_hide == "SelectMenu" and buttonGetHover == "reload":
                         if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
                             action_choice = "reload"
                             green_hide = False
                         if characters_data[the_character_get_click].bullets_carried <= 0:
-                            warnings_to_display.add(warnings_info["no_bullets_left"])
+                            warnings_to_display.add("no_bullets_left")
                         if characters_data[the_character_get_click].current_action_point < 5:
-                            warnings_to_display.add(warnings_info["no_enough_ap_to_reload"])
+                            warnings_to_display.add("no_enough_ap_to_reload")
                     elif green_hide == "SelectMenu" and buttonGetHover == "rescue":
                         if characters_data[the_character_get_click].current_action_point >= 8:
                             action_choice = "rescue"
                             green_hide = False
                         else:
-                            warnings_to_display.add(warnings_info["no_enough_ap_to_rescue"])
+                            warnings_to_display.add("no_enough_ap_to_rescue")
                     #攻击判定
                     elif action_choice == "attack" and green_hide == False and the_character_get_click != "" and len(enemies_get_attack)>0:
                         characters_data[the_character_get_click].current_action_point -= 5
@@ -962,7 +960,7 @@ def battle(chapter_name,screen,setting):
                                             elif (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in attacking_range["near"]:
                                                 enemies_get_attack[enemies] = "near"
                         else:
-                            warnings_to_display.add(warnings_info["no_enemy_in_effective_range"])
+                            warnings_to_display.add("no_enemy_in_effective_range")
                             action_choice = ""
                             green_hide = "SelectMenu"
                     #显示技能范围        
@@ -1043,7 +1041,7 @@ def battle(chapter_name,screen,setting):
                                 green_hide = True
                         #无需换弹
                         elif bullets_to_add <= 0:
-                            warnings_to_display.add(warnings_info["magazine_is_full"])
+                            warnings_to_display.add("magazine_is_full")
                             green_hide = "SelectMenu"
                         else:
                             print(the_character_get_click+" is causing trouble, please double check the files or reporting this issue")
@@ -1250,7 +1248,7 @@ def battle(chapter_name,screen,setting):
                         enemies_in_control_id +=1
                         if enemies_in_control_id >= len(sangvisFerris_name_list):
                             whose_round = "sangvisFerrisToPlayer"
-                            total_rounds += 1
+                            resultInfo["total_rounds"] += 1
                         enemy_action = None
                         enemies_in_control = ""
                 elif enemy_action["action"] == "attack":
@@ -1273,7 +1271,7 @@ def battle(chapter_name,screen,setting):
                         temp_value = random.randint(0,100)
                         if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
                             the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
-                            result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
+                            resultInfo = characters_data[enemy_action["target"]].decreaseHp(the_damage,resultInfo)
                             theMap.calculate_darkness(characters_data,window_x,window_y)
                             damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                         else:
@@ -1282,7 +1280,7 @@ def battle(chapter_name,screen,setting):
                         enemies_in_control_id +=1
                         if enemies_in_control_id >= len(sangvisFerris_name_list):
                             whose_round = "sangvisFerrisToPlayer"
-                            total_rounds += 1
+                            resultInfo["total_rounds"] += 1
                         enemy_action = None
                         enemies_in_control = ""
                 elif enemy_action["action"] == "move&attack":
@@ -1338,7 +1336,7 @@ def battle(chapter_name,screen,setting):
                             temp_value = random.randint(0,100)
                             if enemy_action["target_area"] == "near" and temp_value <= 95 or enemy_action["target_area"] == "middle" and temp_value <= 80 or enemy_action["target_area"] == "far" and temp_value <= 65:
                                 the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
-                                result_of_round = characters_data[enemy_action["target"]].decreaseHp(the_damage,result_of_round)
+                                resultInfo = characters_data[enemy_action["target"]].decreaseHp(the_damage,resultInfo)
                                 theMap.calculate_darkness(characters_data,window_x,window_y)
                                 damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
                             else:
@@ -1347,14 +1345,14 @@ def battle(chapter_name,screen,setting):
                             enemies_in_control_id +=1
                             if enemies_in_control_id >= len(sangvisFerris_name_list):
                                 whose_round = "sangvisFerrisToPlayer"
-                                total_rounds += 1
+                                resultInfo["total_rounds"] += 1
                             enemy_action = None
                             enemies_in_control = ""
                 elif enemy_action["action"] == "stay":
                     enemies_in_control_id +=1
                     if enemies_in_control_id >= len(sangvisFerris_name_list):
                         whose_round = "sangvisFerrisToPlayer"
-                        total_rounds += 1
+                        resultInfo["total_rounds"] += 1
                     enemy_action = None
                     enemies_in_control = ""
                 else:
@@ -1432,7 +1430,7 @@ def battle(chapter_name,screen,setting):
                         else:
                             the_dead_one_remove.append(key)
                             del sangvisFerris_data[key]
-                            result_of_round["total_kills"]+=1
+                            resultInfo["total_kills"]+=1
                 elif value == "character":
                     if characters_data[key].gif_dic["die"]["imgId"] == characters_data[key].gif_dic["die"]["imgNum"]-1:
                         the_alpha = characters_data[key].gif_dic["die"]["img"][-1].get_alpha()
@@ -1441,7 +1439,7 @@ def battle(chapter_name,screen,setting):
                         else:
                             the_dead_one_remove.append(key)
                             del characters_data[key]
-                            result_of_round["times_characters_down"]+=1
+                            resultInfo["times_characters_down"]+=1
                             theMap.calculate_darkness(characters_data,window_x,window_y)
             for key in the_dead_one_remove:
                 del the_dead_one[key]
@@ -1450,8 +1448,7 @@ def battle(chapter_name,screen,setting):
             theMap.display_facility(screen,characters_data,sangvisFerris_data)
             #展示所有角色Ui
             for every_chara in characters_data:
-                if every_chara != the_character_get_click:
-                    characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
+                characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
             if theMap.darkMode == True:
                 for enemies in sangvisFerris_data:
                     if (int(sangvisFerris_data[enemies].x),int(sangvisFerris_data[enemies].y)) in theMap.lightArea:
@@ -1472,7 +1469,7 @@ def battle(chapter_name,screen,setting):
             
             #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
             if whose_round == "playerToSangvisFerris" or whose_round == "sangvisFerrisToPlayer":
-                if RoundSwitchUI.display(screen,whose_round,total_rounds) == True:
+                if RoundSwitchUI.display(screen,whose_round,resultInfo["total_rounds"]) == True:
                     if whose_round == "playerToSangvisFerris":
                         enemies_in_control_id = 0
                         sangvisFerris_name_list = []
@@ -1526,7 +1523,7 @@ def battle(chapter_name,screen,setting):
                 end_round_button.draw(screen)
 
             #显示警告
-            warnings_to_display.display(screen,window_x,window_y)
+            warnings_to_display.display(screen)
 
             #加载并播放音乐
             while pygame.mixer.music.get_busy() != 1:
@@ -1536,14 +1533,9 @@ def battle(chapter_name,screen,setting):
 
             #结束动画
             if whose_round == "result_win":
-                total_kills = fontRender("总杀敌："+str(result_of_round["total_kills"]),"white",window_x/96)
-                result_of_round["total_time"] = time.localtime(time.time()-result_of_round["total_time"])
-                total_time = fontRender("通关时间："+str(time.strftime('%M:%S',result_of_round["total_time"])),"white",window_x/96)
-                result_of_round["total_rounds"] = total_rounds
-                total_rounds_txt = fontRender("通关回合数："+str(result_of_round["total_rounds"]),"white",window_x/96)
-                times_characters_down = fontRender("友方角色被击倒："+str(result_of_round["times_characters_down"]),"white",window_x/96)
-                player_rate = fontRender("评价：A","white",window_x/96)
-                press_space = fontRender("按空格继续","white",window_x/96)
+                resultInfo["total_time"] = time.localtime(time.time()-resultInfo["total_time"])
+                ResultBoardUI = ResultBoard(resultTxt,resultInfo,window_x,window_y)
+
                 whose_round = "result"
             
             if whose_round == "result":
@@ -1552,13 +1544,9 @@ def battle(chapter_name,screen,setting):
                         if event.key == K_SPACE:
                             battle = False
                             battleSystemMainLoop = False
-                original_UI_img["score"].draw(screen)
-                drawImg(total_kills,(250,300),screen)
-                drawImg(total_time,(250,350),screen)
-                drawImg(total_rounds_txt,(250,400),screen)
-                drawImg(times_characters_down,(250,450),screen)
-                drawImg(player_rate,(250,500),screen)
-                drawImg(press_space,(250,700),screen)
+                ResultBoardUI.display(screen)
+            
+            #刷新页面
             Display.flip()
 
-    return result_of_round    
+    return resultInfo    

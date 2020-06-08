@@ -4,6 +4,7 @@ battle_info:
 - 气温：-12°C
 - 能见度：0.78公里
 - 地点：临时据点以东约50公里
+description: 茫茫雪原之上，刺骨的寒风拂过我的脸颊。但至少，还有你们的陪伴
 dialog_after_battle:
   head:
     background_img: duel
@@ -256,7 +257,7 @@ dialog_before_battle:
     - 格林娜
     last_dialog_id: 9
     narrator: 我
-    next_dialog_id: 
+    next_dialog_id:
     - default
     - 11
   11:
@@ -268,7 +269,7 @@ dialog_before_battle:
     - 是
     last_dialog_id: 10
     narrator: 格林娜
-    next_dialog_id: 
+    next_dialog_id:
     - default
     - 12
   12:
@@ -280,7 +281,7 @@ dialog_before_battle:
     - 开始撤离程序吧，然后帮我接通K，我需要和他谈谈
     last_dialog_id: 11
     narrator: 我
-    next_dialog_id: 
+    next_dialog_id:
     - default
     - 13
   13:
@@ -292,7 +293,7 @@ dialog_before_battle:
     - 好的，我这就去
     last_dialog_id: 12
     narrator: 格林娜
-    next_dialog_id: 
+    next_dialog_id:
     - default
     - 14
   14:
@@ -305,8 +306,8 @@ dialog_before_battle:
     last_dialog_id: 13
     narrator: null
     next_dialog_id:
-      - changeScene
-      - 15
+    - changeScene
+    - 15
   15:
     background_img: snowfield
     background_music: BGM_Brain_1
@@ -353,7 +354,7 @@ dialog_before_battle:
     - 到时候我们就能安全撤离了。
     last_dialog_id: 17
     narrator: asval
-    next_dialog_id: 
+    next_dialog_id:
     - default
     - 19
   19:
@@ -379,19 +380,6 @@ dialog_before_battle:
     narrator: asval
     next_dialog_id: null
 dialog_during_battle:
-  tutorial1:
-  - dialoguebox_down:
-      content:
-      - 各位，我拿到补给了！
-      speaker: sv-98
-      speaker_icon: sv-98
-    dialoguebox_up: null
-  - dialoguebox_down:
-      content:
-      - 请注意换弹
-      speaker: 提示
-      speaker_icon: null
-    dialoguebox_up: null
   initial_dialog:
   - move:
       gsh-18:
@@ -478,5 +466,17 @@ dialog_during_battle:
       speaker: 提示
       speaker_icon: null
     dialoguebox_up: null
+  tutorial1:
+  - dialoguebox_down:
+      content:
+      - 各位，我拿到补给了！
+      speaker: sv-98
+      speaker_icon: sv-98
+    dialoguebox_up: null
+  - dialoguebox_down:
+      content:
+      - 请注意换弹
+      speaker: 提示
+      speaker_icon: null
+    dialoguebox_up: null
 title: 白色的希望
-description: 茫茫雪原之上，刺骨的寒风拂过我的脸颊。但至少，还有你们的陪伴

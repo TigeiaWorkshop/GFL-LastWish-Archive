@@ -177,6 +177,7 @@ def mapCreator(chapterName,screen,setting):
                         originalData["facility"][any_dec_replace_type].pop(any_dec_replace_name)
                         theMap.facilityData[any_dec_replace_type].pop(any_dec_replace_name)
                     else:
+                        any_chara_replace = None
                         for key,value in dicMerge(characters_data,sangvisFerris_data).items():
                             if value.x == block_get_click["x"] and value.y == block_get_click["y"]:
                                 any_chara_replace = key

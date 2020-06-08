@@ -1,11 +1,11 @@
 Battle_UI:
   enemyRound: Enemy Round
+  getBullets: Get Bullets
+  getHealth: Gain Health
   numChapter: Chapter NaN
   numRound: Round NaN
   yourRound: Your Round
-  getBullets: Get Bullets
-  getHealth: Gain Health
-chapter:
+Chapter:
 - chapter1
 - chapter2
 - chapter3
@@ -15,13 +15,8 @@ chapter:
 - chapter7
 - chapter8
 - back
-game_title: Girls' Frontline - Last wish
-loading_info:
-  now_loading: Loading...
-  now_loading_characters: Now loading characters' data...
-  now_loading_level: Now loading level data...
-  now_loading_map: Now loading map data...
-main_menu:
+GameTitle: Girls' Frontline - Last wish
+MainMenu:
   text0_continue: Continue
   text1_chooseChapter: Select Chapter
   text2_dlc: DLC
@@ -29,6 +24,28 @@ main_menu:
   text4_mapCreator: Map Creator
   text5_setting: Setting
   text6_exit: Exit
+ResultBoard:
+  characters_down: Friendly character down
+  pressKeyContinue: Press space to continue
+  rank: Rank
+  total_kills: Total elimination
+  total_rounds: Rounds
+  total_time: Time
+Warnings:
+  magazine_is_empty: Current character has an empty magazine, please reload.
+  magazine_is_full: Current character has a full magazine, no need to reload.
+  no_bullets_left: Current character has no bullet left.
+  no_enemy_in_effective_range: There is no enemy in this character's attack range.
+  no_enough_ap_to_attack: You don't have enough action points for attacking.
+  no_enough_ap_to_move: You don't have enough action points for moving.
+  no_enough_ap_to_reload: You don't have enough action points for reloading.
+  no_enough_ap_to_rescue: You don't have enough action points for rescuing.
+  no_enough_ap_to_use_skill: You don't have enough action points for using skill.
+loading_info:
+  now_loading: Loading...
+  now_loading_characters: Now loading characters' data...
+  now_loading_level: Now loading level data...
+  now_loading_map: Now loading map data...
 mapCreator:
   back: Back
   delete: Delete
@@ -40,13 +57,3 @@ select_menu:
   reload: Reload
   rescue: Rescue
   skill: Skill
-warnings:
-  magazine_is_empty: Current character has an empty magazine, please reload.
-  magazine_is_full: Current character has a full magazine, no need to reload.
-  no_bullets_left: Current character has no bullet left.
-  no_enemy_in_effective_range: There is no enemy in this character's attack range.
-  no_enough_ap_to_attack: You don't have enough action points for attacking.
-  no_enough_ap_to_move: You don't have enough action points for moving.
-  no_enough_ap_to_reload: You don't have enough action points for reloading.
-  no_enough_ap_to_rescue: You don't have enough action points for rescuing.
-  no_enough_ap_to_use_skill: You don't have enough action points for using skill.

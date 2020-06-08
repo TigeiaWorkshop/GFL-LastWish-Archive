@@ -107,17 +107,18 @@ class RoundSwitch:
 
 #警告系统
 class WarningSystem:
-    def __init__(self):
+    def __init__(self,warningsTxt):
         self.all_warnings = []
-    def add(self,the_warning):
+        self.warnings = warningsTxt
+    def add(self,the_warning,fontSize=30):
         if len(self.all_warnings)>=5:
             self.all_warnings.pop()
-        self.all_warnings.insert(0,fontRender(the_warning,"red",30,True))
-    def display(self,screen,window_x,window_y):
+        self.all_warnings.insert(0,fontRender(self.warnings[the_warning],"red",fontSize,True))
+    def display(self,screen):
         for i in range(len(self.all_warnings)):
             img_alpha = self.all_warnings[i].get_alpha()
             if img_alpha > 0:
-                screen.blit(self.all_warnings[i],((window_x-self.all_warnings[i].get_width())/2,(window_y-self.all_warnings[i].get_height())/2+i*self.all_warnings[i].get_height()*1.2))
+                screen.blit(self.all_warnings[i],((screen.get_width()-self.all_warnings[i].get_width())/2,(screen.get_height()-self.all_warnings[i].get_height())/2+i*self.all_warnings[i].get_height()*1.2))
                 self.all_warnings[i].set_alpha(img_alpha-5)
             else:
                 del self.all_warnings[i]
@@ -251,3 +252,25 @@ class CharacterInfoBoard:
         displayInCenter(tcgc_hp2,hp_empty,temp_posX ,temp_posY,screen)
         displayInCenter(tcgc_action_point2,hp_empty,temp_posX ,temp_posY+self.text_size*1.5,screen)
         displayInCenter(tcgc_bullets_situation2,hp_empty,temp_posX ,temp_posY+self.text_size*3,screen)
+
+#计分板
+class ResultBoard:
+    def __init__(self,resultTxt,finalResult,window_x,window_y):
+        self.boardImg = loadImg("Assets/image/UI/score.png",window_x/6,window_x/3)
+        self.x = int(window_x/9.6)
+        self.y = int(window_x/9.6)
+        self.txt_x = int(window_x/7.68)
+        self.total_kills = fontRender(resultTxt["total_kills"]+": "+str(finalResult["total_kills"]),"white",window_x/96)
+        self.total_time = fontRender(resultTxt["total_time"]+": "+str(time.strftime('%M:%S',finalResult["total_time"])),"white",window_x/96)
+        self.total_rounds_txt = fontRender(resultTxt["total_rounds"]+": "+str(finalResult["total_rounds"]),"white",window_x/96)
+        self.characters_down = fontRender(resultTxt["characters_down"]+": "+str(finalResult["times_characters_down"]),"white",window_x/96)
+        self.player_rate = fontRender(resultTxt["rank"]+": "+"A","white",window_x/96)
+        self.pressKeyContinue = fontRender(resultTxt["pressKeyContinue"],"white",window_x/96)
+    def display(self,screen):
+        screen.blit(self.boardImg,(self.x,self.y))
+        screen.blit(self.total_kills,(self.txt_x ,300))
+        screen.blit(self.total_time,(self.txt_x ,350))
+        screen.blit(self.total_rounds_txt ,(self.txt_x ,400))
+        screen.blit(self.characters_down,(self.txt_x ,450))
+        screen.blit(self.player_rate,(self.txt_x ,500))
+        screen.blit(self.pressKeyContinue,(self.txt_x ,700))

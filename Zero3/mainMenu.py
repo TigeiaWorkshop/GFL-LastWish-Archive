@@ -16,9 +16,9 @@ def mainMenu(screen,setting):
     try:
         with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
             loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-            game_title = loadData['game_title']
-            main_menu_txt = loadData['main_menu']
-            chapter_select = loadData['chapter']
+            game_title = loadData['GameTitle']
+            main_menu_txt = loadData['MainMenu']
+            chapter_select = loadData['Chapter']
             if "HealthyGamingAdvice" in loadData:
                 HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
     except BaseException:

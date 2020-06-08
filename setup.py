@@ -16,10 +16,13 @@ all_Zero3_c_files = glob.glob(r'Zero3/*.c')
 for i in range(len(all_Zero3_c_files)):
     os.remove(all_Zero3_c_files[i])
 #先检测Zero3_pyd有没有pyd文件
-all_Zero3_pyd_files = glob.glob(r'Zero3_pyd/*.pyd')
-if len(all_Zero3_pyd_files)>0:
-    for i in range(len(all_Zero3_pyd_files)):
-        os.remove(all_Zero3_pyd_files[i])
+if not os.path.exists("Zero3_pyd"):
+    os.makedirs("Zero3_pyd")
+else:
+    all_Zero3_pyd_files = glob.glob(r'Zero3_pyd/*.pyd')
+    if len(all_Zero3_pyd_files)>0:
+        for i in range(len(all_Zero3_pyd_files)):
+            os.remove(all_Zero3_pyd_files[i])
 #移动pyd文件
 all_Zero3_pyd_files = glob.glob(r'build/lib.win-amd64-3.8/*.pyd')
 for i in range(len(all_Zero3_pyd_files)):
