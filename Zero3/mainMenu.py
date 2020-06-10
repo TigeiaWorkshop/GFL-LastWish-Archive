@@ -19,6 +19,7 @@ def mainMenu(screen,setting):
             game_title = loadData['GameTitle']
             main_menu_txt = loadData['MainMenu']
             chapter_select = loadData['Chapter']
+            settingUI = settingContoller(window_x,window_y,setting,loadData["SettingUI"])
             if "HealthyGamingAdvice" in loadData:
                 HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
     except BaseException:
@@ -26,10 +27,10 @@ def mainMenu(screen,setting):
     
     #加载主菜单选择页面的文字
     for txt in main_menu_txt:
-        if txt == "text6_exit" or txt == "text1_chooseChapter" or txt == "text4_mapCreator":
-            main_menu_txt[txt] = fontRenderPro(main_menu_txt[txt],"enable",window_x/38)
-        else:
+        if txt == "text0_continue" or txt == "text2_dlc" or txt == "text3_workshop":
             main_menu_txt[txt] = fontRenderPro(main_menu_txt[txt],"disable",window_x/38)
+        else:
+            main_menu_txt[txt] = fontRenderPro(main_menu_txt[txt],"enable",window_x/38)
     
     #加载菜单章节选择页面的文字
     for i in range(len(chapter_select)):
@@ -129,27 +130,28 @@ def mainMenu(screen,setting):
             hover_on_button_sound.play()
             last_hover_sound_play_on = hover_sound_play_on
 
+        #展示设置UI
+        settingUI.display(screen)
+
         for event in pygame.event.get():
             if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
                 click_button_sound.play()
                 click_button_sound
                 if menu_type == 0:
-                    i=0
-                    for txt in main_menu_txt:
-                        if txt == "text6_exit" and isHoverOn(main_menu_txt["text6_exit"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
-                            quitGame()
-                        elif txt == "text4_mapCreator" and isHoverOn(main_menu_txt["text4_mapCreator"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
-                            mapCreator("chapter1",screen,setting)
-                        #选择章节
-                        elif txt == "text1_chooseChapter" and isHoverOn(main_menu_txt["text1_chooseChapter"].b,(txt_location,main_menu_txt_start_height+window_x/38*2*i)):
-                            menu_type = 1
-                        i+=1
+                    if isHoverOn(main_menu_txt["text1_chooseChapter"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*1)):
+                        menu_type = 1
+                    elif isHoverOn(main_menu_txt["text4_mapCreator"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*4)):
+                        mapCreator("chapter1",screen,setting)
+                    elif isHoverOn(main_menu_txt["text5_setting"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*5)):
+                        settingUI.ifDisplay = True
+                    elif isHoverOn(main_menu_txt["text6_exit"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*6)):
+                        quitGame()
                 elif menu_type == 1:
                     for i in range(len(chapter_select)):
-                        if i == len(chapter_select)-1 and isHoverOn(chapter_select[-1].b,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+                        if i == len(chapter_select)-1 and isHoverOn(chapter_select[-1].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
                             menu_type = 0
                         #章节选择
-                        elif isHoverOn(chapter_select[i].b,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
+                        elif isHoverOn(chapter_select[i].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
                             dialog("chapter"+str(i+1),screen,setting,"dialog_before_battle")
                             battle("chapter"+str(i+1),screen,setting)
                             dialog("chapter"+str(i+1),screen,setting,"dialog_after_battle")

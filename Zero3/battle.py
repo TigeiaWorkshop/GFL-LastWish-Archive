@@ -22,10 +22,10 @@ def battle(chapter_name,screen,setting):
     #加载按钮的文字
     with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        selectMenuUI = SelectMenu(loadData["select_menu"])
+        selectMenuUI = SelectMenu(loadData["SelectMenu"])
         battleUiTxt = loadData["Battle_UI"]
         warnings_to_display = WarningSystem(loadData["Warnings"])
-        loading_info = loadData["loading_info"]
+        loading_info = loadData["LoadingTxt"]
         resultTxt = loadData["ResultBoard"]
 
     with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:

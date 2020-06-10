@@ -16,6 +16,11 @@ Chapter:
 - chapter8
 - back
 GameTitle: Girls' Frontline - Last wish
+LoadingTxt:
+  now_loading: Loading...
+  now_loading_characters: Now loading characters' data...
+  now_loading_level: Now loading level data...
+  now_loading_map: Now loading map data...
 MainMenu:
   text0_continue: Continue
   text1_chooseChapter: Select Chapter
@@ -31,6 +36,21 @@ ResultBoard:
   total_kills: Total elimination
   total_rounds: Rounds
   total_time: Time
+SelectMenu:
+  attack: Attack
+  move: Move
+  reload: Reload
+  rescue: Rescue
+  skill: Skill
+SettingUI:
+  background_music: Background Music
+  cancel: Cancel
+  confirm: Confirm
+  currentLang: English
+  language: Language
+  setting: Setting
+  sound_effects: Sound Effects
+  sound_environment: Environmental Sounds
 Warnings:
   magazine_is_empty: Current character has an empty magazine, please reload.
   magazine_is_full: Current character has a full magazine, no need to reload.
@@ -41,19 +61,8 @@ Warnings:
   no_enough_ap_to_reload: You don't have enough action points for reloading.
   no_enough_ap_to_rescue: You don't have enough action points for rescuing.
   no_enough_ap_to_use_skill: You don't have enough action points for using skill.
-loading_info:
-  now_loading: Loading...
-  now_loading_characters: Now loading characters' data...
-  now_loading_level: Now loading level data...
-  now_loading_map: Now loading map data...
 mapCreator:
   back: Back
   delete: Delete
   reload: Reload
   save: Save
-select_menu:
-  attack: Attack
-  move: Move
-  reload: Reload
-  rescue: Rescue
-  skill: Skill
