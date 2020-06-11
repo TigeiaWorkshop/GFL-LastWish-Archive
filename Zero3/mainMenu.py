@@ -48,7 +48,6 @@ def mainMenu(screen,setting):
     videoCapture = VideoObject("Assets/movie/SquadAR.mp4",True,3105,935)
     #数值初始化
     cover_alpha = 0
-    background_img_id = 0
     menu_type = 0
     txt_location = int(window_x*2/3)
     main_menu_txt_start_height = (window_y-len(main_menu_txt)*window_x/38*2)/2
@@ -131,12 +130,14 @@ def mainMenu(screen,setting):
             last_hover_sound_play_on = hover_sound_play_on
 
         #展示设置UI
-        settingUI.display(screen)
+        if settingUI.display(screen) == True:
+            click_button_sound.set_volume(settingUI.soundVolume_sound_effects/100.0)
+            hover_on_button_sound.set_volume(settingUI.soundVolume_sound_effects/100.0)
 
+        #判断按键
         for event in pygame.event.get():
             if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
                 click_button_sound.play()
-                click_button_sound
                 if menu_type == 0:
                     if isHoverOn(main_menu_txt["text1_chooseChapter"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*1)):
                         menu_type = 1

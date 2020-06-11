@@ -269,11 +269,21 @@ class NpcImage:
             if "&dark" in name:
                 nameTemp = name.replace("&dark","")
                 if nameTemp not in self.imgDic:
-                    self.imgDic[nameTemp] = loadImg("Assets/image/npc/"+nameTemp+".png")
-                self.imgDic[name] = addDarkness(self.imgDic[nameTemp],50)
+                    self.imgDic[nameTemp] = {"img":loadImg("Assets/image/npc/"+nameTemp+".png"),"alpha":250}
+                    self.imgDic[nameTemp]["img"].set_alpha(0)
+                self.imgDic[name] = {"img":addDarkness(self.imgDic[nameTemp]["img"],50),"alpha":250}
+                self.imgDic[name]["img"].set_alpha(0)
             else:
-                self.imgDic[name] = loadImg("Assets/image/npc/"+name+".png")
-        screen.blit(pygame.transform.scale(self.imgDic[name], (int(screen.get_width()/2),int(screen.get_width()/2))),(x,y))
+                self.imgDic[name] = {"img":loadImg("Assets/image/npc/"+name+".png"),"alpha":250}
+                self.imgDic[name]["img"].set_alpha(0)
+        tempAlpha = self.imgDic[name]["img"].get_alpha()
+        if tempAlpha != self.imgDic[name]["alpha"]:
+            if tempAlpha > self.imgDic[name]["alpha"]:
+                tempAlpha -= 25
+            else:
+                tempAlpha += 25
+            self.imgDic[name]["img"].set_alpha(tempAlpha)
+        screen.blit(pygame.transform.scale(self.imgDic[name]["img"], (int(screen.get_width()/2),int(screen.get_width()/2))),(x,y))
 
 #射击音效 -- 频道2
 class attackingSoundManager:
@@ -313,9 +323,9 @@ class settingContoller:
         self.baseImg.set_alpha(200)
         self.baseImgX = int((window_x-self.baseImgWidth)/2)
         self.baseImgY = int((window_y-self.baseImgHeight)/2)
-        self.circle = loadImg("Assets/image/UI/setting_bar_circle.png",window_x/35,window_x/35)
-        self.bar_height = round(window_x/70)
+        self.bar_height = round(window_x/60)
         self.bar_width = round(window_x/5)
+        self.button = loadImg("Assets/image/UI/setting_bar_circle.png",self.bar_height,self.bar_height*2)
         self.bar_empty = loadImg("Assets/image/UI/setting_bar_empty.png",self.bar_width,self.bar_height)
         self.bar_full = loadImg("Assets/image/UI/setting_bar_full.png",self.bar_width,self.bar_height)
         self.bar_x = int(self.baseImgX+(self.baseImgWidth-self.bar_empty.get_width())/2)
@@ -323,47 +333,57 @@ class settingContoller:
         self.bar_y1 = self.baseImgY + self.baseImgHeight*0.4
         self.bar_y2 = self.baseImgY + self.baseImgHeight*0.6
         self.bar_y3 = self.baseImgY + self.baseImgHeight*0.8
+        #音量数值
+        self.soundVolume_background_music = settingdata["Sound"]["background_music"]
+        self.soundVolume_sound_effects = settingdata["Sound"]["sound_effects"]
+        self.soundVolume_sound_environment = settingdata["Sound"]["sound_environment"]
+        #设置UI中的文字
         self.fontSize = window_x/50
         self.settingTitleTxt = fontRender(langTxt["setting"],"white",self.fontSize*1.5)
         self.settingTitleTxt_x = int(self.baseImgX+(self.baseImgWidth-self.settingTitleTxt.get_width())/2)
         self.settingTitleTxt_y = self.baseImgY+self.baseImgHeight*0.05
+        #语言
         self.languageTxt = fontRender(langTxt["language"]+": "+langTxt["currentLang"],"white",self.fontSize)
-        self.backgroundMusicTxt = fontRender(langTxt["background_music"],"white",self.fontSize)
-        self.soundVolume_background_music = settingdata["Sound"]["background_music"]
-        self.soundEffectsTxt = fontRender(langTxt["sound_effects"],"white",self.fontSize)
-        self.soundVolume_sound_effects = settingdata["Sound"]["sound_effects"]
-        self.soundEnvironmentTxt = fontRender(langTxt["sound_environment"],"white",self.fontSize)
-        self.soundVolume_sound_environment = settingdata["Sound"]["sound_environment"]
+        #背景音乐
+        self.backgroundMusicTxt = langTxt["background_music"]
+        #音效
+        self.soundEffectsTxt = langTxt["sound_effects"]
+        #环境声效
+        self.soundEnvironmentTxt = langTxt["sound_environment"]
+        #确认
         self.confirmTxt = fontRenderPro(langTxt["confirm"],"white",self.fontSize)
+        #取消
         self.cancelTxt = fontRenderPro(langTxt["cancel"],"white",self.fontSize)
+        #确认和取消按钮的位置
         self.buttons_y = self.baseImgY + self.baseImgHeight*0.88
         self.buttons_x1 = self.baseImgX + self.confirmTxt.b.get_width()*2.5
         self.buttons_x2 = self.buttons_x1 + self.confirmTxt.b.get_width()
     def display(self,screen):
         if self.ifDisplay == True:
+            #底部图
             screen.blit(self.baseImg,(self.baseImgX,self.baseImgY))
             screen.blit(self.settingTitleTxt,(self.settingTitleTxt_x,self.settingTitleTxt_y))
             #语言
             screen.blit(self.languageTxt,(self.bar_x,self.bar_y0))
             #背景音乐
-            screen.blit(self.backgroundMusicTxt,(self.bar_x,self.bar_y1-self.fontSize*1.4))
+            screen.blit(fontRender(self.backgroundMusicTxt+": "+str(self.soundVolume_background_music),"white",self.fontSize),(self.bar_x,self.bar_y1-self.fontSize*1.4))
             screen.blit(self.bar_empty,(self.bar_x,self.bar_y1))
             barImgWidth = round(self.bar_full.get_width()*self.soundVolume_background_music/100)
             screen.blit(pygame.transform.scale(self.bar_full,(barImgWidth,self.bar_height)),(self.bar_x,self.bar_y1))
-            screen.blit(self.circle,(self.bar_x+barImgWidth-self.circle.get_width()/2,self.bar_y1-self.circle.get_height()/4))
+            screen.blit(self.button,(self.bar_x+barImgWidth-self.button.get_width()/2,self.bar_y1-self.bar_height/2))
             #音效
-            screen.blit(self.soundEffectsTxt,(self.bar_x,self.bar_y2-self.fontSize*1.4))
+            screen.blit(fontRender(self.soundEffectsTxt+": "+str(self.soundVolume_sound_effects),"white",self.fontSize),(self.bar_x,self.bar_y2-self.fontSize*1.4))
             screen.blit(self.bar_empty,(self.bar_x,self.bar_y2))
             barImgWidth = round(self.bar_full.get_width()*self.soundVolume_sound_effects/100)
             screen.blit(pygame.transform.scale(self.bar_full,(barImgWidth,self.bar_height)),(self.bar_x,self.bar_y2))
-            screen.blit(self.circle,(self.bar_x+barImgWidth-self.circle.get_width()/2,self.bar_y2-self.circle.get_height()/4))
+            screen.blit(self.button,(self.bar_x+barImgWidth-self.button.get_width()/2,self.bar_y2-self.bar_height/2))
             #环境声
-            screen.blit(self.soundEnvironmentTxt,(self.bar_x,self.bar_y3-self.fontSize*1.4))
+            screen.blit(fontRender(self.soundEnvironmentTxt+": "+str(self.soundVolume_sound_environment),"white",self.fontSize),(self.bar_x,self.bar_y3-self.fontSize*1.4))
             screen.blit(self.bar_empty,(self.bar_x,self.bar_y3))
             barImgWidth = round(self.bar_full.get_width()*self.soundVolume_sound_environment/100)
             screen.blit(pygame.transform.scale(self.bar_full,(barImgWidth,self.bar_height)),(self.bar_x,self.bar_y3))
-            screen.blit(self.circle,(self.bar_x+barImgWidth-self.circle.get_width()/2,self.bar_y3-self.circle.get_height()/4))
-            #显示按钮
+            screen.blit(self.button,(self.bar_x+barImgWidth-self.button.get_width()/2,self.bar_y3-self.bar_height/2))
+            #显示确认和取消按钮
             if isHoverOn(self.cancelTxt.n,(self.buttons_x1,self.buttons_y)):
                 screen.blit(self.cancelTxt.b,(self.buttons_x1,self.buttons_y))
             else:
@@ -372,19 +392,20 @@ class settingContoller:
                 screen.blit(self.confirmTxt.b,(self.buttons_x2,self.buttons_y))
             else:
                 screen.blit(self.confirmTxt.n,(self.buttons_x2,self.buttons_y))
-
+            #判定按钮
             if pygame.mouse.get_pressed()[0]:
                 mouse_x,mouse_y=pygame.mouse.get_pos()
                 if self.bar_x<=mouse_x<=self.bar_x+self.bar_width:
                     #如果碰到背景音乐的音量条
-                    if self.bar_y1<mouse_y<self.bar_y1+self.bar_height:
+                    if self.bar_y1-self.bar_height/2<mouse_y<self.bar_y1+self.bar_height*1.5:
                         self.soundVolume_background_music = int(100*(mouse_x-self.bar_x)/self.bar_width)
                     #如果碰到音效的音量条
-                    elif self.bar_y2<mouse_y<self.bar_y2+self.bar_height:
+                    elif self.bar_y2-self.bar_height/2<mouse_y<self.bar_y2+self.bar_height*1.5:
                         self.soundVolume_sound_effects = int(100*(mouse_x-self.bar_x)/self.bar_width)
                     #如果碰到环境声的音量条
-                    elif self.bar_y3<mouse_y<self.bar_y3+self.bar_height:
+                    elif self.bar_y3-self.bar_height/2<mouse_y<self.bar_y3+self.bar_height*1.5:
                         self.soundVolume_sound_environment = int(100*(mouse_x-self.bar_x)/self.bar_width)
+                #取消
                 if isHoverOn(self.cancelTxt.n,(self.buttons_x1,self.buttons_y)):
                     with open("Save/setting.yaml", "r", encoding='utf-8') as f:
                         settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -392,6 +413,7 @@ class settingContoller:
                         self.soundVolume_sound_effects = settingData["Sound"]["sound_effects"]
                         self.soundVolume_background_music = settingData["Sound"]["background_music"]
                     self.ifDisplay = False
+                #确认
                 elif isHoverOn(self.confirmTxt.n,(self.buttons_x2,self.buttons_y)):
                     with open("Save/setting.yaml", "r", encoding='utf-8') as f:
                         settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -402,3 +424,5 @@ class settingContoller:
                         yaml.dump(settingData, f)
                     pygame.mixer.music.set_volume(settingData["Sound"]["background_music"]/100.0)
                     self.ifDisplay = False
+                    return True
+        return False

@@ -1548,5 +1548,8 @@ def battle(chapter_name,screen,setting):
             
             #刷新页面
             Display.flip()
-
+    
+    #暂停声效 - 尤其是环境声
+    pygame.mixer.stop()
+    
     return resultInfo    
