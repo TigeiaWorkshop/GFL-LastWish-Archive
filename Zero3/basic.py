@@ -261,29 +261,81 @@ class DisplayController:
         pygame.display.flip()
 
 #npc立绘系统
-class NpcImage:
+class NpcImageSystem:
     def __init__(self):
         self.imgDic = {}
-    def display(self,name,x,y,screen):
+        self.npcLastRound = []
+        self.npcLastRoundImgAlpha = 255
+        self.npcThisRound = []
+        self.npcThisRoundImgAlpha = 0
+        self.npcBothRound = []
+    def displayTheNpc(self,name,x,y,alpha,screen):
+        if alpha <= 0:
+            return False
         if name not in self.imgDic:
+            img_width = round(screen.get_width()/2)
             if "&dark" in name:
                 nameTemp = name.replace("&dark","")
                 if nameTemp not in self.imgDic:
-                    self.imgDic[nameTemp] = {"img":loadImg("Assets/image/npc/"+nameTemp+".png"),"alpha":250}
-                    self.imgDic[nameTemp]["img"].set_alpha(0)
-                self.imgDic[name] = {"img":addDarkness(self.imgDic[nameTemp]["img"],50),"alpha":250}
-                self.imgDic[name]["img"].set_alpha(0)
+                    self.imgDic[nameTemp] = loadImg("Assets/image/npc/"+nameTemp+".png",img_width,img_width)
+                self.imgDic[name] = addDarkness(self.imgDic[nameTemp],50)
             else:
-                self.imgDic[name] = {"img":loadImg("Assets/image/npc/"+name+".png"),"alpha":250}
-                self.imgDic[name]["img"].set_alpha(0)
-        tempAlpha = self.imgDic[name]["img"].get_alpha()
-        if tempAlpha != self.imgDic[name]["alpha"]:
-            if tempAlpha > self.imgDic[name]["alpha"]:
-                tempAlpha -= 25
-            else:
-                tempAlpha += 25
-            self.imgDic[name]["img"].set_alpha(tempAlpha)
-        screen.blit(pygame.transform.scale(self.imgDic[name]["img"], (int(screen.get_width()/2),int(screen.get_width()/2))),(x,y))
+                self.imgDic[name] = loadImg("Assets/image/npc/"+name+".png",img_width,img_width)
+        if self.imgDic[name].get_alpha() != alpha:
+            self.imgDic[name].set_alpha(alpha)
+        screen.blit(self.imgDic[name],(x,y))
+    def display(self,screen):
+        window_x = screen.get_width()
+        window_y = screen.get_height()
+        if self.npcLastRoundImgAlpha != 0 and len(self.npcLastRound)>0:
+            #调整alpha值
+            self.npcLastRoundImgAlpha -= 17
+            #画上上一幕的立绘
+            if len(self.npcLastRound)==2:
+                if self.npcLastRound[0] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcLastRound[0],0,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
+                if self.npcLastRound[1] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcLastRound[1],window_x/2,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
+            elif len(self.npcLastRound)==1 and self.npcLastRound[0] not in self.npcBothRound:
+                self.displayTheNpc(self.npcLastRound[0],window_x/4,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
+        #加载对话人物立绘
+        if len(self.npcThisRound)>0:
+            #调整alpha值
+            if self.npcThisRoundImgAlpha < 255:
+                self.npcThisRoundImgAlpha += 25
+            elif self.npcThisRoundImgAlpha > 255:
+                self.npcThisRoundImgAlpha = 255
+            #画上当前幕的立绘
+            if len(self.npcThisRound)==2:
+                if self.npcThisRound[0] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcThisRound[0],0,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                else:
+                    self.displayTheNpc(self.npcThisRound[0],0,window_y-window_x/2,255,screen)
+                if self.npcThisRound[1] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcThisRound[1],window_x/2,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                else:
+                    self.displayTheNpc(self.npcThisRound[1],window_x/2,window_y-window_x/2,255,screen)
+            elif len(self.npcThisRound)==1:
+                if self.npcThisRound[0] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcThisRound[0],window_x/4,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                else:
+                    self.displayTheNpc(self.npcThisRound[0],window_x/4,window_y-window_x/2,255,screen)
+    def process(self,lastRoundCharacterNameList,thisRoundCharacterNameList):
+        if lastRoundCharacterNameList == None:
+            self.npcLastRound = []
+        else:
+            self.npcLastRound = lastRoundCharacterNameList
+        if thisRoundCharacterNameList == None:
+            self.npcThisRound = []
+        else:
+            self.npcThisRound = thisRoundCharacterNameList
+        self.npcLastRoundImgAlpha = 255
+        self.npcThisRoundImgAlpha = 0
+        self.npcBothRound = []
+        for name in self.npcThisRound:
+            if name in self.npcLastRound:
+                self.npcBothRound.append(name)
+
 
 #射击音效 -- 频道2
 class attackingSoundManager:
