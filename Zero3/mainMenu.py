@@ -12,19 +12,20 @@ def mainMenu(screen,setting):
     HealthyGamingAdvice = []
     #从设置中获取语言文件
     lang = setting['Language']
+
     #加载主菜单文字
     try:
         with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
             loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-            game_title = loadData['GameTitle']
-            main_menu_txt = loadData['MainMenu']
-            chapter_select = loadData['Chapter']
-            settingUI = settingContoller(window_x,window_y,setting,loadData["SettingUI"])
-            if "HealthyGamingAdvice" in loadData:
-                HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
     except BaseException:
         raise Exception('Error: Current language is not supported, please check the "setting.yaml" file in Save folder!')
-    
+    game_title = loadData['GameTitle']
+    main_menu_txt = loadData['MainMenu']
+    chapter_select = loadData['Chapter']
+    settingUI = settingContoller(window_x,window_y,setting,loadData["SettingUI"])
+    if "HealthyGamingAdvice" in loadData:
+        HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
+
     #加载主菜单选择页面的文字
     for txt in main_menu_txt:
         if txt == "text0_continue" or txt == "text2_dlc" or txt == "text3_workshop":
@@ -146,7 +147,7 @@ def mainMenu(screen,setting):
                     elif isHoverOn(main_menu_txt["text5_setting"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*5)):
                         settingUI.ifDisplay = True
                     elif isHoverOn(main_menu_txt["text6_exit"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*6)):
-                        quitGame()
+                        Display.quit()
                 elif menu_type == 1:
                     for i in range(len(chapter_select)):
                         if i == len(chapter_select)-1 and isHoverOn(chapter_select[-1].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):

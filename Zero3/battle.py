@@ -552,7 +552,7 @@ def battle(chapter_name,screen,setting):
                 for event in pygame.event.get():
                     if event.type == KEYDOWN:
                         if event.key == K_ESCAPE:
-                            quitGame()
+                            Display.quit()
                     elif event.type == MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
                         if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
                             display_num +=1
@@ -636,7 +636,7 @@ def battle(chapter_name,screen,setting):
                     if event.key == K_d:
                         pressKeyToMove["right"]=True
                     if event.key == K_m:
-                        quitGame()
+                        Display.quit()
                 elif event.type == KEYUP:
                     if event.key == K_w:
                         pressKeyToMove["up"]=False
@@ -809,9 +809,9 @@ def battle(chapter_name,screen,setting):
                         if characters_data[the_character_get_click].current_action_point >= 5 and characters_data[the_character_get_click].bullets_carried > 0:
                             action_choice = "reload"
                             green_hide = False
-                        if characters_data[the_character_get_click].bullets_carried <= 0:
+                        elif characters_data[the_character_get_click].bullets_carried <= 0:
                             warnings_to_display.add("no_bullets_left")
-                        if characters_data[the_character_get_click].current_action_point < 5:
+                        elif characters_data[the_character_get_click].current_action_point < 5:
                             warnings_to_display.add("no_enough_ap_to_reload")
                     elif green_hide == "SelectMenu" and buttonGetHover == "rescue":
                         if characters_data[the_character_get_click].current_action_point >= 8:

@@ -1,0 +1,329 @@
+# cython: language_level=3
+import glob
+import math
+import os
+import random
+import time
+from sys import exit
+
+import cv2
+import pygame
+import yaml
+from pygame.locals import *
+
+#高级图形类
+class ImageSurface:
+    def __init__(self,img,x,y,width=None,height=None,description="Default"):
+        self.img = img
+        self.x = x
+        self.y = y
+        self.xTogo = x
+        self.yTogo = y
+        self.items = []
+        self.width = width
+        self.height = height
+        self.description = description
+    def draw(self,screen,local_x=0,local_y=0):
+        if self.width == None and self.height == None:
+            screen.blit(self.img,(self.x+local_x,self.y+local_y))
+        else:
+            if self.width == None:
+                self.width = self.height/self.img.get_height()*self.img.get_width()
+            elif self.height == None:
+                self.height = self.width/self.img.get_width()*self.img.get_height()
+            screen.blit(pygame.transform.scale(self.img, (round(self.width),round(self.height))),(self.x+local_x,self.y+local_y))
+    def set_alpha(self,value):
+        self.img.set_alpha(value)
+    def get_alpha(self):
+        return self.img.get_alpha()
+
+#视频捕捉系统
+class VideoObject:
+    def __init__(self,path,ifLoop=False,endPoint=None,loopStartPoint=None):
+        self.video = cv2.VideoCapture(path)
+        self.ifLoop = ifLoop
+        if endPoint != None:
+            self.endPoint = endPoint
+        else:
+            self.endPoint = self.getFrameNum()
+        if loopStartPoint != None:
+            self.loopStartPoint = loopStartPoint
+        else:
+            self.loopStartPoint = 1
+    def getFPS(self):
+        return self.video.get(cv2.CAP_PROP_FPS)
+    def getFrameNum(self):
+        return self.video.get(7)
+    def getFrame(self):
+        return self.video.get(1)
+    def setFrame(self,num):
+        self.video.set(1,num)
+    def display(self,screen):
+        if self.getFrame() >= self.endPoint:
+            if self.ifLoop == True:
+                self.setFrame(self.loopStartPoint)
+            else:
+                return True
+        ret, frame = self.video.read()
+        if frame.shape[0] != screen.get_width() or frame.shape[1] != screen.get_height():
+            frame = cv2.resize(frame,(screen.get_width(),screen.get_height()))
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.transpose(frame)
+        pygame.surfarray.blit_array(screen, frame)
+
+#手柄控制组件
+class Joystick:
+    def __init__(self):
+        if pygame.joystick.get_count()>0:
+            self.inputController = pygame.joystick.Joystick(0)
+            self.inputController.init()
+        else:
+            self.inputController = None
+    def get_init(self):
+        if self.inputController != None:
+            return self.inputController.get_init()
+        else:
+            return False
+    def get_button(self,buttonId):
+        if self.inputController != None and self.inputController.get_init() == True:
+            return self.inputController.get_button(buttonId)
+        else:
+            return None
+    def get_axis(self,buttonId):
+        if self.inputController != None and self.inputController.get_init() == True:
+            return self.inputController.get_axis(buttonId)
+        else:
+            return 0
+
+#画面更新控制器
+class DisplayController:
+    def __init__(self,fps):
+        self.fps = fps
+        self.clock = pygame.time.Clock()
+    def flip(self):
+        self.clock.tick(self.fps)
+        pygame.display.flip()
+    def quit(self):
+        #退出游戏
+        exit()
+
+#npc立绘系统
+class NpcImageSystem:
+    def __init__(self):
+        self.imgDic = {}
+        self.npcLastRound = []
+        self.npcLastRoundImgAlpha = 255
+        self.npcThisRound = []
+        self.npcThisRoundImgAlpha = 0
+        self.npcBothRound = []
+    def displayTheNpc(self,name,x,y,alpha,screen):
+        if alpha <= 0:
+            return False
+        if name not in self.imgDic:
+            img_width = round(screen.get_width()/2)
+            if "&dark" in name:
+                nameTemp = name.replace("&dark","")
+                if nameTemp not in self.imgDic:
+                    self.imgDic[nameTemp] = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/npc/"+nameTemp+".png")).convert_alpha(),(img_width,img_width))
+                #生成深色图片
+                self.imgDic[name] = pygame.transform.scale(self.imgDic[nameTemp],(img_width,img_width))
+                dark = pygame.Surface((img_width,img_width), flags=pygame.SRCALPHA)
+                dark.fill((50,50,50))
+                self.imgDic[name].blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
+            else:
+                self.imgDic[name] = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/npc/"+name+".png")).convert_alpha(),(img_width,img_width))
+        if self.imgDic[name].get_alpha() != alpha:
+            self.imgDic[name].set_alpha(alpha)
+        screen.blit(self.imgDic[name],(x,y))
+    def display(self,screen):
+        window_x = screen.get_width()
+        window_y = screen.get_height()
+        if self.npcLastRoundImgAlpha != 0 and len(self.npcLastRound)>0:
+            #调整alpha值
+            self.npcLastRoundImgAlpha -= 15
+            #画上上一幕的立绘
+            if len(self.npcLastRound)==2:
+                if self.npcLastRound[0] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcLastRound[0],0,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
+                if self.npcLastRound[1] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcLastRound[1],window_x/2,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
+            elif len(self.npcLastRound)==1 and self.npcLastRound[0] not in self.npcBothRound:
+                self.displayTheNpc(self.npcLastRound[0],window_x/4,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
+        #加载对话人物立绘
+        if len(self.npcThisRound)>0:
+            #调整alpha值
+            if self.npcThisRoundImgAlpha < 255:
+                self.npcThisRoundImgAlpha += 25
+            #画上当前幕的立绘
+            if len(self.npcThisRound)==2:
+                if self.npcThisRound[0] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcThisRound[0],0,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                else:
+                    self.displayTheNpc(self.npcThisRound[0],0,window_y-window_x/2,255,screen)
+                if self.npcThisRound[1] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcThisRound[1],window_x/2,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                else:
+                    self.displayTheNpc(self.npcThisRound[1],window_x/2,window_y-window_x/2,255,screen)
+            elif len(self.npcThisRound)==1:
+                if self.npcThisRound[0] not in self.npcBothRound:
+                    self.displayTheNpc(self.npcThisRound[0],window_x/4,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                else:
+                    self.displayTheNpc(self.npcThisRound[0],window_x/4,window_y-window_x/2,255,screen)
+    def process(self,lastRoundCharacterNameList,thisRoundCharacterNameList):
+        if lastRoundCharacterNameList == None:
+            self.npcLastRound = []
+        else:
+            self.npcLastRound = lastRoundCharacterNameList
+        if thisRoundCharacterNameList == None:
+            self.npcThisRound = []
+        else:
+            self.npcThisRound = thisRoundCharacterNameList
+        self.npcLastRoundImgAlpha = 255
+        self.npcThisRoundImgAlpha = 5
+        self.npcBothRound = []
+        for name in self.npcThisRound:
+            if name in self.npcLastRound:
+                self.npcBothRound.append(name)
+
+#射击音效 -- 频道2
+class attackingSoundManager:
+    def __init__(self,volume):
+        self.soundsData = {
+            #突击步枪
+            "AR": glob.glob(r'Assets/sound/attack/ar_*.ogg'),
+            #手枪
+            "HG": glob.glob(r'Assets/sound/attack/hg_*.ogg'),
+            #机枪
+            "MG": glob.glob(r'Assets/sound/attack/mg_*.ogg'),
+            #步枪
+            "RF": glob.glob(r'Assets/sound/attack/rf_*.ogg'),
+            #冲锋枪
+            "SMG": glob.glob(r'Assets/sound/attack/smg_*.ogg'),
+        }
+        self.volume = volume
+        for key in self.soundsData:
+            for i in range(len(self.soundsData[key])):
+                self.soundsData[key][i] = pygame.mixer.Sound(self.soundsData[key][i])
+                self.soundsData[key][i].set_volume(volume/100.0)
+    def play(self,kind):
+        if kind in self.soundsData:
+            pygame.mixer.Channel(2).play(self.soundsData[kind][random.randint(0,len(self.soundsData[kind])-1)])
+
+#设置UI
+class settingContoller:
+    def __init__(self,window_x,window_y,settingdata,langTxt):
+        self.ifDisplay = False
+        self.baseImgWidth = round(window_x/3)
+        self.baseImgHeight = round(window_x/3)
+        self.baseImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/setting_baseImg.png")).convert_alpha(),(self.baseImgWidth,self.baseImgHeight))
+        self.baseImg.set_alpha(200)
+        self.baseImgX = int((window_x-self.baseImgWidth)/2)
+        self.baseImgY = int((window_y-self.baseImgHeight)/2)
+        self.bar_height = round(window_x/60)
+        self.bar_width = round(window_x/5)
+        self.button = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/setting_bar_circle.png")).convert_alpha(),(self.bar_height,self.bar_height*2))
+        self.bar_empty = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/setting_bar_empty.png")).convert_alpha(),(self.bar_width,self.bar_height))
+        self.bar_full = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/setting_bar_full.png")).convert_alpha(),(self.bar_width,self.bar_height))
+        self.bar_x = int(self.baseImgX+(self.baseImgWidth-self.bar_empty.get_width())/2)
+        self.bar_y0 = self.baseImgY + self.baseImgHeight*0.2
+        self.bar_y1 = self.baseImgY + self.baseImgHeight*0.4
+        self.bar_y2 = self.baseImgY + self.baseImgHeight*0.6
+        self.bar_y3 = self.baseImgY + self.baseImgHeight*0.8
+        #音量数值
+        self.soundVolume_background_music = settingdata["Sound"]["background_music"]
+        self.soundVolume_sound_effects = settingdata["Sound"]["sound_effects"]
+        self.soundVolume_sound_environment = settingdata["Sound"]["sound_environment"]
+        #设置UI中的文字
+        self.fontSize = round(window_x/50)
+        self.fontSizeBig = round(window_x/50*1.5)
+        self.normalFont = pygame.font.SysFont("simhei",int(self.fontSize))
+        self.bigFont = pygame.font.SysFont("simhei",int(self.fontSizeBig))
+        self.settingTitleTxt = self.bigFont.render(langTxt["setting"],True,(255, 255, 255))
+        self.settingTitleTxt_x = int(self.baseImgX+(self.baseImgWidth-self.settingTitleTxt.get_width())/2)
+        self.settingTitleTxt_y = self.baseImgY+self.baseImgHeight*0.05
+        #语言
+        self.languageTxt = self.normalFont.render(langTxt["language"]+": "+langTxt["currentLang"],True,(255, 255, 255))
+        #背景音乐
+        self.backgroundMusicTxt = langTxt["background_music"]
+        #音效
+        self.soundEffectsTxt = langTxt["sound_effects"]
+        #环境声效
+        self.soundEnvironmentTxt = langTxt["sound_environment"]
+        #确认
+        self.confirmTxt_n = self.normalFont.render(langTxt["confirm"],True,(255, 255, 255))
+        self.confirmTxt_b = self.bigFont.render(langTxt["confirm"],True,(255, 255, 255))
+        #取消
+        self.cancelTxt_n = self.normalFont.render(langTxt["cancel"],True,(255, 255, 255))
+        self.cancelTxt_b = self.bigFont.render(langTxt["cancel"],True,(255, 255, 255))
+        #确认和取消按钮的位置
+        self.buttons_y = self.baseImgY + self.baseImgHeight*0.88
+        self.buttons_x1 = self.baseImgX + self.confirmTxt_b.get_width()*2.5
+        self.buttons_x2 = self.buttons_x1 + self.confirmTxt_b.get_width()
+    def display(self,screen):
+        if self.ifDisplay == True:
+            #底部图
+            screen.blit(self.baseImg,(self.baseImgX,self.baseImgY))
+            screen.blit(self.settingTitleTxt,(self.settingTitleTxt_x,self.settingTitleTxt_y))
+            #语言
+            screen.blit(self.languageTxt,(self.bar_x,self.bar_y0))
+            #背景音乐
+            screen.blit(self.normalFont.render(self.backgroundMusicTxt+": "+str(self.soundVolume_background_music),True,(255, 255, 255)),(self.bar_x,self.bar_y1-self.fontSize*1.4))
+            screen.blit(self.bar_empty,(self.bar_x,self.bar_y1))
+            barImgWidth = round(self.bar_full.get_width()*self.soundVolume_background_music/100)
+            screen.blit(pygame.transform.scale(self.bar_full,(barImgWidth,self.bar_height)),(self.bar_x,self.bar_y1))
+            screen.blit(self.button,(self.bar_x+barImgWidth-self.button.get_width()/2,self.bar_y1-self.bar_height/2))
+            #音效
+            screen.blit(self.normalFont.render(self.soundEffectsTxt+": "+str(self.soundVolume_sound_effects),True,(255, 255, 255)),(self.bar_x,self.bar_y2-self.fontSize*1.4))
+            screen.blit(self.bar_empty,(self.bar_x,self.bar_y2))
+            barImgWidth = round(self.bar_full.get_width()*self.soundVolume_sound_effects/100)
+            screen.blit(pygame.transform.scale(self.bar_full,(barImgWidth,self.bar_height)),(self.bar_x,self.bar_y2))
+            screen.blit(self.button,(self.bar_x+barImgWidth-self.button.get_width()/2,self.bar_y2-self.bar_height/2))
+            #环境声
+            screen.blit(self.normalFont.render(self.soundEnvironmentTxt+": "+str(self.soundVolume_sound_environment),True,(255, 255, 255)),(self.bar_x,self.bar_y3-self.fontSize*1.4))
+            screen.blit(self.bar_empty,(self.bar_x,self.bar_y3))
+            barImgWidth = round(self.bar_full.get_width()*self.soundVolume_sound_environment/100)
+            screen.blit(pygame.transform.scale(self.bar_full,(barImgWidth,self.bar_height)),(self.bar_x,self.bar_y3))
+            screen.blit(self.button,(self.bar_x+barImgWidth-self.button.get_width()/2,self.bar_y3-self.bar_height/2))
+            #获取鼠标坐标
+            mouse_x,mouse_y=pygame.mouse.get_pos()
+            #取消按钮
+            if self.buttons_x1<mouse_x<self.buttons_x1+self.cancelTxt_n.get_width() and self.buttons_y<mouse_y<self.buttons_y+self.cancelTxt_n.get_height():
+                screen.blit(self.cancelTxt_b,(self.buttons_x1,self.buttons_y))
+                if pygame.mouse.get_pressed()[0]:
+                    with open("Save/setting.yaml", "r", encoding='utf-8') as f:
+                        settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
+                        self.soundVolume_background_music = settingData["Sound"]["background_music"]
+                        self.soundVolume_sound_effects = settingData["Sound"]["sound_effects"]
+                        self.soundVolume_background_music = settingData["Sound"]["background_music"]
+                    self.ifDisplay = False
+            else:
+                screen.blit(self.cancelTxt_n,(self.buttons_x1,self.buttons_y))
+            #确认按钮
+            if self.buttons_x2<mouse_x<self.buttons_x2+self.confirmTxt_n.get_width() and self.buttons_y<mouse_y<self.buttons_y+self.confirmTxt_n.get_height():
+                screen.blit(self.confirmTxt_b,(self.buttons_x2,self.buttons_y))
+                if pygame.mouse.get_pressed()[0]:
+                    with open("Save/setting.yaml", "r", encoding='utf-8') as f:
+                        settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
+                        settingData["Sound"]["background_music"] = self.soundVolume_background_music
+                        settingData["Sound"]["sound_effects"] = self.soundVolume_sound_effects
+                        settingData["Sound"]["background_music"] = self.soundVolume_background_music
+                    with open("Save/setting.yaml", "w", encoding='utf-8') as f:
+                        yaml.dump(settingData, f)
+                    pygame.mixer.music.set_volume(settingData["Sound"]["background_music"]/100.0)
+                    self.ifDisplay = False
+                    return True
+            else:
+                screen.blit(self.confirmTxt_n,(self.buttons_x2,self.buttons_y))
+            #其他按键的判定按钮
+            if pygame.mouse.get_pressed()[0]:
+                if self.bar_x<=mouse_x<=self.bar_x+self.bar_width:
+                    #如果碰到背景音乐的音量条
+                    if self.bar_y1-self.bar_height/2<mouse_y<self.bar_y1+self.bar_height*1.5:
+                        self.soundVolume_background_music = int(100*(mouse_x-self.bar_x)/self.bar_width)
+                    #如果碰到音效的音量条
+                    elif self.bar_y2-self.bar_height/2<mouse_y<self.bar_y2+self.bar_height*1.5:
+                        self.soundVolume_sound_effects = int(100*(mouse_x-self.bar_x)/self.bar_width)
+                    #如果碰到环境声的音量条
+                    elif self.bar_y3-self.bar_height/2<mouse_y<self.bar_y3+self.bar_height*1.5:
+                        self.soundVolume_sound_environment = int(100*(mouse_x-self.bar_x)/self.bar_width)
+        return False
