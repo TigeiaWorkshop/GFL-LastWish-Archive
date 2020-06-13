@@ -1,4 +1,6 @@
+Antialias: true
 FPS: 60
+Font: simhei
 Language: SimplifiedChinese
 Screen_size_x: 1920
 Screen_size_y: 1080

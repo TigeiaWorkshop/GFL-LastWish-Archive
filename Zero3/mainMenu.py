@@ -26,12 +26,15 @@ def mainMenu(screen,setting):
     if "HealthyGamingAdvice" in loadData:
         HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
 
+    #当前可用的菜单选项
+    enabled_option = ["text0_start","text1_setting","text3_exit","text1_chooseChapter","text4_mapCreator","text6_back"]
     #加载主菜单选择页面的文字
-    for txt in main_menu_txt:
-        if txt == "text0_continue" or txt == "text2_dlc" or txt == "text3_workshop":
-            main_menu_txt[txt] = fontRenderPro(main_menu_txt[txt],"disable",window_x/38)
-        else:
-            main_menu_txt[txt] = fontRenderPro(main_menu_txt[txt],"enable",window_x/38)
+    for text in main_menu_txt:
+        for key,txt in main_menu_txt[text].items():
+            if key in enabled_option:
+                main_menu_txt[text][key] = fontRenderPro(txt,"enable",window_x/38)
+            else:
+                main_menu_txt[text][key] = fontRenderPro(txt,"disable",window_x/38)
     
     #加载菜单章节选择页面的文字
     for i in range(len(chapter_select)):
@@ -51,7 +54,8 @@ def mainMenu(screen,setting):
     cover_alpha = 0
     menu_type = 0
     txt_location = int(window_x*2/3)
-    main_menu_txt_start_height = (window_y-len(main_menu_txt)*window_x/38*2)/2
+    main_menu_txt_start_height0 = (window_y-len(main_menu_txt["menu_0"])*window_x/38*2)/2
+    main_menu_txt_start_height1 = (window_y-len(main_menu_txt["menu_1"])*window_x/38*2)/2
     chapter_select_txt_start_height = (window_y-len(chapter_select)*window_x/38*2)/2
     #关卡选择的封面
     cover_img = loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
@@ -104,24 +108,33 @@ def mainMenu(screen,setting):
             if cover_alpha >= 0:
                 cover_alpha -=10
 
-        if menu_type == 1:
+        if cover_alpha > 10:
             cover_img.set_alpha(cover_alpha)
             drawImg(cover_img, (0,0),screen)
         
         #菜单选项
         if menu_type == 0:
             i=0
-            for txt in main_menu_txt:
-                if isHoverOn(main_menu_txt[txt].n, (txt_location,main_menu_txt_start_height+window_x/38*2*i)):
+            for key,text in main_menu_txt["menu_0"].items():
+                if isHoverOn(text.n, (txt_location,main_menu_txt_start_height0+window_x/38*2*i)):
                     hover_sound_play_on = "0_"+str(i)
-                    drawImg(main_menu_txt[txt].b, (txt_location,main_menu_txt_start_height+window_x/38*(2*i-0.25)),screen)
+                    drawImg(text.b, (txt_location,main_menu_txt_start_height0+window_x/38*(2*i-0.25)),screen)
                 else:
-                    drawImg(main_menu_txt[txt].n, (txt_location,main_menu_txt_start_height+window_x/38*2*i),screen)
+                    drawImg(text.n, (txt_location,main_menu_txt_start_height0+window_x/38*2*i),screen)
                 i+=1
         elif menu_type == 1:
+            i=0
+            for key,text in main_menu_txt["menu_1"].items():
+                if isHoverOn(text.n, (txt_location,main_menu_txt_start_height1+window_x/38*2*i)):
+                    hover_sound_play_on = "0_"+str(i)
+                    drawImg(text.b, (txt_location,main_menu_txt_start_height1+window_x/38*(2*i-0.25)),screen)
+                else:
+                    drawImg(text.n, (txt_location,main_menu_txt_start_height1+window_x/38*2*i),screen)
+                i+=1
+        elif menu_type == 2:
             for i in range(len(chapter_select)):
                 if isHoverOn(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
-                    hover_sound_play_on = "1_"+str(i)
+                    hover_sound_play_on = "2_"+str(i)
                     drawImg(chapter_select[i].b, (txt_location,chapter_select_txt_start_height+window_x/38*(2*i-0.25)),screen)
                 else:
                     drawImg(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i),screen)
@@ -137,21 +150,28 @@ def mainMenu(screen,setting):
 
         #判断按键
         for event in pygame.event.get():
-            if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
+            if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and settingUI.ifDisplay != True:
                 click_button_sound.play()
                 if menu_type == 0:
-                    if isHoverOn(main_menu_txt["text1_chooseChapter"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*1)):
+                    if isHoverOn(main_menu_txt["menu_0"]["text0_start"].n,(txt_location,main_menu_txt_start_height0)):
                         menu_type = 1
-                    elif isHoverOn(main_menu_txt["text4_mapCreator"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*4)):
-                        mapCreator("chapter1",screen,setting)
-                    elif isHoverOn(main_menu_txt["text5_setting"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*5)):
+                    elif isHoverOn(main_menu_txt["menu_0"]["text1_setting"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*1)):
                         settingUI.ifDisplay = True
-                    elif isHoverOn(main_menu_txt["text6_exit"].n,(txt_location,main_menu_txt_start_height+window_x/38*2*6)):
+                    elif isHoverOn(main_menu_txt["menu_0"]["text2_developer_team"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*2)):
+                        pass
+                    elif isHoverOn(main_menu_txt["menu_0"]["text3_exit"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*3)):
                         Display.quit()
                 elif menu_type == 1:
+                    if isHoverOn(main_menu_txt["menu_1"]["text1_chooseChapter"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*1)):
+                        menu_type = 2
+                    elif isHoverOn(main_menu_txt["menu_1"]["text4_mapCreator"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*4)):
+                        mapCreator("chapter1",screen,setting)
+                    elif isHoverOn(main_menu_txt["menu_1"]["text6_back"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*6)):
+                        menu_type = 0
+                elif menu_type == 2:
                     for i in range(len(chapter_select)):
                         if i == len(chapter_select)-1 and isHoverOn(chapter_select[-1].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
-                            menu_type = 0
+                            menu_type = 1
                         #章节选择
                         elif isHoverOn(chapter_select[i].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
                             dialog("chapter"+str(i+1),screen,setting,"dialog_before_battle")

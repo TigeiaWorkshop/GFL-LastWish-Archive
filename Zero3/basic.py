@@ -61,38 +61,44 @@ def loadImage(path,the_object_position,width=None,height=None,description="Defau
     else:
         return ImageSurface(path,the_object_position[0],the_object_position[1],width,height,description)
 
+#字体
+with open("Save/setting.yaml", "r", encoding='utf-8') as f:
+    DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
+    FONT = DATA["Font"]
+    MODE = DATA["Antialias"]
+
 #文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
-def fontRender(txt,color,size=50,ifBold=False,ifItalic=False,font="simhei",mode=True):
-    normal_font = pygame.font.SysFont(font,int(size),ifBold,ifItalic)
+def fontRender(txt,color,size=50,ifBold=False,ifItalic=False):
+    normal_font = pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
     if color == "gray" or color == "grey" or color == "disable":
-        text_out = normal_font.render(txt, mode, (105,105,105))
+        text_out = normal_font.render(txt, MODE, (105,105,105))
     elif color == "white" or color == "enable":
-        text_out = normal_font.render(txt, mode, (255, 255, 255))
+        text_out = normal_font.render(txt, MODE, (255, 255, 255))
     elif color == "black":
-        text_out = normal_font.render(txt, mode, (0, 0, 0))
+        text_out = normal_font.render(txt, MODE, (0, 0, 0))
     elif color == "green":
-        text_out = normal_font.render(txt, mode, (0,255,0))
+        text_out = normal_font.render(txt, MODE, (0,255,0))
     elif color == "red":
-        text_out = normal_font.render(txt, mode, (255, 0, 0))
+        text_out = normal_font.render(txt, MODE, (255, 0, 0))
     else:
-        text_out = normal_font.render(txt, mode, color)
+        text_out = normal_font.render(txt, MODE, color)
     return text_out
 
 #高级文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字Class，该Class具有一大一普通的字号
-def fontRenderPro(txt,color,size=50,ifBold=False,ifItalic=False,font="simhei",mode=True):
+def fontRenderPro(txt,color,size=50,ifBold=False,ifItalic=False):
     class TextSurface:
         def __init__(self, n, b):
             self.n = n
             self.b = b
     #文字设定
-    normal_font = pygame.font.SysFont(font,int(size),ifBold,ifItalic)
-    big_font = pygame.font.SysFont(font,int(size*1.5),ifBold,ifItalic)
+    normal_font = pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
+    big_font = pygame.font.SysFont(FONT,int(size*1.5),ifBold,ifItalic)
     if color == "gray" or color == "grey" or color == "disable":
-        text_out = TextSurface(normal_font.render(txt, mode, (105,105,105)),big_font.render(txt, mode, (105,105,105)))
+        text_out = TextSurface(normal_font.render(txt, MODE, (105,105,105)),big_font.render(txt, MODE, (105,105,105)))
     elif color == "white" or color == "enable":
-        text_out = TextSurface(normal_font.render(txt, mode, (255, 255, 255)),big_font.render(txt, mode, (255, 255, 255)))
+        text_out = TextSurface(normal_font.render(txt, MODE, (255, 255, 255)),big_font.render(txt, MODE, (255, 255, 255)))
     else:
-        text_out = TextSurface(normal_font.render(txt, mode, color),big_font.render(txt, mode, color))
+        text_out = TextSurface(normal_font.render(txt, MODE, color),big_font.render(txt, MODE, color))
     return text_out
 
 #检测是否被点击

@@ -6,15 +6,16 @@ Battle_UI:
   numRound: Round NaN
   yourRound: Your Round
 Chapter:
-- chapter1
-- chapter2
-- chapter3
-- chapter4
-- chapter5
-- chapter6
-- chapter7
-- chapter8
-- back
+- Chapter 1
+- Chapter 2
+- Chapter 3
+- Chapter 4
+- Chapter 5
+- Chapter 6
+- Chapter 7
+- Chapter 8
+- Back
+Font: Times New Roman
 GameTitle: Girls' Frontline - Last wish
 LoadingTxt:
   now_loading: Loading...
@@ -22,13 +23,19 @@ LoadingTxt:
   now_loading_level: Now loading level data...
   now_loading_map: Now loading map data...
 MainMenu:
-  text0_continue: Continue
-  text1_chooseChapter: Select Chapter
-  text2_dlc: DLC
-  text3_workshop: Workshop
-  text4_mapCreator: Map Creator
-  text5_setting: Setting
-  text6_exit: Exit
+  menu_0:
+    text0_start: Start
+    text1_setting: Setting
+    text2_developer_team: Development Team
+    text3_exit: Exit
+  menu_1:
+    text0_continue: Continue
+    text1_chooseChapter: Select Chapter
+    text2_dlc: DLC
+    text3_workshop: Workshop
+    text4_mapCreator: Map Creator
+    text5_collection: Collection
+    text6_back: Back
 ResultBoard:
   characters_down: Friendly character down
   pressKeyContinue: Press space to continue
