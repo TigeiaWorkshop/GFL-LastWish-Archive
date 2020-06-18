@@ -29,16 +29,6 @@ def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
 def drawImg(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))
 
-#调整图片亮度
-def changeDarkness(surface,value):
-    dark = pygame.Surface((surface.get_width(), surface.get_height()), flags=pygame.SRCALPHA)
-    dark.fill((abs(int(value)),abs(int(value)),abs(int(value)),0))
-    if value > 0:
-        surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
-    elif value < 0:
-        surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
-    return surface
-
 #重新编辑尺寸
 def resizeImg(img,imgSize=(None,None)):
     if imgSize[1]!= None and imgSize[1] >= 0 and imgSize[0] == None:
@@ -70,16 +60,8 @@ with open("Save/setting.yaml", "r", encoding='utf-8') as f:
 #文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
 def fontRender(txt,color,size=50,ifBold=False,ifItalic=False):
     normal_font = pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
-    if color == "gray" or color == "grey" or color == "disable":
-        text_out = normal_font.render(txt, MODE, (105,105,105))
-    elif color == "white" or color == "enable":
-        text_out = normal_font.render(txt, MODE, (255, 255, 255))
-    elif color == "black":
-        text_out = normal_font.render(txt, MODE, (0, 0, 0))
-    elif color == "green":
-        text_out = normal_font.render(txt, MODE, (0,255,0))
-    elif color == "red":
-        text_out = normal_font.render(txt, MODE, (255, 0, 0))
+    if isinstance(color,str):
+        text_out = normal_font.render(txt, MODE, findColorRGB(color))
     else:
         text_out = normal_font.render(txt, MODE, color)
     return text_out
@@ -93,13 +75,27 @@ def fontRenderPro(txt,color,size=50,ifBold=False,ifItalic=False):
     #文字设定
     normal_font = pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
     big_font = pygame.font.SysFont(FONT,int(size*1.5),ifBold,ifItalic)
-    if color == "gray" or color == "grey" or color == "disable":
-        text_out = TextSurface(normal_font.render(txt, MODE, (105,105,105)),big_font.render(txt, MODE, (105,105,105)))
-    elif color == "white" or color == "enable":
-        text_out = TextSurface(normal_font.render(txt, MODE, (255, 255, 255)),big_font.render(txt, MODE, (255, 255, 255)))
+    if isinstance(color,str):
+        color = findColorRGB(color)
+        text_out = TextSurface(normal_font.render(txt, MODE, color),big_font.render(txt, MODE, color))
     else:
         text_out = TextSurface(normal_font.render(txt, MODE, color),big_font.render(txt, MODE, color))
     return text_out
+
+#给定一个颜色的名字，返回对应的RGB列表
+def findColorRGB(colorName):
+    color_rgb = None
+    if colorName == "gray" or colorName == "grey" or colorName == "disable":
+        color_rgb = (105,105,105)
+    elif colorName == "white" or colorName == "enable":
+        color_rgb = (255, 255, 255)
+    elif colorName == "black":
+        color_rgb = (0, 0, 0)
+    elif colorName == "green":
+        color_rgb = (0,255,0)
+    elif colorName == "red":
+        color_rgb = (255, 0, 0)
+    return color_rgb
 
 #检测是否被点击
 def isHoverOn(the_object,the_object_position,local_x=0,local_y=0):
@@ -144,7 +140,7 @@ def loadAllImgInFile(pathRule,width=None,height=None):
 
 #增加图片暗度
 def addDarkness(img,value):
-    newImg = pygame.transform.scale(img,(img.get_width(), img.get_height()))
+    newImg = img.copy()
     dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA)
     dark.fill((value,value,value))
     newImg.blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
@@ -152,8 +148,23 @@ def addDarkness(img,value):
 
 #减少图片暗度
 def removeDarkness(img,value):
-    newImg = pygame.transform.scale(img,(img.get_width(), img.get_height()))
+    newImg = img.copy()
     dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA)
     dark.fill((value,value,value))
     newImg.blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
     return newImg
+
+#调整图片亮度
+def changeDarkness(surface,value):
+    dark = pygame.Surface((surface.get_width(), surface.get_height()), flags=pygame.SRCALPHA)
+    dark.fill((abs(int(value)),abs(int(value)),abs(int(value)),0))
+    if value > 0:
+        surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
+    elif value < 0:
+        surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
+    return surface
+
+#按照给定的位置对图片进行剪裁
+def cropImg(img,width=(0,0),height=(0,0)):
+    cropped = pygame.Surface((abs(width[1]-width[0]), abs(height[1]-height[0])))
+    cropped.blit(img,width[0])
