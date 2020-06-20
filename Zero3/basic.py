@@ -165,6 +165,7 @@ def changeDarkness(surface,value):
     return surface
 
 #按照给定的位置对图片进行剪裁
-def cropImg(img,width=(0,0),height=(0,0)):
-    cropped = pygame.Surface((abs(width[1]-width[0]), abs(height[1]-height[0])))
-    cropped.blit(img,width[0])
+def cropImg(img,pos=(0,0),size=(0,0)):
+    cropped = pygame.Surface((round(size[0]), round(size[1])))
+    cropped.blit(img,(-pos[0],-pos[1]))
+    return cropped
