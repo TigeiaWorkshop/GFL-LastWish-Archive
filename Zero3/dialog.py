@@ -31,6 +31,9 @@ def dialog(chapter_name,screen,setting,part):
     #加载npc立绘
     npc_img_dic = NpcImageSystem()
 
+    #加载对话文字
+    dialogTxtSystem = DialogContent(window_x*0.015)
+
     #加载对话的背景图片（注意是jpg）
     all_dialog_bg_file_list = glob.glob(r'Assets/image/dialog_background/*.jpg')
     dialog_bg_img_dic={}
@@ -53,14 +56,14 @@ def dialog(chapter_name,screen,setting,part):
     black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
     #设定初始化
     dialogId = "head"
-    dialog_content_id = 1
-    displayed_line = 0
-    mouse_gif_id = 1
-    videoCapture = None
-
     #如果dialog_content没有头
     if dialogId not in dialog_content:
         raise Exception('Warning: The dialog must have a head!')
+    else:
+        dialogTxtSystem.updateContent(dialog_content[dialogId]["content"])
+
+    mouse_gif_id = 1
+    videoCapture = None
 
     #重设立绘系统
     npc_img_dic.process(None,dialog_content[dialogId]["characters_img"])
@@ -127,26 +130,8 @@ def dialog(chapter_name,screen,setting,part):
                 #讲述者名称
                 if dialog_content[dialogId]["narrator"] != None:
                     drawImg(fontRender(dialog_content[dialogId]["narrator"],"white",window_x*0.017),(dialoguebox.width*0.1,dialoguebox.height/8),screen,dialoguebox.x,dialoguebox.y)
-                #对话框已播放的内容
-                for i in range(displayed_line):
-                    drawImg(fontRender(dialog_content[dialogId]["content"][i],"white",window_x*0.015),(dialoguebox.width*0.075,dialoguebox.height*0.33+window_x*0.02*i),screen,dialoguebox.x,dialoguebox.y)
-                #对话框正在播放的内容
-                drawImg(fontRender(dialog_content[dialogId]["content"][displayed_line][0:dialog_content_id],"white",window_x*0.015),(dialoguebox.width*0.075,dialoguebox.height*0.33+window_x*0.02*displayed_line),screen,dialoguebox.x,dialoguebox.y)
-                #检测所有字是否都已经播出
-                if dialog_content_id < len(dialog_content[dialogId]["content"][displayed_line]):
-                    if pygame.mixer.get_busy() == False:
-                        dialog_is_playing_sound.play()
-                    dialog_content_id +=1
-                #当前行的所有字都播出后，播出下一行
-                elif displayed_line < len(dialog_content[dialogId]["content"])-1:
-                    if pygame.mixer.get_busy() == False:
-                        dialog_is_playing_sound.play()
-                    dialog_content_id = 1
-                    displayed_line += 1
-                #当所有行都播出后
-                else:
-                    if pygame.mixer.get_busy() == True:
-                        dialog_is_playing_sound.stop()
+                dialogPlayResult = dialogTxtSystem.display(screen)
+                if dialogPlayResult == True:
                     if dialog_content[dialogId]["next_dialog_id"] != None and dialog_content[dialogId]["next_dialog_id"][0] == "option":
                         optionBox_y_base = (window_y*3/4-(len(dialog_content[dialogId]["next_dialog_id"])-1)*2*window_x*0.03)/4
                         for i in range(1,len(dialog_content[dialogId]["next_dialog_id"])):
@@ -156,8 +141,6 @@ def dialog(chapter_name,screen,setting,part):
                             optionBox_y = i*2*window_x*0.03+optionBox_y_base
                             displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
                             if pygame.mouse.get_pressed()[0] and isHoverOn(optionBox_scaled,(optionBox_x,optionBox_y)):
-                                dialog_content_id = 1
-                                displayed_line = 0
                                 #下一个dialog的Id
                                 theNextDialogId = dialog_content[dialogId]["next_dialog_id"][i][1]
                                 if dialog_content[theNextDialogId]["background_img"] != dialog_content[dialogId]["background_img"]:
@@ -179,6 +162,7 @@ def dialog(chapter_name,screen,setting,part):
                                 npc_img_dic.process(dialog_content[dialogId]["characters_img"],dialog_content[theNextDialogId]["characters_img"])
                                 #切换dialogId
                                 dialogId = theNextDialogId
+                                dialogTxtSystem.updateContent(dialog_content[dialogId]["content"])
                                 break
 
                 #鼠标gif
@@ -203,12 +187,9 @@ def dialog(chapter_name,screen,setting,part):
                         if isHover(skip_button) or dialog_content[dialogId]["next_dialog_id"] == None:
                             if_skip = True
                         #如果所有行都没有播出，则播出所有行
-                        elif displayed_line < len(dialog_content[dialogId]["content"])-1:
-                            displayed_line = len(dialog_content[dialogId]["content"])-1
-                            dialog_content_id = len(dialog_content[dialogId]["content"][displayed_line])-1
+                        elif dialogPlayResult == False:
+                            dialogTxtSystem.playAll()
                         elif dialog_content[dialogId]["next_dialog_id"][0] == "default":
-                            dialog_content_id = 1
-                            displayed_line = 0
                             theNextDialogId = dialog_content[dialogId]["next_dialog_id"][1]
                             #如果当前正播放视频但下一幕不是当前视频，则取消视频
                             if dialog_content[theNextDialogId]["background_img"] != dialog_content[dialogId]["background_img"]:
@@ -229,7 +210,7 @@ def dialog(chapter_name,screen,setting,part):
                             npc_img_dic.process(dialog_content[dialogId]["characters_img"],dialog_content[theNextDialogId]["characters_img"])
                             #切换dialogId
                             dialogId = theNextDialogId
-                            dialog_is_playing_sound.stop()
+                            dialogTxtSystem.updateContent(dialog_content[dialogId]["content"])
                         #如果是切换场景
                         elif dialog_content[dialogId]["next_dialog_id"][0] == "changeScene":
                             if_skip = True
@@ -237,8 +218,6 @@ def dialog(chapter_name,screen,setting,part):
                     elif pygame.mouse.get_pressed()[2] or joystick.get_button(1) == 1:
                         theNextDialogId = dialog_content[dialogId]["last_dialog_id"]
                         if theNextDialogId != None:
-                            dialog_content_id = 1
-                            displayed_line = 0
                             if dialog_content[theNextDialogId]["background_img"] != dialog_content[dialogId]["background_img"]:
                                 videoCapture = None
                             if dialog_content[theNextDialogId]["background_music"] != None and dialog_content[theNextDialogId]["background_music"] != dialog_content[dialogId]["background_music"]:
@@ -254,7 +233,7 @@ def dialog(chapter_name,screen,setting,part):
                             npc_img_dic.process(dialog_content[dialogId]["characters_img"],dialog_content[theNextDialogId]["characters_img"])
                             #切换dialogId
                             dialogId = theNextDialogId
-                            dialog_is_playing_sound.stop()
+                            dialogTxtSystem.updateContent(dialog_content[dialogId]["content"])
             Display.flip()
         
         #淡出
@@ -266,14 +245,13 @@ def dialog(chapter_name,screen,setting,part):
         
         #如果是因changeScene跳出
         if dialog_content[dialogId]["next_dialog_id"] != None and dialog_content[dialogId]["next_dialog_id"][0] == "changeScene":
-            dialog_content_id = 1
-            displayed_line = 0
             dialoguebox.height = 0
             dialoguebox.y = window_y*0.65+dialoguebox_max_height/2
             if_skip = False
             videoCapture = None
             time.sleep(2)
             dialogId = dialog_content[dialogId]["next_dialog_id"][1]
+            dialogTxtSystem.updateContent(dialog_content[dialogId]["content"])
             for i in range(255,0,-5):
                 if dialog_content[dialogId]["background_img"] == None:
                     black_bg.draw(screen)

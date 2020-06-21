@@ -141,7 +141,7 @@ def loadAllImgInFile(pathRule,width=None,height=None):
 #增加图片暗度
 def addDarkness(img,value):
     newImg = img.copy()
-    dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA)
+    dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA).convert_alpha()
     dark.fill((value,value,value))
     newImg.blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
     return newImg
@@ -149,14 +149,14 @@ def addDarkness(img,value):
 #减少图片暗度
 def removeDarkness(img,value):
     newImg = img.copy()
-    dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA)
+    dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA).convert_alpha()
     dark.fill((value,value,value))
     newImg.blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
     return newImg
 
 #调整图片亮度
 def changeDarkness(surface,value):
-    dark = pygame.Surface((surface.get_width(), surface.get_height()), flags=pygame.SRCALPHA)
+    dark = pygame.Surface((surface.get_width(), surface.get_height()), flags=pygame.SRCALPHA).convert_alpha()
     dark.fill((abs(int(value)),abs(int(value)),abs(int(value)),0))
     if value > 0:
         surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
@@ -166,6 +166,6 @@ def changeDarkness(surface,value):
 
 #按照给定的位置对图片进行剪裁
 def cropImg(img,pos=(0,0),size=(0,0)):
-    cropped = pygame.Surface((round(size[0]), round(size[1])))
+    cropped = pygame.Surface((round(size[0]), round(size[1])),flags=pygame.SRCALPHA).convert_alpha()
     cropped.blit(img,(-pos[0],-pos[1]))
     return cropped

@@ -116,25 +116,43 @@ class NpcImageSystem:
         self.npcThisRound = []
         self.npcThisRoundImgAlpha = 0
         self.npcBothRound = []
+        self.communication = pygame.image.load(os.path.join("Assets/image/UI/communication.png")).convert_alpha()
     def displayTheNpc(self,name,x,y,alpha,screen):
         if alpha <= 0:
             return False
-        if name not in self.imgDic:
-            img_width = round(screen.get_width()/2)
-            if "&dark" in name:
-                nameTemp = name.replace("&dark","")
-                if nameTemp not in self.imgDic:
-                    self.imgDic[nameTemp] = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/npc/"+nameTemp+".png")).convert_alpha(),(img_width,img_width))
-                #生成深色图片
-                self.imgDic[name] = pygame.transform.scale(self.imgDic[nameTemp],(img_width,img_width))
-                dark = pygame.Surface((img_width,img_width), flags=pygame.SRCALPHA)
+        nameTemp = name.replace("&communication","").replace("&dark","")
+        img_width = int(screen.get_width()/2)
+        #加载npc的基础立绘
+        if nameTemp not in self.imgDic:
+            self.imgDic[nameTemp] = {"normal":pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/npc/"+nameTemp+".png")).convert_alpha(),(img_width,img_width))}
+            #生成深色图片
+            self.imgDic[nameTemp]["dark"] = self.imgDic[nameTemp]["normal"].copy()
+            dark = pygame.Surface((img_width,img_width), flags=pygame.SRCALPHA).convert_alpha()
+            dark.fill((50,50,50))
+            self.imgDic[nameTemp]["dark"].blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
+        if "&communication" in name:
+            if "communication" not in self.imgDic[nameTemp]:
+                #生成通讯图片
+                self.imgDic[nameTemp]["communication"] = pygame.Surface((int(img_width/1.9), int(img_width/1.8)), flags=pygame.SRCALPHA)
+                self.imgDic[nameTemp]["communication"].blit(self.imgDic[nameTemp]["normal"],(-int(img_width/4),0))
+                self.imgDic[nameTemp]["communication"].blit(pygame.transform.scale(self.communication,(int(img_width/1.9), int(img_width/1.7))),(0,0))
+                #生成深色的通讯图片
+                self.imgDic[nameTemp]["communication_dark"] = self.imgDic[nameTemp]["communication"].copy()
+                dark = pygame.Surface((int(img_width/1.9), int(img_width/1.8)), flags=pygame.SRCALPHA).convert_alpha()
                 dark.fill((50,50,50))
-                self.imgDic[name].blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
+                self.imgDic[nameTemp]["communication_dark"].blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
+            x+=int(img_width/4)
+            if "&dark" in name:
+                img = self.imgDic[nameTemp]["communication_dark"]
             else:
-                self.imgDic[name] = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/npc/"+name+".png")).convert_alpha(),(img_width,img_width))
-        if self.imgDic[name].get_alpha() != alpha:
-            self.imgDic[name].set_alpha(alpha)
-        screen.blit(self.imgDic[name],(x,y))
+                img = self.imgDic[nameTemp]["communication"]
+        elif "&dark" in name:
+            img = self.imgDic[nameTemp]["dark"]
+        else:
+            img = self.imgDic[nameTemp]["normal"]
+        if img.get_alpha() != alpha:
+            img.set_alpha(alpha)
+        screen.blit(img,(x,y))
     def display(self,screen):
         window_x = screen.get_width()
         window_y = screen.get_height()
@@ -326,4 +344,54 @@ class settingContoller:
                     #如果碰到环境声的音量条
                     elif self.bar_y3-self.bar_height/2<mouse_y<self.bar_y3+self.bar_height*1.5:
                         self.soundVolume_sound_environment = int(100*(mouse_x-self.bar_x)/self.bar_width)
+        return False
+
+class DialogContent:
+    def __init__(self,fontSize):
+        self.content = ""
+        self.textIndex = None
+        self.displayedLine = None
+        self.textPlayingSound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")
+        with open("Save/setting.yaml", "r", encoding='utf-8') as f:
+            DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
+            self.FONT = DATA["Font"]
+            self.MODE = DATA["Antialias"]
+        self.FONTSIZE = int(fontSize)
+        self.FONT = pygame.font.SysFont(self.FONT,self.FONTSIZE)
+        
+    def updateContent(self,txt):
+        self.content = txt
+        self.textIndex = 0
+        self.displayedLine = 0
+        if pygame.mixer.get_busy() == True:
+            self.textPlayingSound.stop()
+    def setSoundVolume(self,num):
+        self.textPlayingSound.set_volume(num/100.0)
+    def playAll(self):
+        self.displayedLine = len(self.content)-1
+        self.textIndex = len(self.content[self.displayedLine])-1
+    def display(self,screen):
+        x = int(screen.get_width()*0.2)
+        y = int(screen.get_height()*0.74)
+        #对话框已播放的内容
+        for i in range(self.displayedLine):
+            screen.blit(self.FONT.render(self.content[i],self.MODE,(255, 255, 255)),(x,y+self.FONTSIZE*1.5*i))
+        #对话框正在播放的内容
+        screen.blit(self.FONT.render(self.content[self.displayedLine][:self.textIndex],self.MODE,(255, 255, 255)),(x,y+self.FONTSIZE*1.5*self.displayedLine))
+        #如果当前行的字符还没有完全播出
+        if self.textIndex < len(self.content[self.displayedLine]):
+            if pygame.mixer.get_busy() == False:
+                self.textPlayingSound.play()
+            self.textIndex +=1
+        #当前行的所有字都播出后，播出下一行
+        elif self.displayedLine < len(self.content)-1:
+            if pygame.mixer.get_busy() == False:
+                self.textPlayingSound.play()
+            self.textIndex = 1
+            self.displayedLine += 1
+        #当所有行都播出后
+        else:
+            if pygame.mixer.get_busy() == True:
+                self.textPlayingSound.stop()
+            return True
         return False
