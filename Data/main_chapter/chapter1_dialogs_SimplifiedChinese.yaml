@@ -185,10 +185,9 @@ dialog_after_battle:
     - default
     - 14
   14:
-    background_img: research
+    background_img: SlumpingFluid.mp4
     background_music: null
-    characters_img:
-    - kalina_5&dark
+    characters_img: null
     content:
     - 感谢试玩《少女前线-遗愿》，更多内容仍在研发当中，敬请期待
     last_dialog_id: 13
