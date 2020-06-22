@@ -1,6 +1,5 @@
 # cython: language_level=3
 from Zero3.basic import *
-from Zero3.cutscene import *
 from Zero3.dialog import *
 from Zero3.mapCreator import *
 

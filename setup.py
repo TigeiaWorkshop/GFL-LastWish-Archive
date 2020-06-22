@@ -6,6 +6,7 @@ import shutil
 
 #python setup.py build_ext
 #pyinstaller -i icon.ico main.py
+#pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip install -U
 
 #生成c和pyd文件
 all_Zero3_py_files = glob.glob(r'Zero3/*.py')
