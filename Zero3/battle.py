@@ -36,30 +36,15 @@ def battle(chapter_name,screen,setting):
         chapterDesc = loadData["description"]
 
     #章节标题显示
-    black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
-    title_chapterNum = fontRender(battleUiTxt["numChapter"].replace("NaN",chapter_name.replace("chapter","")),"white",window_x/38)
-    title_chapterNum = ImageSurface(title_chapterNum,(window_x-title_chapterNum.get_width())/2,window_y*0.37)
-    title_chapterName = fontRender(chapter_title,"white",window_x/38)
-    title_chapterName = ImageSurface(title_chapterName,(window_x-title_chapterName.get_width())/2,window_y*0.46)
-    title_description = fontRender(chapterDesc,"white",window_x/76)
-    title_description = ImageSurface(title_description,(window_x-title_description.get_width())/2,window_y*0.6)
+    infoToDisplayDuringLoading = LoadingTitle(window_x,window_y,battleUiTxt["numChapter"],chapter_name,chapter_title,chapterDesc)
 
     #渐入效果
-    for i in range(0,250,2):
-        black_bg.draw(screen)
-        title_chapterNum.set_alpha(i)
-        title_chapterName.set_alpha(i)
-        title_description.set_alpha(i)
-        title_chapterNum.draw(screen)
-        title_chapterName.draw(screen)
-        title_description.draw(screen)
+    for i in range(1,255,2):
+        infoToDisplayDuringLoading.display(screen,i)
         Display.flip()
 
     #开始加载地图场景
-    black_bg.draw(screen)
-    title_chapterNum.draw(screen)
-    title_chapterName.draw(screen)
-    title_description.draw(screen)
+    infoToDisplayDuringLoading.display(screen)
     now_loading = fontRender(loading_info["now_loading_map"], "white",window_x/76)
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     Display.flip()
@@ -89,10 +74,7 @@ def battle(chapter_name,screen,setting):
     characters_data = {}
     for each_character in characters:
         characters_data[each_character] = CharacterDataManager(window_y,characters[each_character])
-        black_bg.draw(screen)
-        title_chapterNum.draw(screen)
-        title_chapterName.draw(screen)
-        title_description.draw(screen)
+        infoToDisplayDuringLoading.display(screen)
         now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
         drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
         Display.flip()
@@ -100,10 +82,7 @@ def battle(chapter_name,screen,setting):
     sangvisFerris_data = {}
     for each_character in sangvisFerris:
         sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character])
-        black_bg.draw(screen)
-        title_chapterNum.draw(screen)
-        title_chapterName.draw(screen)
-        title_description.draw(screen)
+        infoToDisplayDuringLoading.display(screen)
         now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
         drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
         Display.flip()
@@ -113,10 +92,7 @@ def battle(chapter_name,screen,setting):
     theMap.calculate_darkness(characters_data,window_x,window_y)
     
     #开始加载关卡设定
-    black_bg.draw(screen)
-    title_chapterNum.draw(screen)
-    title_chapterName.draw(screen)
-    title_description.draw(screen)
+    infoToDisplayDuringLoading.display(screen)
     now_loading = fontRender(loading_info["now_loading_level"], "white",window_x/76)
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     Display.flip()
@@ -219,10 +195,7 @@ def battle(chapter_name,screen,setting):
 
     #显示章节信息
     for a in range(0,250,2):
-        black_bg.draw(screen)
-        title_chapterNum.draw(screen)
-        title_chapterName.draw(screen)
-        title_description.draw(screen)
+        infoToDisplayDuringLoading.display(screen)
         for i in range(len(battle_info)):
             battle_info[i].set_alpha(a)
             drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
@@ -264,11 +237,9 @@ def battle(chapter_name,screen,setting):
             if weatherController != None:
                 weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
 
-            black_bg.set_alpha(a)
-            black_bg.draw(screen)
-            title_chapterNum.draw(screen)
-            title_chapterName.draw(screen)
-            title_description.draw(screen)
+            infoToDisplayDuringLoading.black_bg.set_alpha(a)
+            infoToDisplayDuringLoading.display(screen)
+
             for i in range(len(battle_info)):
                 battle_info[i].set_alpha(a)
                 drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
@@ -590,14 +561,8 @@ def battle(chapter_name,screen,setting):
                         break
                 #渐变效果：一次性的
                 if txt_alpha >= 0:
-                    black_bg.set_alpha(txt_alpha)
-                    black_bg.draw(screen)
-                    title_chapterNum.set_alpha(txt_alpha)
-                    title_chapterName.set_alpha(txt_alpha)
-                    title_description.set_alpha(txt_alpha)
-                    title_chapterNum.draw(screen)
-                    title_chapterName.draw(screen)
-                    title_description.draw(screen)
+                    infoToDisplayDuringLoading.black_bg.set_alpha(txt_alpha)
+                    infoToDisplayDuringLoading.display(screen,txt_alpha)
                     for i in range(len(battle_info)):
                         battle_info[i].set_alpha(txt_alpha)
                         drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)

@@ -8,10 +8,7 @@ class Doll:
         self.attack_range = attack_range
         self.current_bullets = current_bullets
         self.current_hp = current_hp
-        if current_hp > 0:
-            self.dying = False
-        else:
-            self.dying = 3
+        self.dying = False if current_hp > 0 else 3
         self.effective_range = effective_range
         self.max_effective_range = calculate_range(effective_range)
         self.kind = kind

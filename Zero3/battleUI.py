@@ -274,3 +274,22 @@ class ResultBoard:
         screen.blit(self.characters_down,(self.txt_x ,450))
         screen.blit(self.player_rate,(self.txt_x ,500))
         screen.blit(self.pressKeyContinue,(self.txt_x ,700))
+
+#章节标题(在加载时显示)
+class LoadingTitle:
+    def __init__(self,window_x,window_y,numChapter_txt,chapter_name,chapterTitle_txt,chapterDesc_txt):
+        self.black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
+        title_chapterNum = fontRender(numChapter_txt.replace("NaN",chapter_name.replace("chapter","")),"white",window_x/38)
+        self.title_chapterNum = ImageSurface(title_chapterNum,(window_x-title_chapterNum.get_width())/2,window_y*0.37)
+        title_chapterName = fontRender(chapterTitle_txt,"white",window_x/38)
+        self.title_chapterName = ImageSurface(title_chapterName,(window_x-title_chapterName.get_width())/2,window_y*0.46)
+        title_description = fontRender(chapterDesc_txt,"white",window_x/76)
+        self.title_description = ImageSurface(title_description,(window_x-title_description.get_width())/2,window_y*0.6)
+    def display(self,screen,alpha=255):
+        self.title_chapterNum.set_alpha(alpha)
+        self.title_chapterName.set_alpha(alpha)
+        self.title_description.set_alpha(alpha)
+        self.black_bg.draw(screen)
+        self.title_chapterNum.draw(screen)
+        self.title_chapterName.draw(screen)
+        self.title_description.draw(screen)
