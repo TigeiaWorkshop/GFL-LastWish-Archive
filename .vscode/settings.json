@@ -30,7 +30,10 @@
         "waterplant"
     ],
     "cSpell.ignoreWords": [
-        "pyyaml"
+        "cython",
+        "pyyaml",
+        "spine",
+        "spine cython"
     ],
     "cmake.configureOnOpen": false
 }
