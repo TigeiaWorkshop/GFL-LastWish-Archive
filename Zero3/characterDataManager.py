@@ -150,6 +150,7 @@ class Doll:
                             attacking_range["near"].append((x,y))
         return attacking_range
 
+#格里芬角色类
 class CharacterDataManager(Doll):
     def __init__(self,window_y,theCharacterDataDic,mode=None):
         Doll.__init__(self,theCharacterDataDic["action_point"],theCharacterDataDic["attack_range"],theCharacterDataDic["current_bullets"],theCharacterDataDic["current_hp"],theCharacterDataDic["effective_range"],theCharacterDataDic["kind"],"character",theCharacterDataDic["magazine_capacity"],theCharacterDataDic["max_damage"],theCharacterDataDic["max_hp"],theCharacterDataDic["min_damage"],theCharacterDataDic["type"],theCharacterDataDic["x"],theCharacterDataDic["y"],mode)
@@ -160,8 +161,13 @@ class CharacterDataManager(Doll):
         self.detection = theCharacterDataDic["detection"]
         self.eyeImgSize = 0
         if theCharacterDataDic["kind"] != "HOC":
-            self.ImageGetHurt = loadImage("Assets/image/npc/"+theCharacterDataDic["type"]+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
+            try:
+                self.ImageGetHurt = loadImage("Assets/image/npc/"+theCharacterDataDic["type"]+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
+            except BaseException:
+                print('警告：角色 {} 没有对应的破衣动画'.format(theCharacterDataDic["type"]))
+                print("而且很大几率你也忘了加入对应的头像")
 
+#铁血角色类
 class SangvisFerriDataManager(Doll):
     def __init__(self,theSangvisFerrisDataDic,mode=None):
         Doll.__init__(self,theSangvisFerrisDataDic["action_point"],theSangvisFerrisDataDic["attack_range"],theSangvisFerrisDataDic["current_bullets"],theSangvisFerrisDataDic["current_hp"],theSangvisFerrisDataDic["effective_range"],theSangvisFerrisDataDic["kind"],"sangvisFerri",theSangvisFerrisDataDic["magazine_capacity"],theSangvisFerrisDataDic["max_damage"],theSangvisFerrisDataDic["max_hp"],theSangvisFerrisDataDic["min_damage"],theSangvisFerrisDataDic["type"],theSangvisFerrisDataDic["x"],theSangvisFerrisDataDic["y"],mode)

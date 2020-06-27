@@ -415,24 +415,29 @@ def mapCreator(chapterName,screen,setting):
             drawImg(UIButtonTxt[Image],(posTempX,posTempY),screen)
             
         #显示所有可放置的友方角色
-        i=1
+        i=0
         for every_chara in all_characters_img_list:
-            tempX = theMap.perBlockWidth*i*0.3+UI_local_x
-            if 0 < tempX :
+            tempX = theMap.perBlockWidth*i*0.6+UI_local_x
+            if 0 <= tempX <= UIContainer.width*0.9:
                 tempY = window_y*0.75
                 drawImg(all_characters_img_list[every_chara],(tempX,tempY),screen)
                 if pygame.mouse.get_pressed()[0] and isHoverOn(all_characters_img_list[every_chara],(tempX,tempY)):
                     object_to_put_down = {"type":"character","id":every_chara}
-            i+=2
-        i=1
+            elif tempX > UIContainer.width*0.9:
+                break
+            i+=1
+        i=0
+        #显示所有可放置的敌方角色
         for enemies in all_sangvisFerris_img_list:
-            tempX = theMap.perBlockWidth*i*0.3+UI_local_x
-            if 0 < tempX:
+            tempX = theMap.perBlockWidth*i*0.6+UI_local_x
+            if 0 <= tempX <= UIContainer.width*0.9:
                 tempY = window_y*0.83
                 drawImg(all_sangvisFerris_img_list[enemies],(tempX,tempY),screen)
                 if pygame.mouse.get_pressed()[0] and isHoverOn(all_sangvisFerris_img_list[enemies],(tempX,tempY)):
                     object_to_put_down = {"type":"sangvisFerri","id":enemies}
-            i+=2
+            elif tempX > UIContainer.width*0.9:
+                break
+            i+=1
         
         #显示所有可放置的环境方块
         i=0
