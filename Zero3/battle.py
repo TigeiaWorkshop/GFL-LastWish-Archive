@@ -879,7 +879,7 @@ def battle(chapter_name,screen,setting):
                             end_x = block_get_click["x"]
                             end_y = block_get_click["y"]
                             max_blocks_can_move = int(characters_data[the_character_get_click].current_action_point/2)
-                            if abs(end_x-start_x)+abs(end_y-start_y)<=max_blocks_can_move:
+                            if 0<abs(end_x-start_x)+abs(end_y-start_y)<=max_blocks_can_move:
                                 the_route = theMap.findPath((start_x,start_y),(end_x,end_y),characters_data,sangvisFerris_data,max_blocks_can_move)
                                 if len(the_route)>0:
                                     #显示路径
