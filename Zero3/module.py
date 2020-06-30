@@ -338,13 +338,13 @@ class settingContoller:
                 if self.bar_x<=mouse_x<=self.bar_x+self.bar_width:
                     #如果碰到背景音乐的音量条
                     if self.bar_y1-self.bar_height/2<mouse_y<self.bar_y1+self.bar_height*1.5:
-                        self.soundVolume_background_music = int(100*(mouse_x-self.bar_x)/self.bar_width)
+                        self.soundVolume_background_music = round(100*(mouse_x-self.bar_x)/self.bar_width)
                     #如果碰到音效的音量条
                     elif self.bar_y2-self.bar_height/2<mouse_y<self.bar_y2+self.bar_height*1.5:
-                        self.soundVolume_sound_effects = int(100*(mouse_x-self.bar_x)/self.bar_width)
+                        self.soundVolume_sound_effects = round(100*(mouse_x-self.bar_x)/self.bar_width)
                     #如果碰到环境声的音量条
                     elif self.bar_y3-self.bar_height/2<mouse_y<self.bar_y3+self.bar_height*1.5:
-                        self.soundVolume_sound_environment = int(100*(mouse_x-self.bar_x)/self.bar_width)
+                        self.soundVolume_sound_environment = round(100*(mouse_x-self.bar_x)/self.bar_width)
         return False
 
 class DialogContent:

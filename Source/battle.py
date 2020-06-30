@@ -1,15 +1,14 @@
 # cython: language_level=3
+from Source.skills import *
+from Zero3.AI import *
 from Zero3.basic import *
+from Zero3.battleUI import *
 from Zero3.characterDataManager import *
 from Zero3.map import *
-from Zero3.AI import *
-from Zero3.skills import *
-from Zero3.battleUI import *
 
 def battle(chapter_name,screen,setting):
     #创建手柄组件
     joystick = Joystick()
-
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #卸载音乐
@@ -892,9 +891,10 @@ def battle(chapter_name,screen,setting):
                             attacking_range = characters_data[the_character_get_click].getAttackRange(theMap)
                         any_character_in_attack_range = False
                         for enemies in sangvisFerris_data:
-                            if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in attacking_range["near"] or (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in attacking_range["middle"] or (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in attacking_range["far"]:
-                                any_character_in_attack_range = True
-                                break
+                            if sangvisFerris_data[enemies].current_hp > 0:
+                                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in attacking_range["near"] or (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in attacking_range["middle"] or (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in attacking_range["far"]:
+                                    any_character_in_attack_range = True
+                                    break
                         if any_character_in_attack_range == True:
                             areaDrawColorBlock["green"] = attacking_range["near"]
                             areaDrawColorBlock["blue"] = attacking_range["middle"]

@@ -1,7 +1,8 @@
 # cython: language_level=3
+from Source.battle import *
+from Source.dialog import *
+from Source.mapCreator import *
 from Zero3.basic import *
-from Zero3.dialog import *
-from Zero3.mapCreator import *
 
 def mainMenu(screen,setting):
     #获取屏幕的尺寸

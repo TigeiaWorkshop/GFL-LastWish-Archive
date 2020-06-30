@@ -1,3 +1,4 @@
+# cython: language_level=3
 from Zero3.basic import *
 
 #显示回合切换的UI
