@@ -21,18 +21,9 @@ def dialog(chapter_name,screen,setting,part):
     #卸载音乐
     pygame.mixer.music.unload()
 
-    #从设置中获取语言文件
-    lang = setting['Language']
     #读取章节信息
-    with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
+    with open("Data/main_chapter/{0}_dialogs_{1}.yaml".format(chapter_name,setting['Language']), "r", encoding='utf-8') as f:
         dialog_content = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
-    
-    #加载对话的背景图片（注意是jpg）
-    all_dialog_bg_file_list = glob.glob(r'Assets/image/dialog_background/*.jpg')
-    dialog_bg_img_dic={}
-    for i in range(len(all_dialog_bg_file_list)):
-        img_name = all_dialog_bg_file_list[i].replace("Assets","").replace("image","").replace("dialog_background","").replace(".jpg","").replace("\\","").replace("/","")
-        dialog_bg_img_dic[img_name] = loadImage(all_dialog_bg_file_list[i],(0,0),window_x,window_y)
 
     #选项栏
     optionBox = loadImg("Assets/image/UI/option.png")
@@ -53,58 +44,29 @@ def dialog(chapter_name,screen,setting,part):
     #玩家在对话时做出的选择
     dialog_options = {}
 
-    videoCapture = None
-
     #加载npc立绘系统并初始化
     npc_img_dic = NpcImageSystem()
     npc_img_dic.process(None,dialog_content[dialogId]["characters_img"])
 
+    #加载对话的背景图片
+    backgroundContent = DialogBackground(setting["Sound"]["background_music"])
+    backgroundContent.update(dialog_content[dialogId]["background_img"],None)
+
     #加载完成-淡出效果
     for i in range(100,-1,-1):
-        if dialog_content[dialogId]["background_img"] == None:
-            black_bg.draw(screen)
-        elif dialog_content[dialogId]["background_img"] in dialog_bg_img_dic:
-            dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
-        else:
-            if videoCapture == None:
-                if os.path.exists("Assets/movie/"+dialog_content[dialogId]["background_img"]) == False:
-                    raise Exception('The video file is not exist')
-                videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
-                frames_num = videoCapture.getFrameNum()
-            else:
-                videoCapture.display(screen)
+        backgroundContent.display(screen)
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         Display.flip()
     
-    while if_skip == False:
-        #音效
-        if dialog_content[dialogId]["background_music"] != None:
-            try:
-                pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".mp3")
-            except BaseException:
-                pygame.mixer.music.load("Assets/music/"+dialog_content[dialogId]["background_music"]+".ogg")
-            pygame.mixer.music.play(loops=9999, start=0.0)
-            pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
-        dialog_is_playing_sound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")
-        dialog_is_playing_sound.set_volume(setting["Sound"]["sound_effects"]/100.0)
+    #音效
+    backgroundContent.update(dialog_content[dialogId]["background_img"],dialog_content[dialogId]["background_music"])
 
+    while if_skip == False:
         #主循环
         while len(dialog_content)!=0 and if_skip == False:
             #背景
-            if dialog_content[dialogId]["background_img"] == None:
-                black_bg.draw(screen)
-            elif dialog_content[dialogId]["background_img"] in dialog_bg_img_dic:
-                dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
-            else:
-                if videoCapture == None:
-                    if os.path.exists("Assets/movie/"+dialog_content[dialogId]["background_img"]) == False:
-                        raise Exception('The video file is not exist')
-                    videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
-                    frames_num = videoCapture.getFrameNum()
-                else:
-                    videoCapture.display(screen)
-            #加载对话人物立绘
+            backgroundContent.display(screen)
             npc_img_dic.display(screen)
             #跳过按钮
             skip_button.draw(screen)
@@ -112,6 +74,7 @@ def dialog(chapter_name,screen,setting,part):
             dialogPlayResult = dialogTxtSystem.display(screen)
             if dialogPlayResult == True:
                 if dialog_content[dialogId]["next_dialog_id"] != None and dialog_content[dialogId]["next_dialog_id"][0] == "option":
+                    #显示选项
                     optionBox_y_base = (window_y*3/4-(len(dialog_content[dialogId]["next_dialog_id"])-1)*2*window_x*0.03)/4
                     for i in range(1,len(dialog_content[dialogId]["next_dialog_id"])):
                         option_txt = fontRender(dialog_content[dialogId]["next_dialog_id"][i][0],"white",window_x*0.025)
@@ -122,17 +85,9 @@ def dialog(chapter_name,screen,setting,part):
                         if pygame.mouse.get_pressed()[0] and isHoverOn(optionBox_scaled,(optionBox_x,optionBox_y)):
                             #下一个dialog的Id
                             theNextDialogId = dialog_content[dialogId]["next_dialog_id"][i][1]
-                            if dialog_content[theNextDialogId]["background_img"] != dialog_content[dialogId]["background_img"]:
-                                videoCapture = None
-                            if dialog_content[theNextDialogId]["background_music"] != None and dialog_content[theNextDialogId]["background_music"] != dialog_content[dialogId]["background_music"]:
-                                try:
-                                    pygame.mixer.music.load("Assets/music/"+dialog_content[theNextDialogId]["background_music"]+".mp3")
-                                except BaseException:
-                                    pygame.mixer.music.load("Assets/music/"+dialog_content[theNextDialogId]["background_music"]+".ogg")
-                                pygame.mixer.music.play(loops=9999, start=0.0)
-                                pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
-                            elif dialog_content[theNextDialogId]["background_music"] == None:
-                                pygame.mixer.music.unload()
+                            #更新背景
+                            backgroundContent.update(dialog_content[theNextDialogId]["background_img"],dialog_content[theNextDialogId]["background_music"])
+                            #保存选取的选项
                             dialog_options[len(dialog_options)] = i
                             #重设立绘系统
                             npc_img_dic.process(dialog_content[dialogId]["characters_img"],dialog_content[theNextDialogId]["characters_img"])
@@ -157,18 +112,8 @@ def dialog(chapter_name,screen,setting,part):
                             dialogTxtSystem.playAll()
                         elif dialog_content[dialogId]["next_dialog_id"][0] == "default":
                             theNextDialogId = dialog_content[dialogId]["next_dialog_id"][1]
-                            #如果当前正播放视频但下一幕不是当前视频，则取消视频
-                            if dialog_content[theNextDialogId]["background_img"] != dialog_content[dialogId]["background_img"]:
-                                videoCapture = None
-                            if dialog_content[theNextDialogId]["background_music"] != None and dialog_content[theNextDialogId]["background_music"] != dialog_content[dialogId]["background_music"]:
-                                try:
-                                    pygame.mixer.music.load("Assets/music/"+dialog_content[theNextDialogId]["background_music"]+".mp3")
-                                except BaseException:
-                                    pygame.mixer.music.load("Assets/music/"+dialog_content[theNextDialogId]["background_music"]+".ogg")
-                                pygame.mixer.music.play(loops=9999, start=0.0)
-                                pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
-                            elif dialog_content[theNextDialogId]["background_music"] == None:
-                                pygame.mixer.music.unload()
+                            #更新背景
+                            backgroundContent.update(dialog_content[theNextDialogId]["background_img"],dialog_content[theNextDialogId]["background_music"])
                             #重设立绘系统
                             npc_img_dic.process(dialog_content[dialogId]["characters_img"],dialog_content[theNextDialogId]["characters_img"])
                             #切换dialogId
@@ -181,17 +126,8 @@ def dialog(chapter_name,screen,setting,part):
                     elif pygame.mouse.get_pressed()[2] or joystick.get_button(1) == 1:
                         theNextDialogId = dialog_content[dialogId]["last_dialog_id"]
                         if theNextDialogId != None:
-                            if dialog_content[theNextDialogId]["background_img"] != dialog_content[dialogId]["background_img"]:
-                                videoCapture = None
-                            if dialog_content[theNextDialogId]["background_music"] != None and dialog_content[theNextDialogId]["background_music"] != dialog_content[dialogId]["background_music"]:
-                                try:
-                                    pygame.mixer.music.load("Assets/music/"+dialog_content[theNextDialogId]["background_music"]+".mp3")
-                                except BaseException:
-                                    pygame.mixer.music.load("Assets/music/"+dialog_content[theNextDialogId]["background_music"]+".ogg")
-                                pygame.mixer.music.play(loops=9999, start=0.0)
-                                pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
-                            elif dialog_content[theNextDialogId]["background_music"] == None:
-                                pygame.mixer.music.unload()
+                            #更新背景
+                            backgroundContent.update(dialog_content[theNextDialogId]["background_img"],dialog_content[theNextDialogId]["background_music"])
                             #重设立绘系统
                             npc_img_dic.process(dialog_content[dialogId]["characters_img"],dialog_content[theNextDialogId]["characters_img"])
                             #切换dialogId
@@ -209,32 +145,20 @@ def dialog(chapter_name,screen,setting,part):
         #如果是因changeScene跳出
         if dialog_content[dialogId]["next_dialog_id"] != None and dialog_content[dialogId]["next_dialog_id"][0] == "changeScene":
             if_skip = False
-            videoCapture = None
             time.sleep(2)
             dialogId = dialog_content[dialogId]["next_dialog_id"][1]
             dialogTxtSystem.resetDialogueboxData()
             dialogTxtSystem.updateContent(dialog_content[dialogId]["content"],dialog_content[dialogId]["narrator"])
+            backgroundContent.update(dialog_content[dialogId]["background_img"],None)
             for i in range(255,0,-5):
-                if dialog_content[dialogId]["background_img"] == None:
-                    black_bg.draw(screen)
-                else:
-                    if dialog_content[dialogId]["background_img"] in dialog_bg_img_dic:
-                        dialog_bg_img_dic[dialog_content[dialogId]["background_img"]].draw(screen)
-                    else:
-                        if videoCapture == None:
-                            if os.path.exists("Assets/movie/"+dialog_content[dialogId]["background_img"]) == False:
-                                raise Exception('The video file is not exist')
-                            videoCapture = VideoObject("Assets/movie/"+dialog_content[dialogId]["background_img"],True)
-                            frames_num = videoCapture.getFrameNum()
-                        else:
-                            videoCapture.display(screen)
-                    black_bg.set_alpha(i)
-                    black_bg.draw(screen)
+                backgroundContent.display(screen)
+                black_bg.set_alpha(i)
+                black_bg.draw(screen)
                 Display.flip()
             #重设black_bg的alpha值以便下一次使用
             black_bg.set_alpha(255)
-
-    if len(dialog_options) == 0:
-        return True
-    else:
+            #更新背景（音乐）
+            backgroundContent.update(dialog_content[dialogId]["background_img"],dialog_content[dialogId]["background_music"])
+        
+        #返回玩家做出的选项
         return dialog_options

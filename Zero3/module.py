@@ -347,6 +347,7 @@ class settingContoller:
                         self.soundVolume_sound_environment = round(100*(mouse_x-self.bar_x)/self.bar_width)
         return False
 
+#对话框和对话框内容
 class DialogContent:
     def __init__(self,fontSize):
         self.content = ""
@@ -441,6 +442,55 @@ class DialogContent:
                 return True
         return False
 
+#背景音乐和图片管理
+class DialogBackground:
+    def __init__(self,backgroundMusicVolume):
+        self.backgroundImgName = None
+        self.backgroundImgSurface = None
+        self.nullSurface = pygame.image.load(os.path.join("Assets/image/UI/black.png")).convert_alpha()
+        self.backgroundMusicName = None
+        self.setBgmVolume(backgroundMusicVolume)
+    def setBgmVolume(self,backgroundMusicVolume):
+        self.backgroundMusicVolume = backgroundMusicVolume/100.0
+        pygame.mixer.music.set_volume(self.backgroundMusicVolume)
+    def update(self,backgroundImgName,backgroundMusicName):
+        #如果需要更新背景图片
+        if self.backgroundImgName != backgroundImgName:
+            self.backgroundImgName = backgroundImgName
+            if self.backgroundImgName != None:
+                if os.path.exists("Assets/image/dialog_background/{}.png".format(self.backgroundImgName)):
+                    self.backgroundImgSurface = pygame.image.load(os.path.join("Assets/image/dialog_background/{}.png".format(self.backgroundImgName))).convert_alpha()
+                elif os.path.exists("Assets/image/dialog_background/{}.jpg".format(self.backgroundImgName)):
+                    self.backgroundImgSurface = pygame.image.load(os.path.join("Assets/image/dialog_background/{}.jpg".format(self.backgroundImgName))).convert_alpha()
+                elif os.path.exists("Assets/movie/"+self.backgroundImgName):
+                    self.backgroundImgSurface = VideoObject("Assets/movie/"+self.backgroundImgName,True)
+                else:
+                    raise Exception('Warning: Cannot find background image or video file.')
+            else:
+                self.backgroundImgSurface = None
+        #如果需要更新背景音乐
+        if self.backgroundMusicName != backgroundMusicName:
+            self.backgroundMusicName = backgroundMusicName
+            if self.backgroundMusicName != None:
+                if os.path.exists("Assets/music/{}.mp3".format(self.backgroundMusicName)):
+                    pygame.mixer.music.load("Assets/music/{}.mp3".format(self.backgroundMusicName))
+                elif os.path.exists("Assets/music/{}.ogg".format(self.backgroundMusicName)):
+                    pygame.mixer.music.load("Assets/music/{}.ogg".format(self.backgroundMusicName))
+                else:
+                    raise Exception('Warning: Cannot find background music file.')
+                pygame.mixer.music.play(loops=9999, start=0.0)
+            else:
+                pygame.mixer.music.unload()
+    def display(self,screen):
+        if self.backgroundImgName != None:
+            if isinstance(self.backgroundImgSurface,VideoObject):
+                self.backgroundImgSurface.display(screen)
+            else:
+                screen.blit(pygame.transform.scale(self.backgroundImgSurface,screen.get_size()),(0,0))
+        else:
+            screen.blit(pygame.transform.scale(self.nullSurface,screen.get_size()),(0,0))
+
+#过场动画
 def cutscene(screen,videoPath,bgmPath):
     """
     thevideo = VideoObject(videoPath)
