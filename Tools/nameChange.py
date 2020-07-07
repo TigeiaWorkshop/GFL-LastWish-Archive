@@ -1,12 +1,20 @@
 import os
 import glob
-
+import sys, zipfile
 #所有动作
 actions = ["attack","attack2","die","die2","die3","move","wait","wait2","skill","victory","victoryloop","reload","repair","set"]
 #总共处理的图片
 total_img = 0
 #所有种类：比如铁血啊格里芬啊
 kinds = ["sangvisFerri","character"]
+
+def unzip_single(src_file, dest_dir):
+    zf = zipfile.ZipFile(src_file)
+    try:
+        zf.extractall(path=dest_dir)
+    except RuntimeError as e:
+        print(e)
+    zf.close()
 
 for kind in kinds:
     #读取当前种类下所有类型的角色
