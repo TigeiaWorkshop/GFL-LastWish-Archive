@@ -8,7 +8,10 @@ def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
         if ifConvertAlpha == False:
             img = pygame.image.load(os.path.join(path))
         else:
-            img = pygame.image.load(os.path.join(path)).convert_alpha()
+            try:
+                img = pygame.image.load(os.path.join(path)).convert_alpha()
+            except BaseException:
+                raise Exception('Error: Cannot find image! Path: '+path)
     else:
         img = path
     if setAlpha != None:
