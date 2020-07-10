@@ -525,3 +525,21 @@ def cutscene(screen,videoPath,bgmPath):
     """
     clip = VideoFileClip(videoPath)
     clip.preview()
+
+#行动点数管理器（塔防模式）
+class ApSystem:
+    def __init__(self,fontSize):
+        self.point = 0
+        self.coolDown = 0
+        with open("Save/setting.yaml", "r", encoding='utf-8') as f:
+            DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
+            self.FONT = DATA["Font"]
+            self.MODE = DATA["Antialias"]
+        self.FONT = pygame.font.SysFont(self.FONT,int(fontSize))
+    def display(self,screen,x,y):
+        screen.blit(self.FONT.render(self.point,self.MODE,(255, 255, 255)),(x,y))
+        if self.coolDown == 100:
+            self.point += 1
+            self.coolDown = 0
+        else:
+            self.coolDown += 1
