@@ -117,7 +117,10 @@ class WarningSystem:
         self.all_warnings.insert(0,fontRender(self.warnings[the_warning],"red",fontSize,True))
     def display(self,screen):
         for i in range(len(self.all_warnings)):
-            img_alpha = self.all_warnings[i].get_alpha()
+            try:
+                img_alpha = self.all_warnings[i].get_alpha()
+            except BaseException:
+                break
             if img_alpha > 0:
                 screen.blit(self.all_warnings[i],((screen.get_width()-self.all_warnings[i].get_width())/2,(screen.get_height()-self.all_warnings[i].get_height())/2+i*self.all_warnings[i].get_height()*1.2))
                 self.all_warnings[i].set_alpha(img_alpha-5)

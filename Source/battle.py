@@ -126,6 +126,7 @@ def battle(chapter_name,screen,setting):
         "blue" : resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None)),
         "orange": resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
     }
+    print(UI_img["green"].get_width(),UI_img["green"].get_height())
     #角色信息UI管理
     characterInfoBoardUI = CharacterInfoBoard(window_x,window_y)
     #加载对话框图片
@@ -492,14 +493,16 @@ def battle(chapter_name,screen,setting):
                             idle_seconde = 0
                             seconde_to_idle = None
                 elif "changePos" in dialog_to_display[display_num]:
+                    ifProcessMap = False
                     if screen_to_move_x == None and "x" in dialog_to_display[display_num]["changePos"]:
                         screen_to_move_x = dialog_to_display[display_num]["changePos"]["x"]
                     if screen_to_move_y == None and "y" in dialog_to_display[display_num]["changePos"]:
                         screen_to_move_y = dialog_to_display[display_num]["changePos"]["y"]
                     if screen_to_move_x != None and screen_to_move_x != 0:
                         temp_value = theMap.local_x + screen_to_move_x*0.2
-                        if window_x-theMap.mapSurface.get_width()<=temp_value<=0:
+                        if window_x-theMap.surface_width<=temp_value<=0:
                             theMap.local_x = temp_value
+                            ifProcessMap = True
                             screen_to_move_x*=0.8
                             if int(screen_to_move_x) == 0:
                                 screen_to_move_x = 0
@@ -507,13 +510,16 @@ def battle(chapter_name,screen,setting):
                             screen_to_move_x = 0
                     if screen_to_move_y != None and screen_to_move_y !=0:
                         temp_value = theMap.local_y + screen_to_move_y*0.2
-                        if window_y-theMap.mapSurface.get_height()<=temp_value<=0:
+                        if window_y-theMap.surface_height<=temp_value<=0:
                             theMap.local_y = temp_value
+                            ifProcessMap = True
                             screen_to_move_y*=0.8
                             if int(screen_to_move_y) == 0:
                                 screen_to_move_y = 0
                         else:
                             screen_to_move_y = 0
+                    if ifProcessMap == True:
+                        theMap.process_map(window_x,window_y)
                     if screen_to_move_x == 0 and screen_to_move_y == 0 or screen_to_move_x == None and screen_to_move_y == None:
                         screen_to_move_x = None
                         screen_to_move_y = None
@@ -580,6 +586,7 @@ def battle(chapter_name,screen,setting):
             if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
                 pygame.mixer.Channel(1).play(environment_sound)
             right_click = False
+            ifProcessMap = False
             #获取鼠标坐标
             mouse_x,mouse_y=pygame.mouse.get_pos()
             for event in pygame.event.get():
@@ -645,12 +652,16 @@ def battle(chapter_name,screen,setting):
                     if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
                         if mouse_move_temp_x > mouse_x:
                             theMap.local_x += mouse_move_temp_x-mouse_x
+                            ifProcessMap = True
                         elif mouse_move_temp_x < mouse_x:
                             theMap.local_x -= mouse_x-mouse_move_temp_x
+                            ifProcessMap = True
                         if mouse_move_temp_y > mouse_y:
                             theMap.local_y += mouse_move_temp_y-mouse_y
+                            ifProcessMap = True
                         elif mouse_move_temp_y < mouse_y:
                             theMap.local_y -= mouse_y-mouse_move_temp_y
+                            ifProcessMap = True
                         mouse_move_temp_x = mouse_x
                         mouse_move_temp_y = mouse_y
             else:
@@ -667,6 +678,7 @@ def battle(chapter_name,screen,setting):
                 newPerBlockHeight = round(window_y/theMap.row*zoomIn/100)
                 theMap.local_x += (theMap.perBlockWidth-newPerBlockWidth)*theMap.column/2
                 theMap.local_y += (perBlockHeight-newPerBlockHeight)*theMap.row/2
+                ifProcessMap = True
                 theMap.perBlockWidth = newPerBlockWidth
                 perBlockHeight = newPerBlockHeight
                 #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
@@ -704,25 +716,27 @@ def battle(chapter_name,screen,setting):
             #如果需要移动屏幕
             if screen_to_move_x != None and screen_to_move_x != 0:
                 temp_value = theMap.local_x + screen_to_move_x*0.2
-                if window_x-theMap.mapSurface.get_width()<=temp_value<=0:
+                if window_x-theMap.surface_width<=temp_value<=0:
                     theMap.local_x = temp_value
                     screen_to_move_x*=0.8
                     if int(screen_to_move_x) == 0:
                         screen_to_move_x = 0
                 else:
                     screen_to_move_x = 0
+                ifProcessMap = True
             if screen_to_move_y != None and screen_to_move_y !=0:
                 temp_value = theMap.local_y + screen_to_move_y*0.2
-                if window_y-theMap.mapSurface.get_height()<=temp_value<=0:
+                if window_y-theMap.surface_height<=temp_value<=0:
                     theMap.local_y = temp_value
                     screen_to_move_y*=0.8
                     if int(screen_to_move_y) == 0:
                         screen_to_move_y = 0
                 else:
                     screen_to_move_y = 0
+                ifProcessMap = True
             
             #加载地图
-            screen_to_move_x,screen_to_move_y = theMap.display_map(screen,screen_to_move_x,screen_to_move_y)
+            screen_to_move_x,screen_to_move_y = theMap.display_map(screen,screen_to_move_x,screen_to_move_y,ifProcessMap)
             #画出用彩色方块表示的范围
             for area in areaDrawColorBlock:
                 for position in areaDrawColorBlock[area]:

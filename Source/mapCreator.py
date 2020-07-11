@@ -31,10 +31,10 @@ def mapCreator(chapterName,screen,setting):
             sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],"dev")
         #初始化地图
         theMap = loadData["map"]
-        if len(theMap) == 0:
+        if theMap == None or len(theMap) == 0:
             SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
-            block_y = 24
-            block_x = 24
+            block_y = 50
+            block_x = 50
             default_map = []
             for i in range(block_y):
                 map_per_line = []

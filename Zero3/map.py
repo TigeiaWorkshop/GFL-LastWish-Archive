@@ -22,7 +22,7 @@ class MapObject:
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
         self.bgImg = loadImg("Assets/image/dialog_background/"+mapDataDic["backgroundImage"])
-        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height)).convert()
+        self.mapSurface = None
         self.local_x = local_x
         self.local_y = local_y
         """
@@ -43,21 +43,23 @@ class MapObject:
         self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
         self.process_map(window_x,window_y)
     #把地图画到屏幕上
-    def display_map(self,screen,screen_to_move_x=0,screen_to_move_y=0):
+    def display_map(self,screen,screen_to_move_x=0,screen_to_move_y=0,ifProcessMap=False):
         #检测屏幕是不是移到了不移到的地方
-        if self.local_x < screen.get_width()-self.mapSurface.get_width():
-            self.local_x = screen.get_width()-self.mapSurface.get_width()
+        if self.local_x < screen.get_width()-self.surface_width:
+            self.local_x = screen.get_width()-self.surface_width
             screen_to_move_x = 0
         elif self.local_x > 0:
             self.local_x = 0
             screen_to_move_x = 0
-        if self.local_y < screen.get_height()-self.mapSurface.get_height():
-            self.local_y = screen.get_height()-self.mapSurface.get_height()
+        if self.local_y < screen.get_height()-self.surface_height:
+            self.local_y = screen.get_height()-self.surface_height
             screen_to_move_y = 0
         elif self.local_y > 0:
             self.local_y = 0
             screen_to_move_y = 0
-        screen.blit(self.mapSurface,(self.local_x,self.local_y))
+        if ifProcessMap == True:
+            self.process_map(screen.get_width(),screen.get_height())
+        screen.blit(self.mapSurface,(0,0))
         return (screen_to_move_x,screen_to_move_y)
     #画上设施
     def display_facility(self,screen,characters_data,sangvisFerris_data):
@@ -174,36 +176,41 @@ class MapObject:
             self.surface_width = window_x
         if self.surface_height < window_y:
             self.surface_height = window_y
-        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height)).convert()
+        self.mapSurface = pygame.surface.Surface((window_x,window_y)).convert()
         if self.bgImg != None:
-            self.mapSurface.blit(pygame.transform.scale(self.bgImg,(self.surface_width,self.surface_height)),(0,0))
+            self.mapSurface.blit(pygame.transform.scale(self.bgImg,(self.surface_width,self.surface_height)),(self.local_x,self.local_y))
         """
         for eachBlock in self.mapBlocks:
             eachBlock.updateLightArea(self.lightArea,self.env_img_list,self.perBlockWidth,self.darkMode)
             eachBlock.draw(self.mapSurface,self.row,self.perBlockWidth)
         """
+        #画出地图
         for y in range(len(self.mapData)):
+            #hitTemp = False
             for x in range(len(self.mapData[y])):
                 xTemp,yTemp = self.calPosInMap(x,y)
-                xTemp-=self.local_x
-                yTemp-=self.local_y
-                #画上场景图片
-                if self.darkMode == True and (x,y) not in self.lightArea:
-                    try:
-                        self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
-                    #如果图片没找到
-                    except BaseException:
-                        self.env_img_list_original["dark"][self.mapData[y][x].name] = addDarkness(loadImg("Assets/image/environment/block/"+self.mapData[y][x].name+".png"),150)
-                        self.env_img_list["dark"][self.mapData[y][x].name] = resizeImg(self.env_img_list_original["dark"][self.mapData[y][x].name],(self.perBlockWidth,None))
-                        self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
-                else:
-                    try:
-                        self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
-                    #如果图片没找到
-                    except BaseException:
-                        self.env_img_list_original["normal"][self.mapData[y][x].name] = loadImg("Assets/image/environment/block/"+self.mapData[y][x].name+".png")
-                        self.env_img_list["normal"][self.mapData[y][x].name] = resizeImg(self.env_img_list_original["normal"][self.mapData[y][x].name],(self.perBlockWidth,None))
-                        self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
+                if -self.perBlockWidth<=xTemp<window_x and -self.perBlockWidth<=yTemp<window_y:
+                    #hitTemp = True
+                    #画上场景图片
+                    if self.darkMode == True and (x,y) not in self.lightArea:
+                        try:
+                            self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
+                        #如果图片没找到
+                        except BaseException:
+                            self.env_img_list_original["dark"][self.mapData[y][x].name] = addDarkness(loadImg("Assets/image/environment/block/"+self.mapData[y][x].name+".png"),150)
+                            self.env_img_list["dark"][self.mapData[y][x].name] = resizeImg(self.env_img_list_original["dark"][self.mapData[y][x].name],(self.perBlockWidth,None))
+                            self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
+                    else:
+                        try:
+                            self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
+                        #如果图片没找到
+                        except BaseException:
+                            self.env_img_list_original["normal"][self.mapData[y][x].name] = loadImg("Assets/image/environment/block/"+self.mapData[y][x].name+".png")
+                            self.env_img_list["normal"][self.mapData[y][x].name] = resizeImg(self.env_img_list_original["normal"][self.mapData[y][x].name],(self.perBlockWidth,None))
+                            self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
+                elif xTemp>=window_x:
+                    break
+            
     #计算在地图中的方块
     def calBlockInMap(self,block,mouse_x,mouse_y):
         guess_x = int(((mouse_x-self.local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
@@ -263,7 +270,7 @@ class MapObject:
         self.process_map(window_x,window_y)
     #计算在地图中的位置
     def calPosInMap(self,x,y):
-        return (x-y)*self.perBlockWidth*0.43+self.local_x+self.row*self.perBlockWidth*0.43,(y+x)*self.perBlockWidth*0.22+self.local_y+self.perBlockWidth*0.4
+        return round((x-y)*self.perBlockWidth*0.43+self.local_x+self.row*self.perBlockWidth*0.43,1),round((y+x)*self.perBlockWidth*0.22+self.local_y+self.perBlockWidth*0.4,1)
 
 #初始化地图数据
 def initialBlockData(mapData,facilityData,blocks_setting):
