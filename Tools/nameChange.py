@@ -2,7 +2,7 @@ import os
 import glob
 import sys, zipfile, shutil
 #所有动作
-actions = ["attack","attack2","die","die2","die3","move","wait","wait2","skill","victory","victoryloop","reload","repair","set"]
+actions = ["attack","attack2","die","die2","die3","move","wait","wait2","skill","victory","victoryloop","reload","repair","set","spine"]
 #总共处理的图片
 total_img = 0
 #所有种类：比如铁血啊格里芬啊

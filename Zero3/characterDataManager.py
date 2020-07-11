@@ -165,7 +165,8 @@ class CharacterDataManager(Doll):
                 self.ImageGetHurt = loadImage("Assets/image/npc/"+theCharacterDataDic["type"]+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
             except BaseException:
                 print('警告：角色 {} 没有对应的破衣动画'.format(theCharacterDataDic["type"]))
-                print("而且很大几率你也忘了加入对应的头像")
+                if not os.path.exists("Assets/image/npc_icon/{}.png".format(theCharacterDataDic["type"])):
+                    print("而且你也忘了加入对应的头像")
 
 #铁血角色类
 class SangvisFerriDataManager(Doll):
