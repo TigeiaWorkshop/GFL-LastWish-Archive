@@ -128,29 +128,29 @@ def mapCreator(chapterName,screen,setting):
         mouse_x,mouse_y=pygame.mouse.get_pos()
         block_get_click = theMap.calBlockInMap(green,mouse_x,mouse_y)
         for event in pygame.event.get():
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
                     object_to_put_down = None
                     data_to_edit = None
                     deleteMode = False
-                if event.key == K_w:
+                if event.key == pygame.K_w:
                     pressKeyToMove["up"]=True
-                if event.key == K_s:
+                if event.key == pygame.K_s:
                     pressKeyToMove["down"]=True
-                if event.key == K_a:
+                if event.key == pygame.K_a:
                     pressKeyToMove["left"]=True
-                if event.key == K_d:
+                if event.key == pygame.K_d:
                     pressKeyToMove["right"]=True
-            elif event.type == KEYUP:
-                if event.key == K_w:
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_w:
                     pressKeyToMove["up"]=False
-                if event.key == K_s:
+                if event.key == pygame.K_s:
                     pressKeyToMove["down"]=False
-                if event.key == K_a:
+                if event.key == pygame.K_a:
                     pressKeyToMove["left"]=False
-                if event.key == K_d:
+                if event.key == pygame.K_d:
                     pressKeyToMove["right"]=False
-            elif event.type == MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 if isHover(UIContainerRight):
                     #上下滚轮-放大和缩小地图
                     if event.button == 4 and UI_local_y<0:

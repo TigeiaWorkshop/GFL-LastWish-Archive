@@ -15,11 +15,9 @@ def battle(chapter_name,screen,setting):
     pygame.mixer.music.unload()
     #帧率控制器
     Display = DisplayController(setting['FPS'])
-    #从设置中获取语言文件
-    lang = setting['Language']
 
     #加载按钮的文字
-    with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
+    with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         selectMenuUI = SelectMenu(loadData["SelectMenu"])
         battleUiTxt = loadData["Battle_UI"]
@@ -27,7 +25,7 @@ def battle(chapter_name,screen,setting):
         loading_info = loadData["LoadingTxt"]
         resultTxt = loadData["ResultBoard"]
 
-    with open("Data/main_chapter/"+chapter_name+"_dialogs_"+lang+".yaml", "r", encoding='utf-8') as f:
+    with open("Data/main_chapter/"+chapter_name+"_dialogs_"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         chapter_title = loadData["title"]
         battle_info = loadData["battle_info"]
@@ -493,10 +491,10 @@ def battle(chapter_name,screen,setting):
                             display_num += 1
                     #玩家输入按键判定
                     for event in pygame.event.get():
-                        if event.type == KEYDOWN:
-                            if event.key == K_ESCAPE:
+                        if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_ESCAPE:
                                 Display.quit()
-                        elif event.type == MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
+                        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
                             if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
                                 display_num +=1
                                 if display_num < len(dialog_to_display):
@@ -566,35 +564,35 @@ def battle(chapter_name,screen,setting):
             #获取鼠标坐标
             mouse_x,mouse_y=pygame.mouse.get_pos()
             for event in pygame.event.get():
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE and isWaiting == True:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE and isWaiting == True:
                         green_hide = True
                         the_character_get_click = ""
                         action_choice = ""
                         attacking_range = None
                         skill_range = None
                         areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-                    if event.key == K_w:
+                    if event.key == pygame.K_w:
                         pressKeyToMove["up"]=True
-                    if event.key == K_s:
+                    if event.key == pygame.K_s:
                         pressKeyToMove["down"]=True
-                    if event.key == K_a:
+                    if event.key == pygame.K_a:
                         pressKeyToMove["left"]=True
-                    if event.key == K_d:
+                    if event.key == pygame.K_d:
                         pressKeyToMove["right"]=True
-                    if event.key == K_m:
+                    if event.key == pygame.K_m:
                         Display.quit()
-                elif event.type == KEYUP:
-                    if event.key == K_w:
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_w:
                         pressKeyToMove["up"]=False
-                    if event.key == K_s:
+                    if event.key == pygame.K_s:
                         pressKeyToMove["down"]=False
-                    if event.key == K_a:
+                    if event.key == pygame.K_a:
                         pressKeyToMove["left"]=False
-                    if event.key == K_d:
+                    if event.key == pygame.K_d:
                         pressKeyToMove["right"]=False
                 #鼠标点击
-                elif event.type == MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     #上下滚轮-放大和缩小地图
                     if event.button == 1 and whose_round == "player":
                         right_click = True
@@ -1496,8 +1494,8 @@ def battle(chapter_name,screen,setting):
             
             if whose_round == "result":
                 for event in pygame.event.get():
-                    if event.type == KEYDOWN:
-                        if event.key == K_SPACE:
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
                             battle = False
                             battleSystemMainLoop = False
                 ResultBoardUI.display(screen)

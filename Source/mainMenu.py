@@ -10,12 +10,9 @@ def mainMenu(screen,setting):
     #帧率控制器
     Display = DisplayController(setting['FPS'])
     HealthyGamingAdvice = []
-    #从设置中获取语言文件
-    lang = setting['Language']
-
     #加载主菜单文字
     try:
-        with open("Lang/"+lang+".yaml", "r", encoding='utf-8') as f:
+        with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
             loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
     except BaseException:
         raise Exception('Error: Current language is not supported, please check the "setting.yaml" file in Save folder!')
@@ -150,7 +147,7 @@ def mainMenu(screen,setting):
 
         #判断按键
         for event in pygame.event.get():
-            if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and settingUI.ifDisplay != True:
+            if event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and settingUI.ifDisplay != True:
                 click_button_sound.play()
                 if menu_type == 0:
                     if isHoverOn(main_menu_txt["menu_0"]["text0_start"].n,(txt_location,main_menu_txt_start_height0)):

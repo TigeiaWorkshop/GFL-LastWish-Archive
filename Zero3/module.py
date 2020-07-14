@@ -543,3 +543,36 @@ class ApSystem:
             self.coolDown = 0
         else:
             self.coolDown += 1
+
+class Button:
+    def __init__(self,path,x,y):
+        self.img = pygame.image.load(os.path.join(path)) if isinstance(path,str) else path
+        self.img2 = None
+        self.hoverEventTriggered = False
+        self.x = x
+        self.y = y
+        if isinstance(path,str):
+            pass
+    def display(self,screen):
+        screen.blit(self.img,(self.x,self.y))
+    def hoverEvent(self):
+        if self.img2 != None and self.hoverEventTriggered == False:
+            tempSurface = self.img
+            self.img = self.img2
+            self.img2 = tempSurface
+            self.hoverEventTriggered = True
+    def hoverEventOff(self):
+        if self.img2 != None and self.hoverEventTriggered == True:
+            tempSurface = self.img
+            self.img = self.img2
+            self.img2 = tempSurface
+            self.hoverEventTriggered = False
+    def isHoverOn(self,mouse_pos=None):
+        if mouse_pos == None:
+            mouse_pos=pygame.mouse.get_pos()
+        if self.x<=mouse_pos[0]<=self.x+self.img.get_width() and self.y<=mouse_pos[1]<=self.y+self.img.get_height():
+            self.hoverEvent()
+            return True
+        else:
+            self.hoverEventOff()
+            return False

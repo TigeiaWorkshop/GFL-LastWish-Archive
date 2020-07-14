@@ -15,6 +15,9 @@ Chapter:
 - 第七章
 - 第八章
 - 返回
+Dialog:
+  auto: 自动
+  skip: 跳过
 Font: simhei
 GameTitle: 少女前线-遗愿
 HealthyGamingAdvice:

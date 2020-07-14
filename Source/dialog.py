@@ -28,7 +28,10 @@ def dialog(chapter_name,screen,setting,part):
     #选项栏
     optionBox = loadImg("Assets/image/UI/option.png")
     #跳过按钮
-    skip_button = loadImage("Assets/image/UI/skip.png",(window_x*0.92,window_y*0.05),window_x*0.055,window_x*0.025)
+    with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
+        dialog_txt = yaml.load(f.read(),Loader=yaml.FullLoader)["Dialog"]
+        skip_button = Button(fontRender(dialog_txt["skip"],"gray",window_x*0.02),window_x*0.92,window_y*0.05)
+        skip_button.img2 = fontRender(dialog_txt["skip"],"white",window_x*0.02)
     if_skip = False
     #黑色帘幕
     black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
@@ -69,7 +72,8 @@ def dialog(chapter_name,screen,setting,part):
             backgroundContent.display(screen)
             npc_img_dic.display(screen)
             #跳过按钮
-            skip_button.draw(screen)
+            skip_button.display(screen)
+            ifSkipButtonHovered = skip_button.isHoverOn()
             #显示对话框和对应文字
             dialogPlayResult = dialogTxtSystem.display(screen)
             if dialogPlayResult == True:
@@ -95,17 +99,17 @@ def dialog(chapter_name,screen,setting,part):
                             dialogId = theNextDialogId
                             dialogTxtSystem.updateContent(dialog_content[dialogId]["content"],dialog_content[dialogId]["narrator"])
                             break
-
+            
 
             #按键判定
             for event in pygame.event.get():
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
                         Display.quit()
-                elif event.type == MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
                     if pygame.mouse.get_pressed()[0] or joystick.get_button(0) == 1:
                         #如果接来下没有文档了或者玩家按到了跳过按钮
-                        if isHover(skip_button) or dialog_content[dialogId]["next_dialog_id"] == None:
+                        if ifSkipButtonHovered or dialog_content[dialogId]["next_dialog_id"] == None:
                             if_skip = True
                         #如果所有行都没有播出，则播出所有行
                         elif dialogPlayResult == False:

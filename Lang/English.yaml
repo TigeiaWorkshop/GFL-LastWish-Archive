@@ -15,6 +15,9 @@ Chapter:
 - Chapter 7
 - Chapter 8
 - Back
+Dialog:
+  auto: Auto
+  skip: Skip
 Font: Times New Roman
 GameTitle: Girls' Frontline - Last wish
 LoadingTxt:
