@@ -126,7 +126,6 @@ def battle(chapter_name,screen,setting):
         "blue" : resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None)),
         "orange": resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
     }
-    print(UI_img["green"].get_width(),UI_img["green"].get_height())
     #角色信息UI管理
     characterInfoBoardUI = CharacterInfoBoard(window_x,window_y)
     #加载对话框图片
@@ -155,7 +154,7 @@ def battle(chapter_name,screen,setting):
     enemies_in_control = ""
     action_choice =""
     green_hide = True
-    battle=True
+    battle=False
     isWaiting = True
     whose_round = "sangvisFerrisToPlayer"
     mouse_move_temp_x = -1
@@ -167,7 +166,7 @@ def battle(chapter_name,screen,setting):
     pressKeyToMove={"up":False,"down":False,"left":False,"right":False}
     rightClickCharacterAlpha = None
     battleSystemMainLoop = True
-    txt_alpha = 250
+    txt_alpha = None
     skill_target = None
     stayingTime = 0
     buttonGetHover = None
@@ -176,6 +175,7 @@ def battle(chapter_name,screen,setting):
     RoundSwitchUI = RoundSwitch(window_x,window_y,battleUiTxt)
     enemies_in_control_id = None
     sangvisFerris_name_list = None
+    dialog_valuable_initialized = False
     # 移动路径
     the_route = []
     #上个回合因为暴露被敌人发现的角色
@@ -211,380 +211,356 @@ def battle(chapter_name,screen,setting):
         dialog_to_display = dialog_during_battle[dialogInfo["initial"]]
 
     #加载完成，章节标题淡出
-    #如果战斗前无·对话
-    if dialog_to_display == None:
-        if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
-            pygame.mixer.Channel(1).play(environment_sound)
-        for a in range(250,0,-5):
-            #加载地图
-            theMap.display_map(screen)
-            theMap.display_facility_ahead(screen)
-            #角色动画
-            for every_chara in characters_data:
-                characters_data[every_chara].draw("wait",screen,theMap)
-            for enemies in sangvisFerris_data:
-                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
-                    sangvisFerris_data[enemies].draw("wait",screen,theMap)
-            #展示设施
-            theMap.display_facility(screen,characters_data,sangvisFerris_data)
-            #角色动画
-            for every_chara in characters_data:
-                characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
-            for enemies in sangvisFerris_data:
-                if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
-                    sangvisFerris_data[enemies].drawUI(screen,original_UI_img,theMap)
-            #加载雪花
-            if weatherController != None:
-                weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
-
-            infoToDisplayDuringLoading.black_bg.set_alpha(a)
-            infoToDisplayDuringLoading.display(screen)
-
-            for i in range(len(battle_info)):
-                battle_info[i].set_alpha(a)
-                drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-                if i == 1:
-                    temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
-                    temp_secode.set_alpha(a)
-                    drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-            Display.flip()
     
     #战斗系统主要loop
     while battleSystemMainLoop == True:
-        #如果战斗前有对话
-        if dialog_to_display != None:
-            #设定初始化
-            display_num = 0
-            dialog_up_content_id = 0
-            dialog_down_content_id = 0
-            dialog_up_displayed_line = 0
-            dialog_down_displayed_line = 0
-            all_characters_path = None
-            actionLoop = {}
-            theAction = None
-            idle_seconde = 0
-            seconde_to_idle = None
-            #对话系统总循环
-            while display_num < len(dialog_to_display):
-                if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
-                    pygame.mixer.Channel(1).play(environment_sound)
-                #加载地图
-                theMap.display_map(screen)
-                theMap.display_facility_ahead(screen)
-                #角色动画
-                for key,value in dicMerge(sangvisFerris_data,characters_data).items():
-                    if value.faction == "character" or (value.x,value.y) in theMap.lightArea or theMap.darkMode != True:
-                        if all_characters_path != None and key in all_characters_path:
-                            value.draw("move",screen,theMap)
-                        elif theAction != None and key in theAction:
-                            pass
-                        elif key in actionLoop:
-                            if actionLoop[key] != "die":
-                                value.draw(actionLoop[key],screen,theMap,False)
+        #环境声音-频道1
+        if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
+            pygame.mixer.Channel(1).play(environment_sound)
+        if battle == False:
+            #如果战斗有对话
+            if dialog_to_display != None:
+                #设定初始化
+                if dialog_valuable_initialized == False:
+                    dialog_valuable_initialized = True
+                    display_num = 0
+                    dialog_up_content_id = 0
+                    dialog_down_content_id = 0
+                    dialog_up_displayed_line = 0
+                    dialog_down_displayed_line = 0
+                    all_characters_path = None
+                    actionLoop = {}
+                    theAction = None
+                    idle_seconde = 0
+                    seconde_to_idle = None
+                #对话系统总循环
+                if display_num < len(dialog_to_display):
+                    #加载地图
+                    theMap.display_map(screen)
+                    theMap.display_facility_ahead(screen)
+                    #角色动画
+                    for key,value in dicMerge(sangvisFerris_data,characters_data).items():
+                        if value.faction == "character" or (value.x,value.y) in theMap.lightArea or theMap.darkMode != True:
+                            if all_characters_path != None and key in all_characters_path:
+                                value.draw("move",screen,theMap)
+                            elif theAction != None and key in theAction:
+                                pass
+                            elif key in actionLoop:
+                                if actionLoop[key] != "die":
+                                    value.draw(actionLoop[key],screen,theMap,False)
+                                else:
+                                    value.draw(actionLoop[key],screen,theMap)
                             else:
-                                value.draw(actionLoop[key],screen,theMap)
+                                value.draw("wait",screen,theMap)
+                    #展示设施
+                    theMap.display_facility(screen,characters_data,sangvisFerris_data)
+                    #加载雪花
+                    if weatherController != None:
+                        weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
+                    #如果操作是移动
+                    if "move" in dialog_to_display[display_num]:
+                        if all_characters_path == None:
+                            all_characters_path = {}
+                            for key,value in dicMerge(sangvisFerris_data,characters_data).items():
+                                if key in dialog_to_display[display_num]["move"]:
+                                    #创建AStar对象,并设置起点和终点为
+                                    start_x = value.x
+                                    start_y = value.y
+                                    end_x = dialog_to_display[display_num]["move"][key]["x"]
+                                    end_y = dialog_to_display[display_num]["move"][key]["y"]
+                                    the_route = theMap.findPath((start_x,start_y),(end_x,end_y),characters_data,sangvisFerris_data,None,dialog_to_display[display_num]["move"])
+                                    if len(the_route)>0:
+                                        all_characters_path[key] = the_route
+                        if len(all_characters_path)>0:
+                            if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
+                                pygame.mixer.Channel(1).play(environment_sound)
+                            key_to_remove = []
+                            reProcessMap = False
+                            for key,value in all_characters_path.items():
+                                if value != []:
+                                    if pygame.mixer.Channel(0).get_busy() == False:
+                                        the_sound_id = random.randint(0,len(walking_sound)-1)
+                                        pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
+                                    if key in characters_data:
+                                        if characters_data[key].x < value[0][0]:
+                                            characters_data[key].x+=0.05
+                                            characters_data[key].setFlip(False)
+                                            if characters_data[key].x >= value[0][0]:
+                                                characters_data[key].x = value[0][0]
+                                                value.pop(0)
+                                                reProcessMap = True
+                                        elif characters_data[key].x > value[0][0]:
+                                            characters_data[key].x-=0.05
+                                            characters_data[key].setFlip(True)
+                                            if characters_data[key].x <= value[0][0]:
+                                                characters_data[key].x = value[0][0]
+                                                value.pop(0)
+                                                reProcessMap = True
+                                        elif characters_data[key].y < value[0][1]:
+                                            characters_data[key].y+=0.05
+                                            characters_data[key].setFlip(True)
+                                            if characters_data[key].y >= value[0][1]:
+                                                characters_data[key].y = value[0][1]
+                                                value.pop(0)
+                                                reProcessMap = True
+                                        elif characters_data[key].y > value[0][1]:
+                                            characters_data[key].y-=0.05
+                                            characters_data[key].setFlip(False)
+                                            if characters_data[key].y <= value[0][1]:
+                                                characters_data[key].y = value[0][1]
+                                                value.pop(0)
+                                                reProcessMap = True
+                                    elif key in sangvisFerris_data:
+                                        if sangvisFerris_data[key].x < value[0][0]:
+                                            sangvisFerris_data[key].x+=0.05
+                                            sangvisFerris_data[key].setFlip(True)
+                                            if sangvisFerris_data[key].x >= value[0][0]:
+                                                sangvisFerris_data[key].x = value[0][0]
+                                                value.pop(0)
+                                                reProcessMap = True
+                                        elif sangvisFerris_data[key].x > value[0][0]:
+                                            sangvisFerris_data[key].x-=0.05
+                                            sangvisFerris_data[key].setFlip(False)
+                                            if sangvisFerris_data[key].x <= value[0][0]:
+                                                sangvisFerris_data[key].x = value[0][0]
+                                                value.pop(0)
+                                                reProcessMap = True
+                                        elif sangvisFerris_data[key].y < value[0][1]:
+                                            sangvisFerris_data[key].y+=0.05
+                                            sangvisFerris_data[key].setFlip(False)
+                                            if sangvisFerris_data[key].y >= value[0][1]:
+                                                sangvisFerris_data[key].y = value[0][1]
+                                                value.pop(0)
+                                                reProcessMap = True
+                                        elif sangvisFerris_data[key].y > value[0][1]:
+                                            sangvisFerris_data[key].y-=0.05
+                                            sangvisFerris_data[key].setFlip(True)
+                                            if sangvisFerris_data[key].y <= value[0][1]:
+                                                sangvisFerris_data[key].y = value[0][1]
+                                                value.pop(0)
+                                                reProcessMap = True
+                                else:
+                                    key_to_remove.append(key)
+                            if theMap.darkMode == True and reProcessMap == True:
+                                theMap.calculate_darkness(characters_data,window_x,window_y)
+                            for i in range(len(key_to_remove)):
+                                all_characters_path.pop(key_to_remove[i])
                         else:
-                            value.draw("wait",screen,theMap)
-                #展示设施
-                theMap.display_facility(screen,characters_data,sangvisFerris_data)
-                #加载雪花
-                if weatherController != None:
-                    weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
-                #如果操作是移动
-                if "move" in dialog_to_display[display_num]:
-                    if all_characters_path == None:
-                        all_characters_path = {}
-                        for key,value in dicMerge(sangvisFerris_data,characters_data).items():
-                            if key in dialog_to_display[display_num]["move"]:
-                                #创建AStar对象,并设置起点和终点为
-                                start_x = value.x
-                                start_y = value.y
-                                end_x = dialog_to_display[display_num]["move"][key]["x"]
-                                end_y = dialog_to_display[display_num]["move"][key]["y"]
-                                the_route = theMap.findPath((start_x,start_y),(end_x,end_y),characters_data,sangvisFerris_data,None,dialog_to_display[display_num]["move"])
-                                if len(the_route)>0:
-                                    all_characters_path[key] = the_route
-                    if len(all_characters_path)>0:
-                        if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
-                            pygame.mixer.Channel(1).play(environment_sound)
-                        key_to_remove = []
-                        reProcessMap = False
-                        for key,value in all_characters_path.items():
-                            if value != []:
-                                if pygame.mixer.Channel(0).get_busy() == False:
-                                    the_sound_id = random.randint(0,len(walking_sound)-1)
-                                    pygame.mixer.Channel(0).play(walking_sound[the_sound_id])
-                                if key in characters_data:
-                                    if characters_data[key].x < value[0][0]:
-                                        characters_data[key].x+=0.05
-                                        characters_data[key].setFlip(False)
-                                        if characters_data[key].x >= value[0][0]:
-                                            characters_data[key].x = value[0][0]
-                                            value.pop(0)
-                                            reProcessMap = True
-                                    elif characters_data[key].x > value[0][0]:
-                                        characters_data[key].x-=0.05
-                                        characters_data[key].setFlip(True)
-                                        if characters_data[key].x <= value[0][0]:
-                                            characters_data[key].x = value[0][0]
-                                            value.pop(0)
-                                            reProcessMap = True
-                                    elif characters_data[key].y < value[0][1]:
-                                        characters_data[key].y+=0.05
-                                        characters_data[key].setFlip(True)
-                                        if characters_data[key].y >= value[0][1]:
-                                            characters_data[key].y = value[0][1]
-                                            value.pop(0)
-                                            reProcessMap = True
-                                    elif characters_data[key].y > value[0][1]:
-                                        characters_data[key].y-=0.05
-                                        characters_data[key].setFlip(False)
-                                        if characters_data[key].y <= value[0][1]:
-                                            characters_data[key].y = value[0][1]
-                                            value.pop(0)
-                                            reProcessMap = True
-                                elif key in sangvisFerris_data:
-                                    if sangvisFerris_data[key].x < value[0][0]:
-                                        sangvisFerris_data[key].x+=0.05
-                                        sangvisFerris_data[key].setFlip(True)
-                                        if sangvisFerris_data[key].x >= value[0][0]:
-                                            sangvisFerris_data[key].x = value[0][0]
-                                            value.pop(0)
-                                            reProcessMap = True
-                                    elif sangvisFerris_data[key].x > value[0][0]:
-                                        sangvisFerris_data[key].x-=0.05
-                                        sangvisFerris_data[key].setFlip(False)
-                                        if sangvisFerris_data[key].x <= value[0][0]:
-                                            sangvisFerris_data[key].x = value[0][0]
-                                            value.pop(0)
-                                            reProcessMap = True
-                                    elif sangvisFerris_data[key].y < value[0][1]:
-                                        sangvisFerris_data[key].y+=0.05
-                                        sangvisFerris_data[key].setFlip(False)
-                                        if sangvisFerris_data[key].y >= value[0][1]:
-                                            sangvisFerris_data[key].y = value[0][1]
-                                            value.pop(0)
-                                            reProcessMap = True
-                                    elif sangvisFerris_data[key].y > value[0][1]:
-                                        sangvisFerris_data[key].y-=0.05
-                                        sangvisFerris_data[key].setFlip(True)
-                                        if sangvisFerris_data[key].y <= value[0][1]:
-                                            sangvisFerris_data[key].y = value[0][1]
-                                            value.pop(0)
-                                            reProcessMap = True
-                            else:
-                                key_to_remove.append(key)
-                        if theMap.darkMode == True and reProcessMap == True:
-                            theMap.calculate_darkness(characters_data,window_x,window_y)
-                        for i in range(len(key_to_remove)):
-                            all_characters_path.pop(key_to_remove[i])
-                    else:
-                        #脚步停止
-                        if pygame.mixer.Channel(0).get_busy() != False:
-                            pygame.mixer.Channel(0).stop()
+                            #脚步停止
+                            if pygame.mixer.Channel(0).get_busy() != False:
+                                pygame.mixer.Channel(0).stop()
+                            display_num += 1
+                            all_characters_path = None
+                    #改变方向
+                    elif "direction" in dialog_to_display[display_num]:
+                        for key,value in dialog_to_display[display_num]["direction"].items():
+                            if key in characters_data:
+                                characters_data[key].setFlip(value)
+                            elif key in sangvisFerris_data:
+                                sangvisFerris_data[key].setFlip(value)
                         display_num += 1
-                        all_characters_path = None
-                #改变方向
-                elif "direction" in dialog_to_display[display_num]:
-                    for key,value in dialog_to_display[display_num]["direction"].items():
-                        if key in characters_data:
-                            characters_data[key].setFlip(value)
-                        elif key in sangvisFerris_data:
-                            sangvisFerris_data[key].setFlip(value)
-                    display_num += 1
-                #改变动作（一次性）
-                elif "action" in dialog_to_display[display_num]:
-                    if theAction == None:
-                        theAction = dialog_to_display[display_num]["action"]
-                    else:
-                        theActionNeedPop = []
-                        if len(theAction) > 0:
-                            for key,action in theAction.items():
-                                if key in characters_data and characters_data[key].draw(action,screen,theMap,False) == False:
-                                    if action != "die":
-                                        characters_data[key].reset_imgId(action)
-                                    theActionNeedPop.append(key)
-                                elif key in sangvisFerris_data and sangvisFerris_data[key].draw(action,screen,theMap,False) == False:
-                                    if action != "die":
-                                        sangvisFerris_data[key].reset_imgId(action)
-                                    theActionNeedPop.append(key)
-                            if len(theActionNeedPop) > 0:
-                                for i in range(len(theActionNeedPop)):
-                                    theAction.pop(theActionNeedPop[i])
+                    #改变动作（一次性）
+                    elif "action" in dialog_to_display[display_num]:
+                        if theAction == None:
+                            theAction = dialog_to_display[display_num]["action"]
                         else:
-                            display_num += 1
-                            theAction = None
-                #改变动作（长期）
-                elif "actionLoop" in dialog_to_display[display_num]:
-                    for key,action in dialog_to_display[display_num]["actionLoop"].items():
-                        actionLoop[key] = action
-                    display_num += 1
-                #停止长期的动作改变
-                elif "actionLoopStop" in dialog_to_display[display_num]:
-                    for i in range(len(dialog_to_display[display_num]["actionLoopStop"])):
-                        character_key = dialog_to_display[display_num]["actionLoopStop"][i]
-                        if character_key in actionLoop:
-                            if character_key in characters_data:
-                                characters_data[character_key].reset_imgId(actionLoop[character_key])
-                            elif character_key in sangvisFerris_data:
-                                sangvisFerris_data[character_key].reset_imgId(actionLoop[character_key])
+                            theActionNeedPop = []
+                            if len(theAction) > 0:
+                                for key,action in theAction.items():
+                                    if key in characters_data and characters_data[key].draw(action,screen,theMap,False) == False:
+                                        if action != "die":
+                                            characters_data[key].reset_imgId(action)
+                                        theActionNeedPop.append(key)
+                                    elif key in sangvisFerris_data and sangvisFerris_data[key].draw(action,screen,theMap,False) == False:
+                                        if action != "die":
+                                            sangvisFerris_data[key].reset_imgId(action)
+                                        theActionNeedPop.append(key)
+                                if len(theActionNeedPop) > 0:
+                                    for i in range(len(theActionNeedPop)):
+                                        theAction.pop(theActionNeedPop[i])
                             else:
-                                raise Exception("Error: Cannot find ",character_key," while the system is trying to reset the action.")
-                            del actionLoop[character_key]
-                    display_num += 1
-                #开始对话
-                elif "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
-                    #对话框的移动
-                    if dialoguebox_up.x > window_x/2+dialoguebox_up.width*0.4:
-                        dialoguebox_up.x -= 150
-                    if dialoguebox_down.x < window_x/2-dialoguebox_down.width*1.4:
-                        dialoguebox_down.x += 150
-                    #上方对话框
-                    if dialog_to_display[display_num]["dialoguebox_up"] != None:
-                        #对话框图片
-                        dialoguebox_up.draw(screen)
-                        #名字
-                        if dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != None:
-                            drawImg(fontRender(dialog_to_display[display_num]["dialoguebox_up"]["speaker"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
-                        #正在播放的行
-                        content = fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line][:dialog_up_content_id],"white",window_x/80)
-                        drawImg(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
-                        if dialog_up_content_id < len(dialog_to_display[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line]):
-                            dialog_up_content_id+=1
-                        elif dialog_up_displayed_line < len(dialog_to_display[display_num]["dialoguebox_up"]["content"])-1:
-                            dialog_up_displayed_line += 1
-                            dialog_up_content_id = 0
-                        for i in range(dialog_up_displayed_line):
-                            content = fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][i],"white",window_x/80)
-                            drawImg(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
-                        #角色图标
-                        if dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"] != None:
-                            drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
-                    #下方对话框
-                    if dialog_to_display[display_num]["dialoguebox_down"] != None:
-                        #对话框图片
-                        dialoguebox_down.draw(screen)
-                        #名字
-                        if dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != None:
-                            drawImg(fontRender(dialog_to_display[display_num]["dialoguebox_down"]["speaker"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
-                        #正在播放的行
-                        content = fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line][:dialog_down_content_id],"white",window_x/80)
-                        drawImg(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
-                        if dialog_down_content_id < len(dialog_to_display[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line]):
-                            dialog_down_content_id+=1
-                        elif dialog_down_displayed_line < len(dialog_to_display[display_num]["dialoguebox_down"]["content"])-1:
-                            dialog_down_displayed_line += 1
-                            dialog_down_content_id = 0
-                        for i in range(dialog_down_displayed_line):
-                            content = fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][i],"white",window_x/80)
-                            drawImg(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
-                        #角色图标
-                        if dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"] != None:
-                            drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
-                #闲置一定时间（秒）
-                elif "idle" in dialog_to_display[display_num]:
-                    if seconde_to_idle == None:
-                        seconde_to_idle = dialog_to_display[display_num]["idle"]*Display.fps
-                    else:
-                        if idle_seconde < seconde_to_idle:
-                            idle_seconde += 1
+                                display_num += 1
+                                theAction = None
+                    #改变动作（长期）
+                    elif "actionLoop" in dialog_to_display[display_num]:
+                        for key,action in dialog_to_display[display_num]["actionLoop"].items():
+                            actionLoop[key] = action
+                        display_num += 1
+                    #停止长期的动作改变
+                    elif "actionLoopStop" in dialog_to_display[display_num]:
+                        for i in range(len(dialog_to_display[display_num]["actionLoopStop"])):
+                            character_key = dialog_to_display[display_num]["actionLoopStop"][i]
+                            if character_key in actionLoop:
+                                if character_key in characters_data:
+                                    characters_data[character_key].reset_imgId(actionLoop[character_key])
+                                elif character_key in sangvisFerris_data:
+                                    sangvisFerris_data[character_key].reset_imgId(actionLoop[character_key])
+                                else:
+                                    raise Exception("Error: Cannot find ",character_key," while the system is trying to reset the action.")
+                                del actionLoop[character_key]
+                        display_num += 1
+                    #开始对话
+                    elif "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
+                        #对话框的移动
+                        if dialoguebox_up.x > window_x/2+dialoguebox_up.width*0.4:
+                            dialoguebox_up.x -= 150
+                        if dialoguebox_down.x < window_x/2-dialoguebox_down.width*1.4:
+                            dialoguebox_down.x += 150
+                        #上方对话框
+                        if dialog_to_display[display_num]["dialoguebox_up"] != None:
+                            #对话框图片
+                            dialoguebox_up.draw(screen)
+                            #名字
+                            if dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != None:
+                                drawImg(fontRender(dialog_to_display[display_num]["dialoguebox_up"]["speaker"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
+                            #正在播放的行
+                            content = fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line][:dialog_up_content_id],"white",window_x/80)
+                            drawImg(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
+                            if dialog_up_content_id < len(dialog_to_display[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line]):
+                                dialog_up_content_id+=1
+                            elif dialog_up_displayed_line < len(dialog_to_display[display_num]["dialoguebox_up"]["content"])-1:
+                                dialog_up_displayed_line += 1
+                                dialog_up_content_id = 0
+                            for i in range(dialog_up_displayed_line):
+                                content = fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][i],"white",window_x/80)
+                                drawImg(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
+                            #角色图标
+                            if dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"] != None:
+                                drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
+                        #下方对话框
+                        if dialog_to_display[display_num]["dialoguebox_down"] != None:
+                            #对话框图片
+                            dialoguebox_down.draw(screen)
+                            #名字
+                            if dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != None:
+                                drawImg(fontRender(dialog_to_display[display_num]["dialoguebox_down"]["speaker"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
+                            #正在播放的行
+                            content = fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line][:dialog_down_content_id],"white",window_x/80)
+                            drawImg(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
+                            if dialog_down_content_id < len(dialog_to_display[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line]):
+                                dialog_down_content_id+=1
+                            elif dialog_down_displayed_line < len(dialog_to_display[display_num]["dialoguebox_down"]["content"])-1:
+                                dialog_down_displayed_line += 1
+                                dialog_down_content_id = 0
+                            for i in range(dialog_down_displayed_line):
+                                content = fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][i],"white",window_x/80)
+                                drawImg(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
+                            #角色图标
+                            if dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"] != None:
+                                drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
+                    #闲置一定时间（秒）
+                    elif "idle" in dialog_to_display[display_num]:
+                        if seconde_to_idle == None:
+                            seconde_to_idle = dialog_to_display[display_num]["idle"]*Display.fps
                         else:
-                            display_num += 1
-                            idle_seconde = 0
-                            seconde_to_idle = None
-                elif "changePos" in dialog_to_display[display_num]:
-                    ifProcessMap = False
-                    if screen_to_move_x == None and "x" in dialog_to_display[display_num]["changePos"]:
-                        screen_to_move_x = dialog_to_display[display_num]["changePos"]["x"]
-                    if screen_to_move_y == None and "y" in dialog_to_display[display_num]["changePos"]:
-                        screen_to_move_y = dialog_to_display[display_num]["changePos"]["y"]
-                    if screen_to_move_x != None and screen_to_move_x != 0:
-                        temp_value = theMap.local_x + screen_to_move_x*0.2
-                        if window_x-theMap.surface_width<=temp_value<=0:
-                            theMap.local_x = temp_value
-                            ifProcessMap = True
-                            screen_to_move_x*=0.8
-                            if int(screen_to_move_x) == 0:
+                            if idle_seconde < seconde_to_idle:
+                                idle_seconde += 1
+                            else:
+                                display_num += 1
+                                idle_seconde = 0
+                                seconde_to_idle = None
+                    elif "changePos" in dialog_to_display[display_num]:
+                        ifProcessMap = False
+                        if screen_to_move_x == None and "x" in dialog_to_display[display_num]["changePos"]:
+                            screen_to_move_x = dialog_to_display[display_num]["changePos"]["x"]
+                        if screen_to_move_y == None and "y" in dialog_to_display[display_num]["changePos"]:
+                            screen_to_move_y = dialog_to_display[display_num]["changePos"]["y"]
+                        if screen_to_move_x != None and screen_to_move_x != 0:
+                            temp_value = int(theMap.local_x + screen_to_move_x*0.2)
+                            if window_x-theMap.surface_width<=temp_value<=0:
+                                theMap.local_x = temp_value
+                                ifProcessMap = True
+                                screen_to_move_x*=0.8
+                                if int(screen_to_move_x) == 0:
+                                    screen_to_move_x = 0
+                            else:
                                 screen_to_move_x = 0
-                        else:
-                            screen_to_move_x = 0
-                    if screen_to_move_y != None and screen_to_move_y !=0:
-                        temp_value = theMap.local_y + screen_to_move_y*0.2
-                        if window_y-theMap.surface_height<=temp_value<=0:
-                            theMap.local_y = temp_value
-                            ifProcessMap = True
-                            screen_to_move_y*=0.8
-                            if int(screen_to_move_y) == 0:
+                        if screen_to_move_y != None and screen_to_move_y !=0:
+                            temp_value = int(theMap.local_y + screen_to_move_y*0.2)
+                            if window_y-theMap.surface_height<=temp_value<=0:
+                                theMap.local_y = temp_value
+                                ifProcessMap = True
+                                screen_to_move_y*=0.8
+                                if int(screen_to_move_y) == 0:
+                                    screen_to_move_y = 0
+                            else:
                                 screen_to_move_y = 0
-                        else:
-                            screen_to_move_y = 0
-                    if ifProcessMap == True:
-                        theMap.process_map(window_x,window_y)
-                    if screen_to_move_x == 0 and screen_to_move_y == 0 or screen_to_move_x == None and screen_to_move_y == None:
-                        screen_to_move_x = None
-                        screen_to_move_y = None
-                        display_num += 1
-                #玩家输入按键判定
-                for event in pygame.event.get():
-                    if event.type == KEYDOWN:
-                        if event.key == K_ESCAPE:
-                            Display.quit()
-                    elif event.type == MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
-                        if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
-                            display_num +=1
-                            if display_num < len(dialog_to_display):
-                                if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
-                                    #检测上方对话框
-                                    if dialog_to_display[display_num]["dialoguebox_up"] != None and dialog_to_display[display_num-1]["dialoguebox_up"] != None and dialog_to_display[display_num]["dialoguebox_up"]["speaker"] == dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
-                                        if dialog_to_display[display_num]["dialoguebox_up"]["content"] != dialog_to_display[display_num]["dialoguebox_up"]["content"]:
+                        if ifProcessMap == True:
+                            theMap.process_map(window_x,window_y)
+                        if screen_to_move_x == 0 and screen_to_move_y == 0 or screen_to_move_x == None and screen_to_move_y == None:
+                            screen_to_move_x = None
+                            screen_to_move_y = None
+                            display_num += 1
+                    #玩家输入按键判定
+                    for event in pygame.event.get():
+                        if event.type == KEYDOWN:
+                            if event.key == K_ESCAPE:
+                                Display.quit()
+                        elif event.type == MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
+                            if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
+                                display_num +=1
+                                if display_num < len(dialog_to_display):
+                                    if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
+                                        #检测上方对话框
+                                        if dialog_to_display[display_num]["dialoguebox_up"] != None and dialog_to_display[display_num-1]["dialoguebox_up"] != None and dialog_to_display[display_num]["dialoguebox_up"]["speaker"] == dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
+                                            if dialog_to_display[display_num]["dialoguebox_up"]["content"] != dialog_to_display[display_num]["dialoguebox_up"]["content"]:
+                                                dialog_up_content_id = 0
+                                                dialog_up_displayed_line = 0
+                                            else:
+                                                pass
+                                        else:
+                                            dialoguebox_up.x = window_x
                                             dialog_up_content_id = 0
                                             dialog_up_displayed_line = 0
+                                        #检测下方对话框    
+                                        if dialog_to_display[display_num]["dialoguebox_down"] != None and dialog_to_display[display_num-1]["dialoguebox_down"] != None and dialog_to_display[display_num]["dialoguebox_down"]["speaker"] == dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
+                                            if dialog_to_display[display_num]["dialoguebox_down"]["content"] != dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
+                                                dialog_down_content_id = 0
+                                                dialog_down_displayed_line = 0
+                                            else:
+                                                pass
                                         else:
-                                            pass
+                                            dialoguebox_down.x = -window_x*0.3
+                                            dialog_down_content_id = 0
+                                            dialog_down_displayed_line = 0
                                     else:
                                         dialoguebox_up.x = window_x
                                         dialog_up_content_id = 0
                                         dialog_up_displayed_line = 0
-                                    #检测下方对话框    
-                                    if dialog_to_display[display_num]["dialoguebox_down"] != None and dialog_to_display[display_num-1]["dialoguebox_down"] != None and dialog_to_display[display_num]["dialoguebox_down"]["speaker"] == dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
-                                        if dialog_to_display[display_num]["dialoguebox_down"]["content"] != dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
-                                            dialog_down_content_id = 0
-                                            dialog_down_displayed_line = 0
-                                        else:
-                                            pass
-                                    else:
                                         dialoguebox_down.x = -window_x*0.3
                                         dialog_down_content_id = 0
                                         dialog_down_displayed_line = 0
-                                else:
-                                    dialoguebox_up.x = window_x
-                                    dialog_up_content_id = 0
-                                    dialog_up_displayed_line = 0
-                                    dialoguebox_down.x = -window_x*0.3
-                                    dialog_down_content_id = 0
-                                    dialog_down_displayed_line = 0
-                        break
-                #渐变效果：一次性的
-                if txt_alpha >= 0:
-                    infoToDisplayDuringLoading.black_bg.set_alpha(txt_alpha)
-                    infoToDisplayDuringLoading.display(screen,txt_alpha)
-                    for i in range(len(battle_info)):
-                        battle_info[i].set_alpha(txt_alpha)
-                        drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-                        if i == 1:
-                            temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
-                            temp_secode.set_alpha(txt_alpha)
-                            drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
-                    txt_alpha -= 5
-                Display.flip()
-            dialog_to_display = None
-            battle = True
-
+                            break
+                else:
+                    dialog_valuable_initialized = False
+                    dialog_to_display = None
+                    battle = True
+            #如果战斗前无·对话
+            elif dialog_to_display == None:
+                #加载地图
+                theMap.display_map(screen)
+                theMap.display_facility_ahead(screen)
+                #角色动画
+                for every_chara in characters_data:
+                    characters_data[every_chara].draw("wait",screen,theMap)
+                for enemies in sangvisFerris_data:
+                    if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
+                        sangvisFerris_data[enemies].draw("wait",screen,theMap)
+                #展示设施
+                theMap.display_facility(screen,characters_data,sangvisFerris_data)
+                #角色动画
+                for every_chara in characters_data:
+                    characters_data[every_chara].drawUI(screen,original_UI_img,theMap)
+                for enemies in sangvisFerris_data:
+                    if (sangvisFerris_data[enemies].x,sangvisFerris_data[enemies].y) in theMap.lightArea or theMap.darkMode != True:
+                        sangvisFerris_data[enemies].drawUI(screen,original_UI_img,theMap)
+                #加载雪花
+                if weatherController != None:
+                    weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
+                if txt_alpha == 0:
+                    battle = True
         # 游戏主循环
-        while battle==True:
-            #环境声音-频道1
-            if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
-                pygame.mixer.Channel(1).play(environment_sound)
+        elif battle == True:
             right_click = False
             ifProcessMap = False
             #获取鼠标坐标
@@ -651,16 +627,16 @@ def battle(chapter_name,screen,setting):
                 else:
                     if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
                         if mouse_move_temp_x > mouse_x:
-                            theMap.local_x += mouse_move_temp_x-mouse_x
+                            theMap.local_x += int(mouse_move_temp_x-mouse_x)
                             ifProcessMap = True
                         elif mouse_move_temp_x < mouse_x:
-                            theMap.local_x -= mouse_x-mouse_move_temp_x
+                            theMap.local_x -= int(mouse_x-mouse_move_temp_x)
                             ifProcessMap = True
                         if mouse_move_temp_y > mouse_y:
-                            theMap.local_y += mouse_move_temp_y-mouse_y
+                            theMap.local_y += int(mouse_move_temp_y-mouse_y)
                             ifProcessMap = True
                         elif mouse_move_temp_y < mouse_y:
-                            theMap.local_y -= mouse_y-mouse_move_temp_y
+                            theMap.local_y -= int(mouse_y-mouse_move_temp_y)
                             ifProcessMap = True
                         mouse_move_temp_x = mouse_x
                         mouse_move_temp_y = mouse_y
@@ -715,25 +691,26 @@ def battle(chapter_name,screen,setting):
 
             #如果需要移动屏幕
             if screen_to_move_x != None and screen_to_move_x != 0:
-                temp_value = theMap.local_x + screen_to_move_x*0.2
+                temp_value = int(theMap.local_x + screen_to_move_x*0.2)
                 if window_x-theMap.surface_width<=temp_value<=0:
                     theMap.local_x = temp_value
+                    ifProcessMap = True
                     screen_to_move_x*=0.8
                     if int(screen_to_move_x) == 0:
                         screen_to_move_x = 0
                 else:
                     screen_to_move_x = 0
-                ifProcessMap = True
             if screen_to_move_y != None and screen_to_move_y !=0:
-                temp_value = theMap.local_y + screen_to_move_y*0.2
+                temp_value = int(theMap.local_y + screen_to_move_y*0.2)
                 if window_y-theMap.surface_height<=temp_value<=0:
                     theMap.local_y = temp_value
+                    ifProcessMap = True
                     screen_to_move_y*=0.8
                     if int(screen_to_move_y) == 0:
                         screen_to_move_y = 0
                 else:
                     screen_to_move_y = 0
-                ifProcessMap = True
+
             
             #加载地图
             screen_to_move_x,screen_to_move_y = theMap.display_map(screen,screen_to_move_x,screen_to_move_y,ifProcessMap)
@@ -1111,14 +1088,14 @@ def battle(chapter_name,screen,setting):
                                     action_choice = ""
                                     if "move" in dialogInfo and keyTemp in dialogInfo["move"]:
                                         dialog_to_display = dialog_during_battle[dialogInfo["move"][keyTemp]]
-                                        break
+                                        battle = False
                             else:
                                 isWaiting = True
                                 the_character_get_click = ""
                                 action_choice = ""
                                 if "move" in dialogInfo and keyTemp in dialogInfo["move"]:
                                     dialog_to_display = dialog_during_battle[dialogInfo["move"][keyTemp]]
-                                    break
+                                    battle = False
                     elif action_choice == "attack":
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == 3:
                             attackingSounds.play(characters_data[the_character_get_click].kind)
@@ -1505,7 +1482,7 @@ def battle(chapter_name,screen,setting):
             warnings_to_display.display(screen)
 
             #加载并播放音乐
-            while pygame.mixer.music.get_busy() != 1:
+            if pygame.mixer.music.get_busy() != 1:
                 pygame.mixer.music.load("Assets/music/"+bg_music)
                 pygame.mixer.music.play(loops=9999, start=0.0)
                 pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
@@ -1524,9 +1501,24 @@ def battle(chapter_name,screen,setting):
                             battle = False
                             battleSystemMainLoop = False
                 ResultBoardUI.display(screen)
-            
-            #刷新页面
-            Display.flip()
+    
+        #渐变效果：一次性的
+        if txt_alpha == None:
+            txt_alpha = 250
+        if txt_alpha > 0:
+            infoToDisplayDuringLoading.black_bg.set_alpha(txt_alpha)
+            infoToDisplayDuringLoading.display(screen,txt_alpha)
+            for i in range(len(battle_info)):
+                battle_info[i].set_alpha(txt_alpha)
+                drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                if i == 1:
+                    temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
+                    temp_secode.set_alpha(txt_alpha)
+                    drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+            txt_alpha -= 5
+        
+        #刷新画面
+        Display.flip()
     
     #暂停声效 - 尤其是环境声
     pygame.mixer.stop()

@@ -21,15 +21,10 @@ class MapObject:
         self.lightArea = []
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
-        self.bgImg = loadImg("Assets/image/dialog_background/"+mapDataDic["backgroundImage"])
+        self.bgImg = pygame.image.load(os.path.join("Assets/image/dialog_background/",mapDataDic["backgroundImage"])).convert()
         self.mapSurface = None
         self.local_x = local_x
         self.local_y = local_y
-        """
-        self.mapBlocks =  initalBlocks(mapData)
-        for eachBlock in self.mapBlocks:
-            eachBlock.redrawArea(self.env_img_list,perBlockWidth,self.darkMode)
-        """
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
@@ -40,7 +35,11 @@ class MapObject:
                 self.env_img_list["dark"][key] = pygame.transform.scale(self.env_img_list_original["dark"][key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original["dark"][key].get_width()*self.env_img_list_original["dark"][key].get_height())))
         self.surface_width = int(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
         self.surface_height = int(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
-        self.mapSurface = pygame.surface.Surface((self.surface_width,self.surface_height))
+        if self.surface_width < window_x:
+            self.surface_width = window_x
+        if self.surface_height < window_y:
+            self.surface_height = window_y
+        self.mapSurface = None
         self.process_map(window_x,window_y)
     #把地图画到屏幕上
     def display_map(self,screen,screen_to_move_x=0,screen_to_move_y=0,ifProcessMap=False):
@@ -172,25 +171,19 @@ class MapObject:
         return the_route
     #重新绘制地图
     def process_map(self,window_x,window_y):
-        if self.surface_width < window_x:
-            self.surface_width = window_x
-        if self.surface_height < window_y:
-            self.surface_height = window_y
-        self.mapSurface = pygame.surface.Surface((window_x,window_y)).convert()
+        
+        
+
         if self.bgImg != None:
-            self.mapSurface.blit(pygame.transform.scale(self.bgImg,(self.surface_width,self.surface_height)),(self.local_x,self.local_y))
-        """
-        for eachBlock in self.mapBlocks:
-            eachBlock.updateLightArea(self.lightArea,self.env_img_list,self.perBlockWidth,self.darkMode)
-            eachBlock.draw(self.mapSurface,self.row,self.perBlockWidth)
-        """
+            self.mapSurface = pygame.transform.scale(self.bgImg,(window_x,window_y))
+        else:
+            self.mapSurface = pygame.surface.Surface((window_x,window_y)).convert()
+
         #画出地图
         for y in range(len(self.mapData)):
-            #hitTemp = False
             for x in range(len(self.mapData[y])):
                 xTemp,yTemp = self.calPosInMap(x,y)
                 if -self.perBlockWidth<=xTemp<window_x and -self.perBlockWidth<=yTemp<window_y:
-                    #hitTemp = True
                     #画上场景图片
                     if self.darkMode == True and (x,y) not in self.lightArea:
                         try:
@@ -210,7 +203,6 @@ class MapObject:
                             self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
                 elif xTemp>=window_x:
                     break
-            
     #计算在地图中的方块
     def calBlockInMap(self,block,mouse_x,mouse_y):
         guess_x = int(((mouse_x-self.local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
@@ -291,64 +283,6 @@ class Block:
     def  __init__(self,name,canPassThrough):
         self.name = name
         self.canPassThrough = canPassThrough
-
-"""
-#区块 - 待修复
-class BlockArea:
-    def  __init__(self,areaData,x,y):
-        self.areaData = areaData
-        self.lightArea = []
-        self.x = x
-        self.y = y
-        self.row = len(areaData)
-        self.column = len(areaData[0])
-        self.mapSurface = None
-    def updateLightArea(self,lightArea,envImgList,perBlockWidth,darkMode):
-        newLightArea = []
-        for position in lightArea:
-            if self.x<=position[0]<=self.column+self.x and self.y<=position[1]<=self.row+self.y:
-                newLightArea.append(position)
-        if len(self.lightArea) != len(newLightArea):
-            self.lightArea = newLightArea
-            self.redrawArea(envImgList,perBlockWidth,darkMode)
-        else:
-            for i in range(len(newLightArea)):
-                if newLightArea[i] not in lightArea:
-                    self.lightArea = newLightArea
-                    self.redrawArea(envImgList,perBlockWidth,darkMode)
-                    break
-    def redrawArea(self,envImgList,perBlockWidth,darkMode):
-        surface_width = int(perBlockWidth*0.9*((self.row+self.column+1)/2))
-        surface_height = int(perBlockWidth*0.45*((self.row+self.column)/2)+perBlockWidth)
-        self.mapSurface = pygame.Surface([surface_width, surface_height], pygame.SRCALPHA).convert_alpha()
-        #self.mapSurface = pygame.surface.Surface((surface_width,surface_height)).convert()
-        for y in range(self.row):
-            for x in range(self.column):
-                xTemp,yTemp = calPosInMap(self.row,perBlockWidth,x,y)
-                yTemp-=perBlockWidth*0.4
-                #画上场景图片
-                if darkMode == True and (self.x+x,self.y+y) not in self.lightArea:
-                    self.mapSurface.blit(envImgList["dark"][self.areaData[y][x].name],(xTemp,yTemp))
-                else:
-                    self.mapSurface.blit(envImgList["normal"][self.areaData[y][x].name],(xTemp,yTemp))
-    def draw(self,surface,row,perBlockWidth):
-        xTemp,yTemp = calPosInMap(row,perBlockWidth,self.x,self.y)
-        surface.blit(self.mapSurface,(xTemp-self.column*perBlockWidth*0.43-perBlockWidth*0.43*int(self.x/6-self.y/6),yTemp-perBlockWidth*0.23*int(self.x/6+self.y/6)))
-
-def initalBlocks(mapData):
-    allBlockArea = []
-    rowPerBlockArea = 6
-    columnPerBlockArea = 6
-    rowExtra = len(mapData)%rowPerBlockArea
-    columnExtra = len(mapData[0])%columnPerBlockArea
-    for y in range(int(len(mapData)/rowPerBlockArea)):
-        for x in range(int(len(mapData[0])/columnPerBlockArea)):
-            tempArea = mapData[y*rowPerBlockArea:(y+1)*rowPerBlockArea-1]
-            for i in range(len(tempArea)):
-                tempArea[i] = tempArea[i][x*columnPerBlockArea:(x+1)*columnPerBlockArea-1]
-            allBlockArea.append(BlockArea(tempArea,x*columnPerBlockArea,y*rowPerBlockArea))
-    return allBlockArea
-"""
 
 #环境系统
 class WeatherSystem:
