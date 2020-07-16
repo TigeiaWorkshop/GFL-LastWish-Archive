@@ -5,6 +5,7 @@ from Source.mapCreator import *
 from Zero3.basic import *
 
 def mainMenu(screen,setting):
+    InputController = GameController(screen)
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #帧率控制器
@@ -97,8 +98,7 @@ def mainMenu(screen,setting):
     while True:
         #背景图片
         videoCapture.display(screen)
-
-        if isHoverOn(chapter_select[1].b, (txt_location,(window_y-200)/9*1)):
+        if InputController.ifHover(chapter_select[1].b,(txt_location,(window_y-200)/9*1)):
             if cover_alpha < 250:
                 cover_alpha+=10
         else:
@@ -113,7 +113,7 @@ def mainMenu(screen,setting):
         if menu_type == 0:
             i=0
             for key,text in main_menu_txt["menu_0"].items():
-                if isHoverOn(text.n, (txt_location,main_menu_txt_start_height0+window_x/38*2*i)):
+                if InputController.ifHover(text.n, (txt_location,main_menu_txt_start_height0+window_x/38*2*i)):
                     hover_sound_play_on = "0_"+str(i)
                     drawImg(text.b, (txt_location,main_menu_txt_start_height0+window_x/38*(2*i-0.25)),screen)
                 else:
@@ -122,7 +122,7 @@ def mainMenu(screen,setting):
         elif menu_type == 1:
             i=0
             for key,text in main_menu_txt["menu_1"].items():
-                if isHoverOn(text.n, (txt_location,main_menu_txt_start_height1+window_x/38*2*i)):
+                if InputController.ifHover(text.n, (txt_location,main_menu_txt_start_height1+window_x/38*2*i)):
                     hover_sound_play_on = "0_"+str(i)
                     drawImg(text.b, (txt_location,main_menu_txt_start_height1+window_x/38*(2*i-0.25)),screen)
                 else:
@@ -130,7 +130,7 @@ def mainMenu(screen,setting):
                 i+=1
         elif menu_type == 2:
             for i in range(len(chapter_select)):
-                if isHoverOn(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+                if InputController.ifHover(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
                     hover_sound_play_on = "2_"+str(i)
                     drawImg(chapter_select[i].b, (txt_location,chapter_select_txt_start_height+window_x/38*(2*i-0.25)),screen)
                 else:
@@ -150,27 +150,27 @@ def mainMenu(screen,setting):
             if event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and settingUI.ifDisplay != True:
                 click_button_sound.play()
                 if menu_type == 0:
-                    if isHoverOn(main_menu_txt["menu_0"]["text0_start"].n,(txt_location,main_menu_txt_start_height0)):
+                    if InputController.ifHover(main_menu_txt["menu_0"]["text0_start"].n,(txt_location,main_menu_txt_start_height0)):
                         menu_type = 1
-                    elif isHoverOn(main_menu_txt["menu_0"]["text1_setting"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*1)):
+                    elif InputController.ifHover(main_menu_txt["menu_0"]["text1_setting"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*1)):
                         settingUI.ifDisplay = True
-                    elif isHoverOn(main_menu_txt["menu_0"]["text2_developer_team"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*2)):
+                    elif InputController.ifHover(main_menu_txt["menu_0"]["text2_developer_team"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*2)):
                         pass
-                    elif isHoverOn(main_menu_txt["menu_0"]["text3_exit"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*3)):
+                    elif InputController.ifHover(main_menu_txt["menu_0"]["text3_exit"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*3)):
                         Display.quit()
                 elif menu_type == 1:
-                    if isHoverOn(main_menu_txt["menu_1"]["text1_chooseChapter"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*1)):
+                    if InputController.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*1)):
                         menu_type = 2
-                    elif isHoverOn(main_menu_txt["menu_1"]["text4_mapCreator"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*4)):
+                    elif InputController.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*4)):
                         mapCreator("chapter1",screen,setting)
-                    elif isHoverOn(main_menu_txt["menu_1"]["text6_back"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*6)):
+                    elif InputController.ifHover(main_menu_txt["menu_1"]["text6_back"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*6)):
                         menu_type = 0
                 elif menu_type == 2:
                     for i in range(len(chapter_select)):
-                        if i == len(chapter_select)-1 and isHoverOn(chapter_select[-1].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+                        if i == len(chapter_select)-1 and InputController.ifHover(chapter_select[-1].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
                             menu_type = 1
                         #章节选择
-                        elif isHoverOn(chapter_select[i].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
+                        elif InputController.ifHover(chapter_select[i].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
                             dialog("chapter"+str(i+1),screen,setting,"dialog_before_battle")
                             battle("chapter"+str(i+1),screen,setting)
                             dialog("chapter"+str(i+1),screen,setting,"dialog_after_battle")
@@ -183,4 +183,5 @@ def mainMenu(screen,setting):
             pygame.mixer.music.play(loops=9999, start=0.0)
             pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
 
+        InputController.display(screen)
         Display.flip()

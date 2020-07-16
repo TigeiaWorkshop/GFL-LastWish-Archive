@@ -72,30 +72,6 @@ class VideoObject:
         frame = cv2.transpose(frame)
         pygame.surfarray.blit_array(screen, frame)
 
-#手柄控制组件
-class Joystick:
-    def __init__(self):
-        if pygame.joystick.get_count()>0:
-            self.inputController = pygame.joystick.Joystick(0)
-            self.inputController.init()
-        else:
-            self.inputController = None
-    def get_init(self):
-        if self.inputController != None:
-            return self.inputController.get_init()
-        else:
-            return False
-    def get_button(self,buttonId):
-        if self.inputController != None and self.inputController.get_init() == True:
-            return self.inputController.get_button(buttonId)
-        else:
-            return None
-    def get_axis(self,buttonId):
-        if self.inputController != None and self.inputController.get_init() == True:
-            return self.inputController.get_axis(buttonId)
-        else:
-            return 0
-
 #画面更新控制器
 class DisplayController:
     def __init__(self,fps):
@@ -576,3 +552,59 @@ class Button:
         else:
             self.hoverEventOff()
             return False
+
+#输入管理组件
+class GameController:
+    def __init__(self,screen):
+        self.joystick = Joystick()
+        self.mouse = MouseInput(screen)
+        self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
+    def display(self,screen):
+        self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
+        self.mouse.display(screen,(self.mouse_x,self.mouse_y))
+    def get_pos(self):
+        return self.mouse_x,self.mouse_y
+    #检测是否被点击
+    def ifHover(self,imgObject,objectPos=(0,0),local_x=0,local_y=0):
+        if isinstance(imgObject,pygame.Surface):
+            if objectPos[0]<self.mouse_x-local_x<objectPos[0]+imgObject.get_width() and objectPos[1]<self.mouse_y-local_y<objectPos[1]+imgObject.get_height():
+                return True
+            else:
+                return False
+        elif isinstance(imgObject,ImageSurface):
+            if imgObject.x<self.mouse_x-local_x<imgObject.x+imgObject.width and imgObject.y<self.mouse_y-local_y<imgObject.y+imgObject.height:
+                return True
+            else:
+                return False
+
+#鼠标管理系统
+class MouseInput:
+    def __init__(self,screen):
+        pygame.mouse.set_visible(False)
+        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(screen.get_width()*0.04),int(screen.get_width()*0.04)))
+    def display(self,screen,pos):
+        screen.blit(self.iconImg,pos)
+
+#手柄控制组件
+class Joystick:
+    def __init__(self):
+        if pygame.joystick.get_count()>0:
+            self.inputController = pygame.joystick.Joystick(0)
+            self.inputController.init()
+        else:
+            self.inputController = None
+    def get_init(self):
+        if self.inputController != None:
+            return self.inputController.get_init()
+        else:
+            return False
+    def get_button(self,buttonId):
+        if self.inputController != None and self.inputController.get_init() == True:
+            return self.inputController.get_button(buttonId)
+        else:
+            return None
+    def get_axis(self,buttonId):
+        if self.inputController != None and self.inputController.get_init() == True:
+            return self.inputController.get_axis(buttonId)
+        else:
+            return 0
