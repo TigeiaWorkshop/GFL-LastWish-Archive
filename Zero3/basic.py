@@ -100,22 +100,6 @@ def findColorRGB(colorName):
         color_rgb = (255, 0, 0)
     return color_rgb
 
-#检测是否被点击
-def isHoverOn(the_object,the_object_position,local_x=0,local_y=0):
-    mouse_x,mouse_y=pygame.mouse.get_pos()
-    if the_object_position[0]<mouse_x-local_x<the_object_position[0]+the_object.get_width() and the_object_position[1]<mouse_y-local_y<the_object_position[1]+the_object.get_height():
-        return True
-    else:
-        return False
-
-#检测是否鼠标在物体上
-def isHover(theImgClass,local_x=0,local_y=0):
-    mouse_x,mouse_y=pygame.mouse.get_pos()
-    if theImgClass.x<mouse_x-local_x<theImgClass.x+theImgClass.width and theImgClass.y<mouse_y-local_y<theImgClass.y+theImgClass.height:
-        return True
-    else:
-        return False
-
 #中心展示模块1：接受两个item和item2的x和y，将item1展示在item2的中心位置,但不展示item2：
 def displayInCenter(item1,item2,x,y,screen,local_x=0,local_y=0):
     added_x = (item2.get_width()-item1.get_width())/2

@@ -5,6 +5,7 @@ from Source.mapCreator import *
 from Zero3.basic import *
 
 def mainMenu(screen,setting):
+    #控制器输入组件
     InputController = GameController(screen)
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()

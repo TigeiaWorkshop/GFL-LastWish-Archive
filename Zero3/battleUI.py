@@ -153,7 +153,7 @@ class SelectMenu:
         self.rescueAP = 8
         self.rescueTxt = selectMenuTxtDic["rescue"]
         self.rescueAPTxt = str(self.rescueAP)+" AP"
-    def display(self,screen,fontSize,location,kind,friendsCanSave):
+    def display(self,screen,fontSize,location,kind,friendsCanSave,controller):
         selectButtonBase =  resizeImg(self.selectButtonImg, (round(fontSize*5), round(fontSize*2.5)))
         selectButtonBaseWidth = selectButtonBase.get_width()
         buttonGetHover = None
@@ -164,7 +164,7 @@ class SelectMenu:
         txt_temp2 = fontRender(self.attackAPTxt,"black",sizeSmall)
         txt_tempX = location["xStart"]-selectButtonBaseWidth*0.6
         txt_tempY = location["yStart"]
-        if isHoverOn(selectButtonBase,(txt_tempX,txt_tempY)):
+        if controller.ifHover(selectButtonBase,(txt_tempX,txt_tempY)):
             buttonGetHover = "attack"
         screen.blit(selectButtonBase,(txt_tempX,txt_tempY))
         screen.blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2+txt_tempX,txt_temp.get_height()*0.4+txt_tempY))
@@ -174,7 +174,7 @@ class SelectMenu:
         txt_temp2 = fontRender(self.moveAPTxt,"black",sizeSmall)
         txt_tempX = location["xEnd"]-selectButtonBaseWidth*0.4
         #txt_tempY 与攻击按钮一致
-        if isHoverOn(selectButtonBase,(txt_tempX,txt_tempY)):
+        if controller.ifHover(selectButtonBase,(txt_tempX,txt_tempY)):
             buttonGetHover = "move"
         screen.blit(selectButtonBase,(txt_tempX,txt_tempY))
         screen.blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2+txt_tempX,txt_temp.get_height()*0.4+txt_tempY))
@@ -184,7 +184,7 @@ class SelectMenu:
         txt_temp2 = fontRender(self.reloadAPTxt,"black",sizeSmall)
         txt_tempX = location["xStart"]+selectButtonBaseWidth*0.5
         txt_tempY = location["yEnd"]-selectButtonBaseWidth*0.25
-        if isHoverOn(selectButtonBase,(txt_tempX,txt_tempY)):
+        if controller.ifHover(selectButtonBase,(txt_tempX,txt_tempY)):
             buttonGetHover = "reload"
         screen.blit(selectButtonBase,(txt_tempX,txt_tempY))
         screen.blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2+txt_tempX,txt_temp.get_height()*0.4+txt_tempY))
@@ -195,7 +195,7 @@ class SelectMenu:
             txt_temp2 = fontRender(self.skillAPTxt,"black",sizeSmall)
             #txt_tempX与换弹按钮一致
             txt_tempY = location["yStart"]-selectButtonBaseWidth*0.7
-            if isHoverOn(selectButtonBase,(txt_tempX,txt_tempY)):
+            if controller.ifHover(selectButtonBase,(txt_tempX,txt_tempY)):
                 buttonGetHover = "skill"
             screen.blit(selectButtonBase,(txt_tempX,txt_tempY))
             screen.blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2+txt_tempX,txt_temp.get_height()*0.4+txt_tempY))
@@ -206,7 +206,7 @@ class SelectMenu:
             txt_temp2 = fontRender(self.rescueAPTxt,"black",sizeSmall)
             txt_tempX = location["xStart"]-selectButtonBaseWidth*0.6
             txt_tempY = location["yStart"]-selectButtonBaseWidth*0.7
-            if isHoverOn(selectButtonBase,(txt_tempX,txt_tempY)):
+            if controller.ifHover(selectButtonBase,(txt_tempX,txt_tempY)):
                 buttonGetHover = "rescue"
             screen.blit(selectButtonBase,(txt_tempX,txt_tempY))
             screen.blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2+txt_tempX,txt_temp.get_height()*0.4+txt_tempY))

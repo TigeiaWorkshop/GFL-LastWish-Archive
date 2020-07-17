@@ -520,6 +520,7 @@ class ApSystem:
         else:
             self.coolDown += 1
 
+#按钮
 class Button:
     def __init__(self,path,x,y):
         self.img = pygame.image.load(os.path.join(path)) if isinstance(path,str) else path
@@ -543,15 +544,6 @@ class Button:
             self.img = self.img2
             self.img2 = tempSurface
             self.hoverEventTriggered = False
-    def isHoverOn(self,mouse_pos=None):
-        if mouse_pos == None:
-            mouse_pos=pygame.mouse.get_pos()
-        if self.x<=mouse_pos[0]<=self.x+self.img.get_width() and self.y<=mouse_pos[1]<=self.y+self.img.get_height():
-            self.hoverEvent()
-            return True
-        else:
-            self.hoverEventOff()
-            return False
 
 #输入管理组件
 class GameController:
@@ -566,16 +558,28 @@ class GameController:
         return self.mouse_x,self.mouse_y
     #检测是否被点击
     def ifHover(self,imgObject,objectPos=(0,0),local_x=0,local_y=0):
+        #如果是pygame的面
         if isinstance(imgObject,pygame.Surface):
             if objectPos[0]<self.mouse_x-local_x<objectPos[0]+imgObject.get_width() and objectPos[1]<self.mouse_y-local_y<objectPos[1]+imgObject.get_height():
                 return True
             else:
                 return False
+        #如果是zero引擎的Image类
         elif isinstance(imgObject,ImageSurface):
             if imgObject.x<self.mouse_x-local_x<imgObject.x+imgObject.width and imgObject.y<self.mouse_y-local_y<imgObject.y+imgObject.height:
                 return True
             else:
                 return False
+        #如果是zero引擎的Button类
+        elif isinstance(imgObject,Button):
+            if imgObject.x<=self.mouse_x-local_x<=imgObject.x+imgObject.img.get_width() and imgObject.y<=self.mouse_y-local_y<=imgObject.y+imgObject.img.get_height():
+                imgObject.hoverEvent()
+                return True
+            else:
+                imgObject.hoverEventOff()
+                return False
+        else:
+            raise Exception('Error: Unable to check current object.')
 
 #鼠标管理系统
 class MouseInput:

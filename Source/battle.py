@@ -7,8 +7,8 @@ from Zero3.characterDataManager import *
 from Zero3.map import *
 
 def battle(chapter_name,screen,setting):
-    #创建手柄组件
-    joystick = Joystick()
+    #控制器输入组件
+    InputController = GameController(screen)
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #卸载音乐
@@ -494,7 +494,7 @@ def battle(chapter_name,screen,setting):
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_ESCAPE:
                                 Display.quit()
-                        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and joystick.get_button(0) == 1:
+                        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and InputController.joystick.get_button(0) == 1:
                             if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
                                 display_num +=1
                                 if display_num < len(dialog_to_display):
@@ -562,7 +562,7 @@ def battle(chapter_name,screen,setting):
             right_click = False
             ifProcessMap = False
             #获取鼠标坐标
-            mouse_x,mouse_y=pygame.mouse.get_pos()
+            mouse_x,mouse_y=InputController.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE and isWaiting == True:
@@ -600,20 +600,20 @@ def battle(chapter_name,screen,setting):
                         zoomIntoBe += 20
                     elif event.button == 5 and zoomIntoBe > 200:
                         zoomIntoBe -= 20
-                if joystick.get_init() == True:
-                    if round(joystick.get_axis(1)) == -1:
+                if InputController.joystick.get_init() == True:
+                    if round(InputController.joystick.get_axis(1)) == -1:
                         pressKeyToMove["up"]=True
                     else:
                         pressKeyToMove["up"]=False
-                    if round(joystick.get_axis(1)) == 1:
+                    if round(InputController.joystick.get_axis(1)) == 1:
                         pressKeyToMove["down"]=True
                     else:
                         pressKeyToMove["down"]=False
-                    if round(joystick.get_axis(0)) == 1:
+                    if round(InputController.joystick.get_axis(0)) == 1:
                         pressKeyToMove["right"]=True
                     else:
                         pressKeyToMove["right"]=False
-                    if round(joystick.get_axis(0)) == -1:
+                    if round(InputController.joystick.get_axis(0)) == -1:
                         pressKeyToMove["left"]=True
                     else:
                         pressKeyToMove["left"]=False
@@ -725,7 +725,7 @@ def battle(chapter_name,screen,setting):
                 if right_click == True:
                     block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y)
                     #如果点击了回合结束的按钮
-                    if isHover(end_round_button) and isWaiting == True:
+                    if InputController.ifHover(end_round_button) and isWaiting == True:
                         whose_round = "playerToSangvisFerris"
                         the_character_get_click = ""
                         green_hide = True
@@ -1416,7 +1416,7 @@ def battle(chapter_name,screen,setting):
                 #左下角的角色信息
                 characterInfoBoardUI.display(screen,characters_data[the_character_get_click],original_UI_img)
                 #----选择菜单----
-                buttonGetHover = selectMenuUI.display(screen,round(theMap.perBlockWidth/10),theMap.getBlockExactLocation(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y),characters_data[the_character_get_click].kind,friendsCanSave)
+                buttonGetHover = selectMenuUI.display(screen,round(theMap.perBlockWidth/10),theMap.getBlockExactLocation(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y),characters_data[the_character_get_click].kind,friendsCanSave,InputController)
             #加载雪花
             if weatherController != None:
                 weatherController.display(screen,theMap.perBlockWidth,perBlockHeight)
@@ -1516,6 +1516,7 @@ def battle(chapter_name,screen,setting):
             txt_alpha -= 5
         
         #刷新画面
+        InputController.display(screen)
         Display.flip()
     
     #暂停声效 - 尤其是环境声
