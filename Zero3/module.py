@@ -345,6 +345,12 @@ class DialogContent:
         self.mouseImg_none = pygame.image.load(os.path.join("Assets/image/UI/mouse_none.png")).convert_alpha()
         self.mouseImg_click = pygame.image.load(os.path.join("Assets/image/UI/mouse.png")).convert_alpha()
         self.mouse_gif_id = 0
+        self.ifHide = False
+    def hideSwitch(self):
+        if self.ifHide == False:
+            self.ifHide = True
+        else:
+            self.ifHide = False
     def updateContent(self,txt,narrator,forceNotResizeDialoguebox=False):
         self.content = txt
         if self.narrator != narrator:
@@ -366,56 +372,57 @@ class DialogContent:
         self.displayedLine = len(self.content)-1
         self.textIndex = len(self.content[self.displayedLine])-1
     def display(self,screen):
-        #如果对话框图片的最高高度没有被设置，则根据屏幕大小设置一个
-        if self.dialoguebox_max_height == None:
-            self.dialoguebox_max_height = screen.get_height()/4
-        #如果当前对话框图片的y坐标不存在（一般出现在对话系统例行初始化后），则根据屏幕大小设置一个
-        if self.dialoguebox_y == None:
-            self.dialoguebox_y = screen.get_height()*0.65+self.dialoguebox_max_height/2
-        #画出对话框图片
-        screen.blit(pygame.transform.scale(self.dialoguebox,(int(screen.get_width()*0.74),int(self.dialoguebox_height))),(screen.get_width()*0.13,self.dialoguebox_y))
-        #如果对话框图片还在放大阶段
-        if self.dialoguebox_height < self.dialoguebox_max_height:
-            self.dialoguebox_height += self.dialoguebox_max_height/12
-            self.dialoguebox_y -= self.dialoguebox_max_height/24
-        #如果已经放大好了
-        else:
-            x = int(screen.get_width()*0.2)
-            y = int(screen.get_height()*0.74)
-            #写上当前讲话人的名字
-            if self.narrator != None:
-                screen.blit(self.FONT.render(self.narrator,self.MODE,(255, 255, 255)),(x,self.dialoguebox_y+self.FONTSIZE))
-            #鼠标gif的ID
-            if self.mouse_gif_id<100:
-                self.mouse_gif_id += 0.25
+        if self.ifHide == False:
+            #如果对话框图片的最高高度没有被设置，则根据屏幕大小设置一个
+            if self.dialoguebox_max_height == None:
+                self.dialoguebox_max_height = screen.get_height()/4
+            #如果当前对话框图片的y坐标不存在（一般出现在对话系统例行初始化后），则根据屏幕大小设置一个
+            if self.dialoguebox_y == None:
+                self.dialoguebox_y = screen.get_height()*0.65+self.dialoguebox_max_height/2
+            #画出对话框图片
+            screen.blit(pygame.transform.scale(self.dialoguebox,(int(screen.get_width()*0.74),int(self.dialoguebox_height))),(screen.get_width()*0.13,self.dialoguebox_y))
+            #如果对话框图片还在放大阶段
+            if self.dialoguebox_height < self.dialoguebox_max_height:
+                self.dialoguebox_height += self.dialoguebox_max_height/12
+                self.dialoguebox_y -= self.dialoguebox_max_height/24
+            #如果已经放大好了
             else:
-                self.mouse_gif_id = 0
-            #根据ID画出鼠标gif
-            if int(self.mouse_gif_id/10)%2==0:
-                screen.blit(pygame.transform.scale(self.mouseImg_none,(self.FONTSIZE,self.FONTSIZE)),(screen.get_width()*0.82,screen.get_height()*0.83))
-            else:
-                screen.blit(pygame.transform.scale(self.mouseImg_click,(self.FONTSIZE,self.FONTSIZE)),(screen.get_width()*0.82,screen.get_height()*0.83))
-            #对话框已播放的内容
-            for i in range(self.displayedLine):
-                screen.blit(self.FONT.render(self.content[i],self.MODE,(255, 255, 255)),(x,y+self.FONTSIZE*1.5*i))
-            #对话框正在播放的内容
-            screen.blit(self.FONT.render(self.content[self.displayedLine][:self.textIndex],self.MODE,(255, 255, 255)),(x,y+self.FONTSIZE*1.5*self.displayedLine))
-            #如果当前行的字符还没有完全播出
-            if self.textIndex < len(self.content[self.displayedLine]):
-                if pygame.mixer.get_busy() == False:
-                    self.textPlayingSound.play()
-                self.textIndex +=1
-            #当前行的所有字都播出后，播出下一行
-            elif self.displayedLine < len(self.content)-1:
-                if pygame.mixer.get_busy() == False:
-                    self.textPlayingSound.play()
-                self.textIndex = 1
-                self.displayedLine += 1
-            #当所有行都播出后
-            else:
-                if pygame.mixer.get_busy() == True:
-                    self.textPlayingSound.stop()
-                return True
+                x = int(screen.get_width()*0.2)
+                y = int(screen.get_height()*0.74)
+                #写上当前讲话人的名字
+                if self.narrator != None:
+                    screen.blit(self.FONT.render(self.narrator,self.MODE,(255, 255, 255)),(x,self.dialoguebox_y+self.FONTSIZE))
+                #鼠标gif的ID
+                if self.mouse_gif_id<100:
+                    self.mouse_gif_id += 0.25
+                else:
+                    self.mouse_gif_id = 0
+                #根据ID画出鼠标gif
+                if int(self.mouse_gif_id/10)%2==0:
+                    screen.blit(pygame.transform.scale(self.mouseImg_none,(self.FONTSIZE,self.FONTSIZE)),(screen.get_width()*0.82,screen.get_height()*0.83))
+                else:
+                    screen.blit(pygame.transform.scale(self.mouseImg_click,(self.FONTSIZE,self.FONTSIZE)),(screen.get_width()*0.82,screen.get_height()*0.83))
+                #对话框已播放的内容
+                for i in range(self.displayedLine):
+                    screen.blit(self.FONT.render(self.content[i],self.MODE,(255, 255, 255)),(x,y+self.FONTSIZE*1.5*i))
+                #对话框正在播放的内容
+                screen.blit(self.FONT.render(self.content[self.displayedLine][:self.textIndex],self.MODE,(255, 255, 255)),(x,y+self.FONTSIZE*1.5*self.displayedLine))
+                #如果当前行的字符还没有完全播出
+                if self.textIndex < len(self.content[self.displayedLine]):
+                    if pygame.mixer.get_busy() == False:
+                        self.textPlayingSound.play()
+                    self.textIndex +=1
+                #当前行的所有字都播出后，播出下一行
+                elif self.displayedLine < len(self.content)-1:
+                    if pygame.mixer.get_busy() == False:
+                        self.textPlayingSound.play()
+                    self.textIndex = 1
+                    self.displayedLine += 1
+                #当所有行都播出后
+                else:
+                    if pygame.mixer.get_busy() == True:
+                        self.textPlayingSound.stop()
+                    return True
         return False
 
 #背景音乐和图片管理
@@ -530,9 +537,11 @@ class Button:
         self.y = y
         if isinstance(path,str):
             pass
+    def setHoverImg(self,img):
+        self.img2 = img
     def display(self,screen):
         screen.blit(self.img,(self.x,self.y))
-    def hoverEvent(self):
+    def hoverEventOn(self):
         if self.img2 != None and self.hoverEventTriggered == False:
             tempSurface = self.img
             self.img = self.img2
@@ -573,7 +582,7 @@ class GameController:
         #如果是zero引擎的Button类
         elif isinstance(imgObject,Button):
             if imgObject.x<=self.mouse_x-local_x<=imgObject.x+imgObject.img.get_width() and imgObject.y<=self.mouse_y-local_y<=imgObject.y+imgObject.img.get_height():
-                imgObject.hoverEvent()
+                imgObject.hoverEventOn()
                 return True
             else:
                 imgObject.hoverEventOff()
@@ -585,7 +594,7 @@ class GameController:
 class MouseInput:
     def __init__(self,screen):
         pygame.mouse.set_visible(False)
-        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(screen.get_width()*0.04),int(screen.get_width()*0.04)))
+        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(screen.get_width()*0.013),int(screen.get_width()*0.015)))
     def display(self,screen,pos):
         screen.blit(self.iconImg,pos)
 
