@@ -30,14 +30,8 @@ def dialog(chapter_name,screen,setting,part):
 
     #选项栏
     optionBox = loadImg("Assets/image/UI/option.png")
-    #跳过按钮
-    with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
-        dialog_txt = yaml.load(f.read(),Loader=yaml.FullLoader)["Dialog"]
-        skip_button = Button(fontRender(dialog_txt["skip"],"gray",window_x*0.02),window_x*0.9,window_y*0.1)
-        skip_button.setHoverImg(fontRender(dialog_txt["skip"],"white",window_x*0.02))
-        hideUI_img = loadImg("Assets/image/UI/dialog_hide.png",window_x*0.035,window_x*0.035)
-        hideUI_button = Button(addDarkness(hideUI_img,50),window_x*0.1,window_y*0.09)
-        hideUI_button.setHoverImg(hideUI_img)
+    #UI按钮
+    ButtonsMananger = DialogButtons()
     if_skip = False
     #黑色帘幕
     black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
@@ -76,12 +70,8 @@ def dialog(chapter_name,screen,setting,part):
         #背景
         backgroundContent.display(screen)
         npc_img_dic.display(screen)
-        #跳过按钮
-        skip_button.display(screen)
-        ifSkipButtonHovered = InputController.ifHover(skip_button)
-        #隐藏按钮
-        hideUI_button.display(screen)
-        ifHideUIButtonHovered = InputController.ifHover(hideUI_button)
+        #按钮
+        buttonEvent = ButtonsMananger.display(screen,InputController)
         
         #显示对话框和对应文字
         dialogPlayResult = dialogTxtSystem.display(screen)
@@ -117,10 +107,10 @@ def dialog(chapter_name,screen,setting,part):
                     Display.quit()
             elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0] or InputController.joystick.get_button(0) == 1:
-                    if ifHideUIButtonHovered:
+                    if buttonEvent == "hide":
                         dialogTxtSystem.hideSwitch()
                     #如果接来下没有文档了或者玩家按到了跳过按钮
-                    elif ifSkipButtonHovered or dialog_content[dialogId]["next_dialog_id"] == None:
+                    elif buttonEvent == "skip" or dialog_content[dialogId]["next_dialog_id"] == None:
                         #淡出
                         pygame.mixer.music.fadeout(1000)
                         for i in range(0,255,5):

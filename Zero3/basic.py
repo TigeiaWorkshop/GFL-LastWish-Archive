@@ -89,13 +89,13 @@ def fontRenderPro(txt,color,size=50,ifBold=False,ifItalic=False):
 def findColorRGB(colorName):
     color_rgb = None
     if colorName == "gray" or colorName == "grey" or colorName == "disable":
-        color_rgb = (105,105,105)
+        color_rgb = (105, 105, 105)
     elif colorName == "white" or colorName == "enable":
         color_rgb = (255, 255, 255)
     elif colorName == "black":
         color_rgb = (0, 0, 0)
     elif colorName == "green":
-        color_rgb = (0,255,0)
+        color_rgb = (0, 255, 0)
     elif colorName == "red":
         color_rgb = (255, 0, 0)
     return color_rgb
@@ -128,31 +128,63 @@ def loadAllImgInFile(pathRule,width=None,height=None):
 #增加图片暗度
 def addDarkness(img,value):
     newImg = img.copy()
-    dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA).convert_alpha()
-    dark.fill((value,value,value))
-    newImg.blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
+    newImg.fill((value, value, value),special_flags=pygame.BLEND_RGB_SUB) 
     return newImg
 
 #减少图片暗度
 def removeDarkness(img,value):
     newImg = img.copy()
-    dark = pygame.Surface((img.get_width(), img.get_height()), flags=pygame.SRCALPHA).convert_alpha()
-    dark.fill((value,value,value))
-    newImg.blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+    newImg.fill((value, value, value), special_flags=pygame.BLEND_RGB_ADD)
     return newImg
 
 #调整图片亮度
 def changeDarkness(surface,value):
-    dark = pygame.Surface((surface.get_width(), surface.get_height()), flags=pygame.SRCALPHA).convert_alpha()
-    dark.fill((abs(int(value)),abs(int(value)),abs(int(value)),0))
+    if value == 0:
+        return surface
     if value > 0:
-        surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
-    elif value < 0:
-        surface.blit(dark, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
-    return surface
+        return addDarkness(surface,value)
+    else:
+        return removeDarkness(surface,abd(value))
 
 #按照给定的位置对图片进行剪裁
 def cropImg(img,pos=(0,0),size=(0,0)):
     cropped = pygame.Surface((round(size[0]), round(size[1])),flags=pygame.SRCALPHA).convert_alpha()
     cropped.blit(img,(-pos[0],-pos[1]))
     return cropped
+
+#过场动画
+def cutscene(screen,videoPath,bgmPath=None):
+    try:
+        clip = VideoFileClip(videoPath)
+        clip.preview()
+    except BaseException:
+        thevideo = VideoObject(videoPath)
+        fpsClock = pygame.time.Clock()
+        video_fps = int(thevideo.getFPS()+2)
+        black_bg = loadImage("Assets/image/UI/black.png",(0,0),surface.get_width(),surface.get_height())
+        black_bg.set_alpha(0)
+        skip_button = loadImage("Assets/image/UI/skip.png",(surface.get_width()*0.92,surface.get_height()*0.05),surface.get_width()*0.055,surface.get_height()*0.03)
+        ifSkip = False
+        if bgmPath != None and os.path.exists(bgmPath):
+            pygame.mixer.music.load(bgmPath)
+            pygame.mixer.music.play()
+        while True:
+            ifEnd = thevideo.display(surface,screen)
+            if ifEnd == True:
+                break
+            skip_button.draw(screen)
+            for event in pygame.event.get():
+                if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and isHover(skip_button) and ifSkip == False:
+                    ifSkip = True
+                    pygame.mixer.music.fadeout(5000)
+                    break
+            if ifSkip == True:
+                temp_alpha = black_bg.get_alpha()
+                if temp_alpha < 255:
+                    black_bg.set_alpha(temp_alpha+5)
+                else:
+                    break
+            black_bg.draw(screen)
+            fpsClock.tick(video_fps)
+            pygame.display.update()
+        pygame.mixer.music.stop()

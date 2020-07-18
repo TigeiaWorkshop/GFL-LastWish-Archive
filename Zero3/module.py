@@ -104,9 +104,7 @@ class NpcImageSystem:
             self.imgDic[nameTemp] = {"normal":pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/npc/"+nameTemp+".png")).convert_alpha(),(img_width,img_width))}
             #生成深色图片
             self.imgDic[nameTemp]["dark"] = self.imgDic[nameTemp]["normal"].copy()
-            dark = pygame.Surface((img_width,img_width), flags=pygame.SRCALPHA).convert_alpha()
-            dark.fill((50,50,50))
-            self.imgDic[nameTemp]["dark"].blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
+            self.imgDic[nameTemp]["dark"].fill((50, 50, 50), special_flags=pygame.BLEND_RGB_SUB) 
         if "&communication" in name:
             if "communication" not in self.imgDic[nameTemp]:
                 #生成通讯图片
@@ -473,41 +471,75 @@ class DialogBackground:
         else:
             screen.blit(pygame.transform.scale(self.nullSurface,screen.get_size()),(0,0))
 
-#过场动画
-def cutscene(screen,videoPath,bgmPath):
-    """
-    thevideo = VideoObject(videoPath)
-    fpsClock = pygame.time.Clock()
-    video_fps = int(thevideo.getFPS()+2)
-    black_bg = loadImage("Assets/image/UI/black.png",(0,0),surface.get_width(),surface.get_height())
-    black_bg.set_alpha(0)
-    skip_button = loadImage("Assets/image/UI/skip.png",(surface.get_width()*0.92,surface.get_height()*0.05),surface.get_width()*0.055,surface.get_height()*0.03)
-    ifSkip = False
-    pygame.mixer.music.load(bgmPath)
-    pygame.mixer.music.play()
-    while True:
-        ifEnd = thevideo.display(surface,screen)
-        if ifEnd == True:
-            break
-        skip_button.draw(screen)
-        for event in pygame.event.get():
-            if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and isHover(skip_button) and ifSkip == False:
-                ifSkip = True
-                pygame.mixer.music.fadeout(5000)
-                break
-        if ifSkip == True:
-            temp_alpha = black_bg.get_alpha()
-            if temp_alpha < 255:
-                black_bg.set_alpha(temp_alpha+5)
-            else:
-                break
-        black_bg.draw(screen)
-        fpsClock.tick(video_fps)
-        pygame.display.update()
-    pygame.mixer.music.stop()
-    """
-    clip = VideoFileClip(videoPath)
-    clip.preview()
+#对话系统按钮UI模块
+class DialogButtons:
+    def __init__(self):
+        with open("Save/setting.yaml", "r", encoding='utf-8') as f:
+            setting = yaml.load(f.read(),Loader=yaml.FullLoader)
+            window_x = int(setting['Screen_size_x'])
+            window_y = int(setting['Screen_size_y'])
+            self.FONTSIZE = int(window_x*0.0175)
+            self.FONT = pygame.font.SysFont(setting["Font"],self.FONTSIZE)
+            self.FONTMODE = setting["Antialias"]
+        with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
+            dialog_txt = yaml.load(f.read(),Loader=yaml.FullLoader)["Dialog"]
+            #生成跳过按钮
+            tempButtonIcon2 = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_skip.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+            tempButtonIcon = tempButtonIcon2.copy()
+            tempButtonIcon.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+            tempButtonTxt = self.FONT.render(dialog_txt["skip"],self.FONTMODE,(105, 105, 105))
+            tempButtonTxt2 = self.FONT.render(dialog_txt["skip"],self.FONTMODE,(255, 255, 255))
+            temp_w = tempButtonTxt.get_width()+self.FONTSIZE*1.5
+            tempSurface = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
+            tempSurface.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
+            tempSurface.blit(tempButtonTxt,(0,0))
+            self.skipButton = Button(tempSurface,window_x*0.9,window_y*0.05)
+            tempSurface = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
+            tempSurface.blit(tempButtonIcon2,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
+            tempSurface.blit(tempButtonTxt2,(0,0))
+            self.skipButton.setHoverImg(tempSurface)
+            #生成自动播放按钮
+            tempButtonIcon2 = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_auto.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+            tempButtonIcon = tempButtonIcon2.copy()
+            tempButtonIcon.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+            tempButtonTxt = self.FONT.render(dialog_txt["auto"],self.FONTMODE,(105, 105, 105))
+            tempButtonTxt2 = self.FONT.render(dialog_txt["auto"],self.FONTMODE,(255, 255, 255))
+            temp_w = tempButtonTxt.get_width()+self.FONTSIZE*1.5
+            tempSurface = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
+            tempSurface.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
+            tempSurface.blit(tempButtonTxt,(0,0))
+            self.autoButton = Button(tempSurface,window_x*0.8,window_y*0.05)
+            tempSurface = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
+            tempSurface.blit(tempButtonIcon2,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
+            tempSurface.blit(tempButtonTxt2,(0,0))
+            self.autoButton.setHoverImg(tempSurface)
+            #隐藏按钮
+            hideUI_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_hide.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+            hideUI_imgTemp = hideUI_img.copy()
+            hideUI_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+            self.hideButton = Button(hideUI_imgTemp,window_x*0.05,window_y*0.05)
+            self.hideButton.setHoverImg(hideUI_img)
+            #历史回溯按钮
+            history_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_history.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+            history_imgTemp = history_img.copy()
+            history_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+            self.historyButton = Button(history_imgTemp,window_x*0.1,window_y*0.05)
+            self.historyButton.setHoverImg(history_img)
+    def display(self,screen,theGameController):
+        self.skipButton.display(screen)
+        self.hideButton.display(screen)
+        self.autoButton.display(screen)
+        self.historyButton.display(screen)
+        if theGameController.ifHover(self.skipButton):
+            return "skip"
+        elif theGameController.ifHover(self.hideButton):
+            return "hide"
+        elif theGameController.ifHover(self.autoButton):
+            return "auto"
+        elif theGameController.ifHover(self.historyButton):
+            return "history"
+        else:
+            return ""
 
 #行动点数管理器（塔防模式）
 class ApSystem:
