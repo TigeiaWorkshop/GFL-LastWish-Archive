@@ -118,7 +118,8 @@ def dialog(chapter_name,screen,setting,part):
                             black_bg.draw(screen)
                             Display.flip()
                         if_skip = True
-                        
+                    elif buttonEvent == "auto":
+                        ButtonsMananger.autoModeSwitch()
                     #如果所有行都没有播出，则播出所有行
                     elif dialogPlayResult == False:
                         dialogTxtSystem.playAll()
