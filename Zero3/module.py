@@ -310,7 +310,7 @@ class GameController:
 class MouseInput:
     def __init__(self,screen):
         pygame.mouse.set_visible(False)
-        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(screen.get_width()*0.013),int(screen.get_width()*0.015)))
+        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(screen.get_width()*0.01),int(screen.get_width()*0.013)))
     def display(self,screen,pos):
         screen.blit(self.iconImg,pos)
 

@@ -40,6 +40,7 @@ class DialogSystem:
         self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
         self.showHistory = False
         self.historySurface = None
+        self.historySurface_local_y = 0
     def display(self,screen):
         #背景
         self.backgroundContent.display(screen)
@@ -64,7 +65,7 @@ class DialogSystem:
                         #更新背景
                         self.backgroundContent.update(self.dialog_content[theNextDialogId]["background_img"],self.dialog_content[theNextDialogId]["background_music"])
                         #保存选取的选项
-                        self.dialog_options[len(self.dialog_options)] = i
+                        self.dialog_options[self.dialogId] = i
                         #重设立绘系统
                         self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[theNextDialogId]["characters_img"])
                         #切换dialogId
@@ -86,13 +87,23 @@ class DialogSystem:
                     elif buttonEvent == "auto" and self.showHistory != True:
                         self.ButtonsMananger.autoModeSwitch()
                         self.dialogTxtSystem.autoMode = self.ButtonsMananger.autoMode
-                    elif buttonEvent == "history" and self.showHistory != True:
-                        self.showHistory = True
+                    elif buttonEvent == "history":
+                        if self.showHistory != True:
+                            self.showHistory = True
+                        else:
+                            self.showHistory = False
+                            self.historySurface = None
                     #如果所有行都没有播出，则播出所有行
                     elif dialogPlayResult == False:
                         self.dialogTxtSystem.playAll()
                     else:
                         leftClick = True
+                elif event.button == 4 and self.historySurface_local_y<0:
+                    self.historySurface = None
+                    self.historySurface_local_y += self.window_y*0.1
+                elif event.button == 5:
+                    self.historySurface = None
+                    self.historySurface_local_y -= self.window_y*0.1
                 #返回上一个对话场景（在被允许的情况下）
                 elif pygame.mouse.get_pressed()[2] or self.InputController.joystick.get_button(1) == 1:
                     theNextDialogId = self.dialog_content[self.dialogId]["last_dialog_id"]
@@ -110,18 +121,23 @@ class DialogSystem:
                 pygame.draw.rect(self.historySurface,(0,0,0),(0,0,self.window_x,self.window_y))
                 self.historySurface.set_alpha(150)
                 dialogIdTemp = "head"
-                local_y = 0
+                local_y = self.historySurface_local_y
                 while dialogIdTemp != None:
-                    if self.dialog_content[dialogIdTemp]["narrator"] == None:
-                        narratorTemp = self.dialogTxtSystem.fontRender("旁白: ",(255, 255, 255))
-                    else:
-                        narratorTemp = self.dialogTxtSystem.fontRender(self.dialog_content[dialogIdTemp]["narrator"]+": ",(255, 255, 255))
-                    self.historySurface.blit(narratorTemp,(self.window_x*0.15-narratorTemp.get_width(),self.window_y*0.1+local_y))
+                    if self.dialog_content[dialogIdTemp]["narrator"] != None:
+                        narratorTemp = self.dialogTxtSystem.fontRender(self.dialog_content[dialogIdTemp]["narrator"]+': ["',(255, 255, 255))
+                        self.historySurface.blit(narratorTemp,(self.window_x*0.15-narratorTemp.get_width(),self.window_y*0.1+local_y))
                     for i in range(len(self.dialog_content[dialogIdTemp]["content"])):
-                        self.historySurface.blit(self.dialogTxtSystem.fontRender(self.dialog_content[dialogIdTemp]["content"][i],(255, 255, 255)),(self.window_x*0.15,self.window_y*0.1+local_y))
+                        txt = self.dialog_content[dialogIdTemp]["content"][i]
+                        txt += '"]' if i == len(self.dialog_content[dialogIdTemp]["content"])-1 and self.dialog_content[dialogIdTemp]["narrator"] != None else ""
+                        self.historySurface.blit(self.dialogTxtSystem.fontRender(txt,(255, 255, 255)),(self.window_x*0.15,self.window_y*0.1+local_y))
                         local_y+=self.dialogTxtSystem.FONTSIZE*1.5
-                    if self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "default":
-                        dialogIdTemp = self.dialog_content[dialogIdTemp]["next_dialog_id"][1]
+                    if dialogIdTemp != self.dialogId:
+                        if self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "default" or self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "changeScene":
+                            dialogIdTemp = self.dialog_content[dialogIdTemp]["next_dialog_id"][1]
+                        elif self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "option":
+                            dialogIdTemp = self.dialog_content[dialogIdTemp]["next_dialog_id"][self.dialog_options[dialogIdTemp]][1]
+                        else:
+                            dialogIdTemp = None
                     else:
                         dialogIdTemp = None
             screen.blit(self.historySurface,(0,0))
