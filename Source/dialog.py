@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Zero3.basic import *
+from Zero3.dialogSystem import *
 
 def dialog(chapter_name,screen,setting,part):
     window_x,window_y = screen.get_size()
@@ -26,13 +26,21 @@ def dialog(chapter_name,screen,setting,part):
         drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
         Display.flip()
-    #音效
+    
+    #背景音乐可以开始播放了
     DIALOG.ready()
-    if_skip = False
+
     #主循环
-    while if_skip == False:
-        if_skip = DIALOG.display(screen,Display)
-        Display.flip()
+    while True:
+        if not DIALOG.display(screen):
+            #按键判定
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        exit()
+            Display.flip()
+        else:
+            break
 
     #返回玩家做出的选项
     return DIALOG.dialog_options

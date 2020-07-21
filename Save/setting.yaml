@@ -8,4 +8,4 @@ Sound:
   background_music: 100
   sound_effects: 100
   sound_environment: 100
-ReadingSpeed: 1
+ReadingSpeed: 0.5
