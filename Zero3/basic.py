@@ -155,6 +155,7 @@ def cropImg(img,pos=(0,0),size=(0,0)):
 #过场动画
 def cutscene(screen,videoPath,bgmPath=None):
     try:
+        from moviepy.editor import VideoFileClip
         clip = VideoFileClip(videoPath)
         clip.preview()
     except BaseException:

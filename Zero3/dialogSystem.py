@@ -18,7 +18,9 @@ class DialogSystem:
         #UI按钮
         self.ButtonsMananger = DialogButtons()
         #黑色帘幕
-        self.black_bg = ImageSurface(pygame.image.load(os.path.join("Assets/image/UI/black.png")).convert_alpha(),0,0,self.window_x,self.window_y)
+        black_bg_temp = pygame.Surface((self.window_x,self.window_y),flags=pygame.SRCALPHA).convert_alpha()
+        pygame.draw.rect(black_bg_temp,(0,0,0),(0,0,self.window_x,self.window_y))
+        self.black_bg = ImageSurface(black_bg_temp,0,0,self.window_x,self.window_y)
         #加载对话框系统
         self.dialogTxtSystem = DialogContent(self.window_x*0.015)
         #设定初始化
@@ -36,6 +38,8 @@ class DialogSystem:
         #加载对话的背景图片
         self.backgroundContent = DialogBackground(setting["Sound"]["background_music"])
         self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
+        self.showHistory = False
+        self.historySurface = None
     def display(self,screen):
         #背景
         self.backgroundContent.display(screen)
@@ -49,7 +53,7 @@ class DialogSystem:
                 #显示选项
                 optionBox_y_base = (self.window_y*3/4-(len(self.dialog_content[self.dialogId]["next_dialog_id"])-1)*2*self.window_x*0.03)/4
                 for i in range(1,len(self.dialog_content[self.dialogId]["next_dialog_id"])):
-                    option_txt = self.dialogTxtSystem.FONT.render(self.dialog_content[self.dialogId]["next_dialog_id"][i][0],self.dialogTxtSystem.MODE,(255, 255, 255))
+                    option_txt = self.dialogTxtSystem.fontRender(self.dialog_content[self.dialogId]["next_dialog_id"][i][0],(255, 255, 255))
                     optionBox_scaled = pygame.transform.scale(self.optionBox,(int(option_txt.get_width()+self.window_x*0.05),int(self.window_x*0.05)))
                     optionBox_x = (self.window_x-optionBox_scaled.get_width())/2
                     optionBox_y = i*2*self.window_x*0.03+optionBox_y_base
@@ -72,16 +76,18 @@ class DialogSystem:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0] or self.InputController.joystick.get_button(0) == 1:
-                    if buttonEvent == "hide":
+                    if buttonEvent == "hide" and self.showHistory != True:
                         self.dialogTxtSystem.hideSwitch()
                     #如果接来下没有文档了或者玩家按到了跳过按钮
-                    elif buttonEvent == "skip":
+                    elif buttonEvent == "skip" and self.showHistory != True:
                         #淡出
                         self.fadeOut(screen)
                         return True
-                    elif buttonEvent == "auto":
+                    elif buttonEvent == "auto" and self.showHistory != True:
                         self.ButtonsMananger.autoModeSwitch()
                         self.dialogTxtSystem.autoMode = self.ButtonsMananger.autoMode
+                    elif buttonEvent == "history" and self.showHistory != True:
+                        self.showHistory = True
                     #如果所有行都没有播出，则播出所有行
                     elif dialogPlayResult == False:
                         self.dialogTxtSystem.playAll()
@@ -98,7 +104,28 @@ class DialogSystem:
                         #切换dialogId
                         self.dialogId = theNextDialogId
                         self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"],True)
-        if self.dialogTxtSystem.forceUpdate() or leftClick:
+        if self.showHistory == True:
+            if self.historySurface == None:
+                self.historySurface = pygame.Surface((self.window_x,self.window_y),flags=pygame.SRCALPHA).convert_alpha()
+                pygame.draw.rect(self.historySurface,(0,0,0),(0,0,self.window_x,self.window_y))
+                self.historySurface.set_alpha(150)
+                dialogIdTemp = "head"
+                local_y = 0
+                while dialogIdTemp != None:
+                    if self.dialog_content[dialogIdTemp]["narrator"] == None:
+                        narratorTemp = self.dialogTxtSystem.fontRender("旁白: ",(255, 255, 255))
+                    else:
+                        narratorTemp = self.dialogTxtSystem.fontRender(self.dialog_content[dialogIdTemp]["narrator"]+": ",(255, 255, 255))
+                    self.historySurface.blit(narratorTemp,(self.window_x*0.15-narratorTemp.get_width(),self.window_y*0.1+local_y))
+                    for i in range(len(self.dialog_content[dialogIdTemp]["content"])):
+                        self.historySurface.blit(self.dialogTxtSystem.fontRender(self.dialog_content[dialogIdTemp]["content"][i],(255, 255, 255)),(self.window_x*0.15,self.window_y*0.1+local_y))
+                        local_y+=self.dialogTxtSystem.FONTSIZE*1.5
+                    if self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "default":
+                        dialogIdTemp = self.dialog_content[dialogIdTemp]["next_dialog_id"][1]
+                    else:
+                        dialogIdTemp = None
+            screen.blit(self.historySurface,(0,0))
+        elif self.dialogTxtSystem.forceUpdate() or leftClick:
             if self.dialog_content[self.dialogId]["next_dialog_id"] == None:
                 self.fadeOut(screen)
                 return True
@@ -293,6 +320,8 @@ class DialogContent:
     def playAll(self):
         self.displayedLine = len(self.content)-1
         self.textIndex = len(self.content[self.displayedLine])-1
+    def fontRender(self,txt,color):
+        return self.FONT.render(txt,self.MODE,color)
     def display(self,screen):
         if self.ifHide == False:
             #如果对话框图片的最高高度没有被设置，则根据屏幕大小设置一个

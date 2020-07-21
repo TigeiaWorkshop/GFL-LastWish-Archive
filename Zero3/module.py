@@ -10,7 +10,6 @@ import cv2
 import pygame
 import yaml
 from pygame.locals import *
-from moviepy.editor import *
 
 #高级图形类
 class ImageSurface:
