@@ -3,16 +3,22 @@ from Zero3.basic import *
 
 #视觉小说系统模块
 class DialogSystem:
-    def __init__(self,chapter_name,screen,setting,part):
-        #控制器输入组件
-        self.InputController = GameController(screen)
-        #获取屏幕的尺寸
-        self.window_x,self.window_y = screen.get_size()
+    def __init__(self,path,part):
         #读取章节信息
-        with open("Data/main_chapter/{0}_dialogs_{1}.yaml".format(chapter_name,setting['Language']), "r", encoding='utf-8') as f:
+        with open(path, "r", encoding='utf-8') as f:
             self.dialog_content = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
             if len(self.dialog_content)==0:
                 raise Exception('Warning: The dialog has no content!')
+        #从设置文件中加载信息
+        with open("Save/setting.yaml", "r", encoding='utf-8') as f:
+            DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
+            #加载对话的背景图片
+            self.backgroundContent = DialogBackground(DATA["Sound"]["background_music"])
+            #获取屏幕的尺寸
+            self.window_x = DATA["Screen_size_x"]
+            self.window_y = DATA["Screen_size_y"]
+        #控制器输入组件
+        self.InputController = GameController(self.window_x)
         #选项栏
         self.optionBox = pygame.image.load(os.path.join("Assets/image/UI/option.png")).convert_alpha()
         #UI按钮
@@ -30,14 +36,13 @@ class DialogSystem:
             raise Exception('Warning: The dialog must have a head!')
         else:
             self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
+        #更新背景音乐
+        self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
         #玩家在对话时做出的选择
         self.dialog_options = {}
         #加载npc立绘系统并初始化
         self.npc_img_dic = NpcImageSystem()
         self.npc_img_dic.process(None,self.dialog_content[self.dialogId]["characters_img"])
-        #加载对话的背景图片
-        self.backgroundContent = DialogBackground(setting["Sound"]["background_music"])
-        self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
         self.showHistory = False
         self.historySurface = None
         self.historySurface_local_y = 0

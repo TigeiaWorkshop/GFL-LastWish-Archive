@@ -274,7 +274,14 @@ class Button:
 class GameController:
     def __init__(self,screen):
         self.joystick = Joystick()
-        self.mouse = MouseInput(screen)
+        if isinstance(screen,pygame.Surface):
+            self.mouse = MouseInput(screen.get_width())
+        elif isinstance(screen,(list,tuple)):
+            self.mouse = MouseInput(screen[0])
+        elif isinstance(screen,int):
+            self.mouse = MouseInput(screen)
+        else:
+            raise Exception('Error: GameController cannot accept this variable')
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
     def display(self,screen):
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
@@ -308,9 +315,9 @@ class GameController:
 
 #鼠标管理系统
 class MouseInput:
-    def __init__(self,screen):
+    def __init__(self,window_x):
         pygame.mouse.set_visible(False)
-        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(screen.get_width()*0.01),int(screen.get_width()*0.013)))
+        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(window_x*0.01),int(window_x*0.013)))
     def display(self,screen,pos):
         screen.blit(self.iconImg,pos)
 

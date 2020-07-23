@@ -17,8 +17,7 @@ def dialog(chapter_name,screen,setting,part):
     
     #卸载音乐
     pygame.mixer.music.unload()
-
-    DIALOG = DialogSystem(chapter_name,screen,setting,part)
+    DIALOG = DialogSystem("Data/main_chapter/{0}_dialogs_{1}.yaml".format(chapter_name,setting['Language']),part)
 
     #加载完成-淡出效果
     for i in range(100,-1,-1):
