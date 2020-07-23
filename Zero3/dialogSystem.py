@@ -41,12 +41,16 @@ class DialogSystem:
         self.showHistory = False
         self.historySurface = None
         self.historySurface_local_y = 0
+        #返回按钮
+        buttonTemp = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_back.png")).convert_alpha(),(int(self.window_x*0.03),int(self.window_y*0.04)))
+        self.history_back = Button(addDarkness(buttonTemp,100),self.window_x*0.04,self.window_y*0.04)
+        self.history_back.setHoverImg(buttonTemp)
     def display(self,screen):
         #背景
         self.backgroundContent.display(screen)
         self.npc_img_dic.display(screen)
         #按钮
-        buttonEvent = self.ButtonsMananger.display(screen,self.InputController)
+        buttonEvent = self.ButtonsMananger.display(screen,self.InputController,self.dialogTxtSystem.ifHide)
         #显示对话框和对应文字
         dialogPlayResult = self.dialogTxtSystem.display(screen)
         if dialogPlayResult == True:
@@ -87,12 +91,11 @@ class DialogSystem:
                     elif buttonEvent == "auto" and self.showHistory != True:
                         self.ButtonsMananger.autoModeSwitch()
                         self.dialogTxtSystem.autoMode = self.ButtonsMananger.autoMode
-                    elif buttonEvent == "history":
-                        if self.showHistory != True:
-                            self.showHistory = True
-                        else:
-                            self.showHistory = False
-                            self.historySurface = None
+                    elif buttonEvent == "history" and self.showHistory != True:
+                        self.showHistory = True
+                    elif self.InputController.ifHover(self.history_back) and self.showHistory == True:
+                        self.showHistory = False
+                        self.historySurface = None
                     #如果所有行都没有播出，则播出所有行
                     elif dialogPlayResult == False:
                         self.dialogTxtSystem.playAll()
@@ -135,12 +138,18 @@ class DialogSystem:
                         if self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "default" or self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "changeScene":
                             dialogIdTemp = self.dialog_content[dialogIdTemp]["next_dialog_id"][1]
                         elif self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "option":
+                            narratorTemp = self.dialogTxtSystem.fontRender("选项 - ",(0,191,255))
+                            self.historySurface.blit(narratorTemp,(self.window_x*0.15-narratorTemp.get_width(),self.window_y*0.1+local_y))
+                            self.historySurface.blit(self.dialogTxtSystem.fontRender(self.dialog_content[dialogIdTemp]["next_dialog_id"][self.dialog_options[dialogIdTemp]][0],(0,191,255)),(self.window_x*0.15,self.window_y*0.1+local_y))
+                            local_y+=self.dialogTxtSystem.FONTSIZE*1.5
                             dialogIdTemp = self.dialog_content[dialogIdTemp]["next_dialog_id"][self.dialog_options[dialogIdTemp]][1]
                         else:
                             dialogIdTemp = None
                     else:
                         dialogIdTemp = None
             screen.blit(self.historySurface,(0,0))
+            self.history_back.display(screen)
+            self.InputController.ifHover(self.history_back)
         elif self.dialogTxtSystem.forceUpdate() or leftClick:
             if self.dialog_content[self.dialogId]["next_dialog_id"] == None:
                 self.fadeOut(screen)
@@ -496,50 +505,59 @@ class DialogButtons:
             hideUI_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
             self.hideButton = Button(hideUI_imgTemp,window_x*0.05,window_y*0.05)
             self.hideButton.setHoverImg(hideUI_img)
+            showUI_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_show.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+            showUI_imgTemp = showUI_img.copy()
+            showUI_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+            self.showButton = Button(showUI_imgTemp,window_x*0.05,window_y*0.05)
+            self.showButton.setHoverImg(showUI_img)
             #历史回溯按钮
             history_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_history.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
             history_imgTemp = history_img.copy()
             history_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
             self.historyButton = Button(history_imgTemp,window_x*0.1,window_y*0.05)
             self.historyButton.setHoverImg(history_img)
-    def display(self,screen,theGameController):
-        self.hideButton.display(screen)
-        self.historyButton.display(screen)
-        action = ""
-        if theGameController.ifHover(self.skipButton):
-            self.skipButtonHovered.draw(screen)
-            action = "skip"
-        else:
-            self.skipButton.draw(screen)
-        if theGameController.ifHover(self.autoButton):
-            self.autoButtonHovered.draw(screen)
-            if self.autoMode == True:
-                rotatedIcon = pygame.transform.rotate(self.autoIconHovered,self.autoIconDegree)
-                screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
-                if self.autoIconDegree < 180:
-                    self.autoIconDegree+=1
-                else:
-                    self.autoIconDegree=0
+    def display(self,screen,theGameController,ifHide):
+        if ifHide == True:
+            self.showButton.display(screen)
+            return "hide" if theGameController.ifHover(self.showButton) else ""
+        elif ifHide == False:
+            self.hideButton.display(screen)
+            self.historyButton.display(screen)
+            action = ""
+            if theGameController.ifHover(self.skipButton):
+                self.skipButtonHovered.draw(screen)
+                action = "skip"
             else:
-                screen.blit(self.autoIconHovered,(self.autoButtonHovered.description,self.autoButtonHovered.y))
-            action = "auto"
-        else:
-            if self.autoMode == True:
+                self.skipButton.draw(screen)
+            if theGameController.ifHover(self.autoButton):
                 self.autoButtonHovered.draw(screen)
-                rotatedIcon = pygame.transform.rotate(self.autoIconHovered,self.autoIconDegree)
-                screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
-                if self.autoIconDegree < 180:
-                    self.autoIconDegree+=1
+                if self.autoMode == True:
+                    rotatedIcon = pygame.transform.rotate(self.autoIconHovered,self.autoIconDegree)
+                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
+                    if self.autoIconDegree < 180:
+                        self.autoIconDegree+=1
+                    else:
+                        self.autoIconDegree=0
                 else:
-                    self.autoIconDegree=0
+                    screen.blit(self.autoIconHovered,(self.autoButtonHovered.description,self.autoButtonHovered.y))
+                action = "auto"
             else:
-                self.autoButton.draw(screen)
-                screen.blit(self.autoIcon,(self.autoButton.description,self.autoButton.y))
-        if theGameController.ifHover(self.hideButton):
-            action = "hide"
-        elif theGameController.ifHover(self.historyButton):
-            action = "history"
-        return action
+                if self.autoMode == True:
+                    self.autoButtonHovered.draw(screen)
+                    rotatedIcon = pygame.transform.rotate(self.autoIconHovered,self.autoIconDegree)
+                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
+                    if self.autoIconDegree < 180:
+                        self.autoIconDegree+=1
+                    else:
+                        self.autoIconDegree=0
+                else:
+                    self.autoButton.draw(screen)
+                    screen.blit(self.autoIcon,(self.autoButton.description,self.autoButton.y))
+            if theGameController.ifHover(self.hideButton):
+                action = "hide"
+            elif theGameController.ifHover(self.historyButton):
+                action = "history"
+            return action
     def autoModeSwitch(self):
         if self.autoMode == False:
             self.autoMode = True
