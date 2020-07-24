@@ -8,7 +8,7 @@ class DialogSystem:
         with open(path, "r", encoding='utf-8') as f:
             self.dialog_content = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
             if len(self.dialog_content)==0:
-                raise Exception('Warning: The dialog has no content!')
+                raise Exception('ZeroEngine-Error: The dialog has no content!')
         #从设置文件中加载信息
         with open("Save/setting.yaml", "r", encoding='utf-8') as f:
             DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -33,7 +33,7 @@ class DialogSystem:
         self.dialogId = "head"
         #如果dialog_content没有头
         if self.dialogId not in self.dialog_content:
-            raise Exception('Warning: The dialog must have a head!')
+            raise Exception('ZeroEngine-Error: The dialog must have a head!')
         else:
             self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
         #更新背景音乐
@@ -143,7 +143,7 @@ class DialogSystem:
                         if self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "default" or self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "changeScene":
                             dialogIdTemp = self.dialog_content[dialogIdTemp]["next_dialog_id"][1]
                         elif self.dialog_content[dialogIdTemp]["next_dialog_id"][0] == "option":
-                            narratorTemp = self.dialogTxtSystem.fontRender("选项 - ",(0,191,255))
+                            narratorTemp = self.dialogTxtSystem.fontRender(self.ButtonsMananger.choiceTxt+" - ",(0,191,255))
                             self.historySurface.blit(narratorTemp,(self.window_x*0.15-narratorTemp.get_width(),self.window_y*0.1+local_y))
                             self.historySurface.blit(self.dialogTxtSystem.fontRender(self.dialog_content[dialogIdTemp]["next_dialog_id"][self.dialog_options[dialogIdTemp]][0],(0,191,255)),(self.window_x*0.15,self.window_y*0.1+local_y))
                             local_y+=self.dialogTxtSystem.FONTSIZE*1.5
@@ -172,6 +172,8 @@ class DialogSystem:
             elif self.dialog_content[self.dialogId]["next_dialog_id"][0] == "changeScene":
                 self.fadeOut(screen)
                 time.sleep(2)
+                #重设立绘系统
+                self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[self.dialog_content[self.dialogId]["next_dialog_id"][1]]["characters_img"])
                 self.dialogId = self.dialog_content[self.dialogId]["next_dialog_id"][1]
                 self.dialogTxtSystem.resetDialogueboxData()
                 self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
@@ -434,9 +436,13 @@ class DialogBackground:
                 elif os.path.exists("Assets/image/dialog_background/{}.jpg".format(self.backgroundImgName)):
                     self.backgroundImgSurface = pygame.image.load(os.path.join("Assets/image/dialog_background/{}.jpg".format(self.backgroundImgName))).convert_alpha()
                 elif os.path.exists("Assets/movie/"+self.backgroundImgName):
-                    self.backgroundImgSurface = VideoObject("Assets/movie/"+self.backgroundImgName,True)
+                    try:
+                        from Zero3.movie import VideoObject
+                        self.backgroundImgSurface = VideoObject("Assets/movie/"+self.backgroundImgName,True)
+                    except BaseException:
+                        raise Exception('ZeroEngine-Error: Cannot run movie module')
                 else:
-                    raise Exception('Warning: Cannot find background image or video file.')
+                    raise Exception('ZeroEngine-Error: Cannot find background image or video file.')
             else:
                 self.backgroundImgSurface = None
         #如果需要更新背景音乐
@@ -448,22 +454,26 @@ class DialogBackground:
                 elif os.path.exists("Assets/music/{}.ogg".format(self.backgroundMusicName)):
                     pygame.mixer.music.load("Assets/music/{}.ogg".format(self.backgroundMusicName))
                 else:
-                    raise Exception('Warning: Cannot find background music file.')
+                    raise Exception('ZeroEngine-Error: Cannot find background music file.')
                 pygame.mixer.music.play(loops=9999, start=0.0)
             else:
                 pygame.mixer.music.unload()
     def display(self,screen):
         if self.backgroundImgName != None:
-            if isinstance(self.backgroundImgSurface,VideoObject):
-                self.backgroundImgSurface.display(screen)
-            else:
+            if isinstance(self.backgroundImgSurface,pygame.Surface):
                 screen.blit(pygame.transform.scale(self.backgroundImgSurface,screen.get_size()),(0,0))
+            else:
+                try:
+                    self.backgroundImgSurface.display(screen)
+                except BaseException:
+                    raise Exception('ZeroEngine-Error: "backgroundImgName" in DialogBackground is causing issue')
         else:
             screen.blit(pygame.transform.scale(self.nullSurface,screen.get_size()),(0,0))
 
 #对话系统按钮UI模块
 class DialogButtons:
     def __init__(self):
+        #从设置中读取信息
         with open("Save/setting.yaml", "r", encoding='utf-8') as f:
             setting = yaml.load(f.read(),Loader=yaml.FullLoader)
             window_x = int(setting['Screen_size_x'])
@@ -471,56 +481,58 @@ class DialogButtons:
             self.FONTSIZE = int(window_x*0.0175)
             self.FONT = pygame.font.SysFont(setting["Font"],self.FONTSIZE)
             self.FONTMODE = setting["Antialias"]
+        #从语言文件中读取按钮文字
         with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
             dialog_txt = yaml.load(f.read(),Loader=yaml.FullLoader)["Dialog"]
-            #生成跳过按钮
-            tempButtonIcon = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_skip.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
-            tempButtonTxt = self.FONT.render(dialog_txt["skip"],self.FONTMODE,(255, 255, 255))
-            temp_w = tempButtonTxt.get_width()+self.FONTSIZE*1.5
-            self.skipButton = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
-            self.skipButtonHovered = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
-            self.skipButtonHovered.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
-            self.skipButtonHovered.blit(tempButtonTxt,(0,0))
-            tempButtonTxt = self.FONT.render(dialog_txt["skip"],self.FONTMODE,(105, 105, 105))
-            tempButtonIcon.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
-            self.skipButton.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
-            self.skipButton.blit(tempButtonTxt,(0,0))
-            self.skipButton = ImageSurface(self.skipButton,window_x*0.9,window_y*0.05)
-            self.skipButtonHovered = ImageSurface(self.skipButtonHovered,window_x*0.9,window_y*0.05)
-            #生成自动播放按钮
-            self.autoIconHovered = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_auto.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
-            self.autoIcon = self.autoIconHovered.copy()
-            self.autoIcon.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
-            self.autoIconDegree = 0
-            self.autoIconDegreeChange = (2**0.5-1)*self.FONTSIZE/45
-            self.autoMode = False
-            tempButtonTxt = self.FONT.render(dialog_txt["auto"],self.FONTMODE,(105, 105, 105))
-            temp_w = tempButtonTxt.get_width()+self.FONTSIZE*1.5
-            self.autoButton = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
-            self.autoButtonHovered = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
-            self.autoButton.blit(tempButtonTxt,(0,0))
-            self.autoButtonHovered.blit(self.FONT.render(dialog_txt["auto"],self.FONTMODE,(255, 255, 255)),(0,0))
-            self.autoButton = ImageSurface(self.autoButton,window_x*0.8,window_y*0.05)
-            self.autoButton.description = int(self.autoButton.x+self.autoButton.img.get_width()-self.FONTSIZE)
-            self.autoButtonHovered = ImageSurface(self.autoButtonHovered,window_x*0.8,window_y*0.05)
-            self.autoButtonHovered.description = int(self.autoButtonHovered.x+self.autoButtonHovered.img.get_width()-self.FONTSIZE)
-            #隐藏按钮
-            hideUI_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_hide.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
-            hideUI_imgTemp = hideUI_img.copy()
-            hideUI_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
-            self.hideButton = Button(hideUI_imgTemp,window_x*0.05,window_y*0.05)
-            self.hideButton.setHoverImg(hideUI_img)
-            showUI_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_show.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
-            showUI_imgTemp = showUI_img.copy()
-            showUI_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
-            self.showButton = Button(showUI_imgTemp,window_x*0.05,window_y*0.05)
-            self.showButton.setHoverImg(showUI_img)
-            #历史回溯按钮
-            history_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_history.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
-            history_imgTemp = history_img.copy()
-            history_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
-            self.historyButton = Button(history_imgTemp,window_x*0.1,window_y*0.05)
-            self.historyButton.setHoverImg(history_img)
+        #生成跳过按钮
+        tempButtonIcon = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_skip.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+        tempButtonTxt = self.FONT.render(dialog_txt["skip"],self.FONTMODE,(255, 255, 255))
+        temp_w = tempButtonTxt.get_width()+self.FONTSIZE*1.5
+        self.choiceTxt = dialog_txt["choice"]
+        self.skipButton = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
+        self.skipButtonHovered = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
+        self.skipButtonHovered.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
+        self.skipButtonHovered.blit(tempButtonTxt,(0,0))
+        tempButtonTxt = self.FONT.render(dialog_txt["skip"],self.FONTMODE,(105, 105, 105))
+        tempButtonIcon.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+        self.skipButton.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
+        self.skipButton.blit(tempButtonTxt,(0,0))
+        self.skipButton = ImageSurface(self.skipButton,window_x*0.9,window_y*0.05)
+        self.skipButtonHovered = ImageSurface(self.skipButtonHovered,window_x*0.9,window_y*0.05)
+        #生成自动播放按钮
+        self.autoIconHovered = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_auto.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+        self.autoIcon = self.autoIconHovered.copy()
+        self.autoIcon.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+        self.autoIconDegree = 0
+        self.autoIconDegreeChange = (2**0.5-1)*self.FONTSIZE/45
+        self.autoMode = False
+        tempButtonTxt = self.FONT.render(dialog_txt["auto"],self.FONTMODE,(105, 105, 105))
+        temp_w = tempButtonTxt.get_width()+self.FONTSIZE*1.5
+        self.autoButton = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
+        self.autoButtonHovered = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
+        self.autoButton.blit(tempButtonTxt,(0,0))
+        self.autoButtonHovered.blit(self.FONT.render(dialog_txt["auto"],self.FONTMODE,(255, 255, 255)),(0,0))
+        self.autoButton = ImageSurface(self.autoButton,window_x*0.8,window_y*0.05)
+        self.autoButton.description = int(self.autoButton.x+self.autoButton.img.get_width()-self.FONTSIZE)
+        self.autoButtonHovered = ImageSurface(self.autoButtonHovered,window_x*0.8,window_y*0.05)
+        self.autoButtonHovered.description = int(self.autoButtonHovered.x+self.autoButtonHovered.img.get_width()-self.FONTSIZE)
+        #隐藏按钮
+        hideUI_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_hide.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+        hideUI_imgTemp = hideUI_img.copy()
+        hideUI_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+        self.hideButton = Button(hideUI_imgTemp,window_x*0.05,window_y*0.05)
+        self.hideButton.setHoverImg(hideUI_img)
+        showUI_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_show.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+        showUI_imgTemp = showUI_img.copy()
+        showUI_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+        self.showButton = Button(showUI_imgTemp,window_x*0.05,window_y*0.05)
+        self.showButton.setHoverImg(showUI_img)
+        #历史回溯按钮
+        history_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_history.png")).convert_alpha(),(self.FONTSIZE,self.FONTSIZE))
+        history_imgTemp = history_img.copy()
+        history_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
+        self.historyButton = Button(history_imgTemp,window_x*0.1,window_y*0.05)
+        self.historyButton.setHoverImg(history_img)
     def display(self,screen,theGameController,ifHide):
         if ifHide == True:
             self.showButton.display(screen)

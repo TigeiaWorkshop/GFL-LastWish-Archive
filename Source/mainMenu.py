@@ -3,6 +3,7 @@ from Source.battle import *
 from Source.dialog import *
 from Source.mapCreator import *
 from Zero3.basic import *
+from Zero3.movie import *
 
 def mainMenu(screen,setting):
     #控制器输入组件

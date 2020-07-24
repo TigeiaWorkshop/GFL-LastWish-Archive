@@ -6,7 +6,6 @@ import random
 import time
 from sys import exit
 
-import cv2
 import pygame
 import yaml
 from pygame.locals import *
@@ -35,40 +34,6 @@ class ImageSurface:
         self.img.set_alpha(value)
     def get_alpha(self):
         return self.img.get_alpha()
-
-#视频捕捉系统
-class VideoObject:
-    def __init__(self,path,ifLoop=False,endPoint=None,loopStartPoint=None):
-        self.video = cv2.VideoCapture(path)
-        self.ifLoop = ifLoop
-        if endPoint != None:
-            self.endPoint = endPoint
-        else:
-            self.endPoint = self.getFrameNum()
-        if loopStartPoint != None:
-            self.loopStartPoint = loopStartPoint
-        else:
-            self.loopStartPoint = 1
-    def getFPS(self):
-        return self.video.get(cv2.CAP_PROP_FPS)
-    def getFrameNum(self):
-        return self.video.get(7)
-    def getFrame(self):
-        return self.video.get(1)
-    def setFrame(self,num):
-        self.video.set(1,num)
-    def display(self,screen):
-        if self.getFrame() >= self.endPoint:
-            if self.ifLoop == True:
-                self.setFrame(self.loopStartPoint)
-            else:
-                return True
-        ret, frame = self.video.read()
-        if frame.shape[0] != screen.get_width() or frame.shape[1] != screen.get_height():
-            frame = cv2.resize(frame,(screen.get_width(),screen.get_height()))
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.transpose(frame)
-        pygame.surfarray.blit_array(screen, frame)
 
 #画面更新控制器
 class DisplayController:
@@ -281,7 +246,7 @@ class GameController:
         elif isinstance(screen,int):
             self.mouse = MouseInput(screen)
         else:
-            raise Exception('Error: GameController cannot accept this variable')
+            raise Exception('ZeroEngine-Error: GameController cannot accept this variable')
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
     def display(self,screen):
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
@@ -311,7 +276,7 @@ class GameController:
                 imgObject.hoverEventOff()
                 return False
         else:
-            raise Exception('Error: Unable to check current object.')
+            raise Exception('ZeroEngine-Error: Unable to check current object.')
 
 #鼠标管理系统
 class MouseInput:

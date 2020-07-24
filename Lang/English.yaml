@@ -17,6 +17,7 @@ Chapter:
 - Back
 Dialog:
   auto: Auto
+  choice: Choice
   skip: Skip
 Font: Times New Roman
 GameTitle: Girls' Frontline - Last wish

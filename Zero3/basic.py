@@ -11,7 +11,7 @@ def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
             try:
                 img = pygame.image.load(os.path.join(path)).convert_alpha()
             except BaseException:
-                raise Exception('Error: Cannot find image! Path: '+path)
+                raise Exception('ZeroEngine-Error: Cannot find image! Path: '+path)
     else:
         img = path
     if setAlpha != None:
@@ -25,7 +25,7 @@ def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
     elif width >= 0 and height >= 0:
         img = pygame.transform.scale(img, (int(width), int(height)))
     elif width < 0 or height < 0:
-        raise Exception('Both width and height must be positive interger!')
+        raise Exception('ZeroEngine-Error: Both width and height must be positive interger!')
     return img
         
 #图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
@@ -41,7 +41,7 @@ def resizeImg(img,imgSize=(None,None)):
     elif imgSize[0] >= 0 and imgSize[1] >= 0:
         img = pygame.transform.scale(img, (round(imgSize[0]), round(imgSize[1])))
     elif imgSize[0] < 0 or imgSize[1] < 0:
-        raise Exception('Both width and height must be positive interger!')
+        raise Exception('ZeroEngine-Error: Both width and height must be positive interger!')
     return img
 
 #高级图片加载模块：接收图片路径（或者已经载入的图片）,位置:[x,y],长,高,返回对应的图片class
@@ -151,41 +151,3 @@ def cropImg(img,pos=(0,0),size=(0,0)):
     cropped = pygame.Surface((round(size[0]), round(size[1])),flags=pygame.SRCALPHA).convert_alpha()
     cropped.blit(img,(-pos[0],-pos[1]))
     return cropped
-
-#过场动画
-def cutscene(screen,videoPath,bgmPath=None):
-    try:
-        from moviepy.editor import VideoFileClip
-        clip = VideoFileClip(videoPath)
-        clip.preview()
-    except BaseException:
-        thevideo = VideoObject(videoPath)
-        fpsClock = pygame.time.Clock()
-        video_fps = int(thevideo.getFPS()+2)
-        black_bg = loadImage("Assets/image/UI/black.png",(0,0),surface.get_width(),surface.get_height())
-        black_bg.set_alpha(0)
-        skip_button = loadImage("Assets/image/UI/skip.png",(surface.get_width()*0.92,surface.get_height()*0.05),surface.get_width()*0.055,surface.get_height()*0.03)
-        ifSkip = False
-        if bgmPath != None and os.path.exists(bgmPath):
-            pygame.mixer.music.load(bgmPath)
-            pygame.mixer.music.play()
-        while True:
-            ifEnd = thevideo.display(surface,screen)
-            if ifEnd == True:
-                break
-            skip_button.draw(screen)
-            for event in pygame.event.get():
-                if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and isHover(skip_button) and ifSkip == False:
-                    ifSkip = True
-                    pygame.mixer.music.fadeout(5000)
-                    break
-            if ifSkip == True:
-                temp_alpha = black_bg.get_alpha()
-                if temp_alpha < 255:
-                    black_bg.set_alpha(temp_alpha+5)
-                else:
-                    break
-            black_bg.draw(screen)
-            fpsClock.tick(video_fps)
-            pygame.display.update()
-        pygame.mixer.music.stop()
