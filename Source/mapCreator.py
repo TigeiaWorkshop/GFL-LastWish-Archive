@@ -54,7 +54,7 @@ def mapCreator(chapterName,screen,setting):
     perBlockHeight = int(window_y/block_y*0.9)
     #加载地图
     theMap = MapObject(loadData,int(window_x/10))
-    theMap.process_map(window_x,window_y)
+    theMap.darkMode = False
 
     #加载背景图片
     all_env_file_list = glob.glob(r'Assets/image/environment/block/*.png')
@@ -128,6 +128,7 @@ def mapCreator(chapterName,screen,setting):
     isBuilding = True
     # 游戏主循环
     while isBuilding == True:
+        ifProcessMap = False
         mouse_x,mouse_y=InputController.get_pos()
         block_get_click = theMap.calBlockInMap(green,mouse_x,mouse_y)
         for event in pygame.event.get():
@@ -203,8 +204,7 @@ def mapCreator(chapterName,screen,setting):
                     data_to_edit = None
                     deleteMode = True
                 elif InputController.ifHover(UIButton["reload"]) and object_to_put_down == None and deleteMode == False:
-                    tempLocal_x = theMap.local_x
-                    tempLocal_y = theMap.local_y
+                    tempLocal_x,tempLocal_y = theMap.getPos()
                     #读取地图
                     with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
                         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -217,9 +217,8 @@ def mapCreator(chapterName,screen,setting):
                             sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],"dev")
                     #加载地图
                     theMap = MapObject(loadData,int(window_x/10))
-                    theMap.process_map(window_x,window_y)
-                    theMap.local_x = tempLocal_x
-                    theMap.local_y = tempLocal_y
+                    theMap.setPos(tempLocal_x,tempLocal_y)
+                    theMap.darkMode = False
                     #读取地图
                     with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
                         originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -320,14 +319,10 @@ def mapCreator(chapterName,screen,setting):
                 mouse_move_temp_y = mouse_y
             else:
                 if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
-                    if mouse_move_temp_x > mouse_x:
-                        theMap.local_x += mouse_move_temp_x-mouse_x
-                    elif mouse_move_temp_x < mouse_x:
-                        theMap.local_x -= mouse_x-mouse_move_temp_x
-                    if mouse_move_temp_y > mouse_y:
-                        theMap.local_y += mouse_move_temp_y-mouse_y
-                    elif mouse_move_temp_y < mouse_y:
-                        theMap.local_y -= mouse_y-mouse_move_temp_y
+                    if mouse_move_temp_x != mouse_x:
+                        theMap.addPos_x(mouse_move_temp_x-mouse_x)
+                    if mouse_move_temp_y != mouse_y:
+                        theMap.addPos_y(mouse_move_temp_y-mouse_y)
                     mouse_move_temp_x = mouse_x
                     mouse_move_temp_y = mouse_y
         else:
@@ -359,18 +354,18 @@ def mapCreator(chapterName,screen,setting):
         
         #如果需要移动屏幕
         if screen_to_move_x != None and screen_to_move_x != 0:
-            temp_value = theMap.local_x + screen_to_move_x*0.2
+            temp_value = theMap.getPos_x() + screen_to_move_x*0.2
             if window_x-theMap.mapSurface.get_width()<=temp_value<=0:
-                theMap.local_x = temp_value
+                theMap.setPos_x(temp_value)
                 screen_to_move_x*=0.8
                 if int(screen_to_move_x) == 0:
                     screen_to_move_x = 0
             else:
                 screen_to_move_x = 0
         if screen_to_move_y != None and screen_to_move_y !=0:
-            temp_value = theMap.local_y + screen_to_move_y*0.2
+            temp_value = theMap.getPos_y() + screen_to_move_y*0.2
             if window_y-theMap.mapSurface.get_height()<=temp_value<=0:
-                theMap.local_y = temp_value
+                theMap.setPos_y(temp_value)
                 screen_to_move_y*=0.8
                 if int(screen_to_move_y) == 0:
                     screen_to_move_y = 0
@@ -398,7 +393,7 @@ def mapCreator(chapterName,screen,setting):
             sangvisFerris_data[enemies].draw("wait",screen,theMap)
             if object_to_put_down == None and pygame.mouse.get_pressed()[0] and sangvisFerris_data[enemies].x == int(mouse_x/green.get_width()) and sangvisFerris_data[enemies].y == int(mouse_y/green.get_height()):
                 data_to_edit = sangvisFerris_data[enemies]
-        
+
         #展示设施
         theMap.display_facility(screen,characters_data,sangvisFerris_data)
 

@@ -458,33 +458,28 @@ def battle(chapter_name,screen,setting):
                                 idle_seconde = 0
                                 seconde_to_idle = None
                     elif "changePos" in dialog_to_display[display_num]:
-                        ifProcessMap = False
                         if screen_to_move_x == None and "x" in dialog_to_display[display_num]["changePos"]:
                             screen_to_move_x = dialog_to_display[display_num]["changePos"]["x"]
                         if screen_to_move_y == None and "y" in dialog_to_display[display_num]["changePos"]:
                             screen_to_move_y = dialog_to_display[display_num]["changePos"]["y"]
                         if screen_to_move_x != None and screen_to_move_x != 0:
-                            temp_value = int(theMap.local_x + screen_to_move_x*0.2)
+                            temp_value = int(theMap.getPos_x() + screen_to_move_x*0.2)
                             if window_x-theMap.surface_width<=temp_value<=0:
-                                theMap.local_x = temp_value
-                                ifProcessMap = True
+                                theMap.setPos_x(temp_value)
                                 screen_to_move_x*=0.8
                                 if int(screen_to_move_x) == 0:
                                     screen_to_move_x = 0
                             else:
                                 screen_to_move_x = 0
                         if screen_to_move_y != None and screen_to_move_y !=0:
-                            temp_value = int(theMap.local_y + screen_to_move_y*0.2)
+                            temp_value = int(theMap.getPos_y() + screen_to_move_y*0.2)
                             if window_y-theMap.surface_height<=temp_value<=0:
-                                theMap.local_y = temp_value
-                                ifProcessMap = True
+                                theMap.setPos_y(temp_value)
                                 screen_to_move_y*=0.8
                                 if int(screen_to_move_y) == 0:
                                     screen_to_move_y = 0
                             else:
                                 screen_to_move_y = 0
-                        if ifProcessMap == True:
-                            theMap.process_map(window_x,window_y)
                         if screen_to_move_x == 0 and screen_to_move_y == 0 or screen_to_move_x == None and screen_to_move_y == None:
                             screen_to_move_x = None
                             screen_to_move_y = None
@@ -560,7 +555,6 @@ def battle(chapter_name,screen,setting):
         # 游戏主循环
         elif battle == True:
             right_click = False
-            ifProcessMap = False
             #获取鼠标坐标
             mouse_x,mouse_y=InputController.get_pos()
             for event in pygame.event.get():
@@ -624,24 +618,16 @@ def battle(chapter_name,screen,setting):
                     mouse_move_temp_y = mouse_y
                 else:
                     if mouse_move_temp_x != mouse_x or mouse_move_temp_y != mouse_y:
-                        if mouse_move_temp_x > mouse_x:
-                            theMap.local_x += int(mouse_move_temp_x-mouse_x)
-                            ifProcessMap = True
-                        elif mouse_move_temp_x < mouse_x:
-                            theMap.local_x -= int(mouse_x-mouse_move_temp_x)
-                            ifProcessMap = True
-                        if mouse_move_temp_y > mouse_y:
-                            theMap.local_y += int(mouse_move_temp_y-mouse_y)
-                            ifProcessMap = True
-                        elif mouse_move_temp_y < mouse_y:
-                            theMap.local_y -= int(mouse_y-mouse_move_temp_y)
-                            ifProcessMap = True
+                        if mouse_move_temp_x != mouse_x:
+                            theMap.addPos_x(mouse_move_temp_x-mouse_x)
+                        if mouse_move_temp_y != mouse_y:
+                            theMap.addPos_y(mouse_move_temp_y-mouse_y)
                         mouse_move_temp_x = mouse_x
                         mouse_move_temp_y = mouse_y
             else:
                 mouse_move_temp_x = -1
                 mouse_move_temp_y = -1
-            
+
             #根据zoomIntoBe调整zoomIn大小
             if zoomIntoBe != zoomIn:
                 if zoomIntoBe < zoomIn:
@@ -650,9 +636,8 @@ def battle(chapter_name,screen,setting):
                     zoomIn += 5
                 newPerBlockWidth = round(window_x/theMap.column*zoomIn/100)
                 newPerBlockHeight = round(window_y/theMap.row*zoomIn/100)
-                theMap.local_x += (theMap.perBlockWidth-newPerBlockWidth)*theMap.column/2
-                theMap.local_y += (perBlockHeight-newPerBlockHeight)*theMap.row/2
-                ifProcessMap = True
+                theMap.addPos_x((theMap.perBlockWidth-newPerBlockWidth)*theMap.column/2)
+                theMap.addPos_y((perBlockHeight-newPerBlockHeight)*theMap.row/2)
                 theMap.perBlockWidth = newPerBlockWidth
                 perBlockHeight = newPerBlockHeight
                 #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
@@ -689,29 +674,26 @@ def battle(chapter_name,screen,setting):
 
             #如果需要移动屏幕
             if screen_to_move_x != None and screen_to_move_x != 0:
-                temp_value = int(theMap.local_x + screen_to_move_x*0.2)
+                temp_value = int(theMap.getPos_x() + screen_to_move_x*0.2)
                 if window_x-theMap.surface_width<=temp_value<=0:
-                    theMap.local_x = temp_value
-                    ifProcessMap = True
+                    theMap.setPos_x(temp_value)
                     screen_to_move_x*=0.8
                     if int(screen_to_move_x) == 0:
                         screen_to_move_x = 0
                 else:
                     screen_to_move_x = 0
             if screen_to_move_y != None and screen_to_move_y !=0:
-                temp_value = int(theMap.local_y + screen_to_move_y*0.2)
+                temp_value = int(theMap.getPos_y() + screen_to_move_y*0.2)
                 if window_y-theMap.surface_height<=temp_value<=0:
-                    theMap.local_y = temp_value
-                    ifProcessMap = True
+                    theMap.setPos_y(temp_value)
                     screen_to_move_y*=0.8
                     if int(screen_to_move_y) == 0:
                         screen_to_move_y = 0
                 else:
                     screen_to_move_y = 0
 
-            
             #加载地图
-            screen_to_move_x,screen_to_move_y = theMap.display_map(screen,screen_to_move_x,screen_to_move_y,ifProcessMap)
+            screen_to_move_x,screen_to_move_y = theMap.display_map(screen,screen_to_move_x,screen_to_move_y)
             #画出用彩色方块表示的范围
             for area in areaDrawColorBlock:
                 for position in areaDrawColorBlock[area]:
@@ -844,14 +826,14 @@ def battle(chapter_name,screen,setting):
                     #移动画面以使得被点击的角色可以被更好的操作
                     if screen_to_move_x == None:
                         tempX,tempY = theMap.calPosInMap(characters_data[the_character_get_click].x,characters_data[the_character_get_click].y)
-                        if tempX < window_x*0.2 and theMap.local_x<=0:
+                        if tempX < window_x*0.2 and theMap.getPos_x()<=0:
                             screen_to_move_x = window_x*0.2-tempX
-                        elif tempX > window_x*0.8 and theMap.local_x>=theMap.column*theMap.perBlockWidth*-1:
+                        elif tempX > window_x*0.8 and theMap.getPos_x()>=theMap.column*theMap.perBlockWidth*-1:
                             screen_to_move_x = window_x*0.8-tempX
                     if screen_to_move_y == None:
-                        if tempY < window_y*0.2 and theMap.local_y<=0:
+                        if tempY < window_y*0.2 and theMap.getPos_y()<=0:
                             screen_to_move_y = window_y*0.2-tempY
-                        elif tempY > window_y*0.8 and theMap.local_y>=theMap.row*perBlockHeight*-1:
+                        elif tempY > window_y*0.8 and theMap.getPos_y()>=theMap.row*perBlockHeight*-1:
                             screen_to_move_y = window_y*0.8-tempY
                         
                 #显示攻击/移动/技能范围

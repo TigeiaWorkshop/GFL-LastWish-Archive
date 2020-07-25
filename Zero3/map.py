@@ -25,6 +25,7 @@ class MapObject:
         self.mapSurface = None
         self.local_x = local_x
         self.local_y = local_y
+        self.ifProcessMap = True
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
@@ -41,8 +42,40 @@ class MapObject:
             self.surface_height = window_y
         self.mapSurface = None
         self.process_map(window_x,window_y)
+    #获取local坐标
+    def getPos(self):
+        return self.local_x,self.local_y
+    def getPos_x(self):
+        return self.local_x
+    def getPos_y(self):
+        return self.local_y
+    #设置local坐标
+    def setPos(self,x,y):
+        self.setPos_x(x)
+        self.setPos_y(y)
+    def setPos_x(self,value):
+        tempValue = round(value)
+        if self.local_x != tempValue:
+            self.local_x = tempValue
+            self.ifProcessMap = True
+    def setPos_y(self,value):
+        tempValue = round(value)
+        if self.local_y != tempValue:
+            self.local_y = tempValue
+            self.ifProcessMap = True
+    #增加local坐标
+    def addPos_x(self,value):
+        tempValue = int(value)
+        if tempValue !=0:
+            self.local_x += tempValue
+            self.ifProcessMap = True
+    def addPos_y(self,value):
+        tempValue = int(value)
+        if tempValue !=0:
+            self.local_y += tempValue
+            self.ifProcessMap = True
     #把地图画到屏幕上
-    def display_map(self,screen,screen_to_move_x=0,screen_to_move_y=0,ifProcessMap=False):
+    def display_map(self,screen,screen_to_move_x=0,screen_to_move_y=0):
         #检测屏幕是不是移到了不移到的地方
         if self.local_x < screen.get_width()-self.surface_width:
             self.local_x = screen.get_width()-self.surface_width
@@ -56,7 +89,8 @@ class MapObject:
         elif self.local_y > 0:
             self.local_y = 0
             screen_to_move_y = 0
-        if ifProcessMap == True:
+        if self.ifProcessMap == True:
+            self.ifProcessMap = False
             self.process_map(screen.get_width(),screen.get_height())
         screen.blit(self.mapSurface,(0,0))
         return (screen_to_move_x,screen_to_move_y)
@@ -171,20 +205,17 @@ class MapObject:
         return the_route
     #重新绘制地图
     def process_map(self,window_x,window_y):
-        
-        
-
         if self.bgImg != None:
             self.mapSurface = pygame.transform.scale(self.bgImg,(window_x,window_y))
         else:
             self.mapSurface = pygame.surface.Surface((window_x,window_y)).convert()
-
         #画出地图
         for y in range(len(self.mapData)):
+            anyBlockPrint = False
             for x in range(len(self.mapData[y])):
                 xTemp,yTemp = self.calPosInMap(x,y)
                 if -self.perBlockWidth<=xTemp<window_x and -self.perBlockWidth<=yTemp<window_y:
-                    #画上场景图片
+                    anyBlockPrint = True
                     if self.darkMode == True and (x,y) not in self.lightArea:
                         try:
                             self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
@@ -201,8 +232,10 @@ class MapObject:
                             self.env_img_list_original["normal"][self.mapData[y][x].name] = loadImg("Assets/image/environment/block/"+self.mapData[y][x].name+".png")
                             self.env_img_list["normal"][self.mapData[y][x].name] = resizeImg(self.env_img_list_original["normal"][self.mapData[y][x].name],(self.perBlockWidth,None))
                             self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
-                elif xTemp>=window_x:
+                elif xTemp>=window_x or yTemp>=window_y:
                     break
+            if anyBlockPrint == False and yTemp>=window_y:
+                break
     #计算在地图中的方块
     def calBlockInMap(self,block,mouse_x,mouse_y):
         guess_x = int(((mouse_x-self.local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
@@ -259,7 +292,7 @@ class MapObject:
                         for x in range(int(self.facilityData["campfire"][the_campfire]["x"]-self.facilityData["campfire"][the_campfire]["range"]+(y-self.facilityData["campfire"][the_campfire]["y"])+1),int(self.facilityData["campfire"][the_campfire]["x"]+self.facilityData["campfire"][the_campfire]["range"]-(y-self.facilityData["campfire"][the_campfire]["y"]))):
                             if (x,y) not in self.lightArea:
                                 self.lightArea.append((x,y))
-        self.process_map(window_x,window_y)
+        self.ifProcessMap = True
     #计算在地图中的位置
     def calPosInMap(self,x,y):
         return round((x-y)*self.perBlockWidth*0.43+self.local_x+self.row*self.perBlockWidth*0.43,1),round((y+x)*self.perBlockWidth*0.22+self.local_y+self.perBlockWidth*0.4,1)
