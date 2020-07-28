@@ -7,6 +7,7 @@ from Zero3.characterDataManager import *
 from Zero3.map import *
 
 def battle(chapter_name,screen,setting):
+    """初始化基础数据"""
     #控制器输入组件
     InputController = GameController(screen)
     #获取屏幕的尺寸
@@ -15,7 +16,6 @@ def battle(chapter_name,screen,setting):
     pygame.mixer.music.unload()
     #帧率控制器
     Display = DisplayController(setting['FPS'])
-
     #加载按钮的文字
     with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -24,14 +24,13 @@ def battle(chapter_name,screen,setting):
         warnings_to_display = WarningSystem(loadData["Warnings"])
         loading_info = loadData["LoadingTxt"]
         resultTxt = loadData["ResultBoard"]
-
+    #加载剧情
     with open("Data/main_chapter/"+chapter_name+"_dialogs_"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         chapter_title = loadData["title"]
         battle_info = loadData["battle_info"]
         dialog_during_battle = loadData["dialog_during_battle"]
         chapterDesc = loadData["description"]
-
     #章节标题显示
     infoToDisplayDuringLoading = LoadingTitle(window_x,window_y,battleUiTxt["numChapter"],chapter_name,chapter_title,chapterDesc)
 
@@ -212,6 +211,8 @@ def battle(chapter_name,screen,setting):
     
     #战斗系统主要loop
     while battleSystemMainLoop == True:
+        #加载地图
+        theMap.display_map(screen)
         #环境声音-频道1
         if pygame.mixer.Channel(1).get_busy() == False and environment_sound != None:
             pygame.mixer.Channel(1).play(environment_sound)
@@ -233,9 +234,6 @@ def battle(chapter_name,screen,setting):
                     seconde_to_idle = None
                 #对话系统总循环
                 if display_num < len(dialog_to_display):
-                    #加载地图
-                    theMap.display_map(screen)
-                    theMap.display_facility_ahead(screen)
                     #角色动画
                     for key,value in dicMerge(sangvisFerris_data,characters_data).items():
                         if value.faction == "character" or (value.x,value.y) in theMap.lightArea or theMap.darkMode != True:
@@ -530,9 +528,6 @@ def battle(chapter_name,screen,setting):
                     battle = True
             #如果战斗前无·对话
             elif dialog_to_display == None:
-                #加载地图
-                theMap.display_map(screen)
-                theMap.display_facility_ahead(screen)
                 #角色动画
                 for every_chara in characters_data:
                     characters_data[every_chara].draw("wait",screen,theMap)
@@ -647,6 +642,7 @@ def battle(chapter_name,screen,setting):
                 UI_img["blue"] = resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None))
                 UI_img["orange"] = resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
                 theMap.changePerBlockSize(theMap.perBlockWidth,window_x,window_y)
+                selectMenuUI.allButton = None
             else:
                 zoomIn = zoomIntoBe
 
@@ -809,6 +805,7 @@ def battle(chapter_name,screen,setting):
                                 skill_range = None
                                 areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                                 the_character_get_click = key
+                                characterInfoBoardUI.update()
                                 friendsCanSave = []
                                 for key2 in characters_data:
                                     if characters_data[key2].dying != False:

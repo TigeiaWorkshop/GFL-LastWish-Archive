@@ -93,6 +93,7 @@ class MapObject:
             self.ifProcessMap = False
             self.process_map(screen.get_width(),screen.get_height())
         screen.blit(self.mapSurface,(0,0))
+        self.display_facility_ahead(screen)
         return (screen_to_move_x,screen_to_move_y)
     #画上设施
     def display_facility(self,screen,characters_data,sangvisFerris_data):
