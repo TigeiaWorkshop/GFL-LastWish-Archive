@@ -250,7 +250,17 @@ class GameController:
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
     def display(self,screen):
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
+        if self.joystick.get_axis(0)>0.1 or self.joystick.get_axis(0)<-0.1:
+            self.mouse_x += 10*round(self.joystick.get_axis(0),1)
+        if self.joystick.get_axis(1)>0.1 or self.joystick.get_axis(1)<-0.1:
+            self.mouse_y += 10*round(self.joystick.get_axis(1),1)
+        pygame.mouse.set_pos((self.mouse_x,self.mouse_y))
         self.mouse.display(screen,(self.mouse_x,self.mouse_y))
+    def get_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and self.joystick.get_button(0) == 1:
+                return "comfirm"
+        return None
     def get_pos(self):
         return self.mouse_x,self.mouse_y
     #检测是否被点击

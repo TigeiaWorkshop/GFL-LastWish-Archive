@@ -68,19 +68,20 @@ class DialogSystem:
                     optionBox_x = (self.window_x-optionBox_scaled.get_width())/2
                     optionBox_y = i*2*self.window_x*0.03+optionBox_y_base
                     displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
-                    if pygame.mouse.get_pressed()[0] and self.InputController.ifHover(optionBox_scaled,(optionBox_x,optionBox_y)):
-                        #下一个dialog的Id
-                        theNextDialogId = self.dialog_content[self.dialogId]["next_dialog_id"][i][1]
-                        #更新背景
-                        self.backgroundContent.update(self.dialog_content[theNextDialogId]["background_img"],self.dialog_content[theNextDialogId]["background_music"])
-                        #保存选取的选项
-                        self.dialog_options[self.dialogId] = i
-                        #重设立绘系统
-                        self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[theNextDialogId]["characters_img"])
-                        #切换dialogId
-                        self.dialogId = theNextDialogId
-                        self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
-                        break
+                    if pygame.mouse.get_pressed()[0] or self.InputController.joystick.get_button(0) == 1: 
+                        if self.InputController.ifHover(optionBox_scaled,(optionBox_x,optionBox_y)):
+                            #下一个dialog的Id
+                            theNextDialogId = self.dialog_content[self.dialogId]["next_dialog_id"][i][1]
+                            #更新背景
+                            self.backgroundContent.update(self.dialog_content[theNextDialogId]["background_img"],self.dialog_content[theNextDialogId]["background_music"])
+                            #保存选取的选项
+                            self.dialog_options[self.dialogId] = i
+                            #重设立绘系统
+                            self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[theNextDialogId]["characters_img"])
+                            #切换dialogId
+                            self.dialogId = theNextDialogId
+                            self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
+                            break
         #按键判定
         leftClick = False
         for event in pygame.event.get():

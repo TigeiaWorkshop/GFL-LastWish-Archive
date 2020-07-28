@@ -148,37 +148,36 @@ def mainMenu(screen,setting):
             hover_on_button_sound.set_volume(settingUI.soundVolume_sound_effects/100.0)
 
         #判断按键
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and settingUI.ifDisplay != True:
-                click_button_sound.play()
-                if menu_type == 0:
-                    if InputController.ifHover(main_menu_txt["menu_0"]["text0_start"].n,(txt_location,main_menu_txt_start_height0)):
+        if InputController.get_event() == "comfirm" and settingUI.ifDisplay != True:
+            click_button_sound.play()
+            if menu_type == 0:
+                if InputController.ifHover(main_menu_txt["menu_0"]["text0_start"].n,(txt_location,main_menu_txt_start_height0)):
+                    menu_type = 1
+                elif InputController.ifHover(main_menu_txt["menu_0"]["text1_setting"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*1)):
+                    settingUI.ifDisplay = True
+                elif InputController.ifHover(main_menu_txt["menu_0"]["text2_developer_team"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*2)):
+                    pass
+                elif InputController.ifHover(main_menu_txt["menu_0"]["text3_exit"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*3)):
+                    Display.quit()
+            elif menu_type == 1:
+                if InputController.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*1)):
+                    menu_type = 2
+                elif InputController.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*4)):
+                    mapCreator("chapter1",screen,setting)
+                elif InputController.ifHover(main_menu_txt["menu_1"]["text6_back"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*6)):
+                    menu_type = 0
+            elif menu_type == 2:
+                for i in range(len(chapter_select)):
+                    if i == len(chapter_select)-1 and InputController.ifHover(chapter_select[-1].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
                         menu_type = 1
-                    elif InputController.ifHover(main_menu_txt["menu_0"]["text1_setting"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*1)):
-                        settingUI.ifDisplay = True
-                    elif InputController.ifHover(main_menu_txt["menu_0"]["text2_developer_team"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*2)):
-                        pass
-                    elif InputController.ifHover(main_menu_txt["menu_0"]["text3_exit"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*3)):
-                        Display.quit()
-                elif menu_type == 1:
-                    if InputController.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*1)):
-                        menu_type = 2
-                    elif InputController.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*4)):
-                        mapCreator("chapter1",screen,setting)
-                    elif InputController.ifHover(main_menu_txt["menu_1"]["text6_back"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*6)):
-                        menu_type = 0
-                elif menu_type == 2:
-                    for i in range(len(chapter_select)):
-                        if i == len(chapter_select)-1 and InputController.ifHover(chapter_select[-1].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
-                            menu_type = 1
-                        #章节选择
-                        elif InputController.ifHover(chapter_select[i].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
-                            dialog("chapter"+str(i+1),screen,setting,"dialog_before_battle")
-                            battle("chapter"+str(i+1),screen,setting)
-                            dialog("chapter"+str(i+1),screen,setting,"dialog_after_battle")
-                            cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
-                            videoCapture.setFrame(1)
-                            break
+                    #章节选择
+                    elif InputController.ifHover(chapter_select[i].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
+                        dialog("chapter"+str(i+1),screen,setting,"dialog_before_battle")
+                        battle("chapter"+str(i+1),screen,setting)
+                        dialog("chapter"+str(i+1),screen,setting,"dialog_after_battle")
+                        cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
+                        videoCapture.setFrame(1)
+                        break
             
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')
