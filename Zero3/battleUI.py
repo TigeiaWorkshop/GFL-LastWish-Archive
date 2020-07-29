@@ -193,7 +193,7 @@ class SelectMenu:
         txt_temp2 = fontRender(self.rescueAPTxt,"black",sizeSmall)
         self.allButton["rescue"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.4))
         self.allButton["rescue"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.5))
-    def display(self,screen,fontSize,location,kind,friendsCanSave,controller):
+    def display(self,screen,fontSize,location,kind,friendsCanSave):
         if self.allButton == None:
             self.initialButtons(fontSize)
         buttonGetHover = None
@@ -201,33 +201,33 @@ class SelectMenu:
         #攻击按钮 - 左
         txt_tempX = location["xStart"]-selectButtonBaseWidth*0.6
         txt_tempY = location["yStart"]
-        if controller.ifHover(self.allButton["attack"],(txt_tempX,txt_tempY)):
+        if ifHover(self.allButton["attack"],(txt_tempX,txt_tempY)):
             buttonGetHover = "attack"
         screen.blit(self.allButton["attack"],(txt_tempX,txt_tempY))
         #移动按钮 - 右
         txt_tempX = location["xEnd"]-selectButtonBaseWidth*0.4
         #txt_tempY 与攻击按钮一致
-        if controller.ifHover(self.allButton["move"],(txt_tempX,txt_tempY)):
+        if ifHover(self.allButton["move"],(txt_tempX,txt_tempY)):
             buttonGetHover = "move"
         screen.blit(self.allButton["move"],(txt_tempX,txt_tempY))
         #换弹按钮 - 下
         txt_tempX = location["xStart"]+selectButtonBaseWidth*0.5
         txt_tempY = location["yEnd"]-selectButtonBaseWidth*0.25
-        if controller.ifHover(self.allButton["reload"],(txt_tempX,txt_tempY)):
+        if ifHover(self.allButton["reload"],(txt_tempX,txt_tempY)):
             buttonGetHover = "reload"
         screen.blit(self.allButton["reload"],(txt_tempX,txt_tempY))
         #技能按钮 - 上
         if kind != "HOC":
             #txt_tempX与换弹按钮一致
             txt_tempY = location["yStart"]-selectButtonBaseWidth*0.7
-            if controller.ifHover(self.allButton["skill"],(txt_tempX,txt_tempY)):
+            if ifHover(self.allButton["skill"],(txt_tempX,txt_tempY)):
                 buttonGetHover = "skill"
             screen.blit(self.allButton["skill"],(txt_tempX,txt_tempY))
         #救助队友
         if len(friendsCanSave)>0:
             txt_tempX = location["xStart"]-selectButtonBaseWidth*0.6
             txt_tempY = location["yStart"]-selectButtonBaseWidth*0.7
-            if controller.ifHover(self.allButton["rescue"],(txt_tempX,txt_tempY)):
+            if ifHover(self.allButton["rescue"],(txt_tempX,txt_tempY)):
                 buttonGetHover = "rescue"
             screen.blit(self.allButton["rescue"],(txt_tempX,txt_tempY))
         return buttonGetHover

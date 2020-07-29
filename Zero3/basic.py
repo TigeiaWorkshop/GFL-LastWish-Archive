@@ -151,3 +151,29 @@ def cropImg(img,pos=(0,0),size=(0,0)):
     cropped = pygame.Surface((round(size[0]), round(size[1])),flags=pygame.SRCALPHA).convert_alpha()
     cropped.blit(img,(-pos[0],-pos[1]))
     return cropped
+
+#检测图片是否被点击
+def ifHover(imgObject,objectPos=(0,0),local_x=0,local_y=0):
+    mouse_x,mouse_y = pygame.mouse.get_pos()
+    #如果是pygame的面
+    if isinstance(imgObject,pygame.Surface):
+        if objectPos[0]<mouse_x-local_x<objectPos[0]+imgObject.get_width() and objectPos[1]<mouse_y-local_y<objectPos[1]+imgObject.get_height():
+            return True
+        else:
+            return False
+    #如果是zero引擎的Image类
+    elif isinstance(imgObject,ImageSurface):
+        if imgObject.x<mouse_x-local_x<imgObject.x+imgObject.width and imgObject.y<mouse_y-local_y<imgObject.y+imgObject.height:
+            return True
+        else:
+            return False
+    #如果是zero引擎的Button类
+    elif isinstance(imgObject,Button):
+        if imgObject.x<=mouse_x-local_x<=imgObject.x+imgObject.img.get_width() and imgObject.y<=mouse_y-local_y<=imgObject.y+imgObject.img.get_height():
+            imgObject.hoverEventOn()
+            return True
+        else:
+            imgObject.hoverEventOff()
+            return False
+    else:
+        raise Exception('ZeroEngine-Error: Unable to check current object.')

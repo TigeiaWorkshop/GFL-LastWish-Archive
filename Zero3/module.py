@@ -121,7 +121,7 @@ class settingContoller:
         self.buttons_y = self.baseImgY + self.baseImgHeight*0.88
         self.buttons_x1 = self.baseImgX + self.confirmTxt_b.get_width()*2.5
         self.buttons_x2 = self.buttons_x1 + self.confirmTxt_b.get_width()
-    def display(self,screen):
+    def display(self,screen,InputController):
         if self.ifDisplay == True:
             #底部图
             screen.blit(self.baseImg,(self.baseImgX,self.baseImgY))
@@ -151,7 +151,7 @@ class settingContoller:
             #取消按钮
             if self.buttons_x1<mouse_x<self.buttons_x1+self.cancelTxt_n.get_width() and self.buttons_y<mouse_y<self.buttons_y+self.cancelTxt_n.get_height():
                 screen.blit(self.cancelTxt_b,(self.buttons_x1,self.buttons_y))
-                if pygame.mouse.get_pressed()[0]:
+                if InputController.get_event() == "comfirm":
                     with open("Save/setting.yaml", "r", encoding='utf-8') as f:
                         settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
                         self.soundVolume_background_music = settingData["Sound"]["background_music"]
@@ -163,7 +163,7 @@ class settingContoller:
             #确认按钮
             if self.buttons_x2<mouse_x<self.buttons_x2+self.confirmTxt_n.get_width() and self.buttons_y<mouse_y<self.buttons_y+self.confirmTxt_n.get_height():
                 screen.blit(self.confirmTxt_b,(self.buttons_x2,self.buttons_y))
-                if pygame.mouse.get_pressed()[0]:
+                if InputController.get_event() == "comfirm":
                     with open("Save/setting.yaml", "r", encoding='utf-8') as f:
                         settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
                         settingData["Sound"]["background_music"] = self.soundVolume_background_music
@@ -177,7 +177,7 @@ class settingContoller:
             else:
                 screen.blit(self.confirmTxt_n,(self.buttons_x2,self.buttons_y))
             #其他按键的判定按钮
-            if pygame.mouse.get_pressed()[0]:
+            if InputController.get_event() == "comfirm":
                 if self.bar_x<=mouse_x<=self.bar_x+self.bar_width:
                     #如果碰到背景音乐的音量条
                     if self.bar_y1-self.bar_height/2<mouse_y<self.bar_y1+self.bar_height*1.5:
@@ -237,25 +237,20 @@ class Button:
 
 #输入管理组件
 class GameController:
-    def __init__(self,screen):
+    def __init__(self,mouse_icon_width,speed):
         self.joystick = Joystick()
-        if isinstance(screen,pygame.Surface):
-            self.mouse = MouseInput(screen.get_width())
-        elif isinstance(screen,(list,tuple)):
-            self.mouse = MouseInput(screen[0])
-        elif isinstance(screen,int):
-            self.mouse = MouseInput(screen)
-        else:
-            raise Exception('ZeroEngine-Error: GameController cannot accept this variable')
+        pygame.mouse.set_visible(False)
+        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(mouse_icon_width),int(mouse_icon_width*1.3)))
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
+        self.movingSpeed = speed
     def display(self,screen):
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
         if self.joystick.get_axis(0)>0.1 or self.joystick.get_axis(0)<-0.1:
-            self.mouse_x += 10*round(self.joystick.get_axis(0),1)
+            self.mouse_x += int(self.movingSpeed*round(self.joystick.get_axis(0),1))
         if self.joystick.get_axis(1)>0.1 or self.joystick.get_axis(1)<-0.1:
-            self.mouse_y += 10*round(self.joystick.get_axis(1),1)
+            self.mouse_y += int(self.movingSpeed*round(self.joystick.get_axis(1),1))
         pygame.mouse.set_pos((self.mouse_x,self.mouse_y))
-        self.mouse.display(screen,(self.mouse_x,self.mouse_y))
+        screen.blit(self.iconImg,(self.mouse_x,self.mouse_y))
     def get_event(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and self.joystick.get_button(0) == 1:
@@ -263,38 +258,6 @@ class GameController:
         return None
     def get_pos(self):
         return self.mouse_x,self.mouse_y
-    #检测是否被点击
-    def ifHover(self,imgObject,objectPos=(0,0),local_x=0,local_y=0):
-        #如果是pygame的面
-        if isinstance(imgObject,pygame.Surface):
-            if objectPos[0]<self.mouse_x-local_x<objectPos[0]+imgObject.get_width() and objectPos[1]<self.mouse_y-local_y<objectPos[1]+imgObject.get_height():
-                return True
-            else:
-                return False
-        #如果是zero引擎的Image类
-        elif isinstance(imgObject,ImageSurface):
-            if imgObject.x<self.mouse_x-local_x<imgObject.x+imgObject.width and imgObject.y<self.mouse_y-local_y<imgObject.y+imgObject.height:
-                return True
-            else:
-                return False
-        #如果是zero引擎的Button类
-        elif isinstance(imgObject,Button):
-            if imgObject.x<=self.mouse_x-local_x<=imgObject.x+imgObject.img.get_width() and imgObject.y<=self.mouse_y-local_y<=imgObject.y+imgObject.img.get_height():
-                imgObject.hoverEventOn()
-                return True
-            else:
-                imgObject.hoverEventOff()
-                return False
-        else:
-            raise Exception('ZeroEngine-Error: Unable to check current object.')
-
-#鼠标管理系统
-class MouseInput:
-    def __init__(self,window_x):
-        pygame.mouse.set_visible(False)
-        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(window_x*0.01),int(window_x*0.013)))
-    def display(self,screen,pos):
-        screen.blit(self.iconImg,pos)
 
 #手柄控制组件
 class Joystick:

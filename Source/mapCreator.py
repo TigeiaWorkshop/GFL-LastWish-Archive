@@ -5,7 +5,7 @@ from Zero3.map import *
 
 def mapCreator(chapterName,screen,setting):
     #控制器输入组件
-    InputController = GameController(screen)
+    InputController = GameController(setting["MouseIconWidth"],setting["MouseMoveSpeed"])
     #屏幕尺寸
     window_x = screen.get_width()
     window_y = screen.get_height()
@@ -155,13 +155,13 @@ def mapCreator(chapterName,screen,setting):
                 if event.key == pygame.K_d:
                     pressKeyToMove["right"]=False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if InputController.ifHover(UIContainerRight):
+                if ifHover(UIContainerRight):
                     #上下滚轮-放大和缩小地图
                     if event.button == 4 and UI_local_y<0:
                         UI_local_y += window_y*0.1
                     elif event.button == 5:
                         UI_local_y -= window_y*0.1
-                elif InputController.ifHover(UIContainer):
+                elif ifHover(UIContainer):
                     #上下滚轮-放大和缩小地图
                     if event.button == 4 and UI_local_x<0:
                         UI_local_x += window_x*0.05
@@ -193,17 +193,17 @@ def mapCreator(chapterName,screen,setting):
                             elif any_chara_replace in sangvisFerris_data:
                                 sangvisFerris_data.pop(any_chara_replace)
                                 originalData["sangvisFerri"].pop(any_chara_replace)
-                elif InputController.ifHover(UIButton["save"]) and object_to_put_down == None and deleteMode == False:
+                elif ifHover(UIButton["save"]) and object_to_put_down == None and deleteMode == False:
                     with open("Data/main_chapter/"+chapterName+"_map.yaml", "w", encoding='utf-8') as f:
                         yaml.dump(originalData, f)
-                elif InputController.ifHover(UIButton["back"]) and object_to_put_down == None and deleteMode == False:
+                elif ifHover(UIButton["back"]) and object_to_put_down == None and deleteMode == False:
                     isBuilding = False
                     break
-                elif InputController.ifHover(UIButton["delete"]) and object_to_put_down == None and deleteMode == False:
+                elif ifHover(UIButton["delete"]) and object_to_put_down == None and deleteMode == False:
                     object_to_put_down = None
                     data_to_edit = None
                     deleteMode = True
-                elif InputController.ifHover(UIButton["reload"]) and object_to_put_down == None and deleteMode == False:
+                elif ifHover(UIButton["reload"]) and object_to_put_down == None and deleteMode == False:
                     tempLocal_x,tempLocal_y = theMap.getPos()
                     #读取地图
                     with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
@@ -376,7 +376,7 @@ def mapCreator(chapterName,screen,setting):
         screen_to_move_x,screen_to_move_y = theMap.display_map(screen,screen_to_move_x,screen_to_move_y)
         theMap.display_facility_ahead(screen)
 
-        if block_get_click != None and InputController.ifHover(UIContainerRight)==False and InputController.ifHover(UIContainer)==False:
+        if block_get_click != None and ifHover(UIContainerRight)==False and ifHover(UIContainer)==False:
             if deleteMode == True:
                 xTemp,yTemp = theMap.calPosInMap(block_get_click["x"],block_get_click["y"])
                 drawImg(red,(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
@@ -401,7 +401,7 @@ def mapCreator(chapterName,screen,setting):
         UIContainer.draw(screen)
         UIContainerRight.draw(screen)
         for Image in UIButton:
-            if InputController.ifHover(UIButton[Image]) and object_to_put_down == None and deleteMode == False:
+            if ifHover(UIButton[Image]) and object_to_put_down == None and deleteMode == False:
                 UIButton[Image].set_alpha(255)
                 UIButtonTxt[Image].set_alpha(255)
             else:
@@ -419,7 +419,7 @@ def mapCreator(chapterName,screen,setting):
             if 0 <= tempX <= UIContainer.width*0.9:
                 tempY = window_y*0.75
                 drawImg(all_characters_img_list[every_chara],(tempX,tempY),screen)
-                if pygame.mouse.get_pressed()[0] and InputController.ifHover(all_characters_img_list[every_chara],(tempX,tempY)):
+                if pygame.mouse.get_pressed()[0] and ifHover(all_characters_img_list[every_chara],(tempX,tempY)):
                     object_to_put_down = {"type":"character","id":every_chara}
             elif tempX > UIContainer.width*0.9:
                 break
@@ -431,7 +431,7 @@ def mapCreator(chapterName,screen,setting):
             if 0 <= tempX <= UIContainer.width*0.9:
                 tempY = window_y*0.83
                 drawImg(all_sangvisFerris_img_list[enemies],(tempX,tempY),screen)
-                if pygame.mouse.get_pressed()[0] and InputController.ifHover(all_sangvisFerris_img_list[enemies],(tempX,tempY)):
+                if pygame.mouse.get_pressed()[0] and ifHover(all_sangvisFerris_img_list[enemies],(tempX,tempY)):
                     object_to_put_down = {"type":"sangvisFerri","id":enemies}
             elif tempX > UIContainer.width*0.9:
                 break
@@ -444,7 +444,7 @@ def mapCreator(chapterName,screen,setting):
             if window_y*0.05<posY<window_y*0.9:
                 posX = window_x*0.84+theMap.perBlockWidth/2.7*(i%4)
                 drawImg(env_img_list[img_name],(posX,posY),screen)
-                if pygame.mouse.get_pressed()[0] and InputController.ifHover(env_img_list[img_name],(posX,posY)):
+                if pygame.mouse.get_pressed()[0] and ifHover(env_img_list[img_name],(posX,posY)):
                     object_to_put_down = {"type":"block","id":img_name}
             i+=1
         for img_name in all_decorations_img_list:
@@ -452,7 +452,7 @@ def mapCreator(chapterName,screen,setting):
             if window_y*0.05<posY<window_y*0.9:
                 posX = window_x*0.84+theMap.perBlockWidth/2.7*(i%4)
                 drawImg(all_decorations_img_list[img_name],(posX,posY),screen)
-                if pygame.mouse.get_pressed()[0] and InputController.ifHover(all_decorations_img_list[img_name],(posX,posY)):
+                if pygame.mouse.get_pressed()[0] and ifHover(all_decorations_img_list[img_name],(posX,posY)):
                     object_to_put_down = {"type":"decoration","id":img_name}
             i+=1
         

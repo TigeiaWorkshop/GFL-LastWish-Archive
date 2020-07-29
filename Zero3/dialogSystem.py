@@ -11,14 +11,14 @@ class DialogSystem:
                 raise Exception('ZeroEngine-Error: The dialog has no content!')
         #从设置文件中加载信息
         with open("Save/setting.yaml", "r", encoding='utf-8') as f:
-            DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
+            SETTING = yaml.load(f.read(),Loader=yaml.FullLoader)
             #加载对话的背景图片
-            self.backgroundContent = DialogBackground(DATA["Sound"]["background_music"])
+            self.backgroundContent = DialogBackground(SETTING["Sound"]["background_music"])
             #获取屏幕的尺寸
-            self.window_x = DATA["Screen_size_x"]
-            self.window_y = DATA["Screen_size_y"]
-        #控制器输入组件
-        self.InputController = GameController(self.window_x)
+            self.window_x = SETTING["Screen_size_x"]
+            self.window_y = SETTING["Screen_size_y"]
+            #控制器输入组件
+            self.InputController = GameController(SETTING["MouseIconWidth"],SETTING["MouseMoveSpeed"])
         #选项栏
         self.optionBox = pygame.image.load(os.path.join("Assets/image/UI/option.png")).convert_alpha()
         #UI按钮
@@ -55,7 +55,7 @@ class DialogSystem:
         self.backgroundContent.display(screen)
         self.npc_img_dic.display(screen)
         #按钮
-        buttonEvent = self.ButtonsMananger.display(screen,self.InputController,self.dialogTxtSystem.ifHide)
+        buttonEvent = self.ButtonsMananger.display(screen,self.dialogTxtSystem.ifHide)
         #显示对话框和对应文字
         dialogPlayResult = self.dialogTxtSystem.display(screen)
         if dialogPlayResult == True:
@@ -69,7 +69,7 @@ class DialogSystem:
                     optionBox_y = i*2*self.window_x*0.03+optionBox_y_base
                     displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
                     if pygame.mouse.get_pressed()[0] or self.InputController.joystick.get_button(0) == 1: 
-                        if self.InputController.ifHover(optionBox_scaled,(optionBox_x,optionBox_y)):
+                        if ifHover(optionBox_scaled,(optionBox_x,optionBox_y)):
                             #下一个dialog的Id
                             theNextDialogId = self.dialog_content[self.dialogId]["next_dialog_id"][i][1]
                             #更新背景
@@ -99,7 +99,7 @@ class DialogSystem:
                         self.dialogTxtSystem.autoMode = self.ButtonsMananger.autoMode
                     elif buttonEvent == "history" and self.showHistory != True:
                         self.showHistory = True
-                    elif self.InputController.ifHover(self.history_back) and self.showHistory == True:
+                    elif ifHover(self.history_back) and self.showHistory == True:
                         self.showHistory = False
                         self.historySurface = None
                     #如果所有行都没有播出，则播出所有行
@@ -155,7 +155,7 @@ class DialogSystem:
                         dialogIdTemp = None
             screen.blit(self.historySurface,(0,0))
             self.history_back.display(screen)
-            self.InputController.ifHover(self.history_back)
+            ifHover(self.history_back)
         elif self.dialogTxtSystem.forceUpdate() or leftClick:
             if self.dialog_content[self.dialogId]["next_dialog_id"] == None:
                 self.fadeOut(screen)
@@ -534,20 +534,20 @@ class DialogButtons:
         history_imgTemp.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
         self.historyButton = Button(history_imgTemp,window_x*0.1,window_y*0.05)
         self.historyButton.setHoverImg(history_img)
-    def display(self,screen,theGameController,ifHide):
+    def display(self,screen,ifHide):
         if ifHide == True:
             self.showButton.display(screen)
-            return "hide" if theGameController.ifHover(self.showButton) else ""
+            return "hide" if ifHover(self.showButton) else ""
         elif ifHide == False:
             self.hideButton.display(screen)
             self.historyButton.display(screen)
             action = ""
-            if theGameController.ifHover(self.skipButton):
+            if ifHover(self.skipButton):
                 self.skipButtonHovered.draw(screen)
                 action = "skip"
             else:
                 self.skipButton.draw(screen)
-            if theGameController.ifHover(self.autoButton):
+            if ifHover(self.autoButton):
                 self.autoButtonHovered.draw(screen)
                 if self.autoMode == True:
                     rotatedIcon = pygame.transform.rotate(self.autoIconHovered,self.autoIconDegree)
@@ -571,9 +571,9 @@ class DialogButtons:
                 else:
                     self.autoButton.draw(screen)
                     screen.blit(self.autoIcon,(self.autoButton.description,self.autoButton.y))
-            if theGameController.ifHover(self.hideButton):
+            if ifHover(self.hideButton):
                 action = "hide"
-            elif theGameController.ifHover(self.historyButton):
+            elif ifHover(self.historyButton):
                 action = "history"
             return action
     def autoModeSwitch(self):
