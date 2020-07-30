@@ -68,8 +68,8 @@ def mainMenu(screen,setting):
     last_hover_sound_play_on = None
 
     the_black = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
-    t1 = fontRender("缇吉娅工坊 呈现","white",window_x/64)
-    t2 = fontRender("警告：所有内容仍处于研发阶段，不代表最终效果","white",window_x/64)
+    t1 = fontRender(loadData["title1"],"white",window_x/64)
+    t2 = fontRender(loadData["title2"],"white",window_x/64)
     for i in range(len(HealthyGamingAdvice)):
         HealthyGamingAdvice[i] = fontRender(HealthyGamingAdvice[i],"white",window_x/64)
 

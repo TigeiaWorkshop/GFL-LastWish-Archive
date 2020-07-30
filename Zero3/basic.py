@@ -58,11 +58,26 @@ def loadImage(path,the_object_position,width=None,height=None,description="Defau
 with open("Save/setting.yaml", "r", encoding='utf-8') as f:
     DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
     FONT = DATA["Font"]
+    FONTTYPE = DATA["FontType"]
     MODE = DATA["Antialias"]
 
+#创建字体
+def createFont(size,ifBold=False,ifItalic=False):
+    if FONTTYPE == "default":
+        return pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
+    elif FONTTYPE == "custom":
+        normal_font = pygame.font.Font("Assets/font/{}.ttf".format(FONT),int(size))
+        if ifBold:
+            normal_font.set_bold(ifBold)
+        if ifItalic:
+            normal_font.set_italic(ifItalic)
+        return normal_font
+    else:
+        raise Exception('ZeroEngine-Error: FontType option in setting file is incorrect!')
+
 #文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
-def fontRender(txt,color,size=50,ifBold=False,ifItalic=False):
-    normal_font = pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
+def fontRender(txt,color,size,ifBold=False,ifItalic=False):
+    normal_font = createFont(size,ifBold,ifItalic)
     if isinstance(color,str):
         text_out = normal_font.render(txt, MODE, findColorRGB(color))
     else:
@@ -76,8 +91,8 @@ def fontRenderPro(txt,color,size=50,ifBold=False,ifItalic=False):
             self.n = n
             self.b = b
     #文字设定
-    normal_font = pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
-    big_font = pygame.font.SysFont(FONT,int(size*1.5),ifBold,ifItalic)
+    normal_font = createFont(size,ifBold,ifItalic)
+    big_font = createFont(int(size*1.5),ifBold,ifItalic)
     if isinstance(color,str):
         color = findColorRGB(color)
         text_out = TextSurface(normal_font.render(txt, MODE, color),big_font.render(txt, MODE, color))

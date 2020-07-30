@@ -129,7 +129,7 @@ def mapCreator(chapterName,screen,setting):
     # 游戏主循环
     while isBuilding == True:
         ifProcessMap = False
-        mouse_x,mouse_y=InputController.get_pos()
+        mouse_x,mouse_y = InputController.get_pos()
         block_get_click = theMap.calBlockInMap(green,mouse_x,mouse_y)
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:

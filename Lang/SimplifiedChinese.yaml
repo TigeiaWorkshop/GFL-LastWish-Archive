@@ -19,7 +19,6 @@ Dialog:
   auto: 自动
   choice: 选项
   skip: 跳过
-Font: simhei
 GameTitle: 少女前线-遗愿
 HealthyGamingAdvice:
 - 抵制不良游戏，拒绝盗版游戏。
@@ -82,3 +81,5 @@ mapCreator:
   delete: 删除
   reload: 重新加载
   save: 保存
+title1: 缇吉娅工坊 呈现
+title2: 警告：所有内容仍处于研发阶段，不代表最终效果

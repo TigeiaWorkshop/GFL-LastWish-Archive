@@ -157,7 +157,7 @@ class SelectMenu:
         self.allButton = None
     #初始化按钮
     def initialButtons(self,fontSize):
-        selectButtonBase = resizeImg(self.selectButtonImg, (round(fontSize*5), round(fontSize*2.5)))
+        selectButtonBase = resizeImg(self.selectButtonImg, (round(fontSize*5), round(fontSize*2.6)))
         selectButtonBaseWidth = selectButtonBase.get_width()
         sizeBig = int(fontSize)
         sizeSmall = int(fontSize*0.75)
@@ -171,28 +171,28 @@ class SelectMenu:
         #攻击按钮
         txt_temp = fontRender(self.attackTxt,"black",sizeBig)
         txt_temp2 = fontRender(self.attackAPTxt,"black",sizeSmall)
-        self.allButton["attack"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.4))
-        self.allButton["attack"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.5))
+        self.allButton["attack"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
+        self.allButton["attack"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
         #移动按钮
         txt_temp = fontRender(self.moveTxt,"black",sizeBig)
         txt_temp2 = fontRender(self.moveAPTxt,"black",sizeSmall)
-        self.allButton["move"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.4))
-        self.allButton["move"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.5))
+        self.allButton["move"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
+        self.allButton["move"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
         #换弹按钮
         txt_temp = fontRender(self.reloadTxt,"black",sizeBig)
         txt_temp2 = fontRender(self.reloadAPTxt,"black",sizeSmall)
-        self.allButton["reload"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.4))
-        self.allButton["reload"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.5))
+        self.allButton["reload"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
+        self.allButton["reload"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
         #技能按钮
         txt_temp = fontRender(self.skillTxt,"black",sizeBig)
         txt_temp2 = fontRender(self.skillAPTxt,"black",sizeSmall)
-        self.allButton["skill"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.4))
-        self.allButton["skill"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.5))
+        self.allButton["skill"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
+        self.allButton["skill"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
         #救助按钮
         txt_temp = fontRender(self.rescueTxt,"black",sizeBig)
         txt_temp2 = fontRender(self.rescueAPTxt,"black",sizeSmall)
-        self.allButton["rescue"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.4))
-        self.allButton["rescue"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.5))
+        self.allButton["rescue"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
+        self.allButton["rescue"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
     def display(self,screen,fontSize,location,kind,friendsCanSave):
         if self.allButton == None:
             self.initialButtons(fontSize)

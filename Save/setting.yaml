@@ -1,7 +1,8 @@
 Antialias: true
 FPS: 60
-Font: simhei
-Language: SimplifiedChinese
+FontType: custom
+Font: MicrosoftYaHei-2
+Language: English
 MouseIconWidth: 18
 MouseMoveSpeed: 30
 ReadingSpeed: 0.5

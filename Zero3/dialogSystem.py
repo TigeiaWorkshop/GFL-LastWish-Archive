@@ -310,7 +310,7 @@ class DialogContent:
             self.MODE = DATA["Antialias"]
             self.READINGSPEED = DATA["ReadingSpeed"]
         self.FONTSIZE = int(fontSize)
-        self.FONT = pygame.font.SysFont(self.FONT,self.FONTSIZE)
+        self.FONT = createFont(self.FONTSIZE)
         self.dialoguebox = pygame.image.load(os.path.join("Assets/image/UI/dialoguebox.png")).convert_alpha()
         self.dialoguebox_y = None
         self.dialoguebox_height = 0
@@ -480,7 +480,7 @@ class DialogButtons:
             window_x = int(setting['Screen_size_x'])
             window_y = int(setting['Screen_size_y'])
             self.FONTSIZE = int(window_x*0.0175)
-            self.FONT = pygame.font.SysFont(setting["Font"],self.FONTSIZE)
+            self.FONT = createFont(self.FONTSIZE)
             self.FONTMODE = setting["Antialias"]
         #从语言文件中读取按钮文字
         with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
@@ -490,13 +490,14 @@ class DialogButtons:
         tempButtonTxt = self.FONT.render(dialog_txt["skip"],self.FONTMODE,(255, 255, 255))
         temp_w = tempButtonTxt.get_width()+self.FONTSIZE*1.5
         self.choiceTxt = dialog_txt["choice"]
-        self.skipButton = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
-        self.skipButtonHovered = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
-        self.skipButtonHovered.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
+        self.skipButton = pygame.Surface((temp_w,tempButtonTxt.get_height()),flags=pygame.SRCALPHA).convert_alpha()
+        self.skipButtonHovered = pygame.Surface((temp_w,tempButtonTxt.get_height()),flags=pygame.SRCALPHA).convert_alpha()
+        self.icon_y = (tempButtonTxt.get_height()-tempButtonIcon.get_height())/2
+        self.skipButtonHovered.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,self.icon_y))
         self.skipButtonHovered.blit(tempButtonTxt,(0,0))
         tempButtonTxt = self.FONT.render(dialog_txt["skip"],self.FONTMODE,(105, 105, 105))
         tempButtonIcon.fill((100,100,100), special_flags=pygame.BLEND_RGB_SUB)
-        self.skipButton.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,0))
+        self.skipButton.blit(tempButtonIcon,(tempButtonTxt.get_width()+self.FONTSIZE*0.5,self.icon_y))
         self.skipButton.blit(tempButtonTxt,(0,0))
         self.skipButton = ImageSurface(self.skipButton,window_x*0.9,window_y*0.05)
         self.skipButtonHovered = ImageSurface(self.skipButtonHovered,window_x*0.9,window_y*0.05)
@@ -509,8 +510,8 @@ class DialogButtons:
         self.autoMode = False
         tempButtonTxt = self.FONT.render(dialog_txt["auto"],self.FONTMODE,(105, 105, 105))
         temp_w = tempButtonTxt.get_width()+self.FONTSIZE*1.5
-        self.autoButton = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
-        self.autoButtonHovered = pygame.Surface((temp_w, self.FONTSIZE),flags=pygame.SRCALPHA).convert_alpha()
+        self.autoButton = pygame.Surface((temp_w,tempButtonTxt.get_height()),flags=pygame.SRCALPHA).convert_alpha()
+        self.autoButtonHovered = pygame.Surface((temp_w,tempButtonTxt.get_height()),flags=pygame.SRCALPHA).convert_alpha()
         self.autoButton.blit(tempButtonTxt,(0,0))
         self.autoButtonHovered.blit(self.FONT.render(dialog_txt["auto"],self.FONTMODE,(255, 255, 255)),(0,0))
         self.autoButton = ImageSurface(self.autoButton,window_x*0.8,window_y*0.05)
@@ -551,26 +552,26 @@ class DialogButtons:
                 self.autoButtonHovered.draw(screen)
                 if self.autoMode == True:
                     rotatedIcon = pygame.transform.rotate(self.autoIconHovered,self.autoIconDegree)
-                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
+                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.icon_y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
                     if self.autoIconDegree < 180:
                         self.autoIconDegree+=1
                     else:
                         self.autoIconDegree=0
                 else:
-                    screen.blit(self.autoIconHovered,(self.autoButtonHovered.description,self.autoButtonHovered.y))
+                    screen.blit(self.autoIconHovered,(self.autoButtonHovered.description,self.autoButtonHovered.y+self.icon_y))
                 action = "auto"
             else:
                 if self.autoMode == True:
                     self.autoButtonHovered.draw(screen)
                     rotatedIcon = pygame.transform.rotate(self.autoIconHovered,self.autoIconDegree)
-                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
+                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.icon_y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
                     if self.autoIconDegree < 180:
                         self.autoIconDegree+=1
                     else:
                         self.autoIconDegree=0
                 else:
                     self.autoButton.draw(screen)
-                    screen.blit(self.autoIcon,(self.autoButton.description,self.autoButton.y))
+                    screen.blit(self.autoIcon,(self.autoButton.description,self.autoButton.y+self.icon_y))
             if ifHover(self.hideButton):
                 action = "hide"
             elif ifHover(self.historyButton):

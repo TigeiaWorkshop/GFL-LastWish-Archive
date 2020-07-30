@@ -98,8 +98,12 @@ class settingContoller:
         #设置UI中的文字
         self.fontSize = round(window_x/50)
         self.fontSizeBig = round(window_x/50*1.5)
-        self.normalFont = pygame.font.SysFont("simhei",int(self.fontSize))
-        self.bigFont = pygame.font.SysFont("simhei",int(self.fontSizeBig))
+        if settingdata["FontType"] == "default":
+            self.normalFont = pygame.font.SysFont(settingdata["Font"],int(self.fontSize))
+            self.bigFont = pygame.font.SysFont(settingdata["Font"],int(self.fontSizeBig))
+        elif settingdata["FontType"] == "custom":
+            self.normalFont = pygame.font.Font("Assets/font/{}.ttf".format(settingdata["Font"]),int(self.fontSize))
+            self.bigFont = pygame.font.Font("Assets/font/{}.ttf".format(settingdata["Font"]),int(self.fontSizeBig))
         self.settingTitleTxt = self.bigFont.render(langTxt["setting"],True,(255, 255, 255))
         self.settingTitleTxt_x = int(self.baseImgX+(self.baseImgWidth-self.settingTitleTxt.get_width())/2)
         self.settingTitleTxt_y = self.baseImgY+self.baseImgHeight*0.05
@@ -119,8 +123,8 @@ class settingContoller:
         self.cancelTxt_b = self.bigFont.render(langTxt["cancel"],True,(255, 255, 255))
         #确认和取消按钮的位置
         self.buttons_y = self.baseImgY + self.baseImgHeight*0.88
-        self.buttons_x1 = self.baseImgX + self.confirmTxt_b.get_width()*2.5
-        self.buttons_x2 = self.buttons_x1 + self.confirmTxt_b.get_width()
+        self.buttons_x1 = self.baseImgX + self.baseImgWidth*0.2
+        self.buttons_x2 = self.buttons_x1 + self.cancelTxt_n.get_width()*1.7
     def display(self,screen,InputController):
         if self.ifDisplay == True:
             #底部图
@@ -199,7 +203,11 @@ class ApSystem:
             DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
             self.FONT = DATA["Font"]
             self.MODE = DATA["Antialias"]
-        self.FONT = pygame.font.SysFont(self.FONT,int(fontSize))
+            self.FONTTYPE = DATA["FontType"]
+        if FONTTYPE == "default":
+            self.FONT = pygame.font.SysFont(self.FONT,int(fontSize))
+        elif FONTTYPE == "custom":
+            self.FONT = pygame.font.Font("Assets/font/{}.ttf".format(self.FONT),int(fontSize))
     def display(self,screen,x,y):
         screen.blit(self.FONT.render(self.point,self.MODE,(255, 255, 255)),(x,y))
         if self.coolDown == 100:
