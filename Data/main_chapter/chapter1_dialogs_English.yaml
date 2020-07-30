@@ -1,10 +1,10 @@
 battle_info:
-- 日期：206X年7月3日
-- 当地时间：16:52
-- 气温：-12°C
-- 能见度：0.78公里
-- 地点：临时据点以东约50公里
-description: 茫茫雪原之上，刺骨的寒风拂过我的脸颊。但至少，还有你们的陪伴
+- 'Date: July 3rd, 206X'
+- 'Local time: 16:52'
+- 'Temperature: -12°C/10.4°F'
+- 'Visibility: 0.78km/853yd'
+- 'Location: approximately 50 km east of the temporary base'
+description: Above the snowy plains, the bitter cold wind whipped my cheeks. But at least, you are with me.
 dialog_after_battle:
   head:
     background_img: research
@@ -535,21 +535,22 @@ dialog_during_battle:
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - 目前sv-98没有子弹，无法攻击
-      speaker: 提示
+      - Currently sv-98 has no bullets
+      - and cannot attack
+      speaker: Tip
       speaker_icon: null
     dialoguebox_up: null
   tutorial1:
   - dialoguebox_down:
       content:
-      - 各位，我拿到补给了！
+      - Guys, I got the supplies!
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - 请注意换弹
-      speaker: 提示
+      - Please note the ammunition change.
+      speaker: Tip
       speaker_icon: null
     dialoguebox_up: null
-title: 白色的希望
+title: A Wish Likes Snow

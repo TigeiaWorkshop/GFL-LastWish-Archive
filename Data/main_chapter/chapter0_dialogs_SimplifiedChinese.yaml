@@ -4,6 +4,7 @@ battle_info:
 - 气温：-12°C
 - 能见度：0.78公里
 - 地点：临时据点以东约50公里
+description: 测试人员专用
 dialog_after_battle:
   head:
     background_img: duel
@@ -258,19 +259,6 @@ dialog_before_battle:
     narrator: null
     next_dialog_id: null
 dialog_during_battle:
-  tutorial1:
-  - dialoguebox_down:
-      content:
-      - 这是一个测试
-      speaker: sv-98
-      speaker_icon: sv-98
-    dialoguebox_up: null
-  - dialoguebox_down:
-      content:
-      - 看起来你获得了一些道具
-      speaker: sv-98
-      speaker_icon: sv-98
-    dialoguebox_up: null
   initial_dialog:
   - move:
       2b14_0:
@@ -350,5 +338,17 @@ dialog_during_battle:
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null
+  tutorial1:
+  - dialoguebox_down:
+      content:
+      - 这是一个测试
+      speaker: sv-98
+      speaker_icon: sv-98
+    dialoguebox_up: null
+  - dialoguebox_down:
+      content:
+      - 看起来你获得了一些道具
+      speaker: sv-98
+      speaker_icon: sv-98
+    dialoguebox_up: null
 title: 测试关卡
-description: 测试人员专用

@@ -1,7 +1,7 @@
 Antialias: true
 FPS: 60
-FontType: custom
 Font: MicrosoftYaHei-2
+FontType: custom
 Language: English
 MouseIconWidth: 18
 MouseMoveSpeed: 30

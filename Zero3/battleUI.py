@@ -262,10 +262,10 @@ class CharacterInfoBoard:
         tcgc_bullets_situation2 = fontRender(str(theCharacterData.current_bullets)+"/"+str(theCharacterData.bullets_carried),"black",fontSize)
         #先画出hp,ap和bp的文字
         temp_posX = self.characterIconImages[theCharacterData.type].get_width()*2
-        temp_posY = padding
+        temp_posY = padding-fontSize*0.2
         self.informationBoard.blit(tcgc_hp1,(temp_posX,temp_posY))
         self.informationBoard.blit(tcgc_action_point1,(temp_posX,temp_posY+self.text_size*1.5))
-        self.informationBoard.blit(tcgc_bullets_situation1,(temp_posX,temp_posY+self.text_size*3))
+        self.informationBoard.blit(tcgc_bullets_situation1,(temp_posX,temp_posY+self.text_size*3.0))
         #画出底部空白的血条格
         hp_empty = resizeImg(original_UI_img["hp_empty"],(int(self.boardImg.get_width()/3),int(self.text_size)))
         temp_posX = self.characterIconImages[theCharacterData.type].get_width()*2.4

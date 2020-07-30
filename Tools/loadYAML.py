@@ -1,15 +1,19 @@
 import yaml
+import glob
+
+filesToRead = []
+
 #读取文件
+for path in glob.glob(r'../Lang/*.yaml'):
+    filesToRead.append(path)
+for path in glob.glob(r'../Save/*.yaml'):
+    filesToRead.append(path)
+for path in glob.glob(r'../Data/*.yaml'):
+    filesToRead.append(path)
+for path in glob.glob(r'../Data/main_chapter/*.yaml'):
+    filesToRead.append(path)
 
-filesToRead = {
-    "1": "../Lang/English.yaml",
-    "2": "../Lang/SimplifiedChinese.yaml",
-    "3": "../Data/main_chapter/chapter1_dialogs_SimplifiedChinese.yaml",
-    "4": "../Data/main_chapter/chapter1_map.yaml",
-    "6": "../Data/producersList.yaml"
-}
-
-for key,path in filesToRead.items():
+for path in filesToRead:
     with open(path, "r", encoding='utf-8') as f:
         chapter_info = yaml.load(f.read(),Loader=yaml.FullLoader)
 

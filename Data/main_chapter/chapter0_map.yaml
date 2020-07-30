@@ -1,3 +1,4 @@
+backgroundImage: snowfield.jpg
 background_music: BGM_Danger_1.ogg
 character:
   2b14_0:
@@ -33,6 +34,7 @@ character:
     bullets_carried: 200
     current_bullets: 18
     current_hp: 35
+    detection: null
     effective_range:
       far:
       - 4
@@ -54,9 +56,9 @@ character:
       - 1
       - 6
     type: gsh-18
-    detection: null
     x: 4
     y: 4
+darkMode: true
 dialogs:
   initial: null
 facility:
@@ -72,15 +74,6 @@ facility:
         hp: 10
       x: 3
       y: 4
-  tree:
-    t1:
-      image: Forest_big_tree_needle_03
-      x: 3
-      y: 5
-    t3:
-      image: Forest_big_tree_needle_03
-      x: 4
-      y: 7
   decoration:
     stone1:
       image: Forest_big_stone_01
@@ -91,9 +84,18 @@ facility:
       image: Forest_big_stone_01
       x: 2
       y: 6
+  tree:
+    t1:
+      image: Forest_big_tree_needle_03
+      x: 3
+      y: 5
+    t3:
+      image: Forest_big_tree_needle_03
+      x: 4
+      y: 7
 local_x: 0
 local_y: 0
-map: 
+map:
 - - TileSnow01ToStone01
   - TileSnow02
   - TileSnow01
@@ -242,5 +244,3 @@ sangvisFerri:
     y: 7
 weather: snow
 zoomIn: 1
-darkMode: True
-backgroundImage: snowfield.jpg

@@ -245,20 +245,25 @@ class Button:
 
 #输入管理组件
 class GameController:
-    def __init__(self,mouse_icon_width,speed):
+    def __init__(self,mouse_icon_width,speed,custom=False):
         self.joystick = Joystick()
-        pygame.mouse.set_visible(False)
-        self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(mouse_icon_width),int(mouse_icon_width*1.3)))
+        if custom == True:
+            pygame.mouse.set_visible(False)
+            self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(mouse_icon_width),int(mouse_icon_width*1.3)))
+        else:
+            self.iconImg = None
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
         self.movingSpeed = speed
     def display(self,screen):
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
-        if self.joystick.get_axis(0)>0.1 or self.joystick.get_axis(0)<-0.1:
-            self.mouse_x += int(self.movingSpeed*round(self.joystick.get_axis(0),1))
-        if self.joystick.get_axis(1)>0.1 or self.joystick.get_axis(1)<-0.1:
-            self.mouse_y += int(self.movingSpeed*round(self.joystick.get_axis(1),1))
-        pygame.mouse.set_pos((self.mouse_x,self.mouse_y))
-        screen.blit(self.iconImg,(self.mouse_x,self.mouse_y))
+        if self.joystick.inputController != None:
+            if self.joystick.get_axis(0)>0.1 or self.joystick.get_axis(0)<-0.1:
+                self.mouse_x += int(self.movingSpeed*round(self.joystick.get_axis(0),1))
+            if self.joystick.get_axis(1)>0.1 or self.joystick.get_axis(1)<-0.1:
+                self.mouse_y += int(self.movingSpeed*round(self.joystick.get_axis(1),1))
+            pygame.mouse.set_pos((self.mouse_x,self.mouse_y))
+        if self.iconImg != None:
+            screen.blit(self.iconImg,(self.mouse_x,self.mouse_y))
     def get_event(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and self.joystick.get_button(0) == 1:

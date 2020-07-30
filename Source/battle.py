@@ -195,11 +195,11 @@ def battle(chapter_name,screen,setting):
         infoToDisplayDuringLoading.display(screen)
         for i in range(len(battle_info)):
             battle_info[i].set_alpha(a)
-            drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+            drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.2*i),screen)
             if i == 1:
                 temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                 temp_secode.set_alpha(a)
-                drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.2),screen)
         Display.flip()
 
     if dialogInfo["initial"] == None:
@@ -1487,11 +1487,11 @@ def battle(chapter_name,screen,setting):
             infoToDisplayDuringLoading.display(screen,txt_alpha)
             for i in range(len(battle_info)):
                 battle_info[i].set_alpha(txt_alpha)
-                drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.2*i),screen)
                 if i == 1:
                     temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                     temp_secode.set_alpha(txt_alpha)
-                    drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.5*i),screen)
+                    drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.2),screen)
             txt_alpha -= 5
         
         #刷新画面
