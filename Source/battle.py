@@ -65,24 +65,7 @@ def battle(chapter_name,screen,setting):
     theMap = MapObject(loadData,round(window_x/10),loadData["local_x"],loadData["local_y"])
     
     #初始化角色信息
-    i = 1
-    num_of_characters = len(characters)+len(sangvisFerris)
-    characters_data = {}
-    for each_character in characters:
-        characters_data[each_character] = CharacterDataManager(window_y,characters[each_character])
-        infoToDisplayDuringLoading.display(screen)
-        now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
-        drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-        Display.flip()
-        i+=1
-    sangvisFerris_data = {}
-    for each_character in sangvisFerris:
-        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character])
-        infoToDisplayDuringLoading.display(screen)
-        now_loading = fontRender(loading_info["now_loading_characters"]+"("+str(i)+"/"+str(num_of_characters)+")", "white",window_x/76)
-        drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-        Display.flip()
-        i+=1
+    characters_data,sangvisFerris_data = initializeCharacterData(characters,sangvisFerris,window_y)
 
     #计算光亮区域 并初始化地图
     theMap.calculate_darkness(characters_data,window_x,window_y)

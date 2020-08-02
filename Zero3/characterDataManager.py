@@ -174,6 +174,18 @@ class SangvisFerriDataManager(Doll):
         Doll.__init__(self,theSangvisFerrisDataDic["action_point"],theSangvisFerrisDataDic["attack_range"],theSangvisFerrisDataDic["current_bullets"],theSangvisFerrisDataDic["current_hp"],theSangvisFerrisDataDic["effective_range"],theSangvisFerrisDataDic["kind"],"sangvisFerri",theSangvisFerrisDataDic["magazine_capacity"],theSangvisFerrisDataDic["max_damage"],theSangvisFerrisDataDic["max_hp"],theSangvisFerrisDataDic["min_damage"],theSangvisFerrisDataDic["type"],theSangvisFerrisDataDic["x"],theSangvisFerrisDataDic["y"],mode)
         self.patrol_path = theSangvisFerrisDataDic["patrol_path"]
 
+
+#初始化角色信息
+def initializeCharacterData(characters,sangvisFerris,window_y):
+    characters_data = {}
+    for each_character in characters:
+        characters_data[each_character] = CharacterDataManager(window_y,characters[each_character])
+    sangvisFerris_data = {}
+    for each_character in sangvisFerris:
+        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character])
+    return characters_data,sangvisFerris_data
+
+
 #计算最远攻击距离
 def calculate_range(effective_range_dic):
     if effective_range_dic != None:
