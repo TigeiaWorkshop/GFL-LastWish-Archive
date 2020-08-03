@@ -2,26 +2,26 @@
 from Zero3.basic import *
 
 class Doll:
-    def __init__(self,action_point,attack_range,current_bullets,current_hp,effective_range,kind,faction,magazine_capacity,max_damage,max_hp,min_damage,type,x,y,mode):
-        self.current_action_point = action_point
-        self.max_action_point = action_point
-        self.attack_range = attack_range
-        self.current_bullets = current_bullets
-        self.current_hp = current_hp
-        self.dying = False if current_hp > 0 else 3
-        self.effective_range = effective_range
-        self.max_effective_range = calculate_range(effective_range)
-        self.kind = kind
+    def __init__(self,DATA,faction,mode):
+        self.current_action_point = DATA["action_point"]
+        self.max_action_point = DATA["action_point"]
+        self.attack_range = DATA["attack_range"]
+        self.current_bullets = DATA["current_bullets"] if "current_hp" in DATA else DATA["magazine_capacity"]
+        self.current_hp = DATA["current_hp"] if "current_hp" in DATA else DATA["max_hp"]
+        self.dying = False if self.current_hp > 0 else 3
+        self.effective_range = DATA["effective_range"]
+        self.max_effective_range = calculate_range(self.effective_range)
+        self.kind = DATA["kind"]
         self.faction = faction
-        self.gif_dic = character_gif_dic(type,faction,mode)
-        self.magazine_capacity = magazine_capacity
-        self.max_damage = max_damage
-        self.max_hp = max_hp
-        self.min_damage = min_damage
-        self.type = type
+        self.type = DATA["type"]
+        self.gif_dic = character_gif_dic(self.type,faction,mode)
+        self.magazine_capacity = DATA["magazine_capacity"]
+        self.max_damage = DATA["max_damage"]
+        self.max_hp = DATA["max_hp"]
+        self.min_damage = DATA["min_damage"]
         self.ifFlip = False
-        self.x = x
-        self.y = y
+        self.x = DATA["x"]
+        self.y = DATA["y"]
     def decreaseHp(self,damage,result_of_round=None):
         self.current_hp-=damage
         if self.current_hp<=0:
@@ -152,39 +152,43 @@ class Doll:
 
 #格里芬角色类
 class CharacterDataManager(Doll):
-    def __init__(self,window_y,theCharacterDataDic,mode=None):
-        Doll.__init__(self,theCharacterDataDic["action_point"],theCharacterDataDic["attack_range"],theCharacterDataDic["current_bullets"],theCharacterDataDic["current_hp"],theCharacterDataDic["effective_range"],theCharacterDataDic["kind"],"character",theCharacterDataDic["magazine_capacity"],theCharacterDataDic["max_damage"],theCharacterDataDic["max_hp"],theCharacterDataDic["min_damage"],theCharacterDataDic["type"],theCharacterDataDic["x"],theCharacterDataDic["y"],mode)
-        self.bullets_carried = theCharacterDataDic["bullets_carried"]
-        self.skill_effective_range = theCharacterDataDic["skill_effective_range"]
-        self.max_skill_range = calculate_range(theCharacterDataDic["skill_effective_range"])
-        self.skill_cover_range = theCharacterDataDic["skill_cover_range"]
-        self.detection = theCharacterDataDic["detection"]
+    def __init__(self,theCharacterDataDic,defaultData,window_y,mode=None):
+        for key in theCharacterDataDic:
+            defaultData[key] = theCharacterDataDic[key]
+        Doll.__init__(self,defaultData,"character",mode)
+        self.bullets_carried = defaultData["bullets_carried"]
+        self.skill_effective_range = defaultData["skill_effective_range"]
+        self.max_skill_range = calculate_range(defaultData["skill_effective_range"])
+        self.skill_cover_range = defaultData["skill_cover_range"]
+        self.detection = defaultData["detection"] if "detection" in defaultData else None
         self.eyeImgSize = 0
-        if theCharacterDataDic["kind"] != "HOC":
+        if defaultData["kind"] != "HOC":
             try:
-                self.ImageGetHurt = loadImage("Assets/image/npc/"+theCharacterDataDic["type"]+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
+                self.ImageGetHurt = loadImage("Assets/image/npc/"+defaultData["type"]+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
             except BaseException:
-                print('警告：角色 {} 没有对应的破衣动画'.format(theCharacterDataDic["type"]))
-                if not os.path.exists("Assets/image/npc_icon/{}.png".format(theCharacterDataDic["type"])):
+                print('警告：角色 {} 没有对应的破衣动画'.format(defaultData["type"]))
+                if not os.path.exists("Assets/image/npc_icon/{}.png".format(defaultData["type"])):
                     print("而且你也忘了加入对应的头像")
 
 #铁血角色类
 class SangvisFerriDataManager(Doll):
-    def __init__(self,theSangvisFerrisDataDic,mode=None):
-        Doll.__init__(self,theSangvisFerrisDataDic["action_point"],theSangvisFerrisDataDic["attack_range"],theSangvisFerrisDataDic["current_bullets"],theSangvisFerrisDataDic["current_hp"],theSangvisFerrisDataDic["effective_range"],theSangvisFerrisDataDic["kind"],"sangvisFerri",theSangvisFerrisDataDic["magazine_capacity"],theSangvisFerrisDataDic["max_damage"],theSangvisFerrisDataDic["max_hp"],theSangvisFerrisDataDic["min_damage"],theSangvisFerrisDataDic["type"],theSangvisFerrisDataDic["x"],theSangvisFerrisDataDic["y"],mode)
-        self.patrol_path = theSangvisFerrisDataDic["patrol_path"]
-
+    def __init__(self,theSangvisFerrisDataDic,defaultData,mode=None):
+        for key in theSangvisFerrisDataDic:
+            defaultData[key] = theSangvisFerrisDataDic[key]
+        Doll.__init__(self,defaultData,"sangvisFerri",mode)
+        self.patrol_path = defaultData["patrol_path"] if "patrol_path" in defaultData else []
 
 #初始化角色信息
-def initializeCharacterData(characters,sangvisFerris,window_y):
+def initializeCharacterData(characters,sangvisFerris,setting,mode=None):
     characters_data = {}
+    with open("Data/character_data.yaml", "r", encoding='utf-8') as f:
+        DATABASE = yaml.load(f.read(),Loader=yaml.FullLoader)
     for each_character in characters:
-        characters_data[each_character] = CharacterDataManager(window_y,characters[each_character])
+        characters_data[each_character] = CharacterDataManager(characters[each_character],DATABASE[characters[each_character]["type"]],setting["Screen_size_y"],mode)
     sangvisFerris_data = {}
     for each_character in sangvisFerris:
-        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character])
+        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character],DATABASE[sangvisFerris[each_character]["type"]],mode)
     return characters_data,sangvisFerris_data
-
 
 #计算最远攻击距离
 def calculate_range(effective_range_dic):

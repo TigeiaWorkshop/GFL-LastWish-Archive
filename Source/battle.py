@@ -49,8 +49,8 @@ def battle(chapter_name,screen,setting):
     with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         zoomIn = loadData["zoomIn"]*100
-        characters = loadData["character"]
-        sangvisFerris = loadData["sangvisFerri"]
+        #初始化角色信息
+        characters_data,sangvisFerris_data = initializeCharacterData(loadData["character"],loadData["sangvisFerri"],setting)
         bg_music = loadData["background_music"]
         theWeather = loadData["weather"]
         dialogInfo = loadData["dialogs"]
@@ -63,9 +63,6 @@ def battle(chapter_name,screen,setting):
     perBlockHeight = round(window_y/10)
     #初始化地图模块
     theMap = MapObject(loadData,round(window_x/10),loadData["local_x"],loadData["local_y"])
-    
-    #初始化角色信息
-    characters_data,sangvisFerris_data = initializeCharacterData(characters,sangvisFerris,window_y)
 
     #计算光亮区域 并初始化地图
     theMap.calculate_darkness(characters_data,window_x,window_y)

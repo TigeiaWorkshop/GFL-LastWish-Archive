@@ -26,12 +26,7 @@ def mapCreator(chapterName,screen,setting):
     with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         #初始化角色信息
-        characters_data = {}
-        for each_character in loadData["character"]:
-            characters_data[each_character] = CharacterDataManager(window_y,loadData["character"][each_character],"dev")
-        sangvisFerris_data = {}
-        for each_character in loadData["sangvisFerri"]:
-            sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],"dev")
+        characters_data,sangvisFerris_data = initializeCharacterData(loadData["character"],loadData["sangvisFerri"],setting,"dev")
         #初始化地图
         theMap = loadData["map"]
         if theMap == None or len(theMap) == 0:
