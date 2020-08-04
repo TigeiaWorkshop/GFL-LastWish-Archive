@@ -71,6 +71,9 @@ def mapCreator(chapterName,screen,setting):
         img_name = all_sangvisFerris_list[i].replace(".","").replace("Assets","").replace("image","").replace("sangvisFerri","").replace("\\","").replace("/","")
         all_sangvisFerris_img_list[img_name] = loadImg(all_sangvisFerris_list[i]+"/wait/"+img_name+"_wait_0.png",theMap.perBlockWidth)
     
+    #加载所有角色的数据
+    DATABASE = loadCharacterData()
+
     #加载所有的装饰品
     all_decorations  = glob.glob(r'Assets/image/environment/decoration/*')
     all_decorations_img_list = {}
@@ -206,10 +209,10 @@ def mapCreator(chapterName,screen,setting):
                         #初始化角色信息
                         characters_data = {}
                         for each_character in loadData["character"]:
-                            characters_data[each_character] = CharacterDataManager(window_y,loadData["character"][each_character],"dev")
+                            characters_data[each_character] = CharacterDataManager(loadData["character"][each_character],DATABASE[loadData["character"][each_character]["type"]],window_y,"dev")
                         sangvisFerris_data = {}
                         for each_character in loadData["sangvisFerri"]:
-                            sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],"dev")
+                            sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],DATABASE[loadData["sangvisFerri"][each_character]["type"]],"dev")
                     #加载地图
                     theMap = MapObject(loadData,int(window_x/10))
                     theMap.setPos(tempLocal_x,tempLocal_y)
@@ -267,46 +270,22 @@ def mapCreator(chapterName,screen,setting):
                                         the_id+=1
                                     nameTemp = object_to_put_down["id"]+"_"+str(the_id)
                                     originalData["character"][nameTemp] = {
-                                        "action_point": 1,
-                                        "attack_range": 1,
-                                        "bullets_carried": 1,
-                                        "current_bullets": 1,
-                                        "current_hp": 1,
-                                        "effective_range": {"far":[3,3],"middle":[2,2],"near":[1,1]},
-                                        "kind": "HG",
-                                        "magazine_capacity": 1,
-                                        "max_damage": 1,
-                                        "max_hp": 1,
-                                        "min_damage": 1,
-                                        "skill_cover_range": 1,
-                                        "skill_effective_range":{"near":[1,1]},
+                                        "bullets_carried": 100,
                                         "type": object_to_put_down["id"],
-                                        "detection": None,
                                         "x": block_get_click["x"],
-                                        "y": block_get_click["y"],
+                                        "y": block_get_click["y"]
                                     }
-                                    characters_data[nameTemp] = CharacterDataManager(window_y,originalData["character"][nameTemp],"dev")
+                                    characters_data[nameTemp] = CharacterDataManager(originalData["character"][nameTemp],DATABASE[originalData["character"][nameTemp]["type"]],window_y,"dev")
                                 elif object_to_put_down["type"] == "sangvisFerri":
                                     while object_to_put_down["id"]+"_"+str(the_id) in sangvisFerris_data:
                                         the_id+=1
                                     nameTemp = object_to_put_down["id"]+"_"+str(the_id)
                                     originalData["sangvisFerri"][nameTemp] = {
-                                        "action_point": 1,
-                                        "attack_range": 1,
-                                        "current_bullets": 1,
-                                        "current_hp": 1,
-                                        "effective_range": {"far":[3,3],"middle":[2,2],"near":[1,1]},
-                                        "kind": "HG",
-                                        "magazine_capacity": 1,
-                                        "max_damage": 1,
-                                        "max_hp": 1,
-                                        "min_damage": 1,
-                                        "patrol_path": [],
                                         "type": object_to_put_down["id"],
                                         "x": block_get_click["x"],
-                                        "y": block_get_click["y"],
+                                        "y": block_get_click["y"]
                                     }
-                                    sangvisFerris_data[nameTemp] = SangvisFerriDataManager(originalData["sangvisFerri"][nameTemp],"dev")
+                                    sangvisFerris_data[nameTemp] = SangvisFerriDataManager(originalData["sangvisFerri"][nameTemp],DATABASE[originalData["sangvisFerri"][nameTemp]["type"]],"dev")
         #移动屏幕
         if pygame.mouse.get_pressed()[2]:
             if mouse_move_temp_x == -1 and mouse_move_temp_y == -1:

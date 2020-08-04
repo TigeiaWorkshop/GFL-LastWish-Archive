@@ -181,8 +181,7 @@ class SangvisFerriDataManager(Doll):
 #初始化角色信息
 def initializeCharacterData(characters,sangvisFerris,setting,mode=None):
     characters_data = {}
-    with open("Data/character_data.yaml", "r", encoding='utf-8') as f:
-        DATABASE = yaml.load(f.read(),Loader=yaml.FullLoader)
+    DATABASE = loadCharacterData()
     for each_character in characters:
         characters_data[each_character] = CharacterDataManager(characters[each_character],DATABASE[characters[each_character]["type"]],setting["Screen_size_y"],mode)
     sangvisFerris_data = {}
@@ -250,5 +249,55 @@ def character_gif_dic(character_name,faction,mode):
     elif mode == "dev":
         gif_dic = {"wait":character_creator(character_name,"wait",faction)}
     else:
-        raise Exception('Error: Mode does not exist.')
+        raise Exception('ZeroEngine-Error: Mode does not exist.')
     return gif_dic
+
+#加载并更新更新位于Data中的角色数据配置文件-character_data.yaml
+def loadCharacterData():
+    with open("Data/character_data.yaml", "r", encoding='utf-8') as f:
+        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+    ifAnythingChange = False
+    for path in glob.glob(r'Assets/image/character/*'):
+        name = path.replace("Assets/image/character\\","")
+        if name not in loadData:
+            loadData[name] = {
+            "action_point": 1,
+            "attack_range": 1,
+            "effective_range":{
+                "far": [5,6],
+                "middle":[3,4],
+                "near":[1,2],
+            },
+            "kind": None,
+            "magazine_capacity": 1,
+            "max_damage": 1,
+            "max_hp": 1,
+            "min_damage": 1,
+            "skill_cover_range": None,
+            "skill_effective_range": None,
+            }
+            ifAnythingChange = True
+            print("ZeroEngine-Notice:A new character call {} has been updated to the data file.".format(name))
+    for path in glob.glob(r'Assets/image/sangvisFerri/*'):
+        name = path.replace("Assets/image/sangvisFerri\\","")
+        if name not in loadData:
+            loadData[name] = {
+            "action_point": 1,
+            "attack_range": 1,
+            "effective_range":{
+                "far": [5,6],
+                "middle":[3,4],
+                "near":[1,2],
+            },
+            "kind": None,
+            "magazine_capacity": 1,
+            "max_damage": 1,
+            "max_hp": 1,
+            "min_damage": 1,
+            }
+            ifAnythingChange = True
+            print("ZeroEngine-Notice:A new character call {} has been updated to the data file.".format(name))
+    if ifAnythingChange == True:
+        with open("Data/character_data.yaml", "w", encoding='utf-8') as f:
+            yaml.dump(loadData, f, allow_unicode=True)
+    return loadData
