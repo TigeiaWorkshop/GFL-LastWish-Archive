@@ -50,7 +50,7 @@ def battle(chapter_name,screen,setting):
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         zoomIn = loadData["zoomIn"]*100
         #初始化角色信息
-        characters_data,sangvisFerris_data = initializeCharacterData(loadData["character"],loadData["sangvisFerri"],setting)
+        characterDataThread = initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],setting)
         bg_music = loadData["background_music"]
         theWeather = loadData["weather"]
         dialogInfo = loadData["dialogs"]
@@ -61,6 +61,16 @@ def battle(chapter_name,screen,setting):
         zoomIn = 400
     zoomIntoBe = zoomIn
     perBlockHeight = round(window_y/10)
+
+    #加载角色信息
+    characterDataThread.start()
+    while characterDataThread.isAlive():
+        infoToDisplayDuringLoading.display(screen)
+        now_loading = fontRender(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum), "white",window_x/76)
+        drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
+        Display.flip()
+    characters_data,sangvisFerris_data = characterDataThread.getResult()
+
     #初始化地图模块
     theMap = MapObject(loadData,round(window_x/10),loadData["local_x"],loadData["local_y"])
 
@@ -73,7 +83,7 @@ def battle(chapter_name,screen,setting):
     drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     Display.flip()
 
-    #加载UI
+    #加载UI:
     #加载结束回合的图片
     end_round_button = loadImage("Assets/image/UI/endRound.png",(window_x*0.8,window_y*0.7),window_x/10, window_y/10)
     #加载子弹图片
@@ -187,8 +197,6 @@ def battle(chapter_name,screen,setting):
     else:
         dialog_to_display = dialog_during_battle[dialogInfo["initial"]]
 
-    #加载完成，章节标题淡出
-    
     #战斗系统主要loop
     while battleSystemMainLoop == True:
         #加载地图

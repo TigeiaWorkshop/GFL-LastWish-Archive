@@ -300,7 +300,7 @@ class NpcImageSystem:
 #对话框和对话框内容
 class DialogContent:
     def __init__(self,fontSize):
-        self.content = ""
+        self.content = []
         self.textIndex = None
         self.displayedLine = None
         self.textPlayingSound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")

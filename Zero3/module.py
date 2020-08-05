@@ -5,10 +5,8 @@ import os
 import random
 import time
 from sys import exit
-
-import pygame
-import yaml
-from pygame.locals import *
+import threading
+from Zero3.font import *
 
 #高级图形类
 class ImageSurface:
@@ -98,12 +96,8 @@ class settingContoller:
         #设置UI中的文字
         self.fontSize = round(window_x/50)
         self.fontSizeBig = round(window_x/50*1.5)
-        if settingdata["FontType"] == "default":
-            self.normalFont = pygame.font.SysFont(settingdata["Font"],int(self.fontSize))
-            self.bigFont = pygame.font.SysFont(settingdata["Font"],int(self.fontSizeBig))
-        elif settingdata["FontType"] == "custom":
-            self.normalFont = pygame.font.Font("Assets/font/{}.ttf".format(settingdata["Font"]),int(self.fontSize))
-            self.bigFont = pygame.font.Font("Assets/font/{}.ttf".format(settingdata["Font"]),int(self.fontSizeBig))
+        self.normalFont = createFont(self.fontSize)
+        self.bigFont = createFont(self.fontSizeBig)
         self.settingTitleTxt = self.bigFont.render(langTxt["setting"],True,(255, 255, 255))
         self.settingTitleTxt_x = int(self.baseImgX+(self.baseImgWidth-self.settingTitleTxt.get_width())/2)
         self.settingTitleTxt_y = self.baseImgY+self.baseImgHeight*0.05
@@ -199,15 +193,7 @@ class ApSystem:
     def __init__(self,fontSize):
         self.point = 0
         self.coolDown = 0
-        with open("Save/setting.yaml", "r", encoding='utf-8') as f:
-            DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
-            self.FONT = DATA["Font"]
-            self.MODE = DATA["Antialias"]
-            self.FONTTYPE = DATA["FontType"]
-        if FONTTYPE == "default":
-            self.FONT = pygame.font.SysFont(self.FONT,int(fontSize))
-        elif FONTTYPE == "custom":
-            self.FONT = pygame.font.Font("Assets/font/{}.ttf".format(self.FONT),int(fontSize))
+        self.FONT = createFont(fontSize)
     def display(self,screen,x,y):
         screen.blit(self.FONT.render(self.point,self.MODE,(255, 255, 255)),(x,y))
         if self.coolDown == 100:
@@ -295,3 +281,22 @@ class Joystick:
             return self.inputController.get_axis(buttonId)
         else:
             return 0
+
+#对话框和对话框内容
+class Dialoguebox:
+    def __init__(self,imgPath,width,height,x,y,fontSize):
+        self.dialoguebox = pygame.transform.scale(pygame.image.load(os.path.join(imgPath)).convert_alpha(),(width,height))
+        self.width = width
+        self.height = height
+        self.x = x
+        self.y = y
+        self.txt_x = x
+        self.txt_y = y
+        self.content = []
+        self.textIndex = None
+        self.displayedLine = None
+        self.FONT = createFont(fontSize)
+    def draw(self,screen):
+        screen.blit(self.dialoguebox,(self.x,self.y))
+    def flip(self):
+        self.dialoguebox = pygame.transform.flip(self.dialoguebox,True,False)

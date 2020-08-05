@@ -2,7 +2,7 @@
 from Zero3.basic import *
 
 def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,characters_data,action="detect",skill_target=None,damage_do_to_character=None):
-    if action=="detect":
+    if action == "detect":
         skill_target = None
         if characters_data[characterName].type == "gsh-18":
             for character in characters_data:
@@ -15,7 +15,7 @@ def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,ch
                     skill_target = enemies
                     break
         return skill_target
-    elif action=="react":
+    elif action == "react":
         if characters_data[characterName].type == "gsh-18":
             healed_hp = round((characters_data[skill_target].max_hp - characters_data[skill_target].current_hp)*0.3)
             characters_data[skill_target].heal(healed_hp)

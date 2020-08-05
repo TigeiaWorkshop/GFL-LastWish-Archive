@@ -179,15 +179,27 @@ class SangvisFerriDataManager(Doll):
         self.patrol_path = defaultData["patrol_path"] if "patrol_path" in defaultData else []
 
 #初始化角色信息
-def initializeCharacterData(characters,sangvisFerris,setting,mode=None):
-    characters_data = {}
-    DATABASE = loadCharacterData()
-    for each_character in characters:
-        characters_data[each_character] = CharacterDataManager(characters[each_character],DATABASE[characters[each_character]["type"]],setting["Screen_size_y"],mode)
-    sangvisFerris_data = {}
-    for each_character in sangvisFerris:
-        sangvisFerris_data[each_character] = SangvisFerriDataManager(sangvisFerris[each_character],DATABASE[sangvisFerris[each_character]["type"]],mode)
-    return characters_data,sangvisFerris_data
+class initializeCharacterDataThread(threading.Thread):
+    def __init__(self,characters,sangvisFerris,setting,mode=None):
+        threading.Thread.__init__(self)
+        self.DATABASE = loadCharacterData()
+        self.characters_data = {}
+        self.sangvisFerris_data = {}
+        self.characters = characters
+        self.sangvisFerris = sangvisFerris
+        self.totalNum = len(characters)+len(sangvisFerris)
+        self.currentID = 0
+        self.setting = setting
+        self.mode = mode
+    def run(self):
+        for each_character in self.characters:
+            self.characters_data[each_character] = CharacterDataManager(self.characters[each_character],self.DATABASE[self.characters[each_character]["type"]],self.setting["Screen_size_y"],self.mode)
+            self.currentID+=1
+        for each_character in self.sangvisFerris:
+            self.sangvisFerris_data[each_character] = SangvisFerriDataManager(self.sangvisFerris[each_character],self.DATABASE[self.sangvisFerris[each_character]["type"]],self.mode)
+            self.currentID+=1
+    def getResult(self):
+        return self.characters_data,self.sangvisFerris_data
 
 #计算最远攻击距离
 def calculate_range(effective_range_dic):
