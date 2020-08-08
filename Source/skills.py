@@ -1,5 +1,6 @@
 # cython: language_level=3
-from Zero3.basic import *
+import Zero3 as Zero
+from random import randint
 
 def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,characters_data,action="detect",skill_target=None,damage_do_to_character=None):
     if action == "detect":
@@ -21,11 +22,11 @@ def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,ch
             characters_data[skill_target].heal(healed_hp)
             if characters_data[skill_target].dying != False:
                 characters_data[skill_target].dying = False
-            damage_do_to_character[skill_target] = fontRender("+"+str(healed_hp),"green",25)
+            damage_do_to_character[skill_target] = Zero.fontRender("+"+str(healed_hp),"green",25)
         elif characters_data[characterName].type == "asval" or characters_data[characterName].type == "pp1901" or characters_data[characterName].type == "sv-98":
-            the_damage = random.randint(characters_data[characterName].min_damage,characters_data[characterName].max_damage)
+            the_damage = randint(characters_data[characterName].min_damage,characters_data[characterName].max_damage)
             sangvisFerris_data[skill_target].decreaseHp(the_damage)
-            damage_do_to_character[skill_target] = fontRender("-"+str(the_damage),"red",25)
+            damage_do_to_character[skill_target] = Zero.fontRender("-"+str(the_damage),"red",25)
         return {
             "characters_data":characters_data,
             "sangvisFerris_data":sangvisFerris_data,

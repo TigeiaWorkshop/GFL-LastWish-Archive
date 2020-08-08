@@ -1,27 +1,28 @@
 # cython: language_level=3
 from Source.skills import *
-from Zero3.AI import *
-from Zero3.basic import *
-from Zero3.battleUI import *
-from Zero3.characterDataManager import *
-from Zero3.map import *
+import Zero3 as Zero
+import pygame
+import yaml
+import glob
+import time
+import random
 
 def battle(chapter_name,screen,setting):
     """初始化基础数据"""
     #控制器输入组件
-    InputController = GameController(setting["MouseIconWidth"],setting["MouseMoveSpeed"])
+    InputController = Zero.GameController(setting["MouseIconWidth"],setting["MouseMoveSpeed"])
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #卸载音乐
     pygame.mixer.music.unload()
     #帧率控制器
-    Display = DisplayController(setting['FPS'])
+    Display = Zero.DisplayController(setting['FPS'])
     #加载按钮的文字
     with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        selectMenuUI = SelectMenu(loadData["SelectMenu"])
+        selectMenuUI = Zero.SelectMenu(loadData["SelectMenu"])
         battleUiTxt = loadData["Battle_UI"]
-        warnings_to_display = WarningSystem(loadData["Warnings"])
+        warnings_to_display = Zero.WarningSystem(loadData["Warnings"])
         loading_info = loadData["LoadingTxt"]
         resultTxt = loadData["ResultBoard"]
     #加载剧情
@@ -32,7 +33,7 @@ def battle(chapter_name,screen,setting):
         dialog_during_battle = loadData["dialog_during_battle"]
         chapterDesc = loadData["description"]
     #章节标题显示
-    infoToDisplayDuringLoading = LoadingTitle(window_x,window_y,battleUiTxt["numChapter"],chapter_name,chapter_title,chapterDesc)
+    infoToDisplayDuringLoading = Zero.LoadingTitle(window_x,window_y,battleUiTxt["numChapter"],chapter_name,chapter_title,chapterDesc)
 
     #渐入效果
     for i in range(1,255,2):
@@ -41,8 +42,8 @@ def battle(chapter_name,screen,setting):
 
     #开始加载地图场景
     infoToDisplayDuringLoading.display(screen)
-    now_loading = fontRender(loading_info["now_loading_map"], "white",window_x/76)
-    drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
+    now_loading = Zero.fontRender(loading_info["now_loading_map"], "white",window_x/76)
+    Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     Display.flip()
 
     #读取并初始化章节信息
@@ -50,7 +51,7 @@ def battle(chapter_name,screen,setting):
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         zoomIn = loadData["zoomIn"]*100
         #初始化角色信息
-        characterDataThread = initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],setting)
+        characterDataThread = Zero.initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],setting)
         bg_music = loadData["background_music"]
         theWeather = loadData["weather"]
         dialogInfo = loadData["dialogs"]
@@ -66,58 +67,58 @@ def battle(chapter_name,screen,setting):
     characterDataThread.start()
     while characterDataThread.isAlive():
         infoToDisplayDuringLoading.display(screen)
-        now_loading = fontRender(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum), "white",window_x/76)
-        drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
+        now_loading = Zero.fontRender(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum), "white",window_x/76)
+        Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
         Display.flip()
     characters_data,sangvisFerris_data = characterDataThread.getResult()
 
     #初始化地图模块
-    theMap = MapObject(loadData,round(window_x/10),loadData["local_x"],loadData["local_y"])
+    theMap = Zero.MapObject(loadData,round(window_x/10),loadData["local_x"],loadData["local_y"])
 
     #计算光亮区域 并初始化地图
     theMap.calculate_darkness(characters_data,window_x,window_y)
     
     #开始加载关卡设定
     infoToDisplayDuringLoading.display(screen)
-    now_loading = fontRender(loading_info["now_loading_level"], "white",window_x/76)
-    drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
+    now_loading = Zero.fontRender(loading_info["now_loading_level"], "white",window_x/76)
+    Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
     Display.flip()
 
     #加载UI:
     #加载结束回合的图片
-    end_round_button = loadImage("Assets/image/UI/endRound.png",(window_x*0.8,window_y*0.7),window_x/10, window_y/10)
+    end_round_button = Zero.loadImage("Assets/image/UI/endRound.png",(window_x*0.8,window_y*0.7),window_x/10, window_y/10)
     #加载子弹图片
-    #bullet_img = loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, perBlockHeight/12)
+    #bullet_img = Zero.loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, perBlockHeight/12)
     bullets_list = []
     #加载血条,各色方块等UI图片 size:perBlockWidth, perBlockHeight/5
     original_UI_img = {
-        "hp_empty" : loadImg("Assets/image/UI/hp_empty.png"),
-        "hp_red" : loadImg("Assets/image/UI/hp_red.png"),
-        "hp_green" : loadImg("Assets/image/UI/hp_green.png"),
-        "action_point_blue" : loadImg("Assets/image/UI/action_point.png"),
-        "bullets_number_brown" : loadImg("Assets/image/UI/bullets_number.png"),
-        "green" : loadImg("Assets/image/UI/green.png",None,None,150),
-        "red" : loadImg("Assets/image/UI/red.png",None,None,150),
-        "yellow": loadImg("Assets/image/UI/yellow.png",None,None,150),
-        "blue": loadImg("Assets/image/UI/blue.png",None,None,150),
-        "orange": loadImg("Assets/image/UI/orange.png",None,None,150),
-        "eye_orange": loadImg("Assets/image/UI/eye_orange.png"),
-        "eye_red": loadImg("Assets/image/UI/eye_red.png"),
-        "supplyBoard":loadImage("Assets/image/UI/score.png",((window_x-window_x/3)/2,-window_y/12),window_x/3,window_y/12),
+        "hp_empty" : Zero.loadImg("Assets/image/UI/hp_empty.png"),
+        "hp_red" : Zero.loadImg("Assets/image/UI/hp_red.png"),
+        "hp_green" : Zero.loadImg("Assets/image/UI/hp_green.png"),
+        "action_point_blue" : Zero.loadImg("Assets/image/UI/action_point.png"),
+        "bullets_number_brown" : Zero.loadImg("Assets/image/UI/bullets_number.png"),
+        "green" : Zero.loadImg("Assets/image/UI/green.png",None,None,150),
+        "red" : Zero.loadImg("Assets/image/UI/red.png",None,None,150),
+        "yellow": Zero.loadImg("Assets/image/UI/yellow.png",None,None,150),
+        "blue": Zero.loadImg("Assets/image/UI/blue.png",None,None,150),
+        "orange": Zero.loadImg("Assets/image/UI/orange.png",None,None,150),
+        "eye_orange": Zero.loadImg("Assets/image/UI/eye_orange.png"),
+        "eye_red": Zero.loadImg("Assets/image/UI/eye_red.png"),
+        "supplyBoard":Zero.loadImage("Assets/image/UI/score.png",((window_x-window_x/3)/2,-window_y/12),window_x/3,window_y/12),
     }
     #UI - 变形后
     UI_img = {
-        "green" : resizeImg(original_UI_img["green"], (theMap.perBlockWidth*0.8, None)),
-        "red" : resizeImg(original_UI_img["red"], (theMap.perBlockWidth*0.8, None)),
-        "yellow" : resizeImg(original_UI_img["yellow"], (theMap.perBlockWidth*0.8, None)),
-        "blue" : resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None)),
-        "orange": resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
+        "green" : Zero.resizeImg(original_UI_img["green"], (theMap.perBlockWidth*0.8, None)),
+        "red" : Zero.resizeImg(original_UI_img["red"], (theMap.perBlockWidth*0.8, None)),
+        "yellow" : Zero.resizeImg(original_UI_img["yellow"], (theMap.perBlockWidth*0.8, None)),
+        "blue" : Zero.resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None)),
+        "orange": Zero.resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
     }
     #角色信息UI管理
-    characterInfoBoardUI = CharacterInfoBoard(window_x,window_y)
+    characterInfoBoardUI = Zero.CharacterInfoBoard(window_x,window_y)
     #加载对话框图片
-    dialoguebox_up = loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
-    dialoguebox_down = loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
+    dialoguebox_up = Zero.loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
+    dialoguebox_down = Zero.loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
     #-----加载音效-----
     #行走的音效 -- 频道0
     all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
@@ -132,9 +133,9 @@ def battle(chapter_name,screen,setting):
     if theWeather != None:
         environment_sound = pygame.mixer.Sound("Assets/sound/environment/"+theWeather+".ogg")
         environment_sound.set_volume(setting["Sound"]["sound_environment"]/100.0)
-        weatherController = WeatherSystem(theWeather,window_x,window_y)    
+        weatherController = Zero.WeatherSystem(theWeather,window_x,window_y)    
     #攻击的音效 -- 频道2
-    attackingSounds = attackingSoundManager(setting["Sound"]["sound_effects"])
+    attackingSounds = Zero.AttackingSoundManager(2,setting["Sound"]["sound_effects"])
     #部分设定初始化
     the_character_get_click = ""
     enemies_get_attack = {}
@@ -159,7 +160,7 @@ def battle(chapter_name,screen,setting):
     buttonGetHover = None
     theFriendGetHelp = None
     areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-    RoundSwitchUI = RoundSwitch(window_x,window_y,battleUiTxt)
+    RoundSwitchUI = Zero.RoundSwitch(window_x,window_y,battleUiTxt)
     enemies_in_control_id = None
     sangvisFerris_name_list = None
     dialog_valuable_initialized = False
@@ -178,18 +179,18 @@ def battle(chapter_name,screen,setting):
 
     #关卡背景介绍信息文字
     for i in range(len(battle_info)):
-        battle_info[i] = fontRender(battle_info[i],"white",window_x/76)
+        battle_info[i] = Zero.fontRender(battle_info[i],"white",window_x/76)
 
     #显示章节信息
     for a in range(0,250,2):
         infoToDisplayDuringLoading.display(screen)
         for i in range(len(battle_info)):
             battle_info[i].set_alpha(a)
-            drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.2*i),screen)
+            Zero.drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.2*i),screen)
             if i == 1:
-                temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
+                temp_secode = Zero.fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                 temp_secode.set_alpha(a)
-                drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.2),screen)
+                Zero.drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.2),screen)
         Display.flip()
 
     if dialogInfo["initial"] == None:
@@ -223,7 +224,7 @@ def battle(chapter_name,screen,setting):
                 #对话系统总循环
                 if display_num < len(dialog_to_display):
                     #角色动画
-                    for key,value in dicMerge(sangvisFerris_data,characters_data).items():
+                    for key,value in Zero.dicMerge(sangvisFerris_data,characters_data).items():
                         if value.faction == "character" or (value.x,value.y) in theMap.lightArea or theMap.darkMode != True:
                             if all_characters_path != None and key in all_characters_path:
                                 value.draw("move",screen,theMap)
@@ -245,7 +246,7 @@ def battle(chapter_name,screen,setting):
                     if "move" in dialog_to_display[display_num]:
                         if all_characters_path == None:
                             all_characters_path = {}
-                            for key,value in dicMerge(sangvisFerris_data,characters_data).items():
+                            for key,value in Zero.dicMerge(sangvisFerris_data,characters_data).items():
                                 if key in dialog_to_display[display_num]["move"]:
                                     #创建AStar对象,并设置起点和终点为
                                     start_x = value.x
@@ -396,42 +397,42 @@ def battle(chapter_name,screen,setting):
                             dialoguebox_up.draw(screen)
                             #名字
                             if dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != None:
-                                drawImg(fontRender(dialog_to_display[display_num]["dialoguebox_up"]["speaker"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
+                                Zero.drawImg(Zero.fontRender(dialog_to_display[display_num]["dialoguebox_up"]["speaker"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
                             #正在播放的行
-                            content = fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line][:dialog_up_content_id],"white",window_x/80)
-                            drawImg(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
+                            content = Zero.fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line][:dialog_up_content_id],"white",window_x/80)
+                            Zero.drawImg(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
                             if dialog_up_content_id < len(dialog_to_display[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line]):
                                 dialog_up_content_id+=1
                             elif dialog_up_displayed_line < len(dialog_to_display[display_num]["dialoguebox_up"]["content"])-1:
                                 dialog_up_displayed_line += 1
                                 dialog_up_content_id = 0
                             for i in range(dialog_up_displayed_line):
-                                content = fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][i],"white",window_x/80)
-                                drawImg(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
+                                content = Zero.fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][i],"white",window_x/80)
+                                Zero.drawImg(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
                             #角色图标
                             if dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"] != None:
-                                drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
+                                Zero.drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
                         #下方对话框
                         if dialog_to_display[display_num]["dialoguebox_down"] != None:
                             #对话框图片
                             dialoguebox_down.draw(screen)
                             #名字
                             if dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != None:
-                                drawImg(fontRender(dialog_to_display[display_num]["dialoguebox_down"]["speaker"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
+                                Zero.drawImg(Zero.fontRender(dialog_to_display[display_num]["dialoguebox_down"]["speaker"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
                             #正在播放的行
-                            content = fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line][:dialog_down_content_id],"white",window_x/80)
-                            drawImg(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
+                            content = Zero.fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line][:dialog_down_content_id],"white",window_x/80)
+                            Zero.drawImg(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
                             if dialog_down_content_id < len(dialog_to_display[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line]):
                                 dialog_down_content_id+=1
                             elif dialog_down_displayed_line < len(dialog_to_display[display_num]["dialoguebox_down"]["content"])-1:
                                 dialog_down_displayed_line += 1
                                 dialog_down_content_id = 0
                             for i in range(dialog_down_displayed_line):
-                                content = fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][i],"white",window_x/80)
-                                drawImg(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
+                                content = Zero.fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][i],"white",window_x/80)
+                                Zero.drawImg(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
                             #角色图标
                             if dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"] != None:
-                                drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
+                                Zero.drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
                     #闲置一定时间（秒）
                     elif "idle" in dialog_to_display[display_num]:
                         if seconde_to_idle == None:
@@ -682,7 +683,7 @@ def battle(chapter_name,screen,setting):
             for area in areaDrawColorBlock:
                 for position in areaDrawColorBlock[area]:
                     xTemp,yTemp = theMap.calPosInMap(position[0],position[1])
-                    drawImg(UI_img[area],(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
+                    Zero.drawImg(UI_img[area],(xTemp+theMap.perBlockWidth*0.1,yTemp),screen)
             #显示设施
             theMap.display_facility_ahead(screen)
 
@@ -691,7 +692,7 @@ def battle(chapter_name,screen,setting):
                 if right_click == True:
                     block_get_click = theMap.calBlockInMap(UI_img["green"],mouse_x,mouse_y)
                     #如果点击了回合结束的按钮
-                    if ifHover(end_round_button) and isWaiting == True:
+                    if Zero.ifHover(end_round_button) and isWaiting == True:
                         whose_round = "playerToSangvisFerris"
                         the_character_get_click = ""
                         green_hide = True
@@ -840,7 +841,7 @@ def battle(chapter_name,screen,setting):
                                     #显示路径
                                     areaDrawColorBlock["green"] = the_route
                                     xTemp,yTemp = theMap.calPosInMap(the_route[-1][0],the_route[-1][1])
-                                    displayInCenter(fontRender("-"+str(len(the_route)*2)+"AP","green",theMap.perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
+                                    Zero.displayInCenter(Zero.fontRender("-"+str(len(the_route)*2)+"AP","green",theMap.perBlockWidth/8,True),UI_img["green"],xTemp,yTemp,screen)
                     #显示攻击范围        
                     elif action_choice == "attack":
                         if attacking_range == None:
@@ -1032,10 +1033,10 @@ def battle(chapter_name,screen,setting):
                                     for key2,value2 in value["item"].items():
                                         if key2 == "bullet":
                                             characters_data[the_character_get_click].bullets_carried += value2
-                                            original_UI_img["supplyBoard"].items.append(fontRender(battleUiTxt["getBullets"]+": "+str(value2),"white",window_x/80))
+                                            original_UI_img["supplyBoard"].items.append(Zero.fontRender(battleUiTxt["getBullets"]+": "+str(value2),"white",window_x/80))
                                         elif key2 == "hp":
                                             characters_data[the_character_get_click].current_hp += value2
-                                            original_UI_img["supplyBoard"].items.append(fontRender(battleUiTxt["getHealth"]+": "+str(value2),"white",window_x/80))
+                                            original_UI_img["supplyBoard"].items.append(Zero.fontRender(battleUiTxt["getHealth"]+": "+str(value2),"white",window_x/80))
                                     if len(original_UI_img["supplyBoard"].items)>0:
                                         original_UI_img["supplyBoard"].yTogo = 10
                                     chest_need_to_remove = key
@@ -1082,9 +1083,9 @@ def battle(chapter_name,screen,setting):
                                 if enemies_get_attack[each_enemy] == "near" and random.randint(1,100) <= 95 or enemies_get_attack[each_enemy] == "middle" and random.randint(1,100) <= 80 or enemies_get_attack[each_enemy] == "far" and random.randint(1,100) <= 65:
                                     the_damage = random.randint(characters_data[the_character_get_click].min_damage,characters_data[the_character_get_click].max_damage)
                                     sangvisFerris_data[each_enemy].decreaseHp(the_damage)
-                                    damage_do_to_character[each_enemy] = fontRender("-"+str(the_damage),"red",window_x/76)
+                                    damage_do_to_character[each_enemy] = Zero.fontRender("-"+str(the_damage),"red",window_x/76)
                                 else:
-                                    damage_do_to_character[each_enemy] = fontRender("Miss","red",window_x/76)
+                                    damage_do_to_character[each_enemy] = Zero.fontRender("Miss","red",window_x/76)
                         if characters_data[the_character_get_click].gif_dic["attack"]["imgId"] == characters_data[the_character_get_click].gif_dic["attack"]["imgNum"]-1:
                             characters_data[the_character_get_click].gif_dic["attack"]["imgId"] = 0
                             characters_data[the_character_get_click].current_bullets -= 1
@@ -1130,7 +1131,7 @@ def battle(chapter_name,screen,setting):
             if whose_round == "sangvisFerris":
                 enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]
                 if enemy_action == None:
-                    enemy_action = AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round)
+                    enemy_action = Zero.AI(enemies_in_control,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round)
                     print(enemies_in_control+" choses "+enemy_action["action"])
                 if enemy_action["action"] == "move":
                     if enemy_action["route"] != []:
@@ -1194,9 +1195,9 @@ def battle(chapter_name,screen,setting):
                             the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                             resultInfo = characters_data[enemy_action["target"]].decreaseHp(the_damage,resultInfo)
                             theMap.calculate_darkness(characters_data,window_x,window_y)
-                            damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
+                            damage_do_to_character[enemy_action["target"]] = Zero.fontRender("-"+str(the_damage),"red",window_x/76)
                         else:
-                            damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
+                            damage_do_to_character[enemy_action["target"]] = Zero.fontRender("Miss","red",window_x/76)
                         sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] = 0
                         enemies_in_control_id +=1
                         if enemies_in_control_id >= len(sangvisFerris_name_list):
@@ -1259,9 +1260,9 @@ def battle(chapter_name,screen,setting):
                                 the_damage = random.randint(sangvisFerris_data[enemies_in_control].min_damage,sangvisFerris_data[enemies_in_control].max_damage)
                                 resultInfo = characters_data[enemy_action["target"]].decreaseHp(the_damage,resultInfo)
                                 theMap.calculate_darkness(characters_data,window_x,window_y)
-                                damage_do_to_character[enemy_action["target"]] = fontRender("-"+str(the_damage),"red",window_x/76)
+                                damage_do_to_character[enemy_action["target"]] = Zero.fontRender("-"+str(the_damage),"red",window_x/76)
                             else:
-                                damage_do_to_character[enemy_action["target"]] = fontRender("Miss","red",window_x/76)
+                                damage_do_to_character[enemy_action["target"]] = Zero.fontRender("Miss","red",window_x/76)
                             sangvisFerris_data[enemies_in_control].gif_dic["attack"]["imgId"] = 0
                             enemies_in_control_id +=1
                             if enemies_in_control_id >= len(sangvisFerris_name_list):
@@ -1281,7 +1282,7 @@ def battle(chapter_name,screen,setting):
 
             #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
             rightClickCharacterAlphaDeduct = True
-            for key,value in dicMerge(characters_data,sangvisFerris_data).items():
+            for key,value in Zero.dicMerge(characters_data,sangvisFerris_data).items():
                 #根据血量判断角色的动作
                 if value.faction == "character" and key != the_character_get_click or value.faction == "sangvisFerri" and key != enemies_in_control and (value.x,value.y) in theMap.lightArea or value.faction == "sangvisFerri" and key != enemies_in_control and theMap.darkMode != True:
                     if value.current_hp > 0:
@@ -1321,7 +1322,7 @@ def battle(chapter_name,screen,setting):
                         xTemp,yTemp = theMap.calPosInMap(value.x,value.y)
                         xTemp+=theMap.perBlockWidth*0.05
                         yTemp-=theMap.perBlockWidth*0.05
-                        displayInCenter(damage_do_to_character[key],UI_img["green"],xTemp,yTemp,screen)
+                        Zero.displayInCenter(damage_do_to_character[key],UI_img["green"],xTemp,yTemp,screen)
                         damage_do_to_character[key].set_alpha(the_alpha_to_check-5)
                     else:
                         del damage_do_to_character[key]
@@ -1436,7 +1437,7 @@ def battle(chapter_name,screen,setting):
                 start_point = (window_x - lenTemp)/2
                 for i in range(len(original_UI_img["supplyBoard"].items)):
                     start_point += original_UI_img["supplyBoard"].items[i].get_width()*0.25
-                    drawImg(original_UI_img["supplyBoard"].items[i],(start_point,(original_UI_img["supplyBoard"].height - original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,original_UI_img["supplyBoard"].y)
+                    Zero.drawImg(original_UI_img["supplyBoard"].items[i],(start_point,(original_UI_img["supplyBoard"].height - original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,original_UI_img["supplyBoard"].y)
                     start_point += original_UI_img["supplyBoard"].items[i].get_width()*1.25
 
             if whose_round == "player":
@@ -1475,11 +1476,11 @@ def battle(chapter_name,screen,setting):
             infoToDisplayDuringLoading.display(screen,txt_alpha)
             for i in range(len(battle_info)):
                 battle_info[i].set_alpha(txt_alpha)
-                drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.2*i),screen)
+                Zero.drawImg(battle_info[i],(window_x/20,window_y*0.75+battle_info[i].get_height()*1.2*i),screen)
                 if i == 1:
-                    temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
+                    temp_secode = Zero.fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                     temp_secode.set_alpha(txt_alpha)
-                    drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.2),screen)
+                    Zero.drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.2),screen)
             txt_alpha -= 5
         
         #刷新画面

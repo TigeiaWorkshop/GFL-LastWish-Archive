@@ -23,8 +23,8 @@ class MapObject:
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
         self.bgImg = pygame.image.load(os.path.join("Assets/image/dialog_background/",mapDataDic["backgroundImage"])).convert()
         self.mapSurface = None
-        self.local_x = local_x
-        self.local_y = local_y
+        self.__local_x = local_x
+        self.__local_y = local_y
         self.ifProcessMap = True
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
@@ -44,50 +44,50 @@ class MapObject:
         self.process_map(window_x,window_y)
     #获取local坐标
     def getPos(self):
-        return self.local_x,self.local_y
+        return self.__local_x,self.__local_y
     def getPos_x(self):
-        return self.local_x
+        return self.__local_x
     def getPos_y(self):
-        return self.local_y
+        return self.__local_y
     #设置local坐标
     def setPos(self,x,y):
         self.setPos_x(x)
         self.setPos_y(y)
     def setPos_x(self,value):
         tempValue = round(value)
-        if self.local_x != tempValue:
-            self.local_x = tempValue
+        if self.__local_x != tempValue:
+            self.__local_x = tempValue
             self.ifProcessMap = True
     def setPos_y(self,value):
         tempValue = round(value)
-        if self.local_y != tempValue:
-            self.local_y = tempValue
+        if self.__local_y != tempValue:
+            self.__local_y = tempValue
             self.ifProcessMap = True
     #增加local坐标
     def addPos_x(self,value):
         tempValue = int(value)
         if tempValue !=0:
-            self.local_x += tempValue
+            self.__local_x += tempValue
             self.ifProcessMap = True
     def addPos_y(self,value):
         tempValue = int(value)
         if tempValue !=0:
-            self.local_y += tempValue
+            self.__local_y += tempValue
             self.ifProcessMap = True
     #把地图画到屏幕上
     def display_map(self,screen,screen_to_move_x=0,screen_to_move_y=0):
         #检测屏幕是不是移到了不移到的地方
-        if self.local_x < screen.get_width()-self.surface_width:
-            self.local_x = screen.get_width()-self.surface_width
+        if self.__local_x < screen.get_width()-self.surface_width:
+            self.__local_x = screen.get_width()-self.surface_width
             screen_to_move_x = 0
-        elif self.local_x > 0:
-            self.local_x = 0
+        elif self.__local_x > 0:
+            self.__local_x = 0
             screen_to_move_x = 0
-        if self.local_y < screen.get_height()-self.surface_height:
-            self.local_y = screen.get_height()-self.surface_height
+        if self.__local_y < screen.get_height()-self.surface_height:
+            self.__local_y = screen.get_height()-self.surface_height
             screen_to_move_y = 0
-        elif self.local_y > 0:
-            self.local_y = 0
+        elif self.__local_y > 0:
+            self.__local_y = 0
             screen_to_move_y = 0
         if self.ifProcessMap == True:
             self.ifProcessMap = False
@@ -239,8 +239,8 @@ class MapObject:
                 break
     #计算在地图中的方块
     def calBlockInMap(self,block,mouse_x,mouse_y):
-        guess_x = int(((mouse_x-self.local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
-        guess_y = int((mouse_y-self.local_y-self.perBlockWidth*0.4)/self.perBlockWidth/0.22) - guess_x
+        guess_x = int(((mouse_x-self.__local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.__local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
+        guess_y = int((mouse_y-self.__local_y-self.perBlockWidth*0.4)/self.perBlockWidth/0.22) - guess_x
         block_get_click = None
         lenUnitH = block.get_height()/4
         lenUnitW = block.get_width()/4
@@ -296,7 +296,7 @@ class MapObject:
         self.ifProcessMap = True
     #计算在地图中的位置
     def calPosInMap(self,x,y):
-        return round((x-y)*self.perBlockWidth*0.43+self.local_x+self.row*self.perBlockWidth*0.43,1),round((y+x)*self.perBlockWidth*0.22+self.local_y+self.perBlockWidth*0.4,1)
+        return round((x-y)*self.perBlockWidth*0.43+self.__local_x+self.row*self.perBlockWidth*0.43,1),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4,1)
 
 #初始化地图数据
 def initialBlockData(mapData,facilityData,blocks_setting):
@@ -317,40 +317,6 @@ class Block:
     def  __init__(self,name,canPassThrough):
         self.name = name
         self.canPassThrough = canPassThrough
-
-#环境系统
-class WeatherSystem:
-    def  __init__(self,weather,window_x,window_y):
-        self.name = 0
-        self.img_list = loadAllImgInFile("Assets/image/environment/"+weather+"/*.png")
-        self.ImgObject = []
-        for i in range(50):
-            imgId = random.randint(0,len(self.img_list)-1)
-            img_size = random.randint(5,10)
-            img_speed = random.randint(1,3)
-            img_x = random.randint(1,window_x*1.5)
-            img_y = random.randint(1,window_y)
-            self.ImgObject.append(Snow(imgId,img_size,img_speed,img_x,img_y))
-    def display(self,screen,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
-        speed_unit = perBlockWidth/5
-        for i in range(len(self.ImgObject)):
-            if 0<=self.ImgObject[i].x<=screen.get_width() and 0<=self.ImgObject[i].y+local_y<=screen.get_height():
-                imgTemp = pygame.transform.scale(self.img_list[self.ImgObject[i].imgId], (round(perBlockWidth/self.ImgObject[i].size), round(perBlockWidth/self.ImgObject[i].size)))
-                screen.blit(imgTemp,(self.ImgObject[i].x,self.ImgObject[i].y+local_y))
-            self.ImgObject[i].x -= self.ImgObject[i].speed*speed_unit
-            self.ImgObject[i].y += self.ImgObject[i].speed*speed_unit
-            if self.ImgObject[i].x <= 0 or self.ImgObject[i].y+local_y >= screen.get_height():
-                self.ImgObject[i].y = random.randint(-50,0)
-                self.ImgObject[i].x = random.randint(0,screen.get_width()*2)
-
-#雪花片
-class Snow:
-    def  __init__(self,imgId,size,speed,x,y):
-        self.imgId = imgId
-        self.size = size
-        self.speed = speed
-        self.x = x
-        self.y = y
 
 #加载场地设施的图片
 def loadFacilityImg(facilityData,darkMode=False):

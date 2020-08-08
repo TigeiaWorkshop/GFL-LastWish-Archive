@@ -3,9 +3,9 @@ import glob
 import math
 import os
 import random
-import time
 from sys import exit
 import threading
+import platform
 from Zero3.font import *
 
 #高级图形类
@@ -37,18 +37,18 @@ class ImageSurface:
 class DisplayController:
     def __init__(self,fps):
         self.fps = fps
-        self.clock = pygame.time.Clock()
+        self.__clock = pygame.time.Clock()
     def flip(self):
-        self.clock.tick(self.fps)
+        self.__clock.tick(self.fps)
         pygame.display.flip()
     def quit(self):
         #退出游戏
         exit()
 
 #射击音效 -- 频道2
-class attackingSoundManager:
-    def __init__(self,volume):
-        self.soundsData = {
+class AttackingSoundManager:
+    def __init__(self,channel,volume):
+        self.__soundsData = {
             #突击步枪
             "AR": glob.glob(r'Assets/sound/attack/ar_*.ogg'),
             #手枪
@@ -60,17 +60,54 @@ class attackingSoundManager:
             #冲锋枪
             "SMG": glob.glob(r'Assets/sound/attack/smg_*.ogg'),
         }
+        self.__channel = channel
         self.volume = volume
-        for key in self.soundsData:
-            for i in range(len(self.soundsData[key])):
-                self.soundsData[key][i] = pygame.mixer.Sound(self.soundsData[key][i])
-                self.soundsData[key][i].set_volume(volume/100.0)
+        for key in self.__soundsData:
+            for i in range(len(self.__soundsData[key])):
+                self.__soundsData[key][i] = pygame.mixer.Sound(self.__soundsData[key][i])
+                self.__soundsData[key][i].set_volume(volume/100.0)
     def play(self,kind):
-        if kind in self.soundsData:
-            pygame.mixer.Channel(2).play(self.soundsData[kind][random.randint(0,len(self.soundsData[kind])-1)])
+        if kind in self.__soundsData:
+            pygame.mixer.Channel(self.__channel).play(self.__soundsData[kind][random.randint(0,len(self.__soundsData[kind])-1)])
+
+#环境系统
+class WeatherSystem:
+    def  __init__(self,weather,window_x,window_y):
+        self.name = 0
+        self.img_list = []
+        for imgPath in glob.glob("Assets/image/environment/"+weather+"/*.png"):
+            self.img_list.append(pygame.image.load(os.path.join(imgPath)).convert_alpha())
+        self.ImgObject = []
+        for i in range(50):
+            imgId = random.randint(0,len(self.img_list)-1)
+            img_size = random.randint(5,10)
+            img_speed = random.randint(1,3)
+            img_x = random.randint(1,window_x*1.5)
+            img_y = random.randint(1,window_y)
+            self.ImgObject.append(Snow(imgId,img_size,img_speed,img_x,img_y))
+    def display(self,screen,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
+        speed_unit = perBlockWidth/5
+        for i in range(len(self.ImgObject)):
+            if 0<=self.ImgObject[i].x<=screen.get_width() and 0<=self.ImgObject[i].y+local_y<=screen.get_height():
+                imgTemp = pygame.transform.scale(self.img_list[self.ImgObject[i].imgId], (round(perBlockWidth/self.ImgObject[i].size), round(perBlockWidth/self.ImgObject[i].size)))
+                screen.blit(imgTemp,(self.ImgObject[i].x,self.ImgObject[i].y+local_y))
+            self.ImgObject[i].x -= self.ImgObject[i].speed*speed_unit
+            self.ImgObject[i].y += self.ImgObject[i].speed*speed_unit
+            if self.ImgObject[i].x <= 0 or self.ImgObject[i].y+local_y >= screen.get_height():
+                self.ImgObject[i].y = random.randint(-50,0)
+                self.ImgObject[i].x = random.randint(0,screen.get_width()*2)
+
+#雪花片
+class Snow:
+    def  __init__(self,imgId,size,speed,x,y):
+        self.imgId = imgId
+        self.size = size
+        self.speed = speed
+        self.x = x
+        self.y = y
 
 #设置UI
-class settingContoller:
+class SettingContoller:
     def __init__(self,window_x,window_y,settingdata,langTxt):
         self.ifDisplay = False
         self.baseImgWidth = round(window_x/3)
@@ -296,7 +333,11 @@ class Dialoguebox:
         self.textIndex = None
         self.displayedLine = None
         self.FONT = createFont(fontSize)
+        self.fontSize = fontSize
+        self.narrator = None
     def draw(self,screen):
         screen.blit(self.dialoguebox,(self.x,self.y))
+        if self.narrator != None:
+            screen.blit(self.FONT.render(self.narrator,get_mode(),(255, 255, 255)),(self.width/7+self.x,self.height/11+self.y))
     def flip(self):
         self.dialoguebox = pygame.transform.flip(self.dialoguebox,True,False)

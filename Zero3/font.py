@@ -10,6 +10,9 @@ with open("Save/setting.yaml", "r", encoding='utf-8') as f:
     FONTTYPE = DATA["FontType"]
     MODE = DATA["Antialias"]
 
+def get_mode():
+    return MODE
+
 #创建字体
 def createFont(size,ifBold=False,ifItalic=False):
     if FONTTYPE == "default":
