@@ -22,6 +22,7 @@ class Doll:
         self.ifFlip = False
         self.x = DATA["x"]
         self.y = DATA["y"]
+        self.FONT = createFont(10)
     def decreaseHp(self,damage,result_of_round=None):
         self.current_hp-=damage
         if self.current_hp<=0:
@@ -64,12 +65,12 @@ class Doll:
         if self.dying == False:
             if original_UI_img != None:
                 hp_img = original_UI_img["hp_green"]
-            current_hp_to_display = fontRender(str(self.current_hp)+"/"+str(self.max_hp),"black",10)
+            current_hp_to_display = self.FONT.render("{}/{}".format(self.current_hp,self.max_hp),get_mode(),(0,0,0))
             percent_of_hp = self.current_hp/self.max_hp
         else:
             if original_UI_img != None:
                 hp_img = original_UI_img["hp_red"]
-            current_hp_to_display = fontRender(str(self.dying)+"/3","black",10)
+            current_hp_to_display = self.FONT.render("{}/3".format(self.dying),get_mode(),(0,0,0))
             percent_of_hp = self.dying/3
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)

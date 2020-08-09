@@ -131,3 +131,9 @@ def ifHover(imgObject,objectPos=(0,0),local_x=0,local_y=0):
             return False
     else:
         raise Exception('ZeroEngine-Error: Unable to check current object.')
+
+#读取输入防止未响应
+def inputHolder():
+    for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pass

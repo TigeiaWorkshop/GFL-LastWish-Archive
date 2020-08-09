@@ -66,6 +66,7 @@ def battle(chapter_name,screen,setting):
     #加载角色信息
     characterDataThread.start()
     while characterDataThread.isAlive():
+        Zero.inputHolder()
         infoToDisplayDuringLoading.display(screen)
         now_loading = Zero.fontRender(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum), "white",window_x/76)
         Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
@@ -1341,30 +1342,30 @@ def battle(chapter_name,screen,setting):
                     UI_img["blue"].set_alpha(150)
                     UI_img["green"].set_alpha(150)
                     rightClickCharacterAlpha = None
-                
-            the_dead_one_remove = []
-            for key,value in the_dead_one.items():
-                if value == "sangvisFerri":
-                    if sangvisFerris_data[key].gif_dic["die"]["imgId"] == sangvisFerris_data[key].gif_dic["die"]["imgNum"]-1:
-                        the_alpha = sangvisFerris_data[key].gif_dic["die"]["img"][-1].get_alpha()
-                        if the_alpha > 0:
-                            sangvisFerris_data[key].gif_dic["die"]["img"][-1].set_alpha(the_alpha-5)
-                        else:
-                            the_dead_one_remove.append(key)
-                            del sangvisFerris_data[key]
-                            resultInfo["total_kills"]+=1
-                elif value == "character":
-                    if characters_data[key].gif_dic["die"]["imgId"] == characters_data[key].gif_dic["die"]["imgNum"]-1:
-                        the_alpha = characters_data[key].gif_dic["die"]["img"][-1].get_alpha()
-                        if the_alpha > 0:
-                            characters_data[key].gif_dic["die"]["img"][-1].set_alpha(the_alpha-5)
-                        else:
-                            the_dead_one_remove.append(key)
-                            del characters_data[key]
-                            resultInfo["times_characters_down"]+=1
-                            theMap.calculate_darkness(characters_data,window_x,window_y)
-            for key in the_dead_one_remove:
-                del the_dead_one[key]
+            if len(the_dead_one) > 0:
+                the_dead_one_remove = []
+                for key,value in the_dead_one.items():
+                    if value == "sangvisFerri":
+                        if sangvisFerris_data[key].gif_dic["die"]["imgId"] == sangvisFerris_data[key].gif_dic["die"]["imgNum"]-1:
+                            the_alpha = sangvisFerris_data[key].gif_dic["die"]["img"][-1].get_alpha()
+                            if the_alpha > 0:
+                                sangvisFerris_data[key].gif_dic["die"]["img"][-1].set_alpha(the_alpha-5)
+                            else:
+                                the_dead_one_remove.append(key)
+                                del sangvisFerris_data[key]
+                                resultInfo["total_kills"]+=1
+                    elif value == "character":
+                        if characters_data[key].gif_dic["die"]["imgId"] == characters_data[key].gif_dic["die"]["imgNum"]-1:
+                            the_alpha = characters_data[key].gif_dic["die"]["img"][-1].get_alpha()
+                            if the_alpha > 0:
+                                characters_data[key].gif_dic["die"]["img"][-1].set_alpha(the_alpha-5)
+                            else:
+                                the_dead_one_remove.append(key)
+                                del characters_data[key]
+                                resultInfo["times_characters_down"]+=1
+                                theMap.calculate_darkness(characters_data,window_x,window_y)
+                for key in the_dead_one_remove:
+                    del the_dead_one[key]
             #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
             #展示设施
             theMap.display_facility(screen,characters_data,sangvisFerris_data)
