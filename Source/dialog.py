@@ -14,6 +14,7 @@ def dialog(chapter_name,screen,setting,part):
     for i in range(101):
         Zero.drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         Zero.drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
+        Zero.inputHolder()
         Display.flip()
     
     #卸载音乐
@@ -25,6 +26,7 @@ def dialog(chapter_name,screen,setting,part):
         DIALOG.backgroundContent.display(screen)
         Zero.drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         Zero.drawImg(LoadingImgBelow,(-4,window_y-LoadingImgBelow.get_height()/100*i),screen)
+        Zero.inputHolder()
         Display.flip()
     
     #背景音乐可以开始播放了

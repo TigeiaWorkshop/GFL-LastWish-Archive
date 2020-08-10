@@ -129,6 +129,9 @@ def ifHover(imgObject,objectPos=(0,0),local_x=0,local_y=0):
         else:
             imgObject.hoverEventOff()
             return False
+    #如果是zero引擎的TextSurface类
+    elif isinstance(imgObject,TextSurface):
+        return imgObject.ifHover()
     else:
         raise Exception('ZeroEngine-Error: Unable to check current object.')
 

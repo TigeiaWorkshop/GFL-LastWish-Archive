@@ -27,20 +27,37 @@ def mainMenu(screen,setting):
 
     #当前可用的菜单选项
     enabled_option = ["text0_start","text1_setting","text3_exit","text1_chooseChapter","text4_mapCreator","text6_back"]
+    #加载主菜单页面的文字设置
+    txt_location = window_x*2/3
+    font_size = window_x/38
+    font_size2 = font_size*2
+    main_menu_txt_start_height0 = (window_y-len(main_menu_txt["menu_0"])*font_size2)/2
+    main_menu_txt_start_height1 = (window_y-len(main_menu_txt["menu_1"])*font_size2)/2
+    chapter_select_txt_start_height = (window_y-len(chapter_select)*font_size2)/2
     #加载主菜单选择页面的文字
     for text in main_menu_txt:
         for key,txt in main_menu_txt[text].items():
             if key in enabled_option:
-                main_menu_txt[text][key] = Zero.fontRenderPro(txt,"enable",window_x/38)
+                mode = "enable"
             else:
-                main_menu_txt[text][key] = Zero.fontRenderPro(txt,"disable",window_x/38)
-    
+                mode = "disable"
+            if text == "menu_0":
+                yTmp = main_menu_txt_start_height0
+                main_menu_txt_start_height0 += font_size2
+            elif text == "menu_1":
+                yTmp = main_menu_txt_start_height1
+                main_menu_txt_start_height1 += font_size2
+            main_menu_txt[text][key] = Zero.fontRenderPro(txt,mode,(txt_location,yTmp),font_size)
     #加载菜单章节选择页面的文字
     for i in range(len(chapter_select)):
         if i == 0 or i == len(chapter_select)-1:
-            chapter_select[i] = Zero.fontRenderPro(chapter_select[i],"enable",window_x/38)
+            mode = "enable"
         else:
-            chapter_select[i] = Zero.fontRenderPro(chapter_select[i],"disable",window_x/38)
+            mode = "disable"
+        chapter_select[i] = Zero.fontRenderPro(chapter_select[i],mode,(txt_location,chapter_select_txt_start_height),font_size)
+        chapter_select_txt_start_height += font_size2
+    #加载完成，删除不需要的数据
+    del txt_location,font_size,font_size2,main_menu_txt_start_height0,main_menu_txt_start_height1,chapter_select_txt_start_height,enabled_option
 
     # 创建窗口
     icon_img = Zero.loadImg("Assets/image/UI/icon.png")
@@ -52,10 +69,6 @@ def mainMenu(screen,setting):
     #数值初始化
     cover_alpha = 0
     menu_type = 0
-    txt_location = int(window_x*2/3)
-    main_menu_txt_start_height0 = (window_y-len(main_menu_txt["menu_0"])*window_x/38*2)/2
-    main_menu_txt_start_height1 = (window_y-len(main_menu_txt["menu_1"])*window_x/38*2)/2
-    chapter_select_txt_start_height = (window_y-len(chapter_select)*window_x/38*2)/2
     #关卡选择的封面
     cover_img = Zero.loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
     #音效
@@ -99,43 +112,33 @@ def mainMenu(screen,setting):
     while True:
         #背景图片
         videoCapture.display(screen)
-        if Zero.ifHover(chapter_select[1].b,(txt_location,(window_y-200)/9*1)):
-            if cover_alpha < 250:
-                cover_alpha+=10
-        else:
-            if cover_alpha >= 0:
-                cover_alpha -=10
+        if menu_type == 2 and Zero.ifHover(chapter_select[0]):
+            if cover_alpha < 255:
+                cover_alpha+=15
+        elif cover_alpha >= 0:
+            cover_alpha-=15
 
         if cover_alpha > 10:
             cover_img.set_alpha(cover_alpha)
             Zero.drawImg(cover_img, (0,0),screen)
         
         #菜单选项
+        i=0
         if menu_type == 0:
-            i=0
             for key,text in main_menu_txt["menu_0"].items():
-                if Zero.ifHover(text.n, (txt_location,main_menu_txt_start_height0+window_x/38*2*i)):
+                if text.display(screen):
                     hover_sound_play_on = "0_"+str(i)
-                    Zero.drawImg(text.b, (txt_location,main_menu_txt_start_height0+window_x/38*(2*i-0.25)),screen)
-                else:
-                    Zero.drawImg(text.n, (txt_location,main_menu_txt_start_height0+window_x/38*2*i),screen)
                 i+=1
         elif menu_type == 1:
-            i=0
             for key,text in main_menu_txt["menu_1"].items():
-                if Zero.ifHover(text.n, (txt_location,main_menu_txt_start_height1+window_x/38*2*i)):
-                    hover_sound_play_on = "0_"+str(i)
-                    Zero.drawImg(text.b, (txt_location,main_menu_txt_start_height1+window_x/38*(2*i-0.25)),screen)
-                else:
-                    Zero.drawImg(text.n, (txt_location,main_menu_txt_start_height1+window_x/38*2*i),screen)
+                if text.display(screen):
+                    hover_sound_play_on = "1_"+str(i)
                 i+=1
         elif menu_type == 2:
-            for i in range(len(chapter_select)):
-                if Zero.ifHover(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+            for text in chapter_select:
+                if text.display(screen):
                     hover_sound_play_on = "2_"+str(i)
-                    Zero.drawImg(chapter_select[i].b, (txt_location,chapter_select_txt_start_height+window_x/38*(2*i-0.25)),screen)
-                else:
-                    Zero.drawImg(chapter_select[i].n, (txt_location,chapter_select_txt_start_height+window_x/38*2*i),screen)
+                i+=1
 
         if last_hover_sound_play_on != hover_sound_play_on:
             hover_on_button_sound.play()
@@ -150,27 +153,27 @@ def mainMenu(screen,setting):
         if InputController.get_event() == "comfirm" and settingUI.ifDisplay != True:
             click_button_sound.play()
             if menu_type == 0:
-                if Zero.ifHover(main_menu_txt["menu_0"]["text0_start"].n,(txt_location,main_menu_txt_start_height0)):
+                if Zero.ifHover(main_menu_txt["menu_0"]["text0_start"]):
                     menu_type = 1
-                elif Zero.ifHover(main_menu_txt["menu_0"]["text1_setting"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*1)):
+                elif Zero.ifHover(main_menu_txt["menu_0"]["text1_setting"]):
                     settingUI.ifDisplay = True
-                elif Zero.ifHover(main_menu_txt["menu_0"]["text2_developer_team"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*2)):
+                elif Zero.ifHover(main_menu_txt["menu_0"]["text2_developer_team"]):
                     pass
-                elif Zero.ifHover(main_menu_txt["menu_0"]["text3_exit"].n,(txt_location,main_menu_txt_start_height0+window_x/38*2*3)):
+                elif Zero.ifHover(main_menu_txt["menu_0"]["text3_exit"]):
                     Display.quit()
             elif menu_type == 1:
-                if Zero.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*1)):
+                if Zero.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"]):
                     menu_type = 2
-                elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*4)):
+                elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
                     mapCreator("chapter1",screen,setting)
-                elif Zero.ifHover(main_menu_txt["menu_1"]["text6_back"].n,(txt_location,main_menu_txt_start_height1+window_x/38*2*6)):
+                elif Zero.ifHover(main_menu_txt["menu_1"]["text6_back"]):
                     menu_type = 0
             elif menu_type == 2:
                 for i in range(len(chapter_select)):
-                    if i == len(chapter_select)-1 and Zero.ifHover(chapter_select[-1].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)):
+                    if i == len(chapter_select)-1 and Zero.ifHover(chapter_select[-1]):
                         menu_type = 1
                     #章节选择
-                    elif Zero.ifHover(chapter_select[i].n,(txt_location,chapter_select_txt_start_height+window_x/38*2*i)) and i==0:
+                    elif Zero.ifHover(chapter_select[i]) and i==0:
                         dialog("chapter"+str(i+1),screen,setting,"dialog_before_battle")
                         battle("chapter"+str(i+1),screen,setting)
                         dialog("chapter"+str(i+1),screen,setting,"dialog_after_battle")
