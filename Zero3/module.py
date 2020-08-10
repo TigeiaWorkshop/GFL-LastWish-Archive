@@ -341,3 +341,49 @@ class Dialoguebox:
             screen.blit(self.FONT.render(self.narrator,get_mode(),(255, 255, 255)),(self.width/7+self.x,self.height/11+self.y))
     def flip(self):
         self.dialoguebox = pygame.transform.flip(self.dialoguebox,True,False)
+
+#文字输入框
+class InputBox:
+    def __init__(self,x,y):
+        self.font = createFont(32)
+        self.fontSize = 32
+        self.input_box = pygame.Rect(x, y, 140, self.fontSize+15)
+        self.color_inactive = pygame.Color('lightskyblue3')
+        self.color_active = pygame.Color('dodgerblue2')
+        self.color = self.color_inactive
+        self.active = False
+        self.hidden = False
+        self.text = ''
+        self.textHistoryList = []
+        self.x = x
+        self.y = y
+    def display(self,screen):
+        if self.hidden == False:
+            if pygame.event.peek(MOUSEBUTTONDOWN):
+                self.active = not self.active
+                # Change the current color of the input box.
+                self.color = self.color_active if self.active else self.color_inactive
+            elif pygame.event.peek(KEYDOWN):
+                event = pygame.event.get(KEYDOWN)[0]
+                if self.active:
+                    if event.key == pygame.K_RETURN:
+                        if self.text == "/gamemode 1":
+                            self.textHistoryList.append(self.text)
+                            self.textHistoryList.append("Cheat mode activated")
+                        elif "/say " in self.text:
+                            self.textHistoryList.append(self.text.replace("/say ",""))
+                        self.text = ''
+                    elif event.key == pygame.K_BACKSPACE:
+                        self.text = self.text[:-1]
+                    else:
+                        self.text += event.unicode
+            txt_surface = self.font.render(self.text,get_mode(),self.color)
+            # Resize the box if the text is too long.
+            width = max(200, txt_surface.get_width()+15)
+            self.input_box.w = width
+            for i in range(len(self.textHistoryList)):
+                screen.blit(self.font.render(self.textHistoryList[i],get_mode(),self.color),(self.x+5, self.y-(len(self.textHistoryList)-i)*self.fontSize*1.5))
+            # Blit the text.
+            screen.blit(txt_surface, (self.x+5, self.y))
+            # Blit the input_box rect.
+            pygame.draw.rect(screen, self.color, self.input_box, 2)
