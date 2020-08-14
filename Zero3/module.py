@@ -327,6 +327,8 @@ class Dialoguebox:
         self.height = height
         self.x = x
         self.y = y
+        self.deafult_x = x
+        self.deafult_y = y
         self.txt_x = x
         self.txt_y = y
         self.content = []
@@ -335,10 +337,42 @@ class Dialoguebox:
         self.FONT = createFont(fontSize)
         self.fontSize = fontSize
         self.narrator = None
-    def draw(self,screen):
+        self.narrator_icon = None
+        self.narrator_x = x
+        self.narrator_y = y
+    def draw(self,screen,characterInfoBoardUI=None):
         screen.blit(self.dialoguebox,(self.x,self.y))
+        #讲述人名称
         if self.narrator != None:
-            screen.blit(self.FONT.render(self.narrator,get_mode(),(255, 255, 255)),(self.width/7+self.x,self.height/11+self.y))
+            screen.blit(self.FONT.render(self.narrator,get_mode(),(255,255,255)),(self.width/7+self.x,self.height/11+self.y))
+        #正在播放的行
+        content = self.FONT.render(self.content[self.displayedLine][:self.textIndex],get_mode(),(255,255,255))
+        screen.blit(content,(self.x+self.txt_x,self.y+self.txt_y))
+        if self.textIndex < len(self.content[self.displayedLine]):
+            self.textIndex+=1
+        elif self.displayedLine < len(self.content)-1:
+            self.displayedLine += 1
+            self.textIndex = 0
+        #已经播放的行
+        for i in range(self.displayedLine):
+            screen.blit(self.FONT.render(self.content[i],get_mode(),(255,255,255)),(self.x+self.txt_x,self.y+self.txt_y))
+        #角色图标
+        if self.narrator_icon != None and characterInfoBoardUI != None:
+            screen.blit(characterInfoBoardUI.characterIconImages[self.narrator_icon],(self.x+self.narrator_x,self.y+self.narrator_y))
+    def update(self,txt,narrator,narrator_icon=None):
+        self.__init()
+        self.content = txt
+        self.narrator = narrator
+        self.narrator_icon = narrator_icon
+    def __init(self):
+        self.textIndex = 0
+        self.displayedLine = 0
+        self.x = self.deafult_x
+        self.y = self.deafult_y
+        self.txt_x = self.deafult_x
+        self.txt_y = self.deafult_y
+        self.narrator_x = self.deafult_x
+        self.narrator_y = self.deafult_y
     def flip(self):
         self.dialoguebox = pygame.transform.flip(self.dialoguebox,True,False)
 

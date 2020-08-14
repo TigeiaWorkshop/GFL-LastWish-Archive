@@ -222,10 +222,10 @@ dialog_before_battle:
     characters_img:
     - kalina_5
     content:
-    - 指挥官，铁血的攻势越来越猛烈了，再这样下去，仅存的梯队很快会被击溃
-    - 是时候该下令开始执行标准的撤离程序了
+    - Commander, SangvisFerri's attack is getting fiercer, if this continues, the remaining echelon will soon be routed!
+    - It's time to order a standard evacuation procedure.
     last_dialog_id: 1
-    narrator: 格林娜
+    narrator: Kalina
     next_dialog_id:
     - default
     - 3
@@ -235,10 +235,10 @@ dialog_before_battle:
     characters_img:
     - kalina_5&dark
     content:
-    - 还是没有一点关于她们的消息吗
-    - 后勤第十小队...
+    - Still no news of them
+    - The tenth logistic unit...
     last_dialog_id: 2
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 4
@@ -248,13 +248,13 @@ dialog_before_battle:
     characters_img:
     - kalina_8
     content:
-    - 一直联系不上，也不知道发生了什么...真让人担心啊
-    - 再这样拖下去，这里迟早会被铁血包围起来的
+    - I haven't been able to get ahold of them. I don't know what's going on... That's worrisome.
+    - If we keep this up, it's only a matter of time before SangvisFerri surrounds the place.
     last_dialog_id: 3
-    narrator: 格林娜
+    narrator: Kalina
     next_dialog_id:
     - option
-    - - 最后发出呼救的坐标在哪？
+    - - What were the coordinates of the last call for help?
       - 5
   5:
     background_img: research
@@ -262,10 +262,10 @@ dialog_before_battle:
     characters_img:
     - kalina_5
     content:
-    - 在距离这里以东约50公里的某片平原上
-    - 在13个小时之前落入铁血的控制范围内
+    - It's on a certain plain about 50 kilometers east of here.
+    - It fell under SangvisFerri's control 13 hours ago.
     last_dialog_id: 4
-    narrator: 格林娜
+    narrator: Kalina
     next_dialog_id:
     - default
     - 6
@@ -535,7 +535,7 @@ dialog_during_battle:
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - Currently sv-98 has no bullets
+      - sv-98 has no bullets at this moment
       - and cannot attack
       speaker: Tip
       speaker_icon: null

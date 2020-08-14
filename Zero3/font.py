@@ -10,8 +10,29 @@ with open("Save/setting.yaml", "r", encoding='utf-8') as f:
     FONTTYPE = DATA["FontType"]
     MODE = DATA["Antialias"]
 
+#获取文字信息
+def get_font():
+    return FONT
+def get_fontType():
+    return FONTTYPE
 def get_mode():
     return MODE
+def get_fontDetails():
+    return FONT,FONTTYPE,MODE
+def get_setting():
+    return DATA
+
+#重新获取设置信息
+def reload_setting():
+    global DATA
+    global FONT
+    global FONTTYPE
+    global MODE
+    with open("Save/setting.yaml", "r", encoding='utf-8') as f:
+        DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
+        FONT = DATA["Font"]
+        FONTTYPE = DATA["FontType"]
+        MODE = DATA["Antialias"]
 
 #创建字体
 def createFont(size,ifBold=False,ifItalic=False):
