@@ -118,8 +118,9 @@ def battle(chapter_name,screen,setting):
     #角色信息UI管理
     characterInfoBoardUI = Zero.CharacterInfoBoard(window_x,window_y)
     #加载对话框图片
-    dialoguebox_up = Zero.loadImage("Assets/image/UI/dialoguebox.png",(window_x,window_y/2-window_y*0.35),window_x*0.3,window_y*0.15)
-    dialoguebox_down = Zero.loadImage(pygame.transform.flip(dialoguebox_up.img,True,False),(-window_x*0.3,window_y/2+window_y*0.2),window_x*0.3,window_y*0.15)
+    dialoguebox_up = Zero.Dialoguebox("Assets/image/UI/dialoguebox.png",window_x*0.3,window_y*0.15,window_x,window_y/2-window_y*0.35,window_x/80)
+    dialoguebox_up.flip()
+    dialoguebox_down = Zero.Dialoguebox("Assets/image/UI/dialoguebox.png",window_x*0.3,window_y*0.15,-window_x*0.3,window_y/2+window_y*0.2,window_x/80)
     #-----加载音效-----
     #行走的音效 -- 频道0
     all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
@@ -388,52 +389,26 @@ def battle(chapter_name,screen,setting):
                     #开始对话
                     elif "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
                         #对话框的移动
-                        if dialoguebox_up.x > window_x/2+dialoguebox_up.width*0.4:
+                        if dialoguebox_up.x > window_x/2+dialoguebox_up.get_width()*0.4:
                             dialoguebox_up.x -= 150
-                        if dialoguebox_down.x < window_x/2-dialoguebox_down.width*1.4:
+                        if dialoguebox_down.x < window_x/2-dialoguebox_down.get_width()*1.4:
                             dialoguebox_down.x += 150
                         #上方对话框
                         if dialog_to_display[display_num]["dialoguebox_up"] != None:
+                            if dialoguebox_up.updated == False:
+                                currentTmp = dialog_to_display[display_num]["dialoguebox_up"]
+                                dialoguebox_up.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
+                                del currentTmp
                             #对话框图片
-                            dialoguebox_up.draw(screen)
-                            #名字
-                            if dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != None:
-                                Zero.drawImg(Zero.fontRender(dialog_to_display[display_num]["dialoguebox_up"]["speaker"],"white",window_x/80),(dialoguebox_up.width/7,dialoguebox_up.height/11),screen,dialoguebox_up.x,dialoguebox_up.y)
-                            #正在播放的行
-                            content = Zero.fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line][:dialog_up_content_id],"white",window_x/80)
-                            Zero.drawImg(content,(window_x/45,window_x/35+dialog_up_displayed_line*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
-                            if dialog_up_content_id < len(dialog_to_display[display_num]["dialoguebox_up"]["content"][dialog_up_displayed_line]):
-                                dialog_up_content_id+=1
-                            elif dialog_up_displayed_line < len(dialog_to_display[display_num]["dialoguebox_up"]["content"])-1:
-                                dialog_up_displayed_line += 1
-                                dialog_up_content_id = 0
-                            for i in range(dialog_up_displayed_line):
-                                content = Zero.fontRender(dialog_to_display[display_num]["dialoguebox_up"]["content"][i],"white",window_x/80)
-                                Zero.drawImg(content,(window_x/45,window_x/35+i*window_x/80),screen,dialoguebox_up.x,dialoguebox_up.y)
-                            #角色图标
-                            if dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"] != None:
-                                Zero.drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_up"]["speaker_icon"]],(window_x*0.24,window_x/40),screen,dialoguebox_up.x,dialoguebox_up.y)
+                            dialoguebox_up.display(screen,characterInfoBoardUI)
                         #下方对话框
                         if dialog_to_display[display_num]["dialoguebox_down"] != None:
+                            if dialoguebox_down.updated == False:
+                                currentTmp = dialog_to_display[display_num]["dialoguebox_down"]
+                                dialoguebox_down.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
+                                del currentTmp
                             #对话框图片
-                            dialoguebox_down.draw(screen)
-                            #名字
-                            if dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != None:
-                                Zero.drawImg(Zero.fontRender(dialog_to_display[display_num]["dialoguebox_down"]["speaker"],"white",window_x/80),(dialoguebox_down.width*0.75,dialoguebox_down.height/10),screen,dialoguebox_down.x,dialoguebox_down.y)
-                            #正在播放的行
-                            content = Zero.fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line][:dialog_down_content_id],"white",window_x/80)
-                            Zero.drawImg(content,(window_x/15,window_x/35+dialog_down_displayed_line*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
-                            if dialog_down_content_id < len(dialog_to_display[display_num]["dialoguebox_down"]["content"][dialog_down_displayed_line]):
-                                dialog_down_content_id+=1
-                            elif dialog_down_displayed_line < len(dialog_to_display[display_num]["dialoguebox_down"]["content"])-1:
-                                dialog_down_displayed_line += 1
-                                dialog_down_content_id = 0
-                            for i in range(dialog_down_displayed_line):
-                                content = Zero.fontRender(dialog_to_display[display_num]["dialoguebox_down"]["content"][i],"white",window_x/80)
-                                Zero.drawImg(content,(window_x/15,window_x/35+i*window_x/80),screen,dialoguebox_down.x,dialoguebox_down.y)
-                            #角色图标
-                            if dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"] != None:
-                                Zero.drawImg(characterInfoBoardUI.characterIconImages[dialog_to_display[display_num]["dialoguebox_down"]["speaker_icon"]],(window_x*0.01,window_x/40),screen,dialoguebox_down.x,dialoguebox_down.y)
+                            dialoguebox_down.display(screen,characterInfoBoardUI)
                     #闲置一定时间（秒）
                     elif "idle" in dialog_to_display[display_num]:
                         if seconde_to_idle == None:
@@ -479,38 +454,19 @@ def battle(chapter_name,screen,setting):
                                 Display.quit()
                         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and InputController.joystick.get_button(0) == 1:
                             if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
-                                display_num +=1
+                                display_num += 1
                                 if display_num < len(dialog_to_display):
                                     if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
                                         #检测上方对话框
-                                        if dialog_to_display[display_num]["dialoguebox_up"] != None and dialog_to_display[display_num-1]["dialoguebox_up"] != None and dialog_to_display[display_num]["dialoguebox_up"]["speaker"] == dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
-                                            if dialog_to_display[display_num]["dialoguebox_up"]["content"] != dialog_to_display[display_num]["dialoguebox_up"]["content"]:
-                                                dialog_up_content_id = 0
-                                                dialog_up_displayed_line = 0
-                                            else:
-                                                pass
-                                        else:
-                                            dialoguebox_up.x = window_x
-                                            dialog_up_content_id = 0
-                                            dialog_up_displayed_line = 0
+                                        if dialog_to_display[display_num]["dialoguebox_up"] == None or dialog_to_display[display_num-1]["dialoguebox_up"] == None or dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
+                                            dialoguebox_up.reset_pos()
+                                        if dialog_to_display[display_num]["dialoguebox_up"]["content"] != dialog_to_display[display_num-1]["dialoguebox_up"]["content"]:
+                                            dialoguebox_up.updated = False
                                         #检测下方对话框    
-                                        if dialog_to_display[display_num]["dialoguebox_down"] != None and dialog_to_display[display_num-1]["dialoguebox_down"] != None and dialog_to_display[display_num]["dialoguebox_down"]["speaker"] == dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
-                                            if dialog_to_display[display_num]["dialoguebox_down"]["content"] != dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
-                                                dialog_down_content_id = 0
-                                                dialog_down_displayed_line = 0
-                                            else:
-                                                pass
-                                        else:
-                                            dialoguebox_down.x = -window_x*0.3
-                                            dialog_down_content_id = 0
-                                            dialog_down_displayed_line = 0
-                                    else:
-                                        dialoguebox_up.x = window_x
-                                        dialog_up_content_id = 0
-                                        dialog_up_displayed_line = 0
-                                        dialoguebox_down.x = -window_x*0.3
-                                        dialog_down_content_id = 0
-                                        dialog_down_displayed_line = 0
+                                        if dialog_to_display[display_num]["dialoguebox_down"] == None or dialog_to_display[display_num-1]["dialoguebox_down"] == None or dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
+                                            dialoguebox_down.reset_pos()
+                                        if dialog_to_display[display_num]["dialoguebox_down"]["content"] != dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
+                                            dialoguebox_down.updated = False
                             break
                 else:
                     dialog_valuable_initialized = False
@@ -1126,8 +1082,6 @@ def battle(chapter_name,screen,setting):
                 elif the_character_get_click != "" and isWaiting == True:
                     characters_data[the_character_get_click].draw("wait",screen,theMap)
 
-            
-            #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑中间检测区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
             #敌方回合
             if whose_round == "sangvisFerris":
                 enemies_in_control = sangvisFerris_name_list[enemies_in_control_id]

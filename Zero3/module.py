@@ -322,43 +322,71 @@ class Joystick:
 #对话框和对话框内容
 class Dialoguebox:
     def __init__(self,imgPath,width,height,x,y,fontSize):
-        self.dialoguebox = pygame.transform.scale(pygame.image.load(os.path.join(imgPath)).convert_alpha(),(width,height))
-        self.width = width
-        self.height = height
+        self.__dialoguebox = pygame.transform.scale(pygame.image.load(os.path.join(imgPath)).convert_alpha(),(int(width),int(height)))
+        self.__surface = None
         self.x = x
         self.y = y
         self.deafult_x = x
         self.deafult_y = y
-        self.txt_x = x
-        self.txt_y = y
+        self.txt_x = fontSize
+        self.txt_y = fontSize*2
         self.content = []
         self.textIndex = None
         self.displayedLine = None
-        self.FONT = createFont(fontSize)
+        self.__FONT = createFont(fontSize)
         self.fontSize = fontSize
         self.narrator = None
         self.narrator_icon = None
-        self.narrator_x = x
-        self.narrator_y = y
-    def draw(self,screen,characterInfoBoardUI=None):
-        screen.blit(self.dialoguebox,(self.x,self.y))
-        #讲述人名称
-        if self.narrator != None:
-            screen.blit(self.FONT.render(self.narrator,get_mode(),(255,255,255)),(self.width/7+self.x,self.height/11+self.y))
-        #正在播放的行
-        content = self.FONT.render(self.content[self.displayedLine][:self.textIndex],get_mode(),(255,255,255))
-        screen.blit(content,(self.x+self.txt_x,self.y+self.txt_y))
-        if self.textIndex < len(self.content[self.displayedLine]):
-            self.textIndex+=1
-        elif self.displayedLine < len(self.content)-1:
-            self.displayedLine += 1
-            self.textIndex = 0
-        #已经播放的行
-        for i in range(self.displayedLine):
-            screen.blit(self.FONT.render(self.content[i],get_mode(),(255,255,255)),(self.x+self.txt_x,self.y+self.txt_y))
-        #角色图标
-        if self.narrator_icon != None and characterInfoBoardUI != None:
-            screen.blit(characterInfoBoardUI.characterIconImages[self.narrator_icon],(self.x+self.narrator_x,self.y+self.narrator_y))
+        self.narrator_x = fontSize*3
+        self.narrator_y = fontSize/2
+        self.updated = False
+        self.drew = False
+        self.__flipped = False
+    def get_width(self):
+        return self.__dialoguebox.get_width()
+    def get_height(self):
+        return self.__dialoguebox.get_height()
+    def set_size(self,width,height):
+        self.__dialoguebox = pygame.transform.scale(self.__dialoguebox,(int(width),int(height)))
+    def display(self,screen,characterInfoBoardUI=None):
+        if self.drew == False:
+            self.__surface = self.__dialoguebox.copy()
+            if self.__flipped == True:
+                #讲述人名称
+                if self.narrator != None:
+                    self.__surface.blit(self.__FONT.render(self.narrator,get_mode(),(255,255,255)),(self.get_width()*0.6+self.narrator_x,self.narrator_y))
+                #角色图标
+                if self.narrator_icon != None and characterInfoBoardUI != None:
+                    img = characterInfoBoardUI.characterIconImages[self.narrator_icon]
+                    self.__surface.blit(img,(self.get_width()-self.txt_x,self.txt_y))
+                x = self.txt_x
+            else:
+                #讲述人名称
+                if self.narrator != None:
+                    self.__surface.blit(self.__FONT.render(self.narrator,get_mode(),(255,255,255)),(self.narrator_x,self.narrator_y))
+                #角色图标
+                if self.narrator_icon != None and characterInfoBoardUI != None:
+                    img = characterInfoBoardUI.characterIconImages[self.narrator_icon]
+                    self.__surface.blit(img,(self.txt_x,self.txt_y))
+                    x = self.txt_x+img.get_width() + self.fontSize
+                else:
+                    x = self.txt_x
+            y = self.txt_y
+            #已经播放的行
+            for i in range(self.displayedLine):
+                self.__surface.blit(self.__FONT.render(self.content[i],get_mode(),(255,255,255)),(x,y))
+                y += self.fontSize*1.5
+            #正在播放的行
+            content = self.__FONT.render(self.content[self.displayedLine][:self.textIndex],get_mode(),(255,255,255))
+            self.__surface.blit(content,(x,y))
+            if self.textIndex < len(self.content[self.displayedLine]):
+                self.textIndex += 1
+            elif self.displayedLine < len(self.content)-1:
+                self.displayedLine += 1
+                self.textIndex = 0
+            elif self.textIndex >= len(self.content[self.displayedLine]):
+                self.drew = True
+        screen.blit(self.__surface,(self.x,self.y))
     def update(self,txt,narrator,narrator_icon=None):
         self.__init()
         self.content = txt
@@ -367,14 +395,14 @@ class Dialoguebox:
     def __init(self):
         self.textIndex = 0
         self.displayedLine = 0
+        self.updated = True
+        self.drew = False
+    def reset_pos(self):
         self.x = self.deafult_x
         self.y = self.deafult_y
-        self.txt_x = self.deafult_x
-        self.txt_y = self.deafult_y
-        self.narrator_x = self.deafult_x
-        self.narrator_y = self.deafult_y
     def flip(self):
-        self.dialoguebox = pygame.transform.flip(self.dialoguebox,True,False)
+        self.__dialoguebox = pygame.transform.flip(self.__dialoguebox,True,False)
+        self.__flipped = not self.__flipped
 
 #文字输入框
 class InputBox:
