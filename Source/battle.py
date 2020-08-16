@@ -118,9 +118,9 @@ def battle(chapter_name,screen,setting):
     #角色信息UI管理
     characterInfoBoardUI = Zero.CharacterInfoBoard(window_x,window_y)
     #加载对话框图片
-    dialoguebox_up = Zero.Dialoguebox("Assets/image/UI/dialoguebox.png",window_x*0.3,window_y*0.15,window_x,window_y/2-window_y*0.35,window_x/80)
+    dialoguebox_up = Zero.DialogBox("Assets/image/UI/dialoguebox.png",window_x*0.3,window_y*0.15,window_x,window_y/2-window_y*0.35,window_x/80)
     dialoguebox_up.flip()
-    dialoguebox_down = Zero.Dialoguebox("Assets/image/UI/dialoguebox.png",window_x*0.3,window_y*0.15,-window_x*0.3,window_y/2+window_y*0.2,window_x/80)
+    dialoguebox_down = Zero.DialogBox("Assets/image/UI/dialoguebox.png",window_x*0.3,window_y*0.15,-window_x*0.3,window_y/2+window_y*0.2,window_x/80)
     #-----加载音效-----
     #行走的音效 -- 频道0
     all_walking_sounds = glob.glob(r'Assets/sound/snow/*.wav')
@@ -214,10 +214,6 @@ def battle(chapter_name,screen,setting):
                 if dialog_valuable_initialized == False:
                     dialog_valuable_initialized = True
                     display_num = 0
-                    dialog_up_content_id = 0
-                    dialog_down_content_id = 0
-                    dialog_up_displayed_line = 0
-                    dialog_down_displayed_line = 0
                     all_characters_path = None
                     actionLoop = {}
                     theAction = None
@@ -453,20 +449,27 @@ def battle(chapter_name,screen,setting):
                             if event.key == pygame.K_ESCAPE:
                                 Display.quit()
                         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and InputController.joystick.get_button(0) == 1:
-                            if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
-                                display_num += 1
-                                if display_num < len(dialog_to_display):
-                                    if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
-                                        #检测上方对话框
-                                        if dialog_to_display[display_num]["dialoguebox_up"] == None or dialog_to_display[display_num-1]["dialoguebox_up"] == None or dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
-                                            dialoguebox_up.reset_pos()
-                                        if dialog_to_display[display_num]["dialoguebox_up"]["content"] != dialog_to_display[display_num-1]["dialoguebox_up"]["content"]:
-                                            dialoguebox_up.updated = False
-                                        #检测下方对话框    
-                                        if dialog_to_display[display_num]["dialoguebox_down"] == None or dialog_to_display[display_num-1]["dialoguebox_down"] == None or dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
-                                            dialoguebox_down.reset_pos()
-                                        if dialog_to_display[display_num]["dialoguebox_down"]["content"] != dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
-                                            dialoguebox_down.updated = False
+                            display_num += 1
+                            if display_num < len(dialog_to_display):
+                                if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
+                                    #检测上方对话框
+                                    if dialog_to_display[display_num]["dialoguebox_up"] == None or dialog_to_display[display_num-1]["dialoguebox_up"] == None or dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
+                                        dialoguebox_up.reset_pos()
+                                        dialoguebox_up.updated = False
+                                    elif dialog_to_display[display_num]["dialoguebox_up"]["content"] != dialog_to_display[display_num-1]["dialoguebox_up"]["content"]:
+                                        dialoguebox_up.updated = False
+                                    #检测下方对话框    
+                                    if dialog_to_display[display_num]["dialoguebox_down"] == None or dialog_to_display[display_num-1]["dialoguebox_down"] == None or dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
+                                        dialoguebox_down.reset_pos()
+                                        dialoguebox_down.updated = False
+                                    elif dialog_to_display[display_num]["dialoguebox_down"]["content"] != dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
+                                        dialoguebox_down.updated = False
+                                else:
+                                    dialoguebox_down.reset_pos()
+                                    dialoguebox_down.updated = False
+                            else:
+                                dialoguebox_down.reset_pos()
+                                dialoguebox_down.updated = False
                             break
                 else:
                     dialog_valuable_initialized = False

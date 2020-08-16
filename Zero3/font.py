@@ -15,12 +15,15 @@ def get_font():
     return FONT
 def get_fontType():
     return FONTTYPE
-def get_mode():
+def get_fontMode():
     return MODE
 def get_fontDetails():
     return FONT,FONTTYPE,MODE
-def get_setting():
-    return DATA
+def get_setting(key=None):
+    if key== None:
+        return DATA
+    else:
+        return DATA[key]
 
 #重新获取设置信息
 def reload_setting():

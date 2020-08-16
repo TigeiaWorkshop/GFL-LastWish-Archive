@@ -65,12 +65,12 @@ class Doll:
         if self.dying == False:
             if original_UI_img != None:
                 hp_img = original_UI_img["hp_green"]
-            current_hp_to_display = self.FONT.render("{}/{}".format(self.current_hp,self.max_hp),get_mode(),(0,0,0))
+            current_hp_to_display = self.FONT.render("{}/{}".format(self.current_hp,self.max_hp),get_fontMode(),(0,0,0))
             percent_of_hp = self.current_hp/self.max_hp
         else:
             if original_UI_img != None:
                 hp_img = original_UI_img["hp_red"]
-            current_hp_to_display = self.FONT.render("{}/3".format(self.dying),get_mode(),(0,0,0))
+            current_hp_to_display = self.FONT.render("{}/3".format(self.dying),get_fontMode(),(0,0,0))
             percent_of_hp = self.dying/3
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)

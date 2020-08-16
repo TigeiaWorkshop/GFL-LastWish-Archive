@@ -319,10 +319,26 @@ class Joystick:
         else:
             return 0
 
+#对话框基础模块
+class DialogInterface:
+    def __init__(self,img,fontSize):
+        self.dialoguebox = img
+        self.FONTSIZE = int(fontSize)
+        self.FONT = createFont(self.FONTSIZE)
+        self.content = []
+        self.narrator = None
+        self.textIndex = None
+        self.displayedLine = None
+    def update(self,txt,narrator):
+        self.textIndex = 0
+        self.displayedLine = 0
+        self.content = txt
+        self.narrator = narrator
+
 #对话框和对话框内容
-class Dialoguebox:
+class DialogBox(DialogInterface):
     def __init__(self,imgPath,width,height,x,y,fontSize):
-        self.__dialoguebox = pygame.transform.scale(pygame.image.load(os.path.join(imgPath)).convert_alpha(),(int(width),int(height)))
+        DialogInterface.__init__(self,pygame.transform.scale(pygame.image.load(os.path.join(imgPath)).convert_alpha(),(int(width),int(height))),fontSize)
         self.__surface = None
         self.x = x
         self.y = y
@@ -330,12 +346,6 @@ class Dialoguebox:
         self.deafult_y = y
         self.txt_x = fontSize
         self.txt_y = fontSize*2
-        self.content = []
-        self.textIndex = None
-        self.displayedLine = None
-        self.__FONT = createFont(fontSize)
-        self.fontSize = fontSize
-        self.narrator = None
         self.narrator_icon = None
         self.narrator_x = fontSize*3
         self.narrator_y = fontSize/2
@@ -343,18 +353,18 @@ class Dialoguebox:
         self.drew = False
         self.__flipped = False
     def get_width(self):
-        return self.__dialoguebox.get_width()
+        return self.dialoguebox.get_width()
     def get_height(self):
-        return self.__dialoguebox.get_height()
+        return self.dialoguebox.get_height()
     def set_size(self,width,height):
-        self.__dialoguebox = pygame.transform.scale(self.__dialoguebox,(int(width),int(height)))
+        self.dialoguebox = pygame.transform.scale(self.dialoguebox,(int(width),int(height)))
     def display(self,screen,characterInfoBoardUI=None):
         if self.drew == False:
-            self.__surface = self.__dialoguebox.copy()
+            self.__surface = self.dialoguebox.copy()
             if self.__flipped == True:
                 #讲述人名称
                 if self.narrator != None:
-                    self.__surface.blit(self.__FONT.render(self.narrator,get_mode(),(255,255,255)),(self.get_width()*0.6+self.narrator_x,self.narrator_y))
+                    self.__surface.blit(self.FONT.render(self.narrator,get_fontMode(),(255,255,255)),(self.get_width()*0.6+self.narrator_x,self.narrator_y))
                 #角色图标
                 if self.narrator_icon != None and characterInfoBoardUI != None:
                     img = characterInfoBoardUI.characterIconImages[self.narrator_icon]
@@ -363,21 +373,21 @@ class Dialoguebox:
             else:
                 #讲述人名称
                 if self.narrator != None:
-                    self.__surface.blit(self.__FONT.render(self.narrator,get_mode(),(255,255,255)),(self.narrator_x,self.narrator_y))
+                    self.__surface.blit(self.FONT.render(self.narrator,get_fontMode(),(255,255,255)),(self.narrator_x,self.narrator_y))
                 #角色图标
                 if self.narrator_icon != None and characterInfoBoardUI != None:
                     img = characterInfoBoardUI.characterIconImages[self.narrator_icon]
                     self.__surface.blit(img,(self.txt_x,self.txt_y))
-                    x = self.txt_x+img.get_width() + self.fontSize
+                    x = self.txt_x+img.get_width() + self.FONTSIZE
                 else:
                     x = self.txt_x
             y = self.txt_y
             #已经播放的行
             for i in range(self.displayedLine):
-                self.__surface.blit(self.__FONT.render(self.content[i],get_mode(),(255,255,255)),(x,y))
-                y += self.fontSize*1.5
+                self.__surface.blit(self.FONT.render(self.content[i],get_fontMode(),(255,255,255)),(x,y))
+                y += self.FONTSIZE*1.2
             #正在播放的行
-            content = self.__FONT.render(self.content[self.displayedLine][:self.textIndex],get_mode(),(255,255,255))
+            content = self.FONT.render(self.content[self.displayedLine][:self.textIndex],get_fontMode(),(255,255,255))
             self.__surface.blit(content,(x,y))
             if self.textIndex < len(self.content[self.displayedLine]):
                 self.textIndex += 1
@@ -388,20 +398,15 @@ class Dialoguebox:
                 self.drew = True
         screen.blit(self.__surface,(self.x,self.y))
     def update(self,txt,narrator,narrator_icon=None):
-        self.__init()
-        self.content = txt
-        self.narrator = narrator
-        self.narrator_icon = narrator_icon
-    def __init(self):
-        self.textIndex = 0
-        self.displayedLine = 0
+        super().update(txt,narrator)
         self.updated = True
         self.drew = False
+        self.narrator_icon = narrator_icon
     def reset_pos(self):
         self.x = self.deafult_x
         self.y = self.deafult_y
     def flip(self):
-        self.__dialoguebox = pygame.transform.flip(self.__dialoguebox,True,False)
+        self.dialoguebox = pygame.transform.flip(self.dialoguebox,True,False)
         self.__flipped = not self.__flipped
 
 #文字输入框
@@ -489,12 +494,12 @@ class InputBox:
                     self.removingTxt = False
             if self.removingTxt == True:
                 self.text = self.text[:-1]
-            txt_surface = self.font.render(self.text,get_mode(),self.color)
+            txt_surface = self.font.render(self.text,get_fontMode(),self.color)
             # Resize the box if the text is too long.
             width = max(self.default_width, txt_surface.get_width()+15)
             self.input_box.w = width
             for i in range(len(self.txtOutput)):
-                screen.blit(self.font.render(self.txtOutput[i],get_mode(),self.color),(self.x+5, self.y-(len(self.txtOutput)-i)*self.fontSize*1.5))
+                screen.blit(self.font.render(self.txtOutput[i],get_fontMode(),self.color),(self.x+5, self.y-(len(self.txtOutput)-i)*self.fontSize*1.5))
             # Blit the text.
             screen.blit(txt_surface, (self.x+5, self.y))
             # Blit the input_box rect.

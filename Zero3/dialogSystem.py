@@ -35,7 +35,7 @@ class DialogSystem:
         if self.dialogId not in self.dialog_content:
             raise Exception('ZeroEngine-Error: The dialog must have a head!')
         else:
-            self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
+            self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
         #更新背景音乐
         self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
         #玩家在对话时做出的选择
@@ -80,7 +80,7 @@ class DialogSystem:
                             self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[theNextDialogId]["characters_img"])
                             #切换dialogId
                             self.dialogId = theNextDialogId
-                            self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
+                            self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
                             break
         #按键判定
         leftClick = False
@@ -123,7 +123,7 @@ class DialogSystem:
                         self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[theNextDialogId]["characters_img"])
                         #切换dialogId
                         self.dialogId = theNextDialogId
-                        self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"],True)
+                        self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"],True)
         if self.showHistory == True:
             if self.historySurface == None:
                 self.historySurface = pygame.Surface((self.window_x,self.window_y),flags=pygame.SRCALPHA).convert_alpha()
@@ -168,16 +168,16 @@ class DialogSystem:
                 self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[theNextDialogId]["characters_img"])
                 #切换dialogId
                 self.dialogId = theNextDialogId
-                self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
+                self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
             #如果是切换场景
             elif self.dialog_content[self.dialogId]["next_dialog_id"][0] == "changeScene":
                 self.fadeOut(screen)
-                time.sleep(2)
+                pygame.time.wait(2000)
                 #重设立绘系统
                 self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[self.dialog_content[self.dialogId]["next_dialog_id"][1]]["characters_img"])
                 self.dialogId = self.dialog_content[self.dialogId]["next_dialog_id"][1]
                 self.dialogTxtSystem.resetDialogueboxData()
-                self.dialogTxtSystem.updateContent(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
+                self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
                 self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
                 self.fadeIn(screen)
                 #更新背景（音乐）
@@ -298,24 +298,14 @@ class NpcImageSystem:
                 self.npcBothRound.append(name)
 
 #对话框和对话框内容
-class DialogContent:
+class DialogContent(DialogInterface):
     def __init__(self,fontSize):
-        self.content = []
-        self.textIndex = None
-        self.displayedLine = None
+        DialogInterface.__init__(self,pygame.image.load(os.path.join("Assets/image/UI/dialoguebox.png")).convert_alpha(),fontSize)
         self.textPlayingSound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")
-        with open("Save/setting.yaml", "r", encoding='utf-8') as f:
-            DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
-            self.FONT = DATA["Font"]
-            self.MODE = DATA["Antialias"]
-            self.READINGSPEED = DATA["ReadingSpeed"]
-        self.FONTSIZE = int(fontSize)
-        self.FONT = createFont(self.FONTSIZE)
-        self.dialoguebox = pygame.image.load(os.path.join("Assets/image/UI/dialoguebox.png")).convert_alpha()
+        self.READINGSPEED = get_setting("ReadingSpeed")
         self.dialoguebox_y = None
         self.dialoguebox_height = 0
         self.dialoguebox_max_height = None
-        self.narrator = None
         #鼠标图标
         self.mouseImg_none = pygame.image.load(os.path.join("Assets/image/UI/mouse_none.png")).convert_alpha()
         self.mouseImg_click = pygame.image.load(os.path.join("Assets/image/UI/mouse.png")).convert_alpha()
@@ -325,24 +315,15 @@ class DialogContent:
         self.totalLetters = 0
         self.autoMode = False
     def hideSwitch(self):
-        if self.ifHide == False:
-            self.ifHide = True
-        else:
-            self.ifHide = False
-    def updateContent(self,txt,narrator,forceNotResizeDialoguebox=False):
-        self.content = txt
+        self.ifHide = not self.ifHide
+    def update(self,txt,narrator,forceNotResizeDialoguebox=False):
         self.totalLetters = 0
         self.readTime = 0
         for i in range(len(self.content)):
             self.totalLetters += len(self.content[i])
-        if self.narrator != narrator:
-            if forceNotResizeDialoguebox == False:
-                self.resetDialogueboxData()
-            else:
-                pass
-            self.narrator = narrator
-        self.textIndex = 0
-        self.displayedLine = 0
+        if self.narrator != narrator and forceNotResizeDialoguebox == False:
+            self.resetDialogueboxData()
+        super().update(txt,narrator)
         if pygame.mixer.get_busy() == True:
             self.textPlayingSound.stop()
     def resetDialogueboxData(self):
@@ -354,7 +335,7 @@ class DialogContent:
         self.displayedLine = len(self.content)-1
         self.textIndex = len(self.content[self.displayedLine])-1
     def fontRender(self,txt,color):
-        return self.FONT.render(txt,self.MODE,color)
+        return self.FONT.render(txt,get_fontMode(),color)
     def display(self,screen):
         if self.ifHide == False:
             #如果对话框图片的最高高度没有被设置，则根据屏幕大小设置一个
@@ -375,7 +356,7 @@ class DialogContent:
                 y = int(screen.get_height()*0.74)
                 #写上当前讲话人的名字
                 if self.narrator != None:
-                    screen.blit(self.FONT.render(self.narrator,self.MODE,(255, 255, 255)),(x,self.dialoguebox_y+self.FONTSIZE))
+                    screen.blit(self.FONT.render(self.narrator,get_fontMode(),(255, 255, 255)),(x,self.dialoguebox_y+self.FONTSIZE))
                 #鼠标gif的ID
                 if self.mouse_gif_id<100:
                     self.mouse_gif_id += 0.25
@@ -388,9 +369,9 @@ class DialogContent:
                     screen.blit(pygame.transform.scale(self.mouseImg_click,(self.FONTSIZE,self.FONTSIZE)),(screen.get_width()*0.82,screen.get_height()*0.83))
                 #对话框已播放的内容
                 for i in range(self.displayedLine):
-                    screen.blit(self.FONT.render(self.content[i],self.MODE,(255, 255, 255)),(x,y+self.FONTSIZE*1.5*i))
+                    screen.blit(self.FONT.render(self.content[i],get_fontMode(),(255, 255, 255)),(x,y+self.FONTSIZE*1.5*i))
                 #对话框正在播放的内容
-                screen.blit(self.FONT.render(self.content[self.displayedLine][:self.textIndex],self.MODE,(255, 255, 255)),(x,y+self.FONTSIZE*1.5*self.displayedLine))
+                screen.blit(self.FONT.render(self.content[self.displayedLine][:self.textIndex],get_fontMode(),(255, 255, 255)),(x,y+self.FONTSIZE*1.5*self.displayedLine))
                 #如果当前行的字符还没有完全播出
                 if self.textIndex < len(self.content[self.displayedLine]):
                     if pygame.mixer.get_busy() == False:
