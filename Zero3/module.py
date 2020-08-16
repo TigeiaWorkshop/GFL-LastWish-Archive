@@ -131,9 +131,9 @@ class SettingContoller:
         self.soundVolume_sound_effects = settingdata["Sound"]["sound_effects"]
         self.soundVolume_sound_environment = settingdata["Sound"]["sound_environment"]
         #设置UI中的文字
-        self.fontSize = round(window_x/50)
+        self.FONTSIZE = round(window_x/50)
         self.fontSizeBig = round(window_x/50*1.5)
-        self.normalFont = createFont(self.fontSize)
+        self.normalFont = createFont(self.FONTSIZE)
         self.bigFont = createFont(self.fontSizeBig)
         self.settingTitleTxt = self.bigFont.render(langTxt["setting"],True,(255, 255, 255))
         self.settingTitleTxt_x = int(self.baseImgX+(self.baseImgWidth-self.settingTitleTxt.get_width())/2)
@@ -164,19 +164,19 @@ class SettingContoller:
             #语言
             screen.blit(self.languageTxt,(self.bar_x,self.bar_y0))
             #背景音乐
-            screen.blit(self.normalFont.render(self.backgroundMusicTxt+": "+str(self.soundVolume_background_music),True,(255, 255, 255)),(self.bar_x,self.bar_y1-self.fontSize*1.4))
+            screen.blit(self.normalFont.render(self.backgroundMusicTxt+": "+str(self.soundVolume_background_music),True,(255, 255, 255)),(self.bar_x,self.bar_y1-self.FONTSIZE*1.4))
             screen.blit(self.bar_empty,(self.bar_x,self.bar_y1))
             barImgWidth = round(self.bar_full.get_width()*self.soundVolume_background_music/100)
             screen.blit(pygame.transform.scale(self.bar_full,(barImgWidth,self.bar_height)),(self.bar_x,self.bar_y1))
             screen.blit(self.button,(self.bar_x+barImgWidth-self.button.get_width()/2,self.bar_y1-self.bar_height/2))
             #音效
-            screen.blit(self.normalFont.render(self.soundEffectsTxt+": "+str(self.soundVolume_sound_effects),True,(255, 255, 255)),(self.bar_x,self.bar_y2-self.fontSize*1.4))
+            screen.blit(self.normalFont.render(self.soundEffectsTxt+": "+str(self.soundVolume_sound_effects),True,(255, 255, 255)),(self.bar_x,self.bar_y2-self.FONTSIZE*1.4))
             screen.blit(self.bar_empty,(self.bar_x,self.bar_y2))
             barImgWidth = round(self.bar_full.get_width()*self.soundVolume_sound_effects/100)
             screen.blit(pygame.transform.scale(self.bar_full,(barImgWidth,self.bar_height)),(self.bar_x,self.bar_y2))
             screen.blit(self.button,(self.bar_x+barImgWidth-self.button.get_width()/2,self.bar_y2-self.bar_height/2))
             #环境声
-            screen.blit(self.normalFont.render(self.soundEnvironmentTxt+": "+str(self.soundVolume_sound_environment),True,(255, 255, 255)),(self.bar_x,self.bar_y3-self.fontSize*1.4))
+            screen.blit(self.normalFont.render(self.soundEnvironmentTxt+": "+str(self.soundVolume_sound_environment),True,(255, 255, 255)),(self.bar_x,self.bar_y3-self.FONTSIZE*1.4))
             screen.blit(self.bar_empty,(self.bar_x,self.bar_y3))
             barImgWidth = round(self.bar_full.get_width()*self.soundVolume_sound_environment/100)
             screen.blit(pygame.transform.scale(self.bar_full,(barImgWidth,self.bar_height)),(self.bar_x,self.bar_y3))
@@ -412,23 +412,57 @@ class DialogBox(DialogInterface):
 #文字输入框
 class InputBox:
     def __init__(self,x,y,default_width=150):
-        self.font = createFont(32)
-        self.fontSize = 32
+        self.FONTSIZE = 32
+        self.FONT = createFont(self.FONTSIZE)
         self.default_width = default_width
-        self.input_box = pygame.Rect(x, y,default_width, self.fontSize+15)
+        self.input_box = pygame.Rect(x, y, default_width, self.FONTSIZE*1.5)
         self.color_inactive = pygame.Color('lightskyblue3')
         self.color_active = pygame.Color('dodgerblue2')
         self.color = self.color_inactive
         self.active = False
         self.hidden = True
         self.text = ""
+        self.x = x
+        self.y = y
+        self.removingTxt = False
+    def get_width(self):
+        return self.input_box.w
+    def get_height(self):
+        return self.input_box.h
+    def set_width(self,width):
+        self.default_width = width
+        self.input_box.w = width
+    def set_height(self,height):
+        self.input_box.h = height
+    def set_pos(self,x,y):
+        self.x = x
+        self.y = y
+        self.input_box = pygame.Rect(x, y, self.default_width, self.FONTSIZE*1.5)
+    def display(self,screen):
+        txt_surface = self.FONT.render(self.text,get_fontMode(),self.color)
+        # Resize the box if the text is too long.
+        width = max(self.default_width, txt_surface.get_width()+self.FONTSIZE/2)
+        self.input_box.w = width
+        # 画出文字
+        screen.blit(txt_surface, (self.x+5, self.y))
+        # 画出输入框
+        pygame.draw.rect(screen, self.color, self.input_box, 2)
+
+#控制台
+class Console(InputBox):
+    def __init__(self,x,y,default_width=150):
+        InputBox.__init__(self,x,y,default_width)
+        self.events = {}
         self.txtOutput = []
         self.textHistory = []
         self.backwordID = 1
-        self.x = x
-        self.y = y
-        self.events = {}
-        self.removingTxt = False
+    def get_events(self,key=None):
+        if key==None:
+            return self.events
+        elif key!=None and key in self.events:
+            return self.events[key]
+        else:
+            return None
     def display(self,screen):
         if self.hidden == True and pygame.event.peek(KEYDOWN):
             event = pygame.event.get(KEYDOWN)[0]
@@ -494,13 +528,7 @@ class InputBox:
                     self.removingTxt = False
             if self.removingTxt == True:
                 self.text = self.text[:-1]
-            txt_surface = self.font.render(self.text,get_fontMode(),self.color)
-            # Resize the box if the text is too long.
-            width = max(self.default_width, txt_surface.get_width()+15)
-            self.input_box.w = width
+            #画出输出信息
             for i in range(len(self.txtOutput)):
-                screen.blit(self.font.render(self.txtOutput[i],get_fontMode(),self.color),(self.x+5, self.y-(len(self.txtOutput)-i)*self.fontSize*1.5))
-            # Blit the text.
-            screen.blit(txt_surface, (self.x+5, self.y))
-            # Blit the input_box rect.
-            pygame.draw.rect(screen, self.color, self.input_box, 2)
+                screen.blit(self.FONT.render(self.txtOutput[i],get_fontMode(),self.color),(self.x+5, self.y-(len(self.txtOutput)-i)*self.FONTSIZE*1.5))
+            super().display(screen)

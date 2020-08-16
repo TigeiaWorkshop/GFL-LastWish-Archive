@@ -9,7 +9,8 @@ def mainMenu(screen,setting):
     InputController = Zero.GameController(setting["MouseIconWidth"],setting["MouseMoveSpeed"])
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
-    INPUT = Zero.InputBox(window_x*0.1,window_y*0.8)
+    #修改控制台的位置
+    Zero.get_console().set_pos(window_x*0.1,window_y*0.8)
     #帧率控制器
     Display = Zero.DisplayController(setting['FPS'])
     HealthyGamingAdvice = []
@@ -150,7 +151,7 @@ def mainMenu(screen,setting):
             click_button_sound.set_volume(settingUI.soundVolume_sound_effects/100.0)
             hover_on_button_sound.set_volume(settingUI.soundVolume_sound_effects/100.0)
         
-        INPUT.display(screen)
+        Zero.display_console(screen)
 
         #判断按键
         if InputController.get_event() == "comfirm" and settingUI.ifDisplay != True:

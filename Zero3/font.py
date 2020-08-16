@@ -42,7 +42,12 @@ def createFont(size,ifBold=False,ifItalic=False):
     if FONTTYPE == "default":
         return pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
     elif FONTTYPE == "custom":
-        normal_font = pygame.font.Font("Assets/font/{}.ttf".format(FONT),int(size))
+        try:
+            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(FONT),int(size))
+        #如果文字没有初始化
+        except BaseException:
+            pygame.font.init()
+            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(FONT),int(size))
         if ifBold:
             normal_font.set_bold(ifBold)
         if ifItalic:
