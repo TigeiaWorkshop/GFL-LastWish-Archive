@@ -11,8 +11,7 @@ def mainMenu(screen,setting):
     window_x,window_y = screen.get_size()
     #修改控制台的位置
     Zero.get_console().set_pos(window_x*0.1,window_y*0.8)
-    #帧率控制器
-    Display = Zero.DisplayController(setting['FPS'])
+    
     HealthyGamingAdvice = []
     #加载主菜单文字
     try:
@@ -97,7 +96,7 @@ def mainMenu(screen,setting):
         for a in range(len(HealthyGamingAdvice)):
             HealthyGamingAdvice[a].set_alpha(i)
             Zero.drawImg(HealthyGamingAdvice[a],(window_x-window_x/32-HealthyGamingAdvice[a].get_width(),window_y*0.9-window_x/64*a*1.5),screen)
-        Display.flip()
+        Zero.display.flip()
     
     for i in range(250,0,-2):
         the_black.draw(screen)
@@ -108,7 +107,7 @@ def mainMenu(screen,setting):
         for a in range(len(HealthyGamingAdvice)):
             HealthyGamingAdvice[a].set_alpha(i)
             Zero.drawImg(HealthyGamingAdvice[a],(window_x-window_x/32-HealthyGamingAdvice[a].get_width(),window_y*0.9-window_x/64*a*1.5),screen)
-        Display.flip()
+        Zero.display.flip()
 
     # 游戏主循环
     while True:
@@ -164,7 +163,7 @@ def mainMenu(screen,setting):
                 elif Zero.ifHover(main_menu_txt["menu_0"]["text2_developer_team"]):
                     pass
                 elif Zero.ifHover(main_menu_txt["menu_0"]["text3_exit"]):
-                    Display.quit()
+                    Zero.display.quit()
             elif menu_type == 1:
                 if Zero.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"]):
                     menu_type = 2
@@ -191,4 +190,4 @@ def mainMenu(screen,setting):
             pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
 
         InputController.display(screen)
-        Display.flip()
+        Zero.display.flip()

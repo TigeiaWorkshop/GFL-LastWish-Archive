@@ -7,6 +7,7 @@ from sys import exit
 import threading
 import platform
 from Zero3.font import *
+import time
 
 #高级图形类
 class ImageSurface:
@@ -38,12 +39,37 @@ class DisplayController:
     def __init__(self,fps):
         self.fps = fps
         self.__clock = pygame.time.Clock()
+
     def flip(self):
         self.__clock.tick(self.fps)
         pygame.display.flip()
+    def update(self,rectangle=None):
+        self.__clock.tick(self.fps)
+        if rectangle == None:
+            pygame.display.flip()
+        else:
+            pygame.display.update(rectangle)
     def quit(self):
         #退出游戏
         exit()
+
+#帧率控制器
+display = DisplayController(get_setting("FPS"))
+#事件获取
+def get_events(event_type=None):
+    if event_type == None:
+        return pygame.event.get()
+    else:
+        eventsList = pygame.event.get(event_type)
+        if len(eventsList) == 0:
+            return None
+        else:
+            return eventsList[0]
+def find_event(events,event_type):
+    for event in events:
+        if event.type == event_type:
+            return event
+    return None
 
 #射击音效 -- 频道2
 class AttackingSoundManager:
@@ -108,7 +134,7 @@ class Snow:
 
 #设置UI
 class SettingContoller:
-    def __init__(self,window_x,window_y,settingdata,langTxt):
+    def __init__(self,window_x,window_y,settingData,langTxt):
         self.ifDisplay = False
         self.baseImgWidth = round(window_x/3)
         self.baseImgHeight = round(window_x/3)
@@ -127,9 +153,9 @@ class SettingContoller:
         self.bar_y2 = self.baseImgY + self.baseImgHeight*0.6
         self.bar_y3 = self.baseImgY + self.baseImgHeight*0.8
         #音量数值
-        self.soundVolume_background_music = settingdata["Sound"]["background_music"]
-        self.soundVolume_sound_effects = settingdata["Sound"]["sound_effects"]
-        self.soundVolume_sound_environment = settingdata["Sound"]["sound_environment"]
+        self.soundVolume_background_music = settingData["Sound"]["background_music"]
+        self.soundVolume_sound_effects = settingData["Sound"]["sound_effects"]
+        self.soundVolume_sound_environment = settingData["Sound"]["sound_environment"]
         #设置UI中的文字
         self.FONTSIZE = round(window_x/50)
         self.fontSizeBig = round(window_x/50*1.5)
@@ -191,7 +217,7 @@ class SettingContoller:
                         settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
                         self.soundVolume_background_music = settingData["Sound"]["background_music"]
                         self.soundVolume_sound_effects = settingData["Sound"]["sound_effects"]
-                        self.soundVolume_background_music = settingData["Sound"]["background_music"]
+                        self.soundVolume_sound_environment = settingData["Sound"]["sound_environment"]
                     self.ifDisplay = False
             else:
                 screen.blit(self.cancelTxt_n,(self.buttons_x1,self.buttons_y))
@@ -203,7 +229,7 @@ class SettingContoller:
                         settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
                         settingData["Sound"]["background_music"] = self.soundVolume_background_music
                         settingData["Sound"]["sound_effects"] = self.soundVolume_sound_effects
-                        settingData["Sound"]["background_music"] = self.soundVolume_background_music
+                        settingData["Sound"]["sound_environment"] = self.soundVolume_sound_environment
                     with open("Save/setting.yaml", "w", encoding='utf-8') as f:
                         yaml.dump(settingData, f)
                     pygame.mixer.music.set_volume(settingData["Sound"]["background_music"]/100.0)
@@ -288,7 +314,7 @@ class GameController:
         if self.iconImg != None:
             screen.blit(self.iconImg,(self.mouse_x,self.mouse_y))
     def get_event(self):
-        for event in pygame.event.get():
+        for event in get_events():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and self.joystick.get_button(0) == 1:
                 return "comfirm"
         return None
@@ -422,6 +448,7 @@ class InputBox:
         self.active = False
         self.hidden = True
         self.text = ""
+        self.__holder = self.FONT.render("|",get_fontMode(),self.color_active)
         self.x = x
         self.y = y
         self.removingTxt = False
@@ -438,7 +465,18 @@ class InputBox:
         self.x = x
         self.y = y
         self.input_box = pygame.Rect(x, y, self.default_width, self.FONTSIZE*1.5)
-    def display(self,screen):
+    def display(self,screen,events):
+        anyKeyDown = False
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                anyKeyDown = True
+                if event.key == pygame.K_BACKSPACE:
+                    self.removingTxt = True
+            if event.type == pygame.KEYUP and event.key == pygame.K_BACKSPACE:
+                self.removingTxt = False
+            
+        if self.removingTxt == True:
+            self.text = self.text[:-1]
         txt_surface = self.FONT.render(self.text,get_fontMode(),self.color)
         # Resize the box if the text is too long.
         width = max(self.default_width, txt_surface.get_width()+self.FONTSIZE/2)
@@ -447,6 +485,8 @@ class InputBox:
         screen.blit(txt_surface, (self.x+5, self.y))
         # 画出输入框
         pygame.draw.rect(screen, self.color, self.input_box, 2)
+        if int(time.time()%2)==0 or anyKeyDown == True:
+            screen.blit(self.__holder, (self.x+5+txt_surface.get_width(), self.y))
 
 #控制台
 class Console(InputBox):
@@ -464,71 +504,64 @@ class Console(InputBox):
         else:
             return None
     def display(self,screen):
-        if self.hidden == True and pygame.event.peek(KEYDOWN):
-            event = pygame.event.get(KEYDOWN)[0]
-            if event.key == pygame.K_BACKQUOTE:
+        if self.hidden == True:
+            event = get_events(pygame.KEYDOWN)
+            if event != None and event.key == pygame.K_BACKQUOTE:
                 self.hidden = False
         elif self.hidden == False:
-            if pygame.event.peek(MOUSEBUTTONDOWN):
-                mouse_x,mouse_y = pygame.mouse.get_pos()
-                if self.x <= mouse_x <= self.x+self.input_box.w and self.y <= mouse_y <= self.y+self.input_box.h:
-                    self.active = not self.active
-                    # Change the current color of the input box.
-                    self.color = self.color_active if self.active else self.color_inactive
-                else:
-                    self.active = False
-                    self.color = self.color_inactive
-            elif pygame.event.peek(KEYDOWN):
-                event = pygame.event.get(KEYDOWN)[0]
-                if self.active:
-                    if event.key == pygame.K_RETURN:
-                        if self.text[0]=="/":
-                            if self.text == "/cheat on":
-                                self.events["cheat"] = True
-                                self.txtOutput.append("Cheat mode activated")
-                            elif self.text == "/cheat off":
-                                self.events["cheat"] = False
-                                self.txtOutput.append("Cheat mode deactivated")
-                            elif self.text[:5] == "/say ":
-                                self.txtOutput.append(self.text[5:])
-                            elif self.text == "/dev on":
-                                self.txtOutput.append("Development mode activated")
-                                self.events["dev"] = True
-                            elif self.text == "/dev off":
-                                self.txtOutput.append("Development mode deactivated")
-                                self.events["dev"] = False
-                            else:
-                                self.txtOutput.append("Unknown command")
-                        else:
-                            self.txtOutput.append(self.text)
-                        self.textHistory.append(self.text)
-                        self.text = ""
-                        self.backwordID = 1
-                    elif event.key == pygame.K_UP and self.backwordID<len(self.textHistory):
-                        self.backwordID += 1
-                        self.text = self.textHistory[len(self.textHistory)-self.backwordID]
-                    elif event.key == pygame.K_DOWN and self.backwordID>1:
-                        self.backwordID -= 1
-                        self.text = self.textHistory[len(self.textHistory)-self.backwordID]
-                    elif event.key == pygame.K_BACKSPACE:
-                        self.removingTxt = True
-                    elif event.key == K_ESCAPE:
+            events = get_events()
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_x,mouse_y = pygame.mouse.get_pos()
+                    if self.x <= mouse_x <= self.x+self.input_box.w and self.y <= mouse_y <= self.y+self.input_box.h:
                         self.active = not self.active
                         # Change the current color of the input box.
                         self.color = self.color_active if self.active else self.color_inactive
                     else:
-                        self.text += event.unicode
-                else:
-                    if event.key == pygame.K_BACKQUOTE or event.key == K_ESCAPE:
-                        self.hidden = True
-                        self.text = ""
-            elif pygame.event.peek(KEYUP):
-                event = pygame.event.get(KEYUP)[0]
-                if event.key == pygame.K_BACKSPACE:
-                    self.removingTxt = False
-            if self.removingTxt == True:
-                self.text = self.text[:-1]
+                        self.active = False
+                        self.color = self.color_inactive
+                elif event.type == pygame.KEYDOWN:
+                    if self.active:
+                        if event.key == pygame.K_RETURN:
+                            if self.text[0]=="/":
+                                if self.text == "/cheat on":
+                                    self.events["cheat"] = True
+                                    self.txtOutput.append("Cheat mode activated")
+                                elif self.text == "/cheat off":
+                                    self.events["cheat"] = False
+                                    self.txtOutput.append("Cheat mode deactivated")
+                                elif self.text[:5] == "/say ":
+                                    self.txtOutput.append(self.text[5:])
+                                elif self.text == "/dev on":
+                                    self.txtOutput.append("Development mode activated")
+                                    self.events["dev"] = True
+                                elif self.text == "/dev off":
+                                    self.txtOutput.append("Development mode deactivated")
+                                    self.events["dev"] = False
+                                else:
+                                    self.txtOutput.append("Unknown command")
+                            else:
+                                self.txtOutput.append(self.text)
+                            self.textHistory.append(self.text)
+                            self.text = ""
+                            self.backwordID = 1
+                        elif event.key == pygame.K_UP and self.backwordID<len(self.textHistory):
+                            self.backwordID += 1
+                            self.text = self.textHistory[len(self.textHistory)-self.backwordID]
+                        elif event.key == pygame.K_DOWN and self.backwordID>1:
+                            self.backwordID -= 1
+                            self.text = self.textHistory[len(self.textHistory)-self.backwordID]
+                        elif event.key == K_ESCAPE:
+                            self.active = not self.active
+                            # Change the current color of the input box.
+                            self.color = self.color_active if self.active else self.color_inactive
+                        else:
+                            self.text += event.unicode
+                    else:
+                        if event.key == pygame.K_BACKQUOTE or event.key == K_ESCAPE:
+                            self.hidden = True
+                            self.text = ""
             #画出输出信息
             for i in range(len(self.txtOutput)):
                 screen.blit(self.FONT.render(self.txtOutput[i],get_fontMode(),self.color),(self.x+5, self.y-(len(self.txtOutput)-i)*self.FONTSIZE*1.5))
-            super().display(screen)
+            super().display(screen,events)
