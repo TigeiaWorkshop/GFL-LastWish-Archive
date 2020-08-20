@@ -33,13 +33,52 @@ class ImageSurface:
         self.img.set_alpha(value)
     def get_alpha(self):
         return self.img.get_alpha()
+    def rotate(self,angle):
+        self.img = pygame.transform.rotate(self.img,angle)
+    def flip(self):
+        self.img = pygame.transform.flip(self.img,True,False)
+
+#需要移动的动态图片
+class DynamicImageSurface(ImageSurface):
+    def __init__(self,img,x,y,target_x,target_y,moveSpeed_x,moveSpeed_y,width=None,height=None,description="Default"):
+        ImageSurface.__init__(self,img,x,y,width,height,description)
+        self.default_x = x
+        self.default_y = y
+        self.target_x = target_x
+        self.target_y = target_y
+        self.moveSpeed_x = moveSpeed_x
+        self.moveSpeed_y = moveSpeed_y
+        self.__towardTargetPos = False
+    def draw(self,screen,local_x=0,local_y=0):
+        super().draw(screen,local_x,local_y)
+        if self.__towardTargetPos == True:
+            if self.default_x < self.target_x and self.x < self.target_x:
+                self.x += self.moveSpeed_x
+            elif self.default_x > self.target_x and self.x > self.target_x:
+                self.x -= self.moveSpeed_x
+            if self.default_y < self.target_y and self.y < self.target_y:
+                self.y += self.moveSpeed_y
+            elif self.default_y > self.target_y and self.y > self.target_y:
+                self.y -= self.moveSpeed_y
+        else:
+            if self.default_x < self.target_x and self.x > self.default_x:
+                self.x -= self.moveSpeed_x
+            elif self.default_x > self.target_x and self.x < self.default_x:
+                self.x += self.moveSpeed_x
+            if self.default_y < self.target_y and self.y > self.default__y:
+                self.y -= self.moveSpeed_y
+            elif self.default_y > self.target_y and self.y < self.default__y:
+                self.y += self.moveSpeed_y
+    def switch(self):
+        self.__towardTargetPos = not self.__towardTargetPos
+    def ifToward(self):
+        return self.__towardTargetPos
 
 #画面更新控制器
 class DisplayController:
     def __init__(self,fps):
         self.fps = fps
         self.__clock = pygame.time.Clock()
-
     def flip(self):
         self.__clock.tick(self.fps)
         pygame.display.flip()

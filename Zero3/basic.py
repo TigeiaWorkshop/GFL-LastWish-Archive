@@ -3,17 +3,7 @@ from Zero3.module import *
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
 def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
-    img = None
-    if isinstance(path,str):
-        if ifConvertAlpha == False:
-            img = pygame.image.load(os.path.join(path))
-        else:
-            try:
-                img = pygame.image.load(os.path.join(path)).convert_alpha()
-            except BaseException:
-                raise Exception('ZeroEngine-Error: Cannot find image! Path: '+path)
-    else:
-        img = path
+    img = imgLoadFunction(path,ifConvertAlpha)
     if setAlpha != None:
         img.set_alpha(setAlpha)
     if width == None and height == None:
@@ -27,7 +17,7 @@ def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):
     elif width < 0 or height < 0:
         raise Exception('ZeroEngine-Error: Both width and height must be positive interger!')
     return img
-        
+
 #图片blit模块：接受图片，位置（列表格式），屏幕，如果不是UI层需要local_x和local_y
 def drawImg(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))
@@ -45,14 +35,30 @@ def resizeImg(img,imgSize=(None,None)):
     return img
 
 #高级图片加载模块：接收图片路径（或者已经载入的图片）,位置:[x,y],长,高,返回对应的图片class
-def loadImage(path,the_object_position,width=None,height=None,description="Default",ifConvertAlpha=True):
+def loadImage(path,position,width=None,height=None,description="Default",ifConvertAlpha=True):
+    return ImageSurface(imgLoadFunction(path,ifConvertAlpha),position[0],position[1],width,height,description)
+
+#高级动态图片加载模块：接收图片路径（或者已经载入的图片）,位置:[x,y],长,高,返回对应的图片class
+def loadDynamicImage(path,position,target_position,moveSpeed=(0,0),width=None,height=None,description="Default",ifConvertAlpha=True):
+    return DynamicImageSurface(imgLoadFunction(path,ifConvertAlpha),position[0],position[1],target_position[0],target_position[1],moveSpeed[0],moveSpeed[1],width,height,description)
+
+#识别图片模块，用于引擎内加载图片，十分不建议在本文件外调用
+def imgLoadFunction(path,ifConvertAlpha):
     if isinstance(path,str):
         if ifConvertAlpha == False:
-            return ImageSurface(pygame.image.load(os.path.join(path)),the_object_position[0],the_object_position[1],width,height,description)
+            try:
+                return pygame.image.load(os.path.join(path))
+            except BaseException:
+                raise Exception('ZeroEngine-Error: Cannot load image! Path:',path)
         else:
-            return ImageSurface(pygame.image.load(os.path.join(path)).convert_alpha(),the_object_position[0],the_object_position[1],width,height,description)
+            try:
+                return pygame.image.load(os.path.join(path)).convert_alpha()
+            except BaseException:
+                raise Exception('ZeroEngine-Error: Cannot load image! Path:',path)
+    elif isinstance(path,pygame.Surface):
+        return path
     else:
-        return ImageSurface(path,the_object_position[0],the_object_position[1],width,height,description)
+        raise Exception('ZeroEngine-Error: The path has to be a string or pygame.Surface (even though this is not recommended)! Path:',path)
 
 #中心展示模块1：接受两个item和item2的x和y，将item1展示在item2的中心位置,但不展示item2：
 def displayInCenter(item1,item2,x,y,screen,local_x=0,local_y=0):
@@ -133,7 +139,7 @@ def ifHover(imgObject,objectPos=(0,0),local_x=0,local_y=0):
     elif isinstance(imgObject,TextSurface):
         return imgObject.ifHover()
     else:
-        raise Exception('ZeroEngine-Error: Unable to check current object.')
+        raise Exception('ZeroEngine-Error: Unable to check current object:',imgObject)
 
 #读取输入防止未响应
 def inputHolder():

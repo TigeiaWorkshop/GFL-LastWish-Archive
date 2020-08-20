@@ -95,8 +95,12 @@ def mapCreator(chapterName,screen,setting):
     deleteMode = False
     object_to_put_down = None
     #加载容器图片
-    UIContainer = Zero.loadImage("Assets/image/UI/container.png",(-2,window_y*0.8),int(window_x*0.8), int(window_y*0.2))
-    UIContainerRight = Zero.loadImage("Assets/image/UI/container.png",(window_x*0.825,0),int(window_x*0.175), int(window_y*1.025))
+    UIContainer = Zero.loadImage("Assets/image/UI/container.png",(0,window_y*0.75),int(window_x*0.8), int(window_y*0.25))
+    widthTmp = int(window_x*0.2)
+    UIContainerRight = Zero.loadDynamicImage("Assets/image/UI/container.png",(window_x*0.8+widthTmp,0),(window_x*0.8,0),(widthTmp/10,0),widthTmp,window_y)
+    UIContainerRightButton = Zero.loadImage("Assets/image/UI/container_button.png",(-window_x*0.03,window_y*0.4),int(window_x*0.04),int(window_y*0.2))
+    UIContainerRight.rotate(90)
+    UIContainerRightButton.rotate(90)
     #按钮
     UIButton = {
         "save": Zero.loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*0.2,window_y*0.01),int(theMap.perBlockWidth*0.7)),
@@ -157,12 +161,14 @@ def mapCreator(chapterName,screen,setting):
                 if event.key == pygame.K_d:
                     pressKeyToMove["right"]=False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if Zero.ifHover(UIContainerRight):
-                    #上下滚轮-放大和缩小地图
-                    if event.button == 4 and UI_local_y<0:
-                        UI_local_y += window_y*0.1
-                    elif event.button == 5:
-                        UI_local_y -= window_y*0.1
+                #上下滚轮-放大和缩小地图
+                if Zero.ifHover(UIContainerRight) and event.button == 4 and UI_local_y<0:
+                    UI_local_y += window_y*0.1
+                elif Zero.ifHover(UIContainerRight) and event.button == 5:
+                    UI_local_y -= window_y*0.1
+                elif Zero.ifHover(UIContainerRightButton,None,UIContainerRight.x):
+                    UIContainerRight.switch()
+                    UIContainerRightButton.flip()
                 elif Zero.ifHover(UIContainer):
                     #上下滚轮-放大和缩小地图
                     if event.button == 4 and UI_local_x<0:
@@ -229,7 +235,7 @@ def mapCreator(chapterName,screen,setting):
                         if object_to_put_down != None:
                             if object_to_put_down["type"] == "block":
                                 originalData["map"][block_get_click["y"]][block_get_click["x"]] = object_to_put_down["id"]
-                                theMap.mapData[block_get_click["y"]][block_get_click["x"]] = Block(object_to_put_down["id"],False)
+                                theMap.mapData[block_get_click["y"]][block_get_click["x"]] = Zero.Block(object_to_put_down["id"],False)
                                 theMap.process_map(window_x,window_y)
                             elif object_to_put_down["type"] == "decoration":
                                 #查看当前位置是否有物品
@@ -377,6 +383,7 @@ def mapCreator(chapterName,screen,setting):
 
         #画出UI
         UIContainer.draw(screen)
+        UIContainerRightButton.draw(screen,UIContainerRight.x)
         UIContainerRight.draw(screen)
         for Image in UIButton:
             if Zero.ifHover(UIButton[Image]) and object_to_put_down == None and deleteMode == False:
@@ -418,17 +425,17 @@ def mapCreator(chapterName,screen,setting):
         #显示所有可放置的环境方块
         i=0
         for img_name in env_img_list:
-            posY = perBlockHeight*3*int(i/4)+UI_local_y
+            posY = UIContainerRight.y+perBlockHeight*5*int(i/4)+UI_local_y
             if window_y*0.05<posY<window_y*0.9:
-                posX = window_x*0.84+theMap.perBlockWidth/2.7*(i%4)
+                posX = UIContainerRight.x+theMap.perBlockWidth/6+theMap.perBlockWidth/2.3*(i%4)
                 Zero.drawImg(env_img_list[img_name],(posX,posY),screen)
                 if pygame.mouse.get_pressed()[0] and Zero.ifHover(env_img_list[img_name],(posX,posY)):
                     object_to_put_down = {"type":"block","id":img_name}
             i+=1
         for img_name in all_decorations_img_list:
-            posY = perBlockHeight*3*int(i/4)+UI_local_y
+            posY = UIContainerRight.y+perBlockHeight*5*int(i/4)+UI_local_y
             if window_y*0.05<posY<window_y*0.9:
-                posX = window_x*0.84+theMap.perBlockWidth/2.7*(i%4)
+                posX = UIContainerRight.x+theMap.perBlockWidth/6+theMap.perBlockWidth/2.3*(i%4)
                 Zero.drawImg(all_decorations_img_list[img_name],(posX,posY),screen)
                 if pygame.mouse.get_pressed()[0] and Zero.ifHover(all_decorations_img_list[img_name],(posX,posY)):
                     object_to_put_down = {"type":"decoration","id":img_name}
