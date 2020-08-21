@@ -12,7 +12,7 @@ dialog_after_battle:
     characters_img:
     - kalina_5
     content:
-    - 滴......
+    - Ding......
     last_dialog_id: null
     narrator: null
     next_dialog_id:
@@ -25,7 +25,7 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication
     content:
-    - 指挥官，按照计划，现在并不是我们的通讯时间
+    - Commander, according to the plan, this is not our time to communicate.
     last_dialog_id: head
     narrator: K
     next_dialog_id:
@@ -38,10 +38,10 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication&dark
     content:
-    - 现在究竟是什么状况，我想你比我还要清楚。我的梯队已经溃散
-    - 所以我想知道你所说的救援什么时候能够到达
+    - I think you know better than I do what's really going on right now. My echelon has crumbled.
+    - So I'd like to know when that rescue you were talking about will arrive.
     last_dialog_id: 1
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 3
@@ -52,8 +52,8 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication
     content:
-    - 我想你也该察觉到了，我所说的救援一直就在你们的身边
-    - 但如果东西没有拿到，我是不会让它们出手的
+    - As I'm sure you're aware, the help I'm talking about has been right there with you all along.
+    - But if I don't have the stuff, I won't let them go.
     last_dialog_id: 2
     narrator: K
     next_dialog_id:
@@ -66,9 +66,10 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication&dark
     content:
-    - 那我想知道，为什么你们一开始提供的情报里，并没有提到丝毫关于铁血的事情
+    - Then I'd like to know why there was no mention of SangvisFerri in the information you
+    - provided in the first place.
     last_dialog_id: 3
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 5
@@ -79,8 +80,8 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication
     content:
-    - 按道理来讲，铁血应该不知道这件事。但就目前的情况来看，
-    - 我们的内部肯定有人把这份情报透露了出去
+    - By all rights, SangvisFerri should not know about this. But as things stood.
+    - Someone on the inside must have leaked this information.
     last_dialog_id: 4
     narrator: K
     next_dialog_id:
@@ -93,9 +94,10 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication&dark
     content:
-    - 如果没有支援，我们的梯队很快就会支撑不住了，怎么可能会找得到你所要求的东西
+    - If we don't have support, our echelon will soon be unable to hold up, so how will we ever
+    - find what you're asking for?
     last_dialog_id: 5
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 7
@@ -106,7 +108,8 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication
     content:
-    - 那也没关系。既然你手下的人形只能做到支撑，那就继续支撑下去吧，其他的我会继续想办法的
+    - That's okay. Since the human forms under your command can only do so much to support
+    - you, keep supporting them, and I'll continue to think of the rest
     last_dialog_id: 6
     narrator: K
     next_dialog_id:
@@ -118,7 +121,7 @@ dialog_after_battle:
     characters_img:
     - kalina_5&dark
     content:
-    - 通讯结束
+    - End of communication
     last_dialog_id: 7
     narrator: null
     next_dialog_id:
@@ -130,9 +133,9 @@ dialog_after_battle:
     characters_img:
     - kalina_5&dark
     content:
-    - 该死，早知道一开始就不应接受这份委托。
+    - Damn it, I should have never accepted this commission in the first place.
     last_dialog_id: 8
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 10
@@ -142,9 +145,9 @@ dialog_after_battle:
     characters_img:
     - kalina_8
     content:
-    - 这也不是您的错...
+    - It's not your fault either...
     last_dialog_id: 9
-    narrator: 格林娜
+    narrator: Kalina
     next_dialog_id:
     - default
     - 11
@@ -154,9 +157,10 @@ dialog_after_battle:
     characters_img:
     - kalina_8&dark
     content:
-    - 现在只希望，sv-98他们能够及时回来，之后再考虑其他的事情吧
+    - Now, let's just hope that sv-98 and the others will be back in time, and we'll think about other
+    - things after that!
     last_dialog_id: 10
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 12
@@ -166,9 +170,9 @@ dialog_after_battle:
     characters_img:
     - kalina_5
     content:
-    - 那如果她们没办法回来呢
+    - And what if they don't make it back?
     last_dialog_id: 11
-    narrator: 格林娜
+    narrator: Kalina
     next_dialog_id:
     - default
     - 13
@@ -178,9 +182,9 @@ dialog_after_battle:
     characters_img:
     - kalina_5&dark
     content:
-    - 那我就...没有其他的办法了...
+    - Then I'm... There's no other way...
     last_dialog_id: 12
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 14
@@ -189,7 +193,8 @@ dialog_after_battle:
     background_music: null
     characters_img: null
     content:
-    - 感谢试玩《少女前线-遗愿》，更多内容仍在研发当中，敬请期待
+    - Thanks for trying out Girls' Frontline - Last Wish, more content is still in development,
+    - so stay tuned!
     last_dialog_id: 13
     narrator: null
     next_dialog_id: null
@@ -222,7 +227,8 @@ dialog_before_battle:
     characters_img:
     - kalina_5
     content:
-    - Commander, SangvisFerri's attack is getting fiercer, if this continues, the remaining echelon will soon be routed!
+    - Commander, SangvisFerri's attack is getting fiercer.
+    - If this continues, the remaining echelon will soon be routed!
     - It's time to order a standard evacuation procedure.
     last_dialog_id: 1
     narrator: Kalina
@@ -235,7 +241,7 @@ dialog_before_battle:
     characters_img:
     - kalina_5&dark
     content:
-    - Still no news of them
+    - Still no news about them
     - The tenth logistic unit...
     last_dialog_id: 2
     narrator: Me
@@ -275,9 +281,9 @@ dialog_before_battle:
     characters_img:
     - kalina_5&dark
     content:
-    - 能派一些人形前去搜索吗？
+    - Can you send some of the dolls out to search the area?
     last_dialog_id: 5
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 7
@@ -287,11 +293,12 @@ dialog_before_battle:
     characters_img:
     - kalina_8
     content:
-    - 目前还能行动的梯队目前全都分布在第一防线上
-    - 别说突围了，能勉强挡住铁血的攻势已经是万幸了
-    - 如果这时候再抽出人手，防线可能很快就会被铁血击溃
+    - All operational echelons are currently spread out on the first line of defense.
+    - Not to mention breaking through,
+    - it's already fortunate to be able to barely block SangvisFerri's attack!
+    - If we pull out any more force at this point, the defense may soon be routed.
     last_dialog_id: 6
-    narrator: 格林娜
+    narrator: Kalina
     next_dialog_id:
     - default
     - 8
@@ -301,10 +308,11 @@ dialog_before_battle:
     characters_img:
     - kalina_8&dark
     content:
-    - 该死，说好的支援呢
-    - 而且这只是一座什么资源都没有的孤岛而已，为什么安全局会如此重视
+    - Damn it, where's that backup we were talking about?
+    - And this is just an island with no resources whatsoever
+    - Why the National Security Bureau is so concerned?
     last_dialog_id: 7
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 9
@@ -314,10 +322,11 @@ dialog_before_battle:
     characters_img:
     - kalina_5
     content:
-    - 我也不是很清楚，委托中只提到这和安全局截取到的情报有关
-    - 除此之外就没有透露更多信息了
+    - I don't really know. The commission only mentions that it's related to information
+    - intercepted by the National Security Bureau.
+    - Other than that, no more information was revealed.
     last_dialog_id: 8
-    narrator: 格林娜
+    narrator: Kalina
     next_dialog_id:
     - default
     - 10
@@ -327,9 +336,9 @@ dialog_before_battle:
     characters_img:
     - kalina_5&dark
     content:
-    - 格林娜
+    - Kalina...
     last_dialog_id: 9
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 11
@@ -339,9 +348,9 @@ dialog_before_battle:
     characters_img:
     - kalina_3
     content:
-    - 是
+    - Yes!?
     last_dialog_id: 10
-    narrator: 格林娜
+    narrator: Kalina
     next_dialog_id:
     - default
     - 12
@@ -351,9 +360,9 @@ dialog_before_battle:
     characters_img:
     - kalina_3&dark
     content:
-    - 开始撤离程序吧，然后帮我接通K，我需要和他谈谈
+    - Start the evacuation procedure. Then get me K. I need to talk to him.
     last_dialog_id: 11
-    narrator: 我
+    narrator: Me
     next_dialog_id:
     - default
     - 13
@@ -363,9 +372,9 @@ dialog_before_battle:
     characters_img:
     - kalina_5
     content:
-    - 好的，我这就去
+    - Okay, I'm on it.
     last_dialog_id: 12
-    narrator: 格林娜
+    narrator: Kalina
     next_dialog_id:
     - default
     - 14
@@ -374,8 +383,9 @@ dialog_before_battle:
     background_music: BGM_Boss_1
     characters_img: null
     content:
-    - 此时此刻，我的内心十分不安，sv-98她们能不能在撤离前赶回来是一件事
-    - 但我总感觉这座岛上，有着格里芬甚至安全局自己都还不知道的谜团
+    - At the moment, I was very uneasy, whether sv-98 and the others could make it back before
+    - the evacuation is one thing, but I have a feeling there's a mystery on this island that
+    - Griffin and even the National Security Bureau themselves don't know about yet.
     last_dialog_id: 13
     narrator: null
     next_dialog_id:
@@ -386,7 +396,7 @@ dialog_before_battle:
     background_music: BGM_Brain_1
     characters_img: null
     content:
-    - 24小时以前
+    - 24 hours ago
     last_dialog_id: null
     narrator: null
     next_dialog_id:
@@ -398,7 +408,7 @@ dialog_before_battle:
     characters_img:
     - sv-98
     content:
-    - asval，情况怎么样？
+    - Asval, how's everything going so far?
     last_dialog_id: 15
     narrator: sv-98
     next_dialog_id:
@@ -411,7 +421,8 @@ dialog_before_battle:
     - asval
     - sv-98&dark
     content:
-    - 指挥官已经派直升机来接我们了，我们只需要清空地面上铁血火力，防止直升机降落时出现意外
+    - The commander has already sent a helicopter to pick us up.
+    - We just need to clear the area in case there's an accident when the helicopter lands.
     last_dialog_id: 16
     narrator: asval
     next_dialog_id:
@@ -423,8 +434,8 @@ dialog_before_battle:
     characters_img:
     - sv-98
     content:
-    - 大家再加把劲，只要我们在直升机到来前尽可能消灭当前区域内的铁血势力
-    - 到时候我们就能安全撤离了。
+    - Let's work harder, as long as we take out as much of the current SangvisFerri forces
+    - in the area before the helicopters arrive, then we'll be able to evacuate safely.
     last_dialog_id: 17
     narrator: asval
     next_dialog_id:
@@ -436,9 +447,9 @@ dialog_before_battle:
     characters_img:
     - sv-98&dark
     content:
-    - 好！
+    - Great!
     last_dialog_id: 18
-    narrator: 众人
+    narrator: other dolls
     next_dialog_id:
     - default
     - 20
@@ -448,7 +459,7 @@ dialog_before_battle:
     characters_img:
     - sv-98
     content:
-    - 小声点！铁血又不是没长耳朵。
+    - Keep your voice down! It's not like SangvisFerri didn't have ears.
     last_dialog_id: 19
     narrator: asval
     next_dialog_id: null
@@ -463,21 +474,21 @@ dialog_during_battle:
         y: 3
   - dialoguebox_down:
       content:
-      - 总算是摆脱铁血的追兵了
-      - 大家都没事吧
+      - At last, we're free of SangvisFerri's
+      - pursuers. Is everyone okay?
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - 总算是摆脱铁血的追兵了
-      - 大家都没事吧
+      - At last, we're free of SangvisFerri's
+      - pursuers. Is everyone okay?
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up:
       content:
-      - 没事
-      speaker: 众人
+      - Fine
+      speaker: Everyone
       speaker_icon: null
   - direction:
       asval: true
@@ -487,7 +498,8 @@ dialog_during_battle:
   - idle: 1
   - dialoguebox_down:
       content:
-      - sv-98，前方发现有铁血活动的痕迹
+      - Sv-98, we have signs of SangvisFerri
+      - activity ahead.
       speaker: asval
       speaker_icon: asval
     dialoguebox_up: null
@@ -500,13 +512,14 @@ dialog_during_battle:
       y: 400
   - dialoguebox_down:
       content:
-      - 该死...我已经没有弹药了
+      - Oh no! I'm out of ammo...
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - 前方的铁血...好像在守着什么
+      - The SangvisFerri in the front...
+      - Seems to be guarding something.
       speaker: pp1901
       speaker_icon: pp1901
     dialoguebox_up: null
@@ -516,20 +529,22 @@ dialog_during_battle:
         y: 12
   - dialoguebox_down:
       content:
-      - 远远看过去，好像是物资箱
+      - From a distance, it looks like a supply
+      - crate.
       speaker: gsh-18
       speaker_icon: gsh-18
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - sv-98，上吧。我们会掩护你的。
+      - Sv-98, go for it. We'll cover you.
       speaker: asval
       speaker_icon: asval
     dialoguebox_up: null
   - dialoguebox_down:
       content:
-      - 那就拜托你们了...
-      - 各位，子弹上膛，准备战斗！
+      - It seems like I have no choice...
+      - Girls, load your guns and prepare to
+      - fight!
       speaker: sv-98
       speaker_icon: sv-98
     dialoguebox_up: null

@@ -35,8 +35,8 @@ class ImageSurface:
         return self.img.get_alpha()
     def rotate(self,angle):
         self.img = pygame.transform.rotate(self.img,angle)
-    def flip(self):
-        self.img = pygame.transform.flip(self.img,True,False)
+    def flip(self,vertical=False,horizontal=False):
+        self.img = pygame.transform.flip(self.img,vertical,horizontal)
 
 #需要移动的动态图片
 class DynamicImageSurface(ImageSurface):
@@ -65,9 +65,9 @@ class DynamicImageSurface(ImageSurface):
                 self.x -= self.moveSpeed_x
             elif self.default_x > self.target_x and self.x < self.default_x:
                 self.x += self.moveSpeed_x
-            if self.default_y < self.target_y and self.y > self.default__y:
+            if self.default_y < self.target_y and self.y > self.default_y:
                 self.y -= self.moveSpeed_y
-            elif self.default_y > self.target_y and self.y < self.default__y:
+            elif self.default_y > self.target_y and self.y < self.default_y:
                 self.y += self.moveSpeed_y
     def switch(self):
         self.__towardTargetPos = not self.__towardTargetPos

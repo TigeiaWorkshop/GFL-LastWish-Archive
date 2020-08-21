@@ -95,7 +95,8 @@ def mapCreator(chapterName,screen,setting):
     deleteMode = False
     object_to_put_down = None
     #加载容器图片
-    UIContainer = Zero.loadImage("Assets/image/UI/container.png",(0,window_y*0.75),int(window_x*0.8), int(window_y*0.25))
+    UIContainer = Zero.loadDynamicImage("Assets/image/UI/container.png",(0,window_y),(0,window_y*0.75),(0,window_y*0.25/10),int(window_x*0.8), int(window_y*0.25))
+    UIContainerButton = Zero.loadImage("Assets/image/UI/container_button.png",(window_x*0.33,-window_y*0.05),int(window_x*0.14),int(window_y*0.06))
     widthTmp = int(window_x*0.2)
     UIContainerRight = Zero.loadDynamicImage("Assets/image/UI/container.png",(window_x*0.8+widthTmp,0),(window_x*0.8,0),(widthTmp/10,0),widthTmp,window_y)
     UIContainerRightButton = Zero.loadImage("Assets/image/UI/container_button.png",(-window_x*0.03,window_y*0.4),int(window_x*0.04),int(window_y*0.2))
@@ -168,7 +169,10 @@ def mapCreator(chapterName,screen,setting):
                     UI_local_y -= window_y*0.1
                 elif Zero.ifHover(UIContainerRightButton,None,UIContainerRight.x):
                     UIContainerRight.switch()
-                    UIContainerRightButton.flip()
+                    UIContainerRightButton.flip(True,False)
+                elif Zero.ifHover(UIContainerButton,None,0,UIContainer.y):
+                    UIContainer.switch()
+                    UIContainerButton.flip(False,True)
                 elif Zero.ifHover(UIContainer):
                     #上下滚轮-放大和缩小地图
                     if event.button == 4 and UI_local_x<0:
@@ -382,6 +386,7 @@ def mapCreator(chapterName,screen,setting):
         theMap.display_facility(screen,characters_data,sangvisFerris_data)
 
         #画出UI
+        UIContainerButton.draw(screen,0,UIContainer.y)
         UIContainer.draw(screen)
         UIContainerRightButton.draw(screen,UIContainerRight.x)
         UIContainerRight.draw(screen)
@@ -400,9 +405,9 @@ def mapCreator(chapterName,screen,setting):
         #显示所有可放置的友方角色
         i=0
         for every_chara in all_characters_img_list:
-            tempX = theMap.perBlockWidth*i*0.6+UI_local_x
+            tempX = UIContainer.x+theMap.perBlockWidth*i*0.6+UI_local_x
             if 0 <= tempX <= UIContainer.width*0.9:
-                tempY = window_y*0.75
+                tempY = UIContainer.y-theMap.perBlockWidth*0.25
                 Zero.drawImg(all_characters_img_list[every_chara],(tempX,tempY),screen)
                 if pygame.mouse.get_pressed()[0] and Zero.ifHover(all_characters_img_list[every_chara],(tempX,tempY)):
                     object_to_put_down = {"type":"character","id":every_chara}
@@ -412,9 +417,9 @@ def mapCreator(chapterName,screen,setting):
         i=0
         #显示所有可放置的敌方角色
         for enemies in all_sangvisFerris_img_list:
-            tempX = theMap.perBlockWidth*i*0.6+UI_local_x
+            tempX = UIContainer.x+theMap.perBlockWidth*i*0.6+UI_local_x
             if 0 <= tempX <= UIContainer.width*0.9:
-                tempY = window_y*0.83
+                tempY = UIContainer.y+theMap.perBlockWidth*0.25
                 Zero.drawImg(all_sangvisFerris_img_list[enemies],(tempX,tempY),screen)
                 if pygame.mouse.get_pressed()[0] and Zero.ifHover(all_sangvisFerris_img_list[enemies],(tempX,tempY)):
                     object_to_put_down = {"type":"sangvisFerri","id":enemies}

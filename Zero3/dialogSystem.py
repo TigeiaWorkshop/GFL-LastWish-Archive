@@ -353,7 +353,7 @@ class DialogContent(DialogInterface):
             #如果已经放大好了
             else:
                 x = int(screen.get_width()*0.2)
-                y = int(screen.get_height()*0.74)
+                y = int(screen.get_height()*0.73)
                 #写上当前讲话人的名字
                 if self.narrator != None:
                     screen.blit(self.FONT.render(self.narrator,get_fontMode(),(255, 255, 255)),(x,self.dialoguebox_y+self.FONTSIZE))
