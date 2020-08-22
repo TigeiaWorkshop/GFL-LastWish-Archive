@@ -590,14 +590,14 @@ class Console(InputBox):
                         elif event.key == pygame.K_DOWN and self.backwordID>1:
                             self.backwordID -= 1
                             self.text = self.textHistory[len(self.textHistory)-self.backwordID]
-                        elif event.key == K_ESCAPE:
+                        elif event.key == pygame.K_ESCAPE:
                             self.active = not self.active
                             # Change the current color of the input box.
                             self.color = self.color_active if self.active else self.color_inactive
                         else:
                             self.text += event.unicode
                     else:
-                        if event.key == pygame.K_BACKQUOTE or event.key == K_ESCAPE:
+                        if event.key == pygame.K_BACKQUOTE or event.key == pygame.K_ESCAPE:
                             self.hidden = True
                             self.text = ""
             #画出输出信息

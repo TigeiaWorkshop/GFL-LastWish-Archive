@@ -42,8 +42,9 @@ MainMenu:
     text2_dlc: 可下载内容
     text3_workshop: 创意工坊
     text4_mapCreator: 地图编辑器
-    text5_collection: 收集物
-    text6_back: 返回
+    text5_dialogCreator: 对话编辑器
+    text6_collection: 收集物
+    text7_back: 返回
 ResultBoard:
   characters_down: 友方角色被击倒
   pressKeyContinue: 按空格继续

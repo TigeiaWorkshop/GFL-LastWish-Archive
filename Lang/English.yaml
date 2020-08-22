@@ -37,8 +37,9 @@ MainMenu:
     text2_dlc: DLC
     text3_workshop: Workshop
     text4_mapCreator: Map Creator
-    text5_collection: Collection
-    text6_back: Back
+    text5_dialogCreator: Dialog Creator
+    text6_collection: Collection
+    text7_back: Back
 ResultBoard:
   characters_down: Friendly character down
   pressKeyContinue: Press space to continue

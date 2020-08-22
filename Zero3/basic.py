@@ -144,3 +144,7 @@ def ifHover(imgObject,objectPos=(0,0),local_x=0,local_y=0):
 #读取输入防止未响应
 def inputHolder():
     pygame.event.pump()
+
+#关闭背景音乐
+def unloadBackgroundMusic():
+    pygame.mixer.music.unload()

@@ -3,6 +3,7 @@ import Zero3 as Zero
 import pygame
 import yaml
 import glob
+import random
 
 def mapCreator(chapterName,screen,setting):
     #控制器输入组件

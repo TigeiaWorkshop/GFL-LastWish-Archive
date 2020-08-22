@@ -2,6 +2,7 @@
 from Source.battle import *
 from Source.dialog import *
 from Source.mapCreator import *
+from Source.dialogCreator import *
 import Zero3 as Zero
 
 def mainMenu(screen,setting):
@@ -27,7 +28,7 @@ def mainMenu(screen,setting):
         HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
 
     #当前可用的菜单选项
-    enabled_option = ["text0_start","text1_setting","text3_exit","text1_chooseChapter","text4_mapCreator","text6_back"]
+    enabled_option = ["text0_start","text1_setting","text3_exit","text1_chooseChapter","text4_mapCreator","text5_dialogCreator","text7_back"]
     #加载主菜单页面的文字设置
     txt_location = window_x*2/3
     font_size = window_x/38
@@ -169,7 +170,9 @@ def mainMenu(screen,setting):
                     menu_type = 2
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
                     mapCreator("chapter1",screen,setting)
-                elif Zero.ifHover(main_menu_txt["menu_1"]["text6_back"]):
+                elif Zero.ifHover(main_menu_txt["menu_1"]["text5_dialogCreator"]):
+                    dialogCreator("chapter1",screen,setting,"dialog_before_battle")
+                elif Zero.ifHover(main_menu_txt["menu_1"]["text7_back"]):
                     menu_type = 0
             elif menu_type == 2:
                 for i in range(len(chapter_select)):
