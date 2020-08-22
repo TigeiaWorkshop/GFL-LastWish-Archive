@@ -2,6 +2,7 @@
 import pygame
 import yaml
 from pygame.locals import *
+pygame.init()
 
 #字体
 with open("Save/setting.yaml", "r", encoding='utf-8') as f:

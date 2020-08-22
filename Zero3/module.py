@@ -79,36 +79,29 @@ class DisplayController:
     def __init__(self,fps):
         self.fps = fps
         self.__clock = pygame.time.Clock()
-    def flip(self):
+    def flip(self,pump=False):
         self.__clock.tick(self.fps)
+        controller.display()
+        if pump == True:
+            pygame.event.pump()
         pygame.display.flip()
-    def update(self,rectangle=None):
+    def update(self,rectangle=None,pump=False):
         self.__clock.tick(self.fps)
+        controller.display()
+        if pump == True:
+            pygame.event.pump()
         if rectangle == None:
             pygame.display.flip()
         else:
             pygame.display.update(rectangle)
+    def set_caption(self,title):
+        pygame.display.set_caption(title) 
     def quit(self):
         #退出游戏
         exit()
 
 #帧率控制器
 display = DisplayController(get_setting("FPS"))
-#事件获取
-def get_events(event_type=None):
-    if event_type == None:
-        return pygame.event.get()
-    else:
-        eventsList = pygame.event.get(event_type)
-        if len(eventsList) == 0:
-            return None
-        else:
-            return eventsList[0]
-def find_event(events,event_type):
-    for event in events:
-        if event.type == event_type:
-            return event
-    return None
 
 #射击音效 -- 频道2
 class AttackingSoundManager:
@@ -221,7 +214,7 @@ class SettingContoller:
         self.buttons_y = self.baseImgY + self.baseImgHeight*0.88
         self.buttons_x1 = self.baseImgX + self.baseImgWidth*0.2
         self.buttons_x2 = self.buttons_x1 + self.cancelTxt_n.get_width()*1.7
-    def display(self,screen,InputController):
+    def display(self,screen):
         if self.ifDisplay == True:
             #底部图
             screen.blit(self.baseImg,(self.baseImgX,self.baseImgY))
@@ -251,7 +244,7 @@ class SettingContoller:
             #取消按钮
             if self.buttons_x1<mouse_x<self.buttons_x1+self.cancelTxt_n.get_width() and self.buttons_y<mouse_y<self.buttons_y+self.cancelTxt_n.get_height():
                 screen.blit(self.cancelTxt_b,(self.buttons_x1,self.buttons_y))
-                if InputController.get_event() == "comfirm":
+                if controller.get_event() == "comfirm":
                     with open("Save/setting.yaml", "r", encoding='utf-8') as f:
                         settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
                         self.soundVolume_background_music = settingData["Sound"]["background_music"]
@@ -263,7 +256,7 @@ class SettingContoller:
             #确认按钮
             if self.buttons_x2<mouse_x<self.buttons_x2+self.confirmTxt_n.get_width() and self.buttons_y<mouse_y<self.buttons_y+self.confirmTxt_n.get_height():
                 screen.blit(self.confirmTxt_b,(self.buttons_x2,self.buttons_y))
-                if InputController.get_event() == "comfirm":
+                if controller.get_event() == "comfirm":
                     with open("Save/setting.yaml", "r", encoding='utf-8') as f:
                         settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
                         settingData["Sound"]["background_music"] = self.soundVolume_background_music
@@ -277,7 +270,7 @@ class SettingContoller:
             else:
                 screen.blit(self.confirmTxt_n,(self.buttons_x2,self.buttons_y))
             #其他按键的判定按钮
-            if InputController.get_event() == "comfirm":
+            if controller.get_event() == "comfirm":
                 if self.bar_x<=mouse_x<=self.bar_x+self.bar_width:
                     #如果碰到背景音乐的音量条
                     if self.bar_y1-self.bar_height/2<mouse_y<self.bar_y1+self.bar_height*1.5:
@@ -342,7 +335,7 @@ class GameController:
             self.iconImg = None
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
         self.movingSpeed = speed
-    def display(self,screen):
+    def display(self,screen=None):
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
         if self.joystick.inputController != None:
             if self.joystick.get_axis(0)>0.1 or self.joystick.get_axis(0)<-0.1:
@@ -350,10 +343,12 @@ class GameController:
             if self.joystick.get_axis(1)>0.1 or self.joystick.get_axis(1)<-0.1:
                 self.mouse_y += int(self.movingSpeed*round(self.joystick.get_axis(1),1))
             pygame.mouse.set_pos((self.mouse_x,self.mouse_y))
-        if self.iconImg != None:
+        if self.iconImg != None and screen != None:
             screen.blit(self.iconImg,(self.mouse_x,self.mouse_y))
-    def get_event(self):
-        for event in get_events():
+    def get_event(self,pygame_events=None):
+        if pygame_events == None:
+            pygame_events = pygame.event.get()
+        for event in pygame_events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and self.joystick.get_button(0) == 1:
                 return "comfirm"
         return None
@@ -363,11 +358,14 @@ class GameController:
 #手柄控制组件
 class Joystick:
     def __init__(self):
+        if pygame.joystick.get_init() == False:
+            pygame.joystick.init()
         if pygame.joystick.get_count()>0:
             self.inputController = pygame.joystick.Joystick(0)
             self.inputController.init()
         else:
             self.inputController = None
+            pygame.joystick.quit()
     def get_init(self):
         if self.inputController != None:
             return self.inputController.get_init()
@@ -383,6 +381,9 @@ class Joystick:
             return self.inputController.get_axis(buttonId)
         else:
             return 0
+
+#控制器输入组件初始化
+controller = GameController(get_setting("MouseIconWidth"),get_setting("MouseMoveSpeed"))
 
 #对话框基础模块
 class DialogInterface:
@@ -504,16 +505,18 @@ class InputBox:
         self.x = x
         self.y = y
         self.input_box = pygame.Rect(x, y, self.default_width, self.FONTSIZE*1.5)
-    def display(self,screen,events):
+    def display(self,screen,pygame_events=None):
+        if pygame_events == None:
+            pygame_events = pygame.event.get()
         anyKeyDown = False
-        for event in events:
+        for event in pygame_events:
             if event.type == pygame.KEYDOWN:
                 anyKeyDown = True
                 if event.key == pygame.K_BACKSPACE:
                     self.removingTxt = True
             if event.type == pygame.KEYUP and event.key == pygame.K_BACKSPACE:
                 self.removingTxt = False
-            
+        #是否删除最后一个字符（按了BACKSPACE）
         if self.removingTxt == True:
             self.text = self.text[:-1]
         txt_surface = self.FONT.render(self.text,get_fontMode(),self.color)
@@ -542,14 +545,16 @@ class Console(InputBox):
             return self.events[key]
         else:
             return None
-    def display(self,screen):
+    def display(self,screen,pygame_events=None):
+        if pygame_events == None:
+            pygame_events = pygame.event.get()
         if self.hidden == True:
-            event = get_events(pygame.KEYDOWN)
-            if event != None and event.key == pygame.K_BACKQUOTE:
-                self.hidden = False
+            for event in pygame_events:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKQUOTE:
+                    self.hidden = False
+                    break
         elif self.hidden == False:
-            events = get_events()
-            for event in events:
+            for event in pygame_events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_x,mouse_y = pygame.mouse.get_pos()
                     if self.x <= mouse_x <= self.x+self.input_box.w and self.y <= mouse_y <= self.y+self.input_box.h:
@@ -603,4 +608,4 @@ class Console(InputBox):
             #画出输出信息
             for i in range(len(self.txtOutput)):
                 screen.blit(self.FONT.render(self.txtOutput[i],get_fontMode(),self.color),(self.x+5, self.y-(len(self.txtOutput)-i)*self.FONTSIZE*1.5))
-            super().display(screen,events)
+            super().display(screen,pygame_events)

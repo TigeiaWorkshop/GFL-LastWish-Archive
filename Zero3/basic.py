@@ -104,7 +104,7 @@ def changeDarkness(surface,value):
     if value > 0:
         return addDarkness(surface,value)
     else:
-        return removeDarkness(surface,abd(value))
+        return removeDarkness(surface,abs(value))
 
 #按照给定的位置对图片进行剪裁
 def cropImg(img,pos=(0,0),size=(0,0)):
@@ -140,10 +140,6 @@ def ifHover(imgObject,objectPos=(0,0),local_x=0,local_y=0):
         return imgObject.ifHover()
     else:
         raise Exception('ZeroEngine-Error: Unable to check current object:',imgObject)
-
-#读取输入防止未响应
-def inputHolder():
-    pygame.event.pump()
 
 #关闭背景音乐
 def unloadBackgroundMusic():

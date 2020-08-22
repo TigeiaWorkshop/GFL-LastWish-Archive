@@ -6,14 +6,10 @@ from Source.dialogCreator import *
 import Zero3 as Zero
 
 def mainMenu(screen,setting):
-    #控制器输入组件
-    InputController = Zero.GameController(setting["MouseIconWidth"],setting["MouseMoveSpeed"])
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #修改控制台的位置
-    Zero.get_console().set_pos(window_x*0.1,window_y*0.8)
-    
-    HealthyGamingAdvice = []
+    Zero.console.set_pos(window_x*0.1,window_y*0.8)
     #加载主菜单文字
     try:
         with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
@@ -23,9 +19,13 @@ def mainMenu(screen,setting):
     game_title = loadData['GameTitle']
     main_menu_txt = loadData['MainMenu']
     chapter_select = loadData['Chapter']
+    #选项模块
     settingUI = Zero.SettingContoller(window_x,window_y,setting,loadData["SettingUI"])
+    #健康游戏忠告
     if "HealthyGamingAdvice" in loadData:
         HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
+    else:
+        HealthyGamingAdvice = []
 
     #当前可用的菜单选项
     enabled_option = ["text0_start","text1_setting","text3_exit","text1_chooseChapter","text4_mapCreator","text5_dialogCreator","text7_back"]
@@ -97,7 +97,7 @@ def mainMenu(screen,setting):
         for a in range(len(HealthyGamingAdvice)):
             HealthyGamingAdvice[a].set_alpha(i)
             Zero.drawImg(HealthyGamingAdvice[a],(window_x-window_x/32-HealthyGamingAdvice[a].get_width(),window_y*0.9-window_x/64*a*1.5),screen)
-        Zero.display.flip()
+        Zero.display.flip(True)
     
     for i in range(250,0,-2):
         the_black.draw(screen)
@@ -108,7 +108,7 @@ def mainMenu(screen,setting):
         for a in range(len(HealthyGamingAdvice)):
             HealthyGamingAdvice[a].set_alpha(i)
             Zero.drawImg(HealthyGamingAdvice[a],(window_x-window_x/32-HealthyGamingAdvice[a].get_width(),window_y*0.9-window_x/64*a*1.5),screen)
-        Zero.display.flip()
+        Zero.display.flip(True)
 
     # 游戏主循环
     while True:
@@ -147,14 +147,16 @@ def mainMenu(screen,setting):
             last_hover_sound_play_on = hover_sound_play_on
 
         #展示设置UI
-        if settingUI.display(screen,InputController) == True:
+        if settingUI.display(screen) == True:
             click_button_sound.set_volume(settingUI.soundVolume_sound_effects/100.0)
             hover_on_button_sound.set_volume(settingUI.soundVolume_sound_effects/100.0)
         
-        Zero.display_console(screen)
+        events = pygame.event.get()
+        #展示控制台
+        Zero.console.display(screen,events)
 
         #判断按键
-        if InputController.get_event() == "comfirm" and settingUI.ifDisplay != True:
+        if Zero.controller.get_event(events) == "comfirm" and settingUI.ifDisplay != True:
             click_button_sound.play()
             if menu_type == 0:
                 if Zero.ifHover(main_menu_txt["menu_0"]["text0_start"]):
@@ -192,5 +194,4 @@ def mainMenu(screen,setting):
             pygame.mixer.music.play(loops=9999, start=0.0)
             pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
 
-        InputController.display(screen)
         Zero.display.flip()

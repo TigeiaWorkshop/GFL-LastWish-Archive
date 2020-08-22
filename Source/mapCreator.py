@@ -6,15 +6,13 @@ import glob
 import random
 
 def mapCreator(chapterName,screen,setting):
-    #控制器输入组件
-    InputController = Zero.GameController(setting["MouseIconWidth"],setting["MouseMoveSpeed"])
     #屏幕尺寸
     window_x = screen.get_width()
     window_y = screen.get_height()
     #窗口标题
-    pygame.display.set_caption("Girls frontline-Last Wish: MapCreator") 
+    Zero.display.set_caption("Girls frontline-Last Wish: MapCreator") 
     #卸载音乐
-    pygame.mixer.music.unload()
+    Zero.unloadBackgroundMusic()
 
     #加载地图设置
     with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
@@ -137,7 +135,7 @@ def mapCreator(chapterName,screen,setting):
     # 游戏主循环
     while isBuilding == True:
         ifProcessMap = False
-        mouse_x,mouse_y = InputController.get_pos()
+        mouse_x,mouse_y = Zero.controller.get_pos()
         block_get_click = theMap.calBlockInMap(green,mouse_x,mouse_y)
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -472,5 +470,4 @@ def mapCreator(chapterName,screen,setting):
             Zero.drawImg(Zero.fontRender("x: "+str(data_to_edit.x),"black",15),(window_x*0.91,window_y*0.8+20*8),screen)
             Zero.drawImg(Zero.fontRender("y: "+str(data_to_edit.y),"black",15),(window_x*0.91,window_y*0.8+20*9),screen)
 
-        InputController.display(screen)
-        pygame.display.flip()
+        Zero.display.flip()

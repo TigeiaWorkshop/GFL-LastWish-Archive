@@ -14,9 +14,8 @@ def battle(chapter_name,screen,setting):
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #卸载音乐
-    pygame.mixer.music.unload()
-    #帧率控制器
-    Display = Zero.DisplayController(setting['FPS'])
+    Zero.unloadBackgroundMusic()
+
     #加载按钮的文字
     with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -38,13 +37,13 @@ def battle(chapter_name,screen,setting):
     #渐入效果
     for i in range(1,255,2):
         infoToDisplayDuringLoading.display(screen,i)
-        Display.flip()
+        Zero.display.flip(True)
 
     #开始加载地图场景
     infoToDisplayDuringLoading.display(screen)
     now_loading = Zero.fontRender(loading_info["now_loading_map"], "white",window_x/76)
     Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-    Display.flip()
+    Zero.display.flip(True)
 
     #读取并初始化章节信息
     with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
@@ -66,11 +65,10 @@ def battle(chapter_name,screen,setting):
     #加载角色信息
     characterDataThread.start()
     while characterDataThread.isAlive():
-        Zero.inputHolder()
         infoToDisplayDuringLoading.display(screen)
         now_loading = Zero.fontRender(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum), "white",window_x/76)
         Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-        Display.flip()
+        Zero.display.flip(True)
     characters_data,sangvisFerris_data = characterDataThread.getResult()
 
     #初始化地图模块
@@ -83,7 +81,7 @@ def battle(chapter_name,screen,setting):
     infoToDisplayDuringLoading.display(screen)
     now_loading = Zero.fontRender(loading_info["now_loading_level"], "white",window_x/76)
     Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
-    Display.flip()
+    Zero.display.flip(True)
 
     #加载UI:
     #加载结束回合的图片
@@ -193,7 +191,7 @@ def battle(chapter_name,screen,setting):
                 temp_secode = Zero.fontRender(time.strftime(":%S", time.localtime()),"white",window_x/76)
                 temp_secode.set_alpha(a)
                 Zero.drawImg(temp_secode,(window_x/20+battle_info[i].get_width(),window_y*0.75+battle_info[i].get_height()*1.2),screen)
-        Display.flip()
+        Zero.display.flip(True)
 
     if dialogInfo["initial"] == None:
         dialog_to_display = None
@@ -408,7 +406,7 @@ def battle(chapter_name,screen,setting):
                     #闲置一定时间（秒）
                     elif "idle" in dialog_to_display[display_num]:
                         if seconde_to_idle == None:
-                            seconde_to_idle = dialog_to_display[display_num]["idle"]*Display.fps
+                            seconde_to_idle = dialog_to_display[display_num]["idle"]*Zero.display.fps
                         else:
                             if idle_seconde < seconde_to_idle:
                                 idle_seconde += 1
@@ -447,19 +445,23 @@ def battle(chapter_name,screen,setting):
                     for event in pygame.event.get():
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_ESCAPE:
-                                Display.quit()
-                        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and InputController.joystick.get_button(0) == 1:
+                                Zero.display.quit()
+                        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and Zero.controller.joystick.get_button(0) == 1:
                             display_num += 1
                             if display_num < len(dialog_to_display):
-                                if "dialoguebox_up" in dialog_to_display[display_num] or "dialoguebox_down" in dialog_to_display[display_num]:
+                                if "dialoguebox_up" in dialog_to_display[display_num]:
                                     #检测上方对话框
-                                    if dialog_to_display[display_num]["dialoguebox_up"] == None or dialog_to_display[display_num-1]["dialoguebox_up"] == None or dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
+                                    if dialog_to_display[display_num]["dialoguebox_up"] == None or "dialoguebox_up" not in dialog_to_display[display_num-1] or dialog_to_display[display_num-1]["dialoguebox_up"] == None or dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
                                         dialoguebox_up.reset_pos()
                                         dialoguebox_up.updated = False
                                     elif dialog_to_display[display_num]["dialoguebox_up"]["content"] != dialog_to_display[display_num-1]["dialoguebox_up"]["content"]:
                                         dialoguebox_up.updated = False
+                                else:
+                                    dialoguebox_up.reset_pos()
+                                    dialoguebox_up.updated = False
+                                if "dialoguebox_down" in dialog_to_display[display_num]:
                                     #检测下方对话框    
-                                    if dialog_to_display[display_num]["dialoguebox_down"] == None or dialog_to_display[display_num-1]["dialoguebox_down"] == None or dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
+                                    if dialog_to_display[display_num]["dialoguebox_down"] == None or "dialoguebox_down" not in dialog_to_display[display_num-1] or dialog_to_display[display_num-1]["dialoguebox_down"] == None or dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
                                         dialoguebox_down.reset_pos()
                                         dialoguebox_down.updated = False
                                     elif dialog_to_display[display_num]["dialoguebox_down"]["content"] != dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
@@ -500,7 +502,7 @@ def battle(chapter_name,screen,setting):
         elif battle == True:
             right_click = False
             #获取鼠标坐标
-            mouse_x,mouse_y=InputController.get_pos()
+            mouse_x,mouse_y = Zero.controller.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE and isWaiting == True:
@@ -519,7 +521,7 @@ def battle(chapter_name,screen,setting):
                     if event.key == pygame.K_d:
                         pressKeyToMove["right"]=True
                     if event.key == pygame.K_m:
-                        Display.quit()
+                        Zero.display.quit()
                 elif event.type == pygame.KEYUP:
                     if event.key == pygame.K_w:
                         pressKeyToMove["up"]=False
@@ -530,7 +532,7 @@ def battle(chapter_name,screen,setting):
                     if event.key == pygame.K_d:
                         pressKeyToMove["right"]=False
                 #鼠标点击
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and InputController.joystick.get_button(0) == 1:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and Zero.controller.joystick.get_button(0) == 1:
                     right_click = True
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     #上下滚轮-放大和缩小地图
@@ -538,20 +540,20 @@ def battle(chapter_name,screen,setting):
                         zoomIntoBe += 20
                     elif event.button == 5 and zoomIntoBe > 200:
                         zoomIntoBe -= 20
-                if InputController.joystick.get_init() == True:
-                    if round(InputController.joystick.get_axis(4)) == -1:
+                if Zero.controller.joystick.get_init() == True:
+                    if round(Zero.controller.joystick.get_axis(4)) == -1:
                         pressKeyToMove["up"]=True
                     else:
                         pressKeyToMove["up"]=False
-                    if round(InputController.joystick.get_axis(4)) == 1:
+                    if round(Zero.controller.joystick.get_axis(4)) == 1:
                         pressKeyToMove["down"]=True
                     else:
                         pressKeyToMove["down"]=False
-                    if round(InputController.joystick.get_axis(3)) == 1:
+                    if round(Zero.controller.joystick.get_axis(3)) == 1:
                         pressKeyToMove["right"]=True
                     else:
                         pressKeyToMove["right"]=False
-                    if round(InputController.joystick.get_axis(3)) == -1:
+                    if round(Zero.controller.joystick.get_axis(3)) == -1:
                         pressKeyToMove["left"]=True
                     else:
                         pressKeyToMove["left"]=False
@@ -1442,8 +1444,7 @@ def battle(chapter_name,screen,setting):
             txt_alpha -= 5
         
         #刷新画面
-        InputController.display(screen)
-        Display.flip()
+        Zero.display.flip()
     
     #暂停声效 - 尤其是环境声
     pygame.mixer.stop()

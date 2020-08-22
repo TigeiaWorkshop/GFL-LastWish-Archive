@@ -9,8 +9,7 @@ def dialog(chapter_name,screen,setting,part):
     for i in range(101):
         Zero.drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         Zero.drawImg(LoadingImgBelow,(-4,screen.get_height()-LoadingImgBelow.get_height()/100*i),screen)
-        Zero.inputHolder()
-        Zero.display.flip()
+        Zero.display.flip(True)
     #卸载音乐
     Zero.unloadBackgroundMusic()
     #初始化对话系统模块
@@ -20,8 +19,7 @@ def dialog(chapter_name,screen,setting,part):
         DIALOG.backgroundContent.display(screen)
         Zero.drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         Zero.drawImg(LoadingImgBelow,(-4,screen.get_height()-LoadingImgBelow.get_height()/100*i),screen)
-        Zero.inputHolder()
-        Zero.display.flip()
+        Zero.display.flip(True)
     #背景音乐可以开始播放了
     DIALOG.ready()
     #主循环
