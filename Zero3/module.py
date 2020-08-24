@@ -33,6 +33,10 @@ class ImageSurface:
         self.img.set_alpha(value)
     def get_alpha(self):
         return self.img.get_alpha()
+    def get_width(self):
+        return self.width
+    def get_height(self):
+        return self.height
     def rotate(self,angle):
         self.img = pygame.transform.rotate(self.img,angle)
     def flip(self,vertical=False,horizontal=False):
@@ -95,7 +99,9 @@ class DisplayController:
         else:
             pygame.display.update(rectangle)
     def set_caption(self,title):
-        pygame.display.set_caption(title) 
+        pygame.display.set_caption(title)
+    def get_size(self):
+        return get_setting("Screen_size_x"),get_setting("Screen_size_y")
     def quit(self):
         #退出游戏
         exit()
