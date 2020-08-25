@@ -19,6 +19,14 @@ Dialog:
   auto: Auto
   choice: Choice
   skip: Skip
+DialogCreator:
+  add: New dialog
+  back: Back to main menu
+  delete: Delete current dialog
+  next: Next dialog
+  previous: Previous dialog
+  reload: Reload configuration file
+  save: Save
 GameTitle: Girls' Frontline - Last wish
 LoadingTxt:
   now_loading: Loading...
@@ -40,6 +48,11 @@ MainMenu:
     text5_dialogCreator: Dialog Creator
     text6_collection: Collection
     text7_back: Back
+MapCreator:
+  back: Back
+  delete: Delete
+  reload: Reload
+  save: Save
 ResultBoard:
   characters_down: Friendly character down
   pressKeyContinue: Press space to continue
@@ -72,11 +85,6 @@ Warnings:
   no_enough_ap_to_reload: You don't have enough action points for reloading.
   no_enough_ap_to_rescue: You don't have enough action points for rescuing.
   no_enough_ap_to_use_skill: You don't have enough action points for using skill.
-mapCreator:
-  back: Back
-  delete: Delete
-  reload: Reload
-  save: Save
 title1: 'Warning: All content is still in development and does not represent final
   results'
 title2: Presents by Tigeia-Workshop

@@ -4,7 +4,8 @@ battle_info:
 - 'Temperature: -12°C/10.4°F'
 - 'Visibility: 0.78km/853yd'
 - 'Location: approximately 50 km east of the temporary base'
-description: Above the snowy plains, the bitter cold wind whipped my cheeks. But at least, you are with me.
+description: Above the snowy plains, the bitter cold wind whipped my cheeks. But at
+  least, you are with me.
 dialog_after_battle:
   head:
     background_img: research
@@ -38,7 +39,8 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication&dark
     content:
-    - I think you know better than I do what's really going on right now. My echelon has crumbled.
+    - I think you know better than I do what's really going on right now. My echelon
+      has crumbled.
     - So I'd like to know when that rescue you were talking about will arrive.
     last_dialog_id: 1
     narrator: Me
@@ -52,7 +54,8 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication
     content:
-    - As I'm sure you're aware, the help I'm talking about has been right there with you all along.
+    - As I'm sure you're aware, the help I'm talking about has been right there with
+      you all along.
     - But if I don't have the stuff, I won't let them go.
     last_dialog_id: 2
     narrator: K
@@ -66,7 +69,8 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication&dark
     content:
-    - Then I'd like to know why there was no mention of SangvisFerri in the information you
+    - Then I'd like to know why there was no mention of SangvisFerri in the information
+      you
     - provided in the first place.
     last_dialog_id: 3
     narrator: Me
@@ -94,7 +98,8 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication&dark
     content:
-    - If we don't have support, our echelon will soon be unable to hold up, so how will we ever
+    - If we don't have support, our echelon will soon be unable to hold up, so how
+      will we ever
     - find what you're asking for?
     last_dialog_id: 5
     narrator: Me
@@ -108,7 +113,8 @@ dialog_after_battle:
     - kalina_5&dark
     - k&communication
     content:
-    - That's okay. Since the human forms under your command can only do so much to support
+    - That's okay. Since the human forms under your command can only do so much to
+      support
     - you, keep supporting them, and I'll continue to think of the rest
     last_dialog_id: 6
     narrator: K
@@ -157,7 +163,8 @@ dialog_after_battle:
     characters_img:
     - kalina_8&dark
     content:
-    - Now, let's just hope that sv-98 and the others will be back in time, and we'll think about other
+    - Now, let's just hope that sv-98 and the others will be back in time, and we'll
+      think about other
     - things after that!
     last_dialog_id: 10
     narrator: Me
@@ -193,7 +200,8 @@ dialog_after_battle:
     background_music: null
     characters_img: null
     content:
-    - Thanks for trying out Girls' Frontline - Last Wish, more content is still in development,
+    - Thanks for trying out Girls' Frontline - Last Wish, more content is still in
+      development,
     - so stay tuned!
     last_dialog_id: 13
     narrator: null
@@ -254,8 +262,10 @@ dialog_before_battle:
     characters_img:
     - kalina_8
     content:
-    - I haven't been able to get ahold of them. I don't know what's going on... That's worrisome.
-    - If we keep this up, it's only a matter of time before SangvisFerri surrounds the place.
+    - I haven't been able to get ahold of them. I don't know what's going on... That's
+      worrisome.
+    - If we keep this up, it's only a matter of time before SangvisFerri surrounds
+      the place.
     last_dialog_id: 3
     narrator: Kalina
     next_dialog_id:
@@ -383,8 +393,10 @@ dialog_before_battle:
     background_music: BGM_Boss_1
     characters_img: null
     content:
-    - At the moment, I was very uneasy, whether sv-98 and the others could make it back before
-    - the evacuation is one thing, but I have a feeling there's a mystery on this island that
+    - At the moment, I was very uneasy, whether sv-98 and the others could make it
+      back before
+    - the evacuation is one thing, but I have a feeling there's a mystery on this
+      island that
     - Griffin and even the National Security Bureau themselves don't know about yet.
     last_dialog_id: 13
     narrator: null
@@ -422,7 +434,8 @@ dialog_before_battle:
     - sv-98&dark
     content:
     - The commander has already sent a helicopter to pick us up.
-    - We just need to clear the area in case there's an accident when the helicopter lands.
+    - We just need to clear the area in case there's an accident when the helicopter
+      lands.
     last_dialog_id: 16
     narrator: asval
     next_dialog_id:
@@ -434,7 +447,8 @@ dialog_before_battle:
     characters_img:
     - sv-98
     content:
-    - Let's work harder, as long as we take out as much of the current SangvisFerri forces
+    - Let's work harder, as long as we take out as much of the current SangvisFerri
+      forces
     - in the area before the helicopters arrive, then we'll be able to evacuate safely.
     last_dialog_id: 17
     narrator: asval

@@ -19,6 +19,14 @@ Dialog:
   auto: 自动
   choice: 选项
   skip: 跳过
+DialogCreator:
+  add: 新增对话
+  back: 返回主菜单
+  delete: 删除当前对话
+  next: 下一个对话
+  previous: 上一个对话
+  reload: 重新加载配置文件
+  save: 保存
 GameTitle: 少女前线-遗愿
 HealthyGamingAdvice:
 - 抵制不良游戏，拒绝盗版游戏。
@@ -45,6 +53,11 @@ MainMenu:
     text5_dialogCreator: 对话编辑器
     text6_collection: 收集物
     text7_back: 返回
+MapCreator:
+  back: 返回
+  delete: 删除
+  reload: 重新加载
+  save: 保存
 ResultBoard:
   characters_down: 友方角色被击倒
   pressKeyContinue: 按空格继续
@@ -77,10 +90,5 @@ Warnings:
   no_enough_ap_to_reload: 当前角色没有足够的行动值用于换弹
   no_enough_ap_to_rescue: 当前角色没有足够的行动值用于救助
   no_enough_ap_to_use_skill: 当前角色没有足够的行动值用于使用技能
-mapCreator:
-  back: 返回
-  delete: 删除
-  reload: 重新加载
-  save: 保存
 title1: 缇吉娅工坊 呈现
 title2: 警告：所有内容仍处于研发阶段，不代表最终效果

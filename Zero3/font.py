@@ -4,7 +4,11 @@ import yaml
 from pygame.locals import *
 pygame.init()
 
-#字体
+#加载设置配置文件，顺带加载字体的配置文件
+DATA = None
+FONT = None
+FONTTYPE = None
+MODE = None
 with open("Save/setting.yaml", "r", encoding='utf-8') as f:
     DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
     FONT = DATA["Font"]
@@ -25,7 +29,6 @@ def get_setting(key=None):
         return DATA
     else:
         return DATA[key]
-
 #重新获取设置信息
 def reload_setting():
     global DATA
@@ -37,6 +40,23 @@ def reload_setting():
         FONT = DATA["Font"]
         FONTTYPE = DATA["FontType"]
         MODE = DATA["Antialias"]
+
+#语言配置文件
+LANG = None
+with open("Lang/{}.yaml".format(DATA["Language"]), "r", encoding='utf-8') as f:
+    LANG = yaml.load(f.read(),Loader=yaml.FullLoader)
+
+#获取语言配置文件
+def get_lang(key=None):
+    if key == None:
+        return LANG
+    else:
+        return LANG[key]
+#重新加载语言配置文件
+def reload_lang():
+    global LANG
+    with open("Lang/{}.yaml".format(DATA["Language"]), "r", encoding='utf-8') as f:
+        LANG = yaml.load(f.read(),Loader=yaml.FullLoader)
 
 #创建字体
 def createFont(size,ifBold=False,ifItalic=False):

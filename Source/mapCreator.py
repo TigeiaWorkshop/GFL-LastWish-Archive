@@ -114,7 +114,7 @@ def mapCreator(chapterName,screen,setting):
     with open("Lang/"+setting["Language"]+".yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         for txt in UIButton:
-            UIButtonTxt[txt] = Zero.fontRender(loadData["mapCreator"][txt],"black",window_x/80)
+            UIButtonTxt[txt] = Zero.fontRender(loadData["MapCreator"][txt],"black",window_x/80)
             
     #数据控制器
     data_to_edit = None

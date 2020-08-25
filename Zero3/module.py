@@ -311,8 +311,6 @@ class Button:
         self.hoverEventTriggered = False
         self.x = x
         self.y = y
-        if isinstance(path,str):
-            pass
     def setHoverImg(self,img):
         self.img2 = img
     def display(self,screen):
@@ -329,6 +327,23 @@ class Button:
             self.img = self.img2
             self.img2 = tempSurface
             self.hoverEventTriggered = False
+
+class ButtonWithDes(Button):
+    def __init__(self,path,x,y,width,height,des):
+        Button.__init__(self,path,x,y)
+        self.img2 = self.img.copy()
+        self.img.set_alpha(150)
+        self.width = width
+        self.height = height
+        self.des = des
+        self.des_font_surface = fontRender(des,"black",self.height*0.8)
+        self.des_surface = pygame.Surface((self.des_font_surface.get_width()*1.2,self.height),flags=pygame.SRCALPHA).convert_alpha()
+        pygame.draw.rect(self.des_surface,(255,255,255),(0,0, self.des_surface.get_width(),self.des_surface.get_height()))
+        self.des_surface.blit(self.des_font_surface,(self.des_font_surface.get_width()*0.1,0))
+    def display(self,screen):
+        super().display(screen)
+        if self.hoverEventTriggered == True:
+            screen.blit(self.des_surface,pygame.mouse.get_pos())
 
 #输入管理组件
 class GameController:

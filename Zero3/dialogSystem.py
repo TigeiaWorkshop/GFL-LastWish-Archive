@@ -45,7 +45,7 @@ class DialogSystem:
         self.historySurface = None
         self.historySurface_local_y = 0
         #返回按钮
-        buttonTemp = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_back.png")).convert_alpha(),(int(self.window_x*0.03),int(self.window_y*0.04)))
+        buttonTemp = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/back.png")).convert_alpha(),(int(self.window_x*0.03),int(self.window_y*0.04)))
         self.history_back = Button(addDarkness(buttonTemp,100),self.window_x*0.04,self.window_y*0.04)
         self.history_back.setHoverImg(buttonTemp)
         self.__events = None
@@ -245,6 +245,16 @@ class DialogSystemDev:
         self.UIContainerRightButton = loadImage("Assets/image/UI/container_button.png",(-self.window_x*0.03,self.window_y*0.4),int(self.window_x*0.04),int(self.window_y*0.2))
         self.UIContainerRight.rotate(90)
         self.UIContainerRightButton.rotate(90)
+        CONFIG = get_lang("DialogCreator")
+        self.buttonsUI = {
+            "add": ButtonWithDes("Assets/image/UI/add.png",50,50,50,50,CONFIG["add"]),
+            "back": ButtonWithDes("Assets/image/UI/back.png",150,50,50,50,CONFIG["back"]),
+            "delete": ButtonWithDes("Assets/image/UI/delete.png",250,50,50,50,CONFIG["delete"]),
+            "previous": ButtonWithDes("Assets/image/UI/previous.png",350,50,50,50,CONFIG["previous"]),
+            "next": ButtonWithDes("Assets/image/UI/dialog_skip.png",450,50,50,50,CONFIG["next"]),
+            "reload": ButtonWithDes("Assets/image/UI/reload.png",550,50,50,50,CONFIG["reload"]),
+            "save": ButtonWithDes("Assets/image/UI/save.png",650,50,50,50,CONFIG["save"])
+        } 
         #加载背景图片
         self.all_background_image = {}
         for imgPath in glob.glob("Assets/image/dialog_background/*.jpg"):
@@ -270,6 +280,11 @@ class DialogSystemDev:
             for img in self.all_background_image:
                 screen.blit(self.all_background_image[img],(self.UIContainerRight.x+self.UIContainerRight.width*0.1,self.background_image_local_y+self.all_background_image[img].get_height()*1.5*i))
                 i+=1
+        for button in self.buttonsUI:
+            if ifHover(self.buttonsUI[button]):
+                pass
+            self.buttonsUI[button].display(screen)
+
         return False
 
 #npc立绘系统
