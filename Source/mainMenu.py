@@ -81,7 +81,7 @@ def mainMenu(screen,setting):
     hover_sound_play_on = None
     last_hover_sound_play_on = None
 
-    the_black = Zero.loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
+    the_black = Zero.get_SingleColorSurface("black")
     t1 = Zero.fontRender(loadData["title1"],"white",window_x/64)
     t2 = Zero.fontRender(loadData["title2"],"white",window_x/64)
     for i in range(len(HealthyGamingAdvice)):
@@ -173,7 +173,7 @@ def mainMenu(screen,setting):
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
                     mapCreator("chapter1",screen,setting)
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text5_dialogCreator"]):
-                    dialogCreator("chapter1",screen,setting,"dialog_before_battle")
+                    dialogCreator("chapter0",screen,setting,"dialog_before_battle")
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text7_back"]):
                     menu_type = 0
             elif menu_type == 2:
@@ -188,6 +188,9 @@ def mainMenu(screen,setting):
                         Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                         videoCapture.setFrame(1)
                         break
+                    elif  Zero.ifHover(chapter_select[i]) and Zero.console.get_events("dev") == True and i==7:
+                        dialog("chapter0",screen,setting,"dialog_before_battle")
+
             
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')

@@ -23,7 +23,8 @@ def drawImg(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))
 
 #重新编辑尺寸
-def resizeImg(img,imgSize=(None,None)):
+def resizeImg(imgOriginal,imgSize=(None,None)):
+    img = imgOriginal.copy()
     if imgSize[1]!= None and imgSize[1] >= 0 and imgSize[0] == None:
         img = pygame.transform.scale(img,(round(imgSize[1]/img.get_height()*img.get_width()), round(imgSize[1])))
     elif imgSize[1] == None and imgSize[0]!= None and imgSize[0] >= 0:
@@ -144,3 +145,14 @@ def ifHover(imgObject,objectPos=(0,0),local_x=0,local_y=0):
 #关闭背景音乐
 def unloadBackgroundMusic():
     pygame.mixer.music.unload()
+
+#获取特定颜色的表面
+def get_SingleColorSurface(color,size=None):
+    if size == None:
+        width,height = display.get_size()
+    else:
+        width = size[0]
+        height = size[1]
+    surfaceTmp = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
+    pygame.draw.rect(surfaceTmp,findColorRGB(color),(0,0,width,height))
+    return ImageSurface(surfaceTmp,0,0,width,height)

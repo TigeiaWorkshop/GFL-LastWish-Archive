@@ -310,7 +310,7 @@ class ResultBoard:
 #章节标题(在加载时显示)
 class LoadingTitle:
     def __init__(self,window_x,window_y,numChapter_txt,chapter_name,chapterTitle_txt,chapterDesc_txt):
-        self.black_bg = loadImage("Assets/image/UI/black.png",(0,0),window_x,window_y)
+        self.black_bg = get_SingleColorSurface("black")
         title_chapterNum = fontRender(numChapter_txt.replace("NaN",chapter_name.replace("chapter","")),"white",window_x/38)
         self.title_chapterNum = ImageSurface(title_chapterNum,(window_x-title_chapterNum.get_width())/2,window_y*0.37)
         title_chapterName = fontRender(chapterTitle_txt,"white",window_x/38)

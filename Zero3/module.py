@@ -340,8 +340,7 @@ class ButtonWithDes(Button):
         self.des_surface = pygame.Surface((self.des_font_surface.get_width()*1.2,self.height),flags=pygame.SRCALPHA).convert_alpha()
         pygame.draw.rect(self.des_surface,(255,255,255),(0,0, self.des_surface.get_width(),self.des_surface.get_height()))
         self.des_surface.blit(self.des_font_surface,(self.des_font_surface.get_width()*0.1,0))
-    def display(self,screen):
-        super().display(screen)
+    def displayDes(self,screen):
         if self.hoverEventTriggered == True:
             screen.blit(self.des_surface,pygame.mouse.get_pos())
 
