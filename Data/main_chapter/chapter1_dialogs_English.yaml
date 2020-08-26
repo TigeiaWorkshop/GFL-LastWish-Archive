@@ -6,477 +6,180 @@ battle_info:
 - 'Location: approximately 50 km east of the temporary base'
 description: Above the snowy plains, the bitter cold wind whipped my cheeks. But at
   least, you are with me.
+default_lang: SimplifiedChinese
 dialog_after_battle:
   head:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5
     content:
     - Ding......
-    last_dialog_id: null
-    narrator: null
-    next_dialog_id:
-    - default
-    - 1
   1:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
-    - k&communication
     content:
     - Commander, according to the plan, this is not our time to communicate.
-    last_dialog_id: head
-    narrator: K
-    next_dialog_id:
-    - default
-    - 2
   2:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
-    - k&communication&dark
     content:
     - I think you know better than I do what's really going on right now. My echelon
       has crumbled.
     - So I'd like to know when that rescue you were talking about will arrive.
-    last_dialog_id: 1
     narrator: Me
-    next_dialog_id:
-    - default
-    - 3
   3:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
-    - k&communication
     content:
     - As I'm sure you're aware, the help I'm talking about has been right there with
       you all along.
     - But if I don't have the stuff, I won't let them go.
-    last_dialog_id: 2
-    narrator: K
-    next_dialog_id:
-    - default
-    - 4
   4:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
-    - k&communication&dark
     content:
     - Then I'd like to know why there was no mention of SangvisFerri in the information
       you
     - provided in the first place.
-    last_dialog_id: 3
     narrator: Me
-    next_dialog_id:
-    - default
-    - 5
   5:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
-    - k&communication
     content:
     - By all rights, SangvisFerri should not know about this. But as things stood.
     - Someone on the inside must have leaked this information.
-    last_dialog_id: 4
-    narrator: K
-    next_dialog_id:
-    - default
-    - 6
   6:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
-    - k&communication&dark
     content:
     - If we don't have support, our echelon will soon be unable to hold up, so how
       will we ever
     - find what you're asking for?
-    last_dialog_id: 5
     narrator: Me
-    next_dialog_id:
-    - default
-    - 7
   7:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
-    - k&communication
     content:
     - That's okay. Since the human forms under your command can only do so much to
       support
     - you, keep supporting them, and I'll continue to think of the rest
-    last_dialog_id: 6
-    narrator: K
-    next_dialog_id:
-    - default
-    - 8
   8:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
     content:
     - End of communication
-    last_dialog_id: 7
-    narrator: null
-    next_dialog_id:
-    - default
-    - 9
   9:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
     content:
     - Damn it, I should have never accepted this commission in the first place.
-    last_dialog_id: 8
     narrator: Me
-    next_dialog_id:
-    - default
-    - 10
   10:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_8
     content:
     - It's not your fault either...
-    last_dialog_id: 9
     narrator: Kalina
-    next_dialog_id:
-    - default
-    - 11
   11:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_8&dark
     content:
     - Now, let's just hope that sv-98 and the others will be back in time, and we'll
       think about other
     - things after that!
-    last_dialog_id: 10
     narrator: Me
-    next_dialog_id:
-    - default
-    - 12
   12:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5
     content:
     - And what if they don't make it back?
-    last_dialog_id: 11
     narrator: Kalina
-    next_dialog_id:
-    - default
-    - 13
   13:
-    background_img: research
-    background_music: null
-    characters_img:
-    - kalina_5&dark
     content:
     - Then I'm... There's no other way...
-    last_dialog_id: 12
     narrator: Me
-    next_dialog_id:
-    - default
-    - 14
   14:
-    background_img: SlumpingFluid.mp4
-    background_music: null
-    characters_img: null
     content:
     - Thanks for trying out Girls' Frontline - Last Wish, more content is still in
       development,
     - so stay tuned!
-    last_dialog_id: 13
-    narrator: null
-    next_dialog_id: null
 dialog_before_battle:
   head:
-    background_img: null
-    background_music: null
-    characters_img: null
     content:
     - In my subconscious, I used to worry about accidents.
-    last_dialog_id: null
-    narrator: null
-    next_dialog_id:
-    - default
-    - 1
   1:
-    background_img: null
-    background_music: null
-    characters_img: null
     content:
     - But I didn't expect, that the accident will come so soon.
-    last_dialog_id: head
-    narrator: null
-    next_dialog_id:
-    - default
-    - 2
   2:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_5
     content:
     - Commander, SangvisFerri's attack is getting fiercer.
     - If this continues, the remaining echelon will soon be routed!
     - It's time to order a standard evacuation procedure.
-    last_dialog_id: 1
     narrator: Kalina
-    next_dialog_id:
-    - default
-    - 3
   3:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_5&dark
     content:
     - Still no news about them
     - The tenth logistic unit...
-    last_dialog_id: 2
     narrator: Me
-    next_dialog_id:
-    - default
-    - 4
   4:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_8
     content:
     - I haven't been able to get ahold of them. I don't know what's going on... That's
       worrisome.
     - If we keep this up, it's only a matter of time before SangvisFerri surrounds
       the place.
-    last_dialog_id: 3
     narrator: Kalina
     next_dialog_id:
-    - option
-    - - What were the coordinates of the last call for help?
-      - 5
+      type: option
+      target:
+      - id: 5
+        txt: What were the coordinates of the last call for help?
   5:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_5
     content:
     - It's on a certain plain about 50 kilometers east of here.
     - It fell under SangvisFerri's control 13 hours ago.
-    last_dialog_id: 4
     narrator: Kalina
-    next_dialog_id:
-    - default
-    - 6
   6:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_5&dark
     content:
     - Can you send some of the dolls out to search the area?
-    last_dialog_id: 5
     narrator: Me
-    next_dialog_id:
-    - default
-    - 7
   7:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_8
     content:
     - All operational echelons are currently spread out on the first line of defense.
     - Not to mention breaking through,
     - it's already fortunate to be able to barely block SangvisFerri's attack!
     - If we pull out any more force at this point, the defense may soon be routed.
-    last_dialog_id: 6
     narrator: Kalina
-    next_dialog_id:
-    - default
-    - 8
   8:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_8&dark
     content:
     - Damn it, where's that backup we were talking about?
     - And this is just an island with no resources whatsoever
     - Why the National Security Bureau is so concerned?
-    last_dialog_id: 7
     narrator: Me
-    next_dialog_id:
-    - default
-    - 9
   9:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_5
     content:
     - I don't really know. The commission only mentions that it's related to information
     - intercepted by the National Security Bureau.
     - Other than that, no more information was revealed.
-    last_dialog_id: 8
     narrator: Kalina
-    next_dialog_id:
-    - default
-    - 10
   10:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_5&dark
     content:
     - Kalina...
-    last_dialog_id: 9
     narrator: Me
-    next_dialog_id:
-    - default
-    - 11
   11:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_3
     content:
     - Yes!?
-    last_dialog_id: 10
     narrator: Kalina
-    next_dialog_id:
-    - default
-    - 12
   12:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_3&dark
     content:
     - Start the evacuation procedure. Then get me K. I need to talk to him.
-    last_dialog_id: 11
     narrator: Me
-    next_dialog_id:
-    - default
-    - 13
   13:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img:
-    - kalina_5
     content:
     - Okay, I'm on it.
-    last_dialog_id: 12
     narrator: Kalina
-    next_dialog_id:
-    - default
-    - 14
   14:
-    background_img: research
-    background_music: BGM_Boss_1
-    characters_img: null
     content:
     - At the moment, I was very uneasy, whether sv-98 and the others could make it
       back before
     - the evacuation is one thing, but I have a feeling there's a mystery on this
       island that
     - Griffin and even the National Security Bureau themselves don't know about yet.
-    last_dialog_id: 13
-    narrator: null
-    next_dialog_id:
-    - changeScene
-    - 15
   15:
-    background_img: snowfield
-    background_music: BGM_Brain_1
-    characters_img: null
     content:
     - 24 hours ago
-    last_dialog_id: null
-    narrator: null
-    next_dialog_id:
-    - default
-    - 16
   16:
-    background_img: snowfield
-    background_music: BGM_Brain_1
-    characters_img:
-    - sv-98
     content:
     - Asval, how's everything going so far?
-    last_dialog_id: 15
-    narrator: sv-98
-    next_dialog_id:
-    - default
-    - 17
   17:
-    background_img: snowfield
-    background_music: BGM_Brain_1
-    characters_img:
-    - asval
-    - sv-98&dark
     content:
     - The commander has already sent a helicopter to pick us up.
     - We just need to clear the area in case there's an accident when the helicopter
       lands.
-    last_dialog_id: 16
-    narrator: asval
-    next_dialog_id:
-    - default
-    - 18
   18:
-    background_img: snowfield
-    background_music: BGM_Brain_1
-    characters_img:
-    - sv-98
     content:
     - Let's work harder, as long as we take out as much of the current SangvisFerri
       forces
     - in the area before the helicopters arrive, then we'll be able to evacuate safely.
-    last_dialog_id: 17
-    narrator: asval
-    next_dialog_id:
-    - default
-    - 19
   19:
-    background_img: snowfield
-    background_music: BGM_Brain_1
-    characters_img:
-    - sv-98&dark
     content:
     - Great!
-    last_dialog_id: 18
     narrator: other dolls
-    next_dialog_id:
-    - default
-    - 20
   20:
-    background_img: snowfield
-    background_music: BGM_Brain_1
-    characters_img:
-    - sv-98
     content:
     - Keep your voice down! It's not like SangvisFerri didn't have ears.
-    last_dialog_id: 19
-    narrator: asval
-    next_dialog_id: null
 dialog_during_battle:
   initial_dialog:
   - move:

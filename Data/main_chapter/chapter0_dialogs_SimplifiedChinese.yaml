@@ -15,8 +15,8 @@ dialog_after_battle:
     last_dialog_id: null
     narrator: null
     next_dialog_id:
-      type: default
       target: 1
+      type: default
   1:
     background_img: duel.jpg
     background_music: Room_1.mp3
@@ -28,8 +28,8 @@ dialog_after_battle:
     last_dialog_id: head
     narrator: 克鲁格
     next_dialog_id:
-      type: default
       target: 2
+      type: default
 dialog_before_battle:
   head:
     background_img: research.jpg
@@ -40,11 +40,14 @@ dialog_before_battle:
     last_dialog_id: null
     narrator: null
     next_dialog_id:
-      type: option 
       target:
-        1: choice1
-        2: choice2
-        3: choice3
+      - id: 1
+        txt: choice1
+      - id: 2
+        txt: choice2
+      - id: 3
+        txt: choice3
+      type: option
   1:
     background_img: research.jpg
     background_music: Room_1.mp3
@@ -55,10 +58,10 @@ dialog_before_battle:
     last_dialog_id: head
     narrator: 我
     next_dialog_id:
-      type: default
       target: 2
+      type: default
   2:
-    background_img: research.jpg
+    background_img: duel.jpg
     background_music: Room_1.mp3
     characters_img:
     - kalina_5.png
@@ -67,8 +70,8 @@ dialog_before_battle:
     last_dialog_id: 1
     narrator: 格林娜
     next_dialog_id:
-      type: default
       target: 3
+      type: default
   3:
     background_img: research.jpg
     background_music: Room_1.mp3
