@@ -2,6 +2,7 @@
 import pygame
 import yaml
 from pygame.locals import *
+import pygame.freetype
 pygame.init()
 
 #加载设置配置文件，顺带加载字体的配置文件
@@ -61,7 +62,11 @@ def reload_lang():
 #创建字体
 def createFont(size,ifBold=False,ifItalic=False):
     if FONTTYPE == "default":
-        return pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
+        try:
+            return pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
+        except BaseException:
+            pygame.font.init()
+            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(FONT),int(size))
     elif FONTTYPE == "custom":
         try:
             normal_font = pygame.font.Font("Assets/font/{}.ttf".format(FONT),int(size))
@@ -77,9 +82,41 @@ def createFont(size,ifBold=False,ifItalic=False):
     else:
         raise Exception('ZeroEngine-Error: FontType option in setting file is incorrect!')
 
+#创建FreeType字体
+def createFreeTypeFont(size,ifBold=False,ifItalic=False):
+    if FONTTYPE == "default":
+        try:
+            return pygame.freetype.SysFont(FONT,int(size),ifBold,ifItalic)
+        except BaseException:
+            pygame.freetype.init()
+            return pygame.freetype.SysFont(FONT,int(size),ifBold,ifItalic)
+    elif FONTTYPE == "custom":
+        try:
+            normal_font = pygame.freetype.Font("Assets/font/{}.ttf".format(FONT),int(size))
+        #如果文字没有初始化
+        except BaseException:
+            pygame.freetype.init()
+            normal_font = pygame.freetype.Font("Assets/font/{}.ttf".format(FONT),int(size))
+        if ifBold:
+            normal_font.set_bold(ifBold)
+        if ifItalic:
+            normal_font.set_italic(ifItalic)
+        return normal_font
+    else:
+        raise Exception('ZeroEngine-Error: FontType option in setting file is incorrect!')
+
 #文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
 def fontRender(txt,color,size,ifBold=False,ifItalic=False):
     normal_font = createFont(size,ifBold,ifItalic)
+    if isinstance(color,str):
+        text_out = normal_font.render(txt, MODE, findColorRGB(color))
+    else:
+        text_out = normal_font.render(txt, MODE, color)
+    return text_out
+
+#文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
+def freeTypeRender(txt,color,size,ifBold=False,ifItalic=False):
+    normal_font = createFreeTypeFont(size,ifBold,ifItalic)
     if isinstance(color,str):
         text_out = normal_font.render(txt, MODE, findColorRGB(color))
     else:

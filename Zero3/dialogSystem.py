@@ -352,7 +352,7 @@ class DialogSystemDev:
         leftClick = False
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
-                if pygame.mouse.get_pressed()[0] or controller.joystick.get_button(0) == 1:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
                     if ifHover(self.UIContainerRightButton,None,self.UIContainerRight.x):
                         self.UIContainerRight.switch()
                         self.UIContainerRightButton.flip(True,False)
