@@ -221,9 +221,9 @@ class DialogSystemDev:
         #获取屏幕的尺寸
         self.window_x,self.window_y = display.get_size()
         #黑色帘幕
-        black_bg_temp = pygame.Surface((self.window_x,self.window_y),flags=pygame.SRCALPHA).convert_alpha()
-        pygame.draw.rect(black_bg_temp,(0,0,0),(0,0,self.window_x,self.window_y))
-        self.black_bg = ImageSurface(black_bg_temp,0,0,self.window_x,self.window_y)
+        self.black_bg = get_SingleColorSurface("black")
+        #文字
+        self.FONT = createFont(self.window_x*0.0175)
         #选项栏
         self.optionBox = pygame.image.load(os.path.join("Assets/image/UI/option.png")).convert_alpha()
         #设定初始化
@@ -249,7 +249,11 @@ class DialogSystemDev:
         for imgPath in glob.glob("Assets/image/dialog_background/*"):
             self.all_background_image[os.path.basename(imgPath)] = loadImg(imgPath)
         self.background_image_local_y = self.window_y*0.1
-        self.FONT = createFont(self.window_x*0.0175)
+        #加载NPC立绘
+        #加载npc立绘系统并初始化
+        self.npc_img_dic = NpcImageSystem()
+        self.npc_img_dic.devMode()
+        self.npc_img_dic.process(None,self.dialog_content[self.part][self.dialogId]["characters_img"])
     #保存数据
     def __save(self):
         with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.dialogType,self.chapterName,self.lang), "w", encoding='utf-8') as f:
@@ -267,18 +271,82 @@ class DialogSystemDev:
             self.dialog_content["dialog_after_battle"] = {}
         if "head" not in self.dialog_content["dialog_after_battle"]:
             self.dialog_content["dialog_after_battle"]["head"] = self.deafult_dialog_format
+    #更新场景
+    def __update_scene(self,theNextDialogId):
+        #重设立绘系统
+        self.npc_img_dic.process(self.dialog_content[self.part][self.dialogId]["characters_img"],self.dialog_content[self.part][theNextDialogId]["characters_img"])
+        self.dialogId = theNextDialogId
+    #获取下一个对话的ID
+    def __get_last_id(self):
+        if self.dialogId == "head":
+            return None
+        elif "last_dialog_id" in self.dialog_content[self.part][self.dialogId] and self.dialog_content[self.part][self.dialogId]["last_dialog_id"] != None:
+            return self.dialog_content[self.part][self.dialogId]["last_dialog_id"]
+        else:
+            for key,dialogData in self.dialog_content[self.part].items():
+                if dialogData["next_dialog_id"] != None:
+                    if dialogData["next_dialog_id"]["type"] == "default" and dialogData["next_dialog_id"]["target"] == self.dialogId:
+                        return key
+                    elif dialogData["next_dialog_id"]["type"] == "changeScene" and dialogData["next_dialog_id"]["target"] == self.dialogId:
+                        return key
+                    elif dialogData["next_dialog_id"]["type"] == "option":
+                        for optionChoice in dialogData["next_dialog_id"]["target"]:
+                            if optionChoice["id"] == self.dialogId:
+                                return key
+            return None
+    #获取上一个对话的ID
+    def __get_next_id(self,screen):
+        if "next_dialog_id" in self.dialog_content[self.part][self.dialogId]:
+            theNext = self.dialog_content[self.part][self.dialogId]["next_dialog_id"]
+            if theNext != None:
+                if theNext["type"] == "default" or theNext["type"] == "changeScene":
+                    return theNext["target"]
+                elif theNext["type"] == "option":
+                    optionBox_y_base = (self.window_y*3/4-(len(theNext["target"]))*2*self.window_x*0.03)/4
+                    for i in range(len(theNext["target"])):
+                        option_txt = self.FONT.render(theNext["target"][i]["txt"],get_fontMode(),(255, 255, 255))
+                        optionBox_scaled = pygame.transform.scale(self.optionBox,(int(option_txt.get_width()+self.window_x*0.05),int(self.window_x*0.05)))
+                        optionBox_x = (self.window_x-optionBox_scaled.get_width())/2
+                        optionBox_y = (i+1)*2*self.window_x*0.03+optionBox_y_base
+                        displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
+                    while True:
+                        leftClick = False
+                        for event in pygame.event.get():
+                            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
+                                leftClick = True
+                                break
+                        for i in range(len(theNext["target"])):
+                            option_txt = self.FONT.render(theNext["target"][i]["txt"],get_fontMode(),(255, 255, 255))
+                            optionBox_scaled = pygame.transform.scale(self.optionBox,(int(option_txt.get_width()+self.window_x*0.05),int(self.window_x*0.05)))
+                            optionBox_x = (self.window_x-optionBox_scaled.get_width())/2
+                            optionBox_y = (i+1)*2*self.window_x*0.03+optionBox_y_base
+                            if ifHover(optionBox_scaled,(optionBox_x,optionBox_y)) and leftClick == True:
+                                return theNext["target"][i]["id"]
+                        display.flip()
+                else:
+                    return None
+            else:
+                return None
+        else:
+            return None
     def display(self,screen):
         if self.dialog_content[self.part][self.dialogId]["background_img"] == None:
             self.black_bg.draw(screen)
         else:
             screen.blit(pygame.transform.scale(self.all_background_image[self.dialog_content[self.part][self.dialogId]["background_img"]],(self.window_x,self.window_y)),(0,0))
+        #画上NPC立绘
+        self.npc_img_dic.display(screen)
         self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
         self.UIContainerRight.draw(screen)
         buttonHovered = None
+        theNextDialogId = self.dialog_content[self.part][self.dialogId]["next_dialog_id"]
         for button in self.buttonsUI:
-            if ifHover(self.buttonsUI[button]):
-                buttonHovered = button
-            self.buttonsUI[button].display(screen)
+            if button == "next" and theNextDialogId == None or button == "next" and len(theNextDialogId)<2:
+                pass
+            else:
+                if ifHover(self.buttonsUI[button]):
+                    buttonHovered = button
+                self.buttonsUI[button].display(screen)
         if buttonHovered != None:
             self.buttonsUI[buttonHovered].displayDes(screen)
         leftClick = False
@@ -292,39 +360,39 @@ class DialogSystemDev:
                     elif buttonHovered == "back":
                         return True
                     elif buttonHovered == "previous":
-                        lastId = self.dialog_content[self.part][self.dialogId]["last_dialog_id"]
+                        lastId = self.__get_last_id()
                         if lastId != None:
-                            self.dialogId = lastId
+                            self.__update_scene(lastId)
+                        else:
+                            print("no last_dialog_id")
+                    elif buttonHovered == "delete":
+                        lastId = self.__get_last_id()
+                        nextId = self.__get_next_id(screen)
+                        if lastId != None:
+                            if self.dialog_content[self.part][lastId]["next_dialog_id"]["type"] == "default" or self.dialog_content[self.part][lastId]["next_dialog_id"]["type"] == "changeScene":
+                                self.dialog_content[self.part][lastId]["next_dialog_id"]["target"] = nextId
+                            elif self.dialog_content[self.part][lastId]["next_dialog_id"]["type"] == "option":
+                                for optionChoice in self.dialog_content[self.part][lastId]["next_dialog_id"]["target"]:
+                                    if optionChoice["id"] == self.dialogId:
+                                        optionChoice["id"] = nextId
+                                        break
+                            else:
+                                #如果当前next_dialog_id的类型不支持的话，报错
+                                Exception('ZeroEngine-Error: Cannot recognize next_dialog_id type: {}, please fix it'.formate(self.dialog_content[self.part][lastId]["next_dialog_id"]["type"]))
+                            #修改下一个对白配置文件中的"last_dialog_id"的参数
+                            if "last_dialog_id" in self.dialog_content[self.part][nextId] and self.dialog_content[self.part][nextId]["last_dialog_id"] != None:
+                                self.dialog_content[self.part][nextId]["last_dialog_id"] = lastId
+                            needDeleteId = self.dialogId
+                            self.__update_scene(lastId)
+                            del self.dialog_content[self.part][needDeleteId]
                         else:
                             print("no last_dialog_id")
                     elif buttonHovered == "next":
-                        if self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["type"] == "default" or self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["type"] == "changeScene":
-                            self.dialogId = self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["target"]
-                        elif self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["type"] == "option":
-                            optionBox_y_base = (self.window_y*3/4-(len(self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["target"]))*2*self.window_x*0.03)/4
-                            for i in range(len(self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["target"])):
-                                option_txt = self.FONT.render(self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["target"][i]["txt"],get_fontMode(),(255, 255, 255))
-                                optionBox_scaled = pygame.transform.scale(self.optionBox,(int(option_txt.get_width()+self.window_x*0.05),int(self.window_x*0.05)))
-                                optionBox_x = (self.window_x-optionBox_scaled.get_width())/2
-                                optionBox_y = (i+1)*2*self.window_x*0.03+optionBox_y_base
-                                displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
-                            loop=True
-                            while loop:
-                                leftClick = False
-                                for event in pygame.event.get():
-                                    if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
-                                        leftClick = True
-                                        break
-                                for i in range(len(self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["target"])):
-                                    option_txt = self.FONT.render(self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["target"][i]["txt"],get_fontMode(),(255, 255, 255))
-                                    optionBox_scaled = pygame.transform.scale(self.optionBox,(int(option_txt.get_width()+self.window_x*0.05),int(self.window_x*0.05)))
-                                    optionBox_x = (self.window_x-optionBox_scaled.get_width())/2
-                                    optionBox_y = (i+1)*2*self.window_x*0.03+optionBox_y_base
-                                    if ifHover(optionBox_scaled,(optionBox_x,optionBox_y)) and leftClick == True:
-                                        self.dialogId = self.dialog_content[self.part][self.dialogId]["next_dialog_id"]["target"][i]["id"]
-                                        loop = False
-                                        break
-                                display.flip()
+                        nextId = self.__get_next_id(screen)
+                        if nextId != None:
+                            self.__update_scene(nextId)
+                        else:
+                            print("no next_dialog_id")
                     elif buttonHovered == "save":
                         self.__save()
                     elif buttonHovered == "reload":
@@ -346,12 +414,23 @@ class DialogSystemDev:
 class NpcImageSystem:
     def __init__(self):
         self.imgDic = {}
+        #如果是开发模式，则在初始化时加载所有图片
         self.npcLastRound = []
         self.npcLastRoundImgAlpha = 255
         self.npcThisRound = []
         self.npcThisRoundImgAlpha = 0
         self.npcBothRound = []
         self.communication = pygame.image.load(os.path.join("Assets/image/UI/communication.png")).convert_alpha()
+    def devMode(self):
+        img_width = int(get_setting("Screen_size_x")/2)
+        for imgPath in glob.glob("Assets/image/npc/*"):
+            self.__loadNpcImg(imgPath,img_width)
+    def __loadNpcImg(self,path,width):
+        name = os.path.basename(path)
+        self.imgDic[name] = {"normal":pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(),(width,width))}
+        #生成深色图片
+        self.imgDic[name]["dark"] = self.imgDic[name]["normal"].copy()
+        self.imgDic[name]["dark"].fill((50, 50, 50), special_flags=pygame.BLEND_RGB_SUB)
     def displayTheNpc(self,name,x,y,alpha,screen):
         if alpha <= 0:
             return False
@@ -359,10 +438,7 @@ class NpcImageSystem:
         img_width = int(screen.get_width()/2)
         #加载npc的基础立绘
         if nameTemp not in self.imgDic:
-            self.imgDic[nameTemp] = {"normal":pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/npc",nameTemp)).convert_alpha(),(img_width,img_width))}
-            #生成深色图片
-            self.imgDic[nameTemp]["dark"] = self.imgDic[nameTemp]["normal"].copy()
-            self.imgDic[nameTemp]["dark"].fill((50, 50, 50), special_flags=pygame.BLEND_RGB_SUB) 
+            self.__loadNpcImg(os.path.join("Assets/image/npc",nameTemp),img_width)
         if "&communication" in name:
             if "communication" not in self.imgDic[nameTemp]:
                 #生成通讯图片
