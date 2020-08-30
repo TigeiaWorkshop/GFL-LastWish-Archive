@@ -495,8 +495,8 @@ class DialogBox(DialogInterface):
         self.dialoguebox = pygame.transform.flip(self.dialoguebox,True,False)
         self.__flipped = not self.__flipped
 
-class SingleLineInputBox:
-    def __init__(self,x,y,font_size,txt_color,default_width=150):
+class InputBoxInterface:
+    def __init__(self,x,y,font_size,txt_color,default_width):
         self.FONTSIZE = font_size
         self.FONT = createFont(self.FONTSIZE)
         self.default_width = default_width
@@ -504,109 +504,12 @@ class SingleLineInputBox:
         self.color = pygame.Color('lightskyblue3')
         self.txt_color = txt_color
         self.active = False
-        self.__text = ""
-        self.__holder = self.FONT.render("|",get_fontMode(),self.color)
+        self._text = None
+        self.__holder = self.FONT.render("|",get_fontMode(),self.txt_color)
+        self.holderIndex = 0
         self.x = x
         self.y = y
         self.removingTxt = False
-        self.backwordID = 1
-        self.deleteID = 0
-        self.needSave = False
-    def set_text(self,new_txt):
-        if new_txt != None and len(new_txt)>0:
-            self.__text = new_txt
-            self.deleteID = len(new_txt)-1
-        else:
-            self.__text = ""
-            self.deleteID = 0
-        self.default_width = self.FONT.size(self.__text)[0]+self.FONTSIZE/2
-    def get_txt(self):
-        self.needSave = False
-        return self.__text
-    def display(self,screen,pygame_events=None):
-        if pygame_events == None:
-            pygame_events = pygame.event.get()
-        mouse_x,mouse_y = pygame.mouse.get_pos()
-        for event in pygame_events:
-            if self.active:
-                if event.type == pygame.KEYDOWN:
-                    #退格-删除字符
-                    if event.key == pygame.K_BACKSPACE:
-                        self.removingTxt = True
-                    #向上-过去历史
-                    elif event.key == pygame.K_UP and self.backwordID<len(self.__textHistory):
-                        self.backwordID += 1
-                        self.__text = self.__textHistory[len(self.__textHistory)-self.backwordID]
-                    #向下-过去历史，最近的一个
-                    elif event.key == pygame.K_DOWN and self.backwordID>1:
-                        self.backwordID -= 1
-                        self.__text = self.__textHistory[len(self.__textHistory)-self.backwordID]
-                    elif event.key == pygame.K_LEFT and self.deleteID > 0:
-                        self.deleteID -= 1
-                    elif event.key == pygame.K_RIGHT and self.deleteID < len(self.__text):
-                        self.deleteID += 1
-                    #ESC，关闭
-                    elif event.key == pygame.K_ESCAPE:
-                        self.active = False
-                        self.needSave = True
-                    else:
-                        if len(event.unicode) > 0:
-                            self.__text = self.__text[:self.deleteID]+event.unicode+self.__text[self.deleteID:]
-                            self.deleteID += len(event.unicode)
-                        else:
-                            print('ZeroEngine-Warning: The value of event.unicode is empty!')
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.x<=mouse_x<=self.x+self.input_box.w and self.y<=mouse_y<=self.y+self.input_box.h:
-                        pass
-                    else:
-                        self.active = False
-                        self.needSave = True
-            else:
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.x<=mouse_x<=self.x+self.input_box.w and self.y<=mouse_y<=self.y+self.input_box.h:
-                        self.active = True
-            if event.type == pygame.KEYUP and event.key == pygame.K_BACKSPACE:
-                self.removingTxt = False
-        #是否删除最后一个字符（按了BACKSPACE）
-        if self.removingTxt == True and self.deleteID > 0:
-            self.__text = self.__text[:self.deleteID-1]+self.__text[self.deleteID:]
-            self.deleteID -= 1
-        if self.__text != None and len(self.__text) > 0:
-            txt_surface = self.FONT.render(self.__text,get_fontMode(),findColorRGB(self.txt_color))
-            # 画出文字
-            screen.blit(txt_surface, (self.x+5, self.y))
-            width = max(self.default_width, txt_surface.get_width()+self.FONTSIZE/2)
-        else:
-            width = self.default_width
-        if self.active:
-            # 调整输入框
-            self.input_box.w = width
-            # 画出输入框
-            pygame.draw.rect(screen, self.color, self.input_box, 2)
-            #画出 “|” 符号
-            if int(time.time()%2)==0 or pygame.mouse.get_pressed()[0] == True:
-                screen.blit(self.__holder, (self.x+5+self.FONT.size(self.__text[:self.deleteID])[0], self.y))
-
-#文字输入框
-class InputBox:
-    def __init__(self,x,y,default_width=150):
-        self.FONTSIZE = 32
-        self.FONT = createFont(self.FONTSIZE)
-        self.default_width = default_width
-        self.input_box = pygame.Rect(x, y, default_width, self.FONTSIZE*1.5)
-        self.color_inactive = pygame.Color('lightskyblue3')
-        self.color_active = pygame.Color('dodgerblue2')
-        self.color = self.color_active
-        self.active = True
-        self.hidden = True
-        self.text = ""
-        self.__holder = self.FONT.render("|",get_fontMode(),self.color_active)
-        self.x = x
-        self.y = y
-        self.removingTxt = False
-        self.textHistory = []
-        self.backwordID = 1
-        self.deleteID = 0
     def get_width(self):
         return self.input_box.w
     def get_height(self):
@@ -620,54 +523,129 @@ class InputBox:
         self.x = x
         self.y = y
         self.input_box = pygame.Rect(x, y, self.default_width, self.FONTSIZE*1.5)
+    def check_KEYDOWN_events(self,event):
+        if event.key == pygame.K_BACKSPACE:
+            self.removingTxt = True
+            return True
+        elif event.key == pygame.K_LEFT and self.holderIndex > 0:
+            self.holderIndex -= 1
+            return True
+        elif event.key == pygame.K_RIGHT and self.holderIndex < len(self._text):
+            self.holderIndex += 1
+            return True
+        return False
+    def add_char(self,char):
+        if len(char) > 0:
+            self._text = self._text[:self.holderIndex]+char+self._text[self.holderIndex:]
+            self.holderIndex += len(char)
+        else:
+            print('ZeroEngine-Warning: The value of event.unicode is empty!')
+    def draw_input_box(self,screen,width,pygame_events):
+        # 调整输入框
+        self.input_box.w = width
+        # 画出输入框
+        pygame.draw.rect(screen, self.color, self.input_box, 2)
+        #画出 “|” 符号
+        if int(time.time()%2)==0 or len(pygame_events)>0 == True:
+            screen.blit(self.__holder, (self.x+5+self.FONT.size(self._text[:self.holderIndex])[0], self.y))
+
+class SingleLineInputBox(InputBoxInterface):
+    def __init__(self,x,y,font_size,txt_color,default_width=150):
+        InputBoxInterface.__init__(self,x,y,font_size,txt_color,default_width)
+        self._text = ""
+        self.needSave = False
+    def set_text(self,new_txt=None):
+        if new_txt != None and len(new_txt)>0:
+            self._text = new_txt
+            self.holderIndex = len(new_txt)-1
+        else:
+            self._text = ""
+            self.holderIndex = 0
+        self.default_width = self.FONT.size(self._text)[0]+self.FONTSIZE/2
+    def get_txt(self):
+        self.needSave = False
+        return self._text
+    #删除对应字符
+    def removeTxt(self):
+        if self.removingTxt == True and self.holderIndex > 0:
+            self._text = self._text[:self.holderIndex-1]+self._text[self.holderIndex:]
+            self.holderIndex -= 1
+            self.removingTxt = False
+    def display(self,screen,pygame_events=None):
+        if pygame_events == None:
+            pygame_events = pygame.event.get()
+        mouse_x,mouse_y = pygame.mouse.get_pos()
+        for event in pygame_events:
+            if self.active:
+                if event.type == pygame.KEYDOWN:
+                    if self.check_KEYDOWN_events(event):
+                        pass
+                    #ESC，关闭
+                    elif event.key == pygame.K_ESCAPE:
+                        self.active = False
+                        self.needSave = True
+                    else:
+                        self.add_char(event.unicode)
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.x<=mouse_x<=self.x+self.input_box.w and self.y<=mouse_y<=self.y+self.input_box.h:
+                        pass
+                    else:
+                        self.active = False
+                        self.needSave = True
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.x<=mouse_x<=self.x+self.input_box.w and self.y<=mouse_y<=self.y+self.input_box.h:
+                self.active = True
+        self.removeTxt()
+        if self._text != None and len(self._text) > 0:
+            txt_surface = self.FONT.render(self._text,get_fontMode(),findColorRGB(self.txt_color))
+            # 画出文字
+            screen.blit(txt_surface, (self.x+5, self.y))
+            width = max(self.default_width, txt_surface.get_width()+self.FONTSIZE/2)
+        else:
+            width = self.default_width
+        if self.active:
+            #画出输入框
+            self.draw_input_box(screen,width,pygame_events)
+
+#文字输入框
+class InputBox(SingleLineInputBox):
+    def __init__(self,x,y,font_size=32,default_width=150):
+        self.color_inactive = pygame.Color('lightskyblue3')
+        self.color_active = pygame.Color('dodgerblue2')
+        SingleLineInputBox.__init__(self,x,y,font_size,self.color_active,default_width)
+        self.color = self.color_active
+        self.active = True
+        self.hidden = True
+        self.textHistory = []
+        self.backwordID = 1
     def display(self,screen,pygame_events=None):
         if pygame_events == None:
             pygame_events = pygame.event.get()
         for event in pygame_events:
             if self.active:
                 if event.type == pygame.KEYDOWN:
-                    #退格-删除字符
-                    if event.key == pygame.K_BACKSPACE:
-                        self.removingTxt = True
+                    if self.check_KEYDOWN_events(event):
+                        pass
                     #向上-过去历史
                     elif event.key == pygame.K_UP and self.backwordID<len(self.textHistory):
                         self.backwordID += 1
-                        self.text = self.textHistory[len(self.textHistory)-self.backwordID]
+                        self.set_text(self.textHistory[len(self.textHistory)-self.backwordID])
                     #向下-过去历史，最近的一个
                     elif event.key == pygame.K_DOWN and self.backwordID>1:
                         self.backwordID -= 1
-                        self.text = self.textHistory[len(self.textHistory)-self.backwordID]
-                    elif event.key == pygame.K_LEFT and self.deleteID > 0:
-                        self.deleteID -= 1
-                    elif event.key == pygame.K_RIGHT and self.deleteID < len(self.text):
-                        self.deleteID += 1
+                        self.set_text(self.textHistory[len(self.textHistory)-self.backwordID])
                     #ESC，关闭
                     elif event.key == pygame.K_ESCAPE:
-                        self.active = not self.active
+                        self.active = False
                         # Change the current color of the input box.
                         self.color = self.color_active if self.active else self.color_inactive
                     else:
-                        if len(event.unicode) > 0:
-                            self.text = self.text[:self.deleteID]+event.unicode+self.text[self.deleteID:]
-                            self.deleteID += len(event.unicode)
-                        else:
-                            print('ZeroEngine-Warning: The value of event.unicode is empty!')
-            if event.type == pygame.KEYUP and event.key == pygame.K_BACKSPACE:
-                self.removingTxt = False
-        #是否删除最后一个字符（按了BACKSPACE）
-        if self.removingTxt == True and self.deleteID > 0:
-            self.text = self.text[:self.deleteID-1]+self.text[self.deleteID:]
-            self.deleteID -= 1
-        txt_surface = self.FONT.render(self.text,get_fontMode(),self.color)
-        # Resize the box if the text is too long.
-        width = max(self.default_width, txt_surface.get_width()+self.FONTSIZE/2)
-        self.input_box.w = width
+                        self.add_char(event.unicode)
+        self.removeTxt()
+        txt_surface = self.FONT.render(self._text,get_fontMode(),self.color)
         # 画出文字
         screen.blit(txt_surface, (self.x+5, self.y))
-        # 画出输入框
-        pygame.draw.rect(screen, self.color, self.input_box, 2)
-        if int(time.time()%2)==0 or pygame.mouse.get_pressed()[0] == True:
-            screen.blit(self.__holder, (self.x+5+self.FONT.size(self.text[:self.deleteID])[0], self.y))
+        #画出输入框
+        self.draw_input_box(screen,max(self.default_width, txt_surface.get_width()+self.FONTSIZE/2),pygame_events)
 
 #控制台
 class Console(InputBox):
@@ -704,35 +682,35 @@ class Console(InputBox):
                 elif event.type == pygame.KEYDOWN:
                     if self.active:
                         if event.key == pygame.K_RETURN:
-                            if len(self.text)>0:
-                                if self.text[0]=="/":
-                                    if self.text == "/cheat on":
+                            if len(self._text)>0:
+                                if self._text[0]=="/":
+                                    if self._text == "/cheat on":
                                         self.events["cheat"] = True
                                         self.txtOutput.append("Cheat mode activated")
-                                    elif self.text == "/cheat off":
+                                    elif self._text == "/cheat off":
                                         self.events["cheat"] = False
                                         self.txtOutput.append("Cheat mode deactivated")
-                                    elif self.text[:5] == "/say ":
-                                        self.txtOutput.append(self.text[5:])
-                                    elif self.text == "/dev on":
+                                    elif self._text[:5] == "/say ":
+                                        self.txtOutput.append(self._text[5:])
+                                    elif self._text == "/dev on":
                                         self.txtOutput.append("Development mode activated")
                                         self.events["dev"] = True
-                                    elif self.text == "/dev off":
+                                    elif self._text == "/dev off":
                                         self.txtOutput.append("Development mode deactivated")
                                         self.events["dev"] = False
                                     else:
                                         self.txtOutput.append("Unknown command")
                                 else:
-                                    self.txtOutput.append(self.text)
-                                self.textHistory.append(self.text)
-                                self.text = ""
+                                    self.txtOutput.append(self._text)
+                                self.textHistory.append(self._text)
+                                self.set_text()
                                 self.backwordID = 1
                             else:
                                 print('ZeroEngine-Warning: The input box is empty!')
                     else:
                         if event.key == pygame.K_BACKQUOTE or event.key == pygame.K_ESCAPE:
                             self.hidden = True
-                            self.text = ""
+                            self.set_text()
             #画出输出信息
             for i in range(len(self.txtOutput)):
                 screen.blit(self.FONT.render(self.txtOutput[i],get_fontMode(),self.color),(self.x+5, self.y-(len(self.txtOutput)-i)*self.FONTSIZE*1.5))

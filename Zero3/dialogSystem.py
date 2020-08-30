@@ -205,6 +205,18 @@ class DialogSystem:
 
 class DialogSystemDev:
     def __init__(self,dialogType,chapterName,lang):
+        #设定初始化
+        self.dialogType = dialogType
+        self.chapterName = chapterName
+        self.lang = lang
+        self.dialogId = "head"
+        self.part = "dialog_before_battle"
+        #获取屏幕的尺寸
+        self.window_x,self.window_y = display.get_size()
+        #文字
+        self.FONTSIZE = self.window_x*0.0175
+        self.FONT = createFont(self.FONTSIZE)
+        #初始格式
         self.deafult_dialog_format = {
             "background_img": None,
             "background_music": None,
@@ -214,22 +226,16 @@ class DialogSystemDev:
             "narrator": None,
             "next_dialog_id": {"type":"default","target":1}
         }
-        self.dialogType = dialogType
-        self.chapterName = chapterName
-        self.lang = lang
+        #对话框
+        self.dialoguebox = loadImage("Assets/image/UI/dialoguebox.png",(self.window_x*0.13,self.window_y*0.65),self.window_x*0.74,self.window_y/4)
+        self.narrator = SingleLineInputBox(self.window_x*0.2,self.dialoguebox.y+self.FONTSIZE,self.FONTSIZE,"white")
+        #从配置文件中加载数据
         self.__loadDialogData()
-        #获取屏幕的尺寸
-        self.window_x,self.window_y = display.get_size()
         #黑色帘幕
         self.black_bg = get_SingleColorSurface("black")
-        #文字
-        self.FONTSIZE = self.window_x*0.0175
-        self.FONT = createFont(self.FONTSIZE)
         #选项栏
         self.optionBox = pygame.image.load(os.path.join("Assets/image/UI/option.png")).convert_alpha()
-        #设定初始化
-        self.dialogId = "head"
-        self.part = "dialog_before_battle"
+        #背景选择界面
         widthTmp = int(self.window_x*0.2)
         self.UIContainerRight = loadDynamicImage("Assets/image/UI/container.png",(self.window_x*0.8+widthTmp,0),(self.window_x*0.8,0),(widthTmp/10,0),widthTmp,self.window_y)
         self.UIContainerRightButton = loadImage("Assets/image/UI/container_button.png",(-self.window_x*0.03,self.window_y*0.4),int(self.window_x*0.04),int(self.window_y*0.2))
@@ -254,12 +260,9 @@ class DialogSystemDev:
         self.npc_img_dic = NpcImageSystem()
         self.npc_img_dic.devMode()
         self.npc_img_dic.process(None,self.dialog_content[self.part][self.dialogId]["characters_img"])
-        #对话框
-        self.dialoguebox = loadImage("Assets/image/UI/dialoguebox.png",(self.window_x*0.13,self.window_y*0.65),self.window_x*0.74,self.window_y/4)
-        self.narrator = SingleLineInputBox(self.window_x*0.2,self.dialoguebox.y+self.FONTSIZE,self.FONTSIZE,"white")
-        self.narrator.set_text(self.dialog_content[self.part][self.dialogId]["narrator"])
     #保存数据
     def __save(self):
+        self.dialog_content[self.part][self.dialogId]["narrator"] = self.narrator.get_txt()
         with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.dialogType,self.chapterName,self.lang), "w", encoding='utf-8') as f:
             yaml.dump(self.dialog_content, f, allow_unicode=True)
     #读取章节信息
@@ -275,6 +278,7 @@ class DialogSystemDev:
             self.dialog_content["dialog_after_battle"] = {}
         if "head" not in self.dialog_content["dialog_after_battle"]:
             self.dialog_content["dialog_after_battle"]["head"] = self.deafult_dialog_format
+        self.narrator.set_text(self.dialog_content[self.part][self.dialogId]["narrator"])
     #更新场景
     def __update_scene(self,theNextDialogId):
         #重设立绘系统
