@@ -532,7 +532,10 @@ class SingleLineInputBox(InputBoxInterface):
         self.needSave = False
     def get_txt(self):
         self.needSave = False
-        return self._text
+        if self._text == "":
+            return None
+        else:
+            return self._text
     def set_text(self,new_txt=None):
         if new_txt != None and len(new_txt)>0:
             self._text = new_txt
@@ -614,7 +617,10 @@ class MultipleLinesInputBox(InputBoxInterface):
         self.lineId = 0
     def get_txt(self):
         self.needSave = False
-        return self._text
+        if len(self._text) == 0 or self._text == [""]:
+            return None
+        else:
+            return self._text
     def set_text(self,new_txt=None):
         if new_txt == None or len(self._text) == 0:
             self._text = [""]

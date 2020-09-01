@@ -173,7 +173,7 @@ def mainMenu(screen,setting):
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
                     mapCreator("chapter1",screen,setting)
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text5_dialogCreator"]):
-                    dialogCreator("chapter0",screen,setting,"dialog_before_battle")
+                    dialogCreator("chapter1",screen,setting,"dialog_before_battle")
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text7_back"]):
                     menu_type = 0
             elif menu_type == 2:
@@ -188,10 +188,7 @@ def mainMenu(screen,setting):
                         Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                         videoCapture.setFrame(1)
                         break
-                    elif  Zero.ifHover(chapter_select[i]) and Zero.console.get_events("dev") == True and i==7:
-                        dialog("chapter0",screen,setting,"dialog_before_battle")
-
-            
+        #检测背景音乐是否还在播放
         while pygame.mixer.music.get_busy() != 1:
             pygame.mixer.music.load('Assets/music/LoadOut.mp3')
             pygame.mixer.music.play(loops=9999, start=0.0)

@@ -4,9 +4,9 @@ battle_info:
 - 'Temperature: -12°C/10.4°F'
 - 'Visibility: 0.78km/853yd'
 - 'Location: approximately 50 km east of the temporary base'
+default_lang: SimplifiedChinese
 description: Above the snowy plains, the bitter cold wind whipped my cheeks. But at
   least, you are with me.
-default_lang: SimplifiedChinese
 dialog_after_battle:
   head:
     content:
@@ -102,10 +102,10 @@ dialog_before_battle:
       the place.
     narrator: Kalina
     next_dialog_id:
-      type: option
       target:
       - id: 5
         txt: What were the coordinates of the last call for help?
+      type: option
   5:
     content:
     - It's on a certain plain about 50 kilometers east of here.

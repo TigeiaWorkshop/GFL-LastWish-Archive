@@ -16,8 +16,8 @@ dialog_after_battle:
     last_dialog_id: null
     narrator: null
     next_dialog_id:
-      type: default
       target: 1
+      type: default
   1:
     background_img: research.jpg
     background_music: null
@@ -29,8 +29,8 @@ dialog_after_battle:
     last_dialog_id: head
     narrator: K
     next_dialog_id:
-      type: default
       target: 2
+      type: default
   2:
     background_img: research.jpg
     background_music: null
@@ -43,8 +43,8 @@ dialog_after_battle:
     last_dialog_id: 1
     narrator: 我
     next_dialog_id:
-      type: default
       target: 3
+      type: default
   3:
     background_img: research.jpg
     background_music: null
@@ -57,8 +57,8 @@ dialog_after_battle:
     last_dialog_id: 2
     narrator: K
     next_dialog_id:
-      type: default
       target: 4
+      type: default
   4:
     background_img: research.jpg
     background_music: null
@@ -70,8 +70,8 @@ dialog_after_battle:
     last_dialog_id: 3
     narrator: 我
     next_dialog_id:
-      type: default
       target: 5
+      type: default
   5:
     background_img: research.jpg
     background_music: null
@@ -84,8 +84,8 @@ dialog_after_battle:
     last_dialog_id: 4
     narrator: K
     next_dialog_id:
-      type: default
       target: 6
+      type: default
   6:
     background_img: research.jpg
     background_music: null
@@ -97,8 +97,8 @@ dialog_after_battle:
     last_dialog_id: 5
     narrator: 我
     next_dialog_id:
-      type: default
       target: 7
+      type: default
   7:
     background_img: research.jpg
     background_music: null
@@ -110,8 +110,8 @@ dialog_after_battle:
     last_dialog_id: 6
     narrator: K
     next_dialog_id:
-      type: default
       target: 8
+      type: default
   8:
     background_img: research.jpg
     background_music: null
@@ -122,8 +122,8 @@ dialog_after_battle:
     last_dialog_id: 7
     narrator: null
     next_dialog_id:
-      type: default
       target: 9
+      type: default
   9:
     background_img: research.jpg
     background_music: null
@@ -134,8 +134,8 @@ dialog_after_battle:
     last_dialog_id: 8
     narrator: 我
     next_dialog_id:
-      type: default
       target: 10
+      type: default
   10:
     background_img: research.jpg
     background_music: null
@@ -146,8 +146,8 @@ dialog_after_battle:
     last_dialog_id: 9
     narrator: 格林娜
     next_dialog_id:
-      type: default
       target: 11
+      type: default
   11:
     background_img: research.jpg
     background_music: null
@@ -158,8 +158,8 @@ dialog_after_battle:
     last_dialog_id: 10
     narrator: 我
     next_dialog_id:
-      type: default
       target: 12
+      type: default
   12:
     background_img: research.jpg
     background_music: null
@@ -170,8 +170,8 @@ dialog_after_battle:
     last_dialog_id: 11
     narrator: 格林娜
     next_dialog_id:
-      type: default
       target: 13
+      type: default
   13:
     background_img: research.jpg
     background_music: null
@@ -182,8 +182,8 @@ dialog_after_battle:
     last_dialog_id: 12
     narrator: 我
     next_dialog_id:
-      type: default
       target: 14
+      type: default
   14:
     background_img: SlumpingFluid.mp4
     background_music: null
@@ -203,8 +203,8 @@ dialog_before_battle:
     last_dialog_id: null
     narrator: null
     next_dialog_id:
-      type: default
       target: 1
+      type: default
   1:
     background_img: null
     background_music: null
@@ -214,8 +214,8 @@ dialog_before_battle:
     last_dialog_id: head
     narrator: null
     next_dialog_id:
-      type: default
       target: 2
+      type: default
   2:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -227,8 +227,8 @@ dialog_before_battle:
     last_dialog_id: 1
     narrator: 格林娜
     next_dialog_id:
-      type: default
       target: 3
+      type: default
   3:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -240,8 +240,8 @@ dialog_before_battle:
     last_dialog_id: 2
     narrator: 我
     next_dialog_id:
-      type: default
       target: 4
+      type: default
   4:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -253,10 +253,10 @@ dialog_before_battle:
     last_dialog_id: 3
     narrator: 格林娜
     next_dialog_id:
-      type: option
       target:
       - id: 5
         txt: 最后发出呼救的坐标在哪？
+      type: option
   5:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -268,8 +268,8 @@ dialog_before_battle:
     last_dialog_id: 4
     narrator: 格林娜
     next_dialog_id:
-      type: default
       target: 6
+      type: default
   6:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -280,8 +280,8 @@ dialog_before_battle:
     last_dialog_id: 5
     narrator: 我
     next_dialog_id:
-      type: default
       target: 7
+      type: default
   7:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -294,8 +294,8 @@ dialog_before_battle:
     last_dialog_id: 6
     narrator: 格林娜
     next_dialog_id:
-      type: default
       target: 8
+      type: default
   8:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -307,8 +307,8 @@ dialog_before_battle:
     last_dialog_id: 7
     narrator: 我
     next_dialog_id:
-      type: default
       target: 9
+      type: default
   9:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -320,8 +320,8 @@ dialog_before_battle:
     last_dialog_id: 8
     narrator: 格林娜
     next_dialog_id:
-      type: default
       target: 10
+      type: default
   10:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -332,8 +332,8 @@ dialog_before_battle:
     last_dialog_id: 9
     narrator: 我
     next_dialog_id:
-      type: default
       target: 11
+      type: default
   11:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -344,8 +344,8 @@ dialog_before_battle:
     last_dialog_id: 10
     narrator: 格林娜
     next_dialog_id:
-      type: default
       target: 12
+      type: default
   12:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -356,8 +356,8 @@ dialog_before_battle:
     last_dialog_id: 11
     narrator: 我
     next_dialog_id:
-      type: default
       target: 13
+      type: default
   13:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -368,8 +368,8 @@ dialog_before_battle:
     last_dialog_id: 12
     narrator: 格林娜
     next_dialog_id:
-      type: default
       target: 14
+      type: default
   14:
     background_img: research.jpg
     background_music: BGM_Boss_1.ogg
@@ -380,8 +380,8 @@ dialog_before_battle:
     last_dialog_id: 13
     narrator: null
     next_dialog_id:
-      type: changeScene
       target: 15
+      type: changeScene
   15:
     background_img: snowfield.jpg
     background_music: BGM_Brain_1.ogg
@@ -391,8 +391,8 @@ dialog_before_battle:
     last_dialog_id: null
     narrator: null
     next_dialog_id:
-      type: default
       target: 16
+      type: default
   16:
     background_img: snowfield.jpg
     background_music: BGM_Brain_1.ogg
@@ -403,8 +403,8 @@ dialog_before_battle:
     last_dialog_id: 15
     narrator: sv-98
     next_dialog_id:
-      type: default
       target: 17
+      type: default
   17:
     background_img: snowfield.jpg
     background_music: BGM_Brain_1.ogg
@@ -416,8 +416,8 @@ dialog_before_battle:
     last_dialog_id: 16
     narrator: asval
     next_dialog_id:
-      type: default
       target: 18
+      type: default
   18:
     background_img: snowfield.jpg
     background_music: BGM_Brain_1.ogg
@@ -429,8 +429,8 @@ dialog_before_battle:
     last_dialog_id: 17
     narrator: asval
     next_dialog_id:
-      type: default
       target: 19
+      type: default
   19:
     background_img: snowfield.jpg
     background_music: BGM_Brain_1.ogg
@@ -441,8 +441,8 @@ dialog_before_battle:
     last_dialog_id: 18
     narrator: 众人
     next_dialog_id:
-      type: default
       target: 20
+      type: default
   20:
     background_img: snowfield.jpg
     background_music: BGM_Brain_1.ogg
