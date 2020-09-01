@@ -229,6 +229,7 @@ class DialogSystemDev:
         #对话框
         self.dialoguebox = loadImage("Assets/image/UI/dialoguebox.png",(self.window_x*0.13,self.window_y*0.65),self.window_x*0.74,self.window_y/4)
         self.narrator = SingleLineInputBox(self.window_x*0.2,self.dialoguebox.y+self.FONTSIZE,self.FONTSIZE,"white")
+        self.content = MultipleLinesInputBox(self.window_x*0.2,self.window_y*0.73,self.FONTSIZE,"white")
         #从配置文件中加载数据
         self.__loadDialogData()
         #黑色帘幕
@@ -278,13 +279,17 @@ class DialogSystemDev:
             self.dialog_content["dialog_after_battle"] = {}
         if "head" not in self.dialog_content["dialog_after_battle"]:
             self.dialog_content["dialog_after_battle"]["head"] = self.deafult_dialog_format
-        self.narrator.set_text(self.dialog_content[self.part][self.dialogId]["narrator"])
+        self.__update_dialogbox()
     #更新场景
     def __update_scene(self,theNextDialogId):
         #重设立绘系统
         self.npc_img_dic.process(self.dialog_content[self.part][self.dialogId]["characters_img"],self.dialog_content[self.part][theNextDialogId]["characters_img"])
         self.dialogId = theNextDialogId
+        self.__update_dialogbox()
+    #更新对话框
+    def __update_dialogbox(self):
         self.narrator.set_text(self.dialog_content[self.part][self.dialogId]["narrator"])
+        self.content.set_text(self.dialog_content[self.part][self.dialogId]["content"])
     #获取下一个对话的ID
     def __get_last_id(self):
         if self.dialogId == "head":
@@ -345,19 +350,15 @@ class DialogSystemDev:
             screen.blit(pygame.transform.scale(self.all_background_image[self.dialog_content[self.part][self.dialogId]["background_img"]],(self.window_x,self.window_y)),(0,0))
         #画上NPC立绘
         self.npc_img_dic.display(screen)
-        self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
-        self.UIContainerRight.draw(screen)
         #画上对话框
         self.dialoguebox.draw(screen)
         pygame_events = pygame.event.get()
         self.narrator.display(screen,pygame_events)
         if self.narrator.needSave == True:
             self.dialog_content[self.part][self.dialogId]["narrator"] = self.narrator.get_txt()
-        if "content" in self.dialog_content[self.part][self.dialogId]:
-            i=0
-            for sentence in self.dialog_content[self.part][self.dialogId]["content"]:
-                screen.blit(self.FONT.render(sentence,get_fontMode(),(255, 255, 255)),(self.window_x*0.2,self.window_y*0.73+self.FONTSIZE*1.5*i))
-                i+=1
+        self.content.display(screen,pygame_events)
+        if self.content.needSave == True:
+            self.dialog_content[self.part][self.dialogId]["content"] = self.content.get_txt()
         #初始化数值
         buttonHovered = None
         theNextDialogId = self.dialog_content[self.part][self.dialogId]["next_dialog_id"]
@@ -421,6 +422,9 @@ class DialogSystemDev:
                         self.__loadDialogData()
                     else:
                         leftClick = True
+        #画上右侧的菜单选项
+        self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
+        self.UIContainerRight.draw(screen)
         if self.UIContainerRight.x<self.window_x:
             i = 0
             for img in self.all_background_image:
