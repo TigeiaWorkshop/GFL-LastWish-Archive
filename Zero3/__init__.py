@@ -22,10 +22,6 @@ try:
     from Zero3.movie import *
 except BaseException:
     print('ZeroEngine-Warning: Unable to import module "movie".')
-#初始化常用模块
-console = Console(0,0)
-
-
 
 print("Zero Engine 3 (pygame {}, python {})".format(pygame.version.ver,platform.python_version()))
 print("Hello from the zero engine community. http://tjygf.com/forum.php")

@@ -266,8 +266,8 @@ class DialogSystemDev:
         self.npc_img_dic.process(None,self.dialogData[self.part][self.dialogId]["characters_img"])
     #保存数据
     def __save(self):
-        self.dialogData[self.part][self.dialogId]["narrator"] = self.narrator.get_txt()
-        self.dialogData[self.part][self.dialogId]["content"] = self.content.get_txt()
+        self.dialogData[self.part][self.dialogId]["narrator"] = self.narrator.get_text()
+        self.dialogData[self.part][self.dialogId]["content"] = self.content.get_text()
         if self.isDefault == True:
             with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.dialogType,self.chapterName,self.lang),"w",encoding='utf-8') as f:
                 yaml.dump(self.dialogData, f, allow_unicode=True)
@@ -400,10 +400,10 @@ class DialogSystemDev:
         pygame_events = pygame.event.get()
         self.narrator.display(screen,pygame_events)
         if self.narrator.needSave == True:
-            self.dialogData[self.part][self.dialogId]["narrator"] = self.narrator.get_txt()
+            self.dialogData[self.part][self.dialogId]["narrator"] = self.narrator.get_text()
         self.content.display(screen,pygame_events)
         if self.content.needSave == True:
-            self.dialogData[self.part][self.dialogId]["content"] = self.content.get_txt()
+            self.dialogData[self.part][self.dialogId]["content"] = self.content.get_text()
         #初始化数值
         buttonHovered = None
         theNextDialogId = self.dialogData[self.part][self.dialogId]["next_dialog_id"]
