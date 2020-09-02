@@ -510,16 +510,10 @@ class InputBoxInterface:
         self.holderIndex = 0
         self.x = x
         self.y = y
-        self.removingTxt = False
     def get_width(self):
         return self.input_box.w
-    def set_width(self,width):
-        self.default_width = width
-        self.input_box.w = width
     def get_height(self):
         return self.input_box.h
-    def set_height(self,height):
-        self.input_box.h = height
     def get_fontsize(self):
         return self.FONTSIZE
     def set_fontsize(self,font_size):
@@ -548,42 +542,43 @@ class SingleLineInputBox(InputBoxInterface):
         else:
             self._text = ""
             self.holderIndex = 0
-        self.default_width = self.FONT.size(self._text)[0]+self.FONTSIZE/2
-    def add_char(self,char):
+        self._reset_inputbox_width()
+    def _add_char(self,char):
         if len(char) > 0:
             self._text = self._text[:self.holderIndex]+char+self._text[self.holderIndex:]
             self.holderIndex += len(char)
+            self._reset_inputbox_width()
         else:
             print('ZeroEngine-Warning: The value of event.unicode is empty!')
-    def remove_char(self):
-        if self.removingTxt == True and self.holderIndex > 0:
-            self._text = self._text[:self.holderIndex-1]+self._text[self.holderIndex:]
-            self.holderIndex -= 1
-            self.removingTxt = False
-    def check_KEYDOWN_events(self,event):
-        if event.key == pygame.K_BACKSPACE:
-            self.removingTxt = True
-            return True
-        elif event.key == pygame.K_LEFT and self.holderIndex > 0:
-            self.holderIndex -= 1
-            return True
-        elif event.key == pygame.K_RIGHT and self.holderIndex < len(self._text):
-            self.holderIndex += 1
-            return True
-        return False
-    def draw_input_box(self,screen,width,pygame_events):
-        # 调整输入框
-        self.input_box.w = width
-        # 画出输入框
-        pygame.draw.rect(screen, self.color, self.input_box, 2)
-        #画出 “|” 符号
-        if int(time.time()%2)==0 or len(pygame_events)>0 == True:
-            screen.blit(self._holder, (self.x+5+self.FONT.size(self._text[:self.holderIndex])[0], self.y))
-    def __reset_holderIndex(self,mouse_x):
+    def _remove_char(self,action):
+        if action == "ahead":
+            if self.holderIndex > 0:
+                self._text = self._text[:self.holderIndex-1]+self._text[self.holderIndex:]
+                self.holderIndex -= 1
+        elif action == "behind":
+            if self.holderIndex < len(self._text):
+                self._text = self._text[:self.holderIndex]+self._text[self.holderIndex+1:]
+        else:
+            raise Exception('ZeroEngine-Error: Action has to be either "ahead" or "behind"!')
+        self._reset_inputbox_width()
+    def _reset_holderIndex(self,mouse_x):
+        last_width = 0
+        local_x = mouse_x-self.x
         for i in range(len(self._text)):
-            if self.FONT.size(self._text[:i])[0]+self.FONTSIZE*0.25>mouse_x-self.x:
+            new_width = self.FONT.size(self._text[:i])[0]+self.FONTSIZE*0.25
+            if new_width>local_x:
                 break
-        self.holderIndex = i
+            else:
+                last_width = new_width
+        if (new_width-local_x) < (local_x-last_width):
+            self.holderIndex = i
+        else:
+            self.holderIndex = i-1
+    def _reset_inputbox_width(self):
+        if self._text != None and len(self._text)>0:
+            self.input_box.w = max(self.default_width, self.FONT.size(self._text)[0]+self.FONTSIZE*0.25)
+        else:
+            self.input_box.w = self.default_width
     def display(self,screen,pygame_events=None):
         if pygame_events == None:
             pygame_events = pygame.event.get()
@@ -591,34 +586,37 @@ class SingleLineInputBox(InputBoxInterface):
         for event in pygame_events:
             if self.active:
                 if event.type == pygame.KEYDOWN:
-                    if self.check_KEYDOWN_events(event):
-                        pass
-                    #ESC，关闭
+                    if event.key == pygame.K_BACKSPACE:
+                        self._remove_char("ahead")
+                    elif event.key == pygame.K_DELETE:
+                        self._remove_char("behind")
+                    elif event.key == pygame.K_LEFT and self.holderIndex > 0:
+                        self.holderIndex -= 1
+                    elif event.key == pygame.K_RIGHT and self.holderIndex < len(self._text):
+                        self.holderIndex += 1
                     elif event.key == pygame.K_ESCAPE:
                         self.active = False
                         self.needSave = True
                     else:
-                        self.add_char(event.unicode)
+                        self._add_char(event.unicode)
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.x<=mouse_x<=self.x+self.input_box.w and self.y<=mouse_y<=self.y+self.input_box.h:
-                        self.__reset_holderIndex(mouse_x)
+                        self._reset_holderIndex(mouse_x)
                     else:
                         self.active = False
                         self.needSave = True
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.x<=mouse_x<=self.x+self.input_box.w and self.y<=mouse_y<=self.y+self.input_box.h:
                 self.active = True
-                self.__reset_holderIndex(mouse_x)
-        self.remove_char()
+                self._reset_holderIndex(mouse_x)
+        # 画出文字
         if self._text != None and len(self._text) > 0:
-            txt_surface = self.FONT.render(self._text,get_fontMode(),findColorRGB(self.txt_color))
-            # 画出文字
-            screen.blit(txt_surface, (self.x+5, self.y))
-            width = max(self.default_width, txt_surface.get_width()+self.FONTSIZE*0.25)
-        else:
-            width = self.default_width
+            screen.blit(self.FONT.render(self._text,get_fontMode(),findColorRGB(self.txt_color)), (self.x+self.FONTSIZE*0.25,self.y))
+        #画出输入框
         if self.active:
-            #画出输入框
-            self.draw_input_box(screen,width,pygame_events)
+            pygame.draw.rect(screen, self.color, self.input_box, 2)
+            #画出 “|” 符号
+            if int(time.time()%2)==0 or len(pygame_events)>0:
+                screen.blit(self._holder, (self.x+self.FONTSIZE*0.25+self.FONT.size(self._text[:self.holderIndex])[0], self.y))
 
 class MultipleLinesInputBox(InputBoxInterface):
     def __init__(self,x,y,font_size,txt_color,default_width=150):
@@ -637,13 +635,13 @@ class MultipleLinesInputBox(InputBoxInterface):
             self._text = [""]
         elif isinstance(new_txt,list):
             self._text = new_txt
-            self.__reset_inputbox_size()
+            self._reset_inputbox_size()
         else:
             raise Exception('ZeroEngine-Error: new_txt for MultipleLinesInputBox.set_text() must be a list!')
     def set_fontsize(self,font_size):
         super().set_fontsize(font_size)
-        self.__reset_inputbox_size()
-    def __reset_inputbox_width(self):
+        self._reset_inputbox_size()
+    def _reset_inputbox_width(self):
         if self._text != None and len(self._text) > 0:
             width = self.default_width
             for txtTmp in self._text:
@@ -653,21 +651,21 @@ class MultipleLinesInputBox(InputBoxInterface):
         else:
             width = self.default_width
         self.input_box.w = width
-    def __reset_inputbox_height(self):
-        self.set_height(self.deafult_height*len(self._text))
-    def __reset_inputbox_size(self):
-        self.__reset_inputbox_width()
-        self.__reset_inputbox_height()
-    def __add_char(self,char):
+    def _reset_inputbox_height(self):
+        self.input_box.h = self.deafult_height*len(self._text)
+    def _reset_inputbox_size(self):
+        self._reset_inputbox_width()
+        self._reset_inputbox_height()
+    def _add_char(self,char):
         if len(char) > 0:
             self._text[self.lineId] = self._text[self.lineId][:self.holderIndex]+char+self._text[self.lineId][self.holderIndex:]
             self.holderIndex += len(char)
-            self.__reset_inputbox_width()
+            self._reset_inputbox_width()
         else:
             print('ZeroEngine-Warning: The value of event.unicode is empty!')
     #删除对应字符
-    def __remove_char(self):
-        if self.removingTxt == True:
+    def _remove_char(self,action):
+        if action == "ahead":
             if self.holderIndex > 0:
                 self._text[self.lineId] = self._text[self.lineId][:self.holderIndex-1]+self._text[self.lineId][self.holderIndex:]
                 self.holderIndex -= 1
@@ -682,24 +680,35 @@ class MultipleLinesInputBox(InputBoxInterface):
                     self._text.pop(self.lineId)
                     self.lineId -= 1
                     self.holderIndex = len(self._text[self.lineId])
-            self.__reset_inputbox_size()
-            self.removingTxt = False
-    def draw_input_box(self,screen,pygame_events):
-        # 画出输入框
-        pygame.draw.rect(screen, self.color, self.input_box, 2)
-        #画出 “|” 符号
-        if int(time.time()%2)==0 or len(pygame_events)>0:
-            screen.blit(self._holder, (self.x++self.FONTSIZE*0.25+self.FONT.size(self._text[self.lineId][:self.holderIndex])[0], self.y+self.lineId*self.deafult_height))
-    def __reset_holderIndex(self,mouse_x,mouse_y):
-        self.lineId = int((mouse_y-self.y)/self.FONTSIZE*1.5)-1
+        elif action == "behind":
+            if self.holderIndex < len(self._text[self.lineId]):
+                self._text[self.lineId] = self._text[self.lineId][:self.holderIndex]+self._text[self.lineId][self.holderIndex+1:]
+            elif self.lineId < len(self._text)-1:
+                #如果下一行有内容
+                if len(self._text[self.lineId+1]) > 0:
+                    self._text[self.lineId] += self._text[self.lineId+1]
+                self._text.pop(self.lineId+1)
+        else:
+            raise Exception('ZeroEngine-Error: Action has to be either "ahead" or "behind"!')
+        self._reset_inputbox_size()
+    def _reset_holderIndex(self,mouse_x,mouse_y):
+        self.lineId = round((mouse_y-self.y)/self.FONTSIZE)-1
         if self.lineId < 0:
             self.lineId = 0
         elif self.lineId >= len(self._text):
             self.lineId = len(self._text)-1
+        last_width = 0
+        local_x = mouse_x-self.x
         for i in range(len(self._text[self.lineId])):
-            if self.FONT.size(self._text[self.lineId][:i])[0]+self.FONTSIZE*0.25>mouse_x-self.x:
+            new_width = self.FONT.size(self._text[self.lineId][:i])[0]+self.FONTSIZE*0.25
+            if new_width>local_x:
                 break
-        self.holderIndex = i
+            else:
+                last_width = new_width
+        if (new_width-local_x) < (local_x-last_width):
+            self.holderIndex = i
+        else:
+            self.holderIndex = i-1
     def display(self,screen,pygame_events=None):
         if pygame_events == None:
             pygame_events = pygame.event.get()
@@ -708,7 +717,9 @@ class MultipleLinesInputBox(InputBoxInterface):
             if self.active:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_BACKSPACE:
-                        self.removingTxt = True
+                        self._remove_char("ahead")
+                    elif event.key == pygame.K_DELETE:
+                        self._remove_char("behind")
                     elif event.key == pygame.K_LEFT and self.holderIndex > 0:
                         self.holderIndex -= 1
                     elif event.key == pygame.K_RIGHT and self.holderIndex < len(self._text[self.lineId]):
@@ -734,26 +745,28 @@ class MultipleLinesInputBox(InputBoxInterface):
                             self._text[self.lineId] = self._text[self.lineId][:self.holderIndex]
                         self.lineId+=1
                         self.holderIndex=0
-                        self.__reset_inputbox_size()
+                        self._reset_inputbox_size()
                     else:
-                        self.__add_char(event.unicode)
+                        self._add_char(event.unicode)
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.x<=mouse_x<=self.x+self.input_box.w and self.y<=mouse_y<=self.y+self.input_box.h:
-                        self.__reset_holderIndex(mouse_x,mouse_y)
+                        self._reset_holderIndex(mouse_x,mouse_y)
                     else:
                         self.active = False
                         self.needSave = True
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.x<=mouse_x<=self.x+self.input_box.w and self.y<=mouse_y<=self.y+self.input_box.h:
                 self.active = True
-                self.__reset_holderIndex(mouse_x,mouse_y)
-        self.__remove_char()
+                self._reset_holderIndex(mouse_x,mouse_y)
         if self._text != None:
             for i in range(len(self._text)): 
                 # 画出文字
                 screen.blit(self.FONT.render(self._text[i],get_fontMode(),findColorRGB(self.txt_color)),(self.x+self.FONTSIZE*0.25,self.y+i*self.deafult_height))
         if self.active:
-            #画出输入框
-            self.draw_input_box(screen,pygame_events)
+            # 画出输入框
+            pygame.draw.rect(screen, self.color, self.input_box, 2)
+            #画出 “|” 符号
+            if int(time.time()%2)==0 or len(pygame_events)>0:
+                screen.blit(self._holder, (self.x+self.FONTSIZE*0.1+self.FONT.size(self._text[self.lineId][:self.holderIndex])[0], self.y+self.lineId*self.deafult_height))
 
 #控制台
 class Console(SingleLineInputBox):
@@ -796,8 +809,14 @@ class Console(SingleLineInputBox):
                         self.color = self.color_inactive
                 elif event.type == pygame.KEYDOWN:
                     if self.active:
-                        if self.check_KEYDOWN_events(event):
-                            pass
+                        if event.key == pygame.K_BACKSPACE:
+                            self._remove_char("ahead")
+                        elif event.key == pygame.K_DELETE:
+                            self._remove_char("behind")
+                        elif event.key == pygame.K_LEFT and self.holderIndex > 0:
+                            self.holderIndex -= 1
+                        elif event.key == pygame.K_RIGHT and self.holderIndex < len(self._text):
+                            self.holderIndex += 1
                         #向上-过去历史
                         elif event.key == pygame.K_UP and self.backwordID<len(self.textHistory):
                             self.backwordID += 1
@@ -839,20 +858,22 @@ class Console(SingleLineInputBox):
                             # Change the current color of the input box.
                             self.color = self.color_active if self.active else self.color_inactive
                         else:
-                            self.add_char(event.unicode)
+                            self._add_char(event.unicode)
                     else:
                         if event.key == pygame.K_BACKQUOTE or event.key == pygame.K_ESCAPE:
                             self.hidden = True
                             self.set_text()
-            self.remove_char()
             #画出输出信息
             for i in range(len(self.txtOutput)):
-                screen.blit(self.FONT.render(self.txtOutput[i],get_fontMode(),self.color),(self.x+5, self.y-(len(self.txtOutput)-i)*self.FONTSIZE*1.5))
+                screen.blit(self.FONT.render(self.txtOutput[i],get_fontMode(),self.color),(self.x+self.FONTSIZE*0.25, self.y-(len(self.txtOutput)-i)*self.FONTSIZE*1.5))
             # 画出文字
-            txt_surface = self.FONT.render(self._text,get_fontMode(),self.color)
-            screen.blit(txt_surface, (self.x+5, self.y))
+            if self._text != None and len(self._text) > 0:
+                screen.blit(self.FONT.render(self._text,get_fontMode(),self.color),(self.x+self.FONTSIZE*0.25, self.y))
             #画出输入框
-            self.draw_input_box(screen,max(self.default_width, txt_surface.get_width()+self.FONTSIZE/2),pygame_events)
+            pygame.draw.rect(screen, self.color, self.input_box, 2)
+            #画出 “|” 符号
+            if int(time.time()%2)==0 or len(pygame_events)>0:
+                screen.blit(self._holder, (self.x+self.FONTSIZE*0.25+self.FONT.size(self._text[:self.holderIndex])[0], self.y))
 
 #初始化控制台模块
 console = Console(0,0)
