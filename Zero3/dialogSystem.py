@@ -243,6 +243,7 @@ class DialogSystemDev:
         self.UIContainerRightButton = loadImage("Assets/image/UI/container_button.png",(-self.window_x*0.03,self.window_y*0.4),int(self.window_x*0.04),int(self.window_y*0.2))
         self.UIContainerRight.rotate(90)
         self.UIContainerRightButton.rotate(90)
+        self.background_deselect = loadImg("Assets/image/UI/deselect.png")
         CONFIG = get_lang("DialogCreator")
         button_width = self.window_x*0.05
         button_y = self.window_y*0.03
@@ -490,14 +491,29 @@ class DialogSystemDev:
         self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
         self.UIContainerRight.draw(screen)
         if self.UIContainerRight.x<self.window_x:
-            i = 0
-            for img in self.all_background_image:
-                imgTmp = resizeImg(self.all_background_image[img],(self.UIContainerRight.width*0.8,None))
-                pos = (self.UIContainerRight.x+self.UIContainerRight.width*0.1,self.background_image_local_y+imgTmp.get_height()*1.5*i)
+            imgName = self.dialogData[self.part][self.dialogId]["background_img"]
+            if imgName != None:
+                imgTmp = resizeImg(self.all_background_image[imgName],(self.UIContainerRight.width*0.8,None))
+                pos = (self.UIContainerRight.x+self.UIContainerRight.width*0.1,self.background_image_local_y)
                 screen.blit(imgTmp,pos)
-                i+=1
+                screen.blit(resizeImg(self.background_deselect,imgTmp.get_size()),pos)
                 if leftClick == True and ifHover(imgTmp,pos):
-                    self.dialogData[self.part][self.dialogId]["background_img"] = img
+                    self.dialogData[self.part][self.dialogId]["background_img"] = None
+                    leftClick = False
+                    i = 0
+                else:
+                    i = 1
+            else:
+                i = 0
+            for imgName in self.all_background_image:
+                if imgName != self.dialogData[self.part][self.dialogId]["background_img"]:
+                    imgTmp = resizeImg(self.all_background_image[imgName],(self.UIContainerRight.width*0.8,None))
+                    pos = (self.UIContainerRight.x+self.UIContainerRight.width*0.1,self.background_image_local_y+imgTmp.get_height()*1.5*i)
+                    screen.blit(imgTmp,pos)
+                    i+=1
+                    if leftClick == True and ifHover(imgTmp,pos):
+                        self.dialogData[self.part][self.dialogId]["background_img"] = imgName
+                        leftClick = False
         return False
 
 #npc立绘系统
