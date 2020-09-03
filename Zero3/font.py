@@ -2,51 +2,52 @@
 import pygame
 from pygame.locals import *
 import pygame.freetype
+from pygame.colordict import THECOLORS
 from Zero3.config import *
 pygame.init()
 
 #初始化字体的配置文件
-FONT = DATA["Font"]
-FONTTYPE = DATA["FontType"]
-MODE = DATA["Antialias"]
+ZERO_FONT = ZERO_DATA["Font"]
+ZERO_FONTTYPE = ZERO_DATA["FontType"]
+ZERO_MODE = ZERO_DATA["Antialias"]
 
 #获取文字信息
 def get_font():
-    return FONT
+    return ZERO_FONT
 def get_fontType():
-    return FONTTYPE
+    return ZERO_FONTTYPE
 def get_fontMode():
-    return MODE
+    return ZERO_MODE
 def get_fontDetails():
-    return FONT,FONTTYPE,MODE
+    return ZERO_FONT,ZERO_FONTTYPE,ZERO_MODE
 
 #重新获取设置信息
 def reload_setting():
-    global DATA
-    global FONT
-    global FONTTYPE
-    global MODE
+    global ZERO_DATA
+    global ZERO_FONT
+    global ZERO_FONTTYPE
+    global ZERO_MODE
     with open("Save/setting.yaml", "r", encoding='utf-8') as f:
-        DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
-        FONT = DATA["Font"]
-        FONTTYPE = DATA["FontType"]
-        MODE = DATA["Antialias"]
+        ZERO_DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
+        ZERO_FONT = ZERO_DATA["Font"]
+        ZERO_FONTTYPE = ZERO_DATA["FontType"]
+        ZERO_MODE = ZERO_DATA["Antialias"]
 
 #创建字体
 def createFont(size,ifBold=False,ifItalic=False):
-    if FONTTYPE == "default":
+    if ZERO_FONTTYPE == "default":
         try:
-            return pygame.font.SysFont(FONT,int(size),ifBold,ifItalic)
+            return pygame.font.SysFont(ZERO_FONT,int(size),ifBold,ifItalic)
         except BaseException:
             pygame.font.init()
-            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(FONT),int(size))
-    elif FONTTYPE == "custom":
+            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(ZERO_FONT),int(size))
+    elif ZERO_FONTTYPE == "custom":
         try:
-            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(FONT),int(size))
+            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(ZERO_FONT),int(size))
         #如果文字没有初始化
         except BaseException:
-            pygame.font.init()
-            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(FONT),int(size))
+            pygame.ZERO_FONT.init()
+            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(ZERO_FONT),int(size))
         if ifBold:
             normal_font.set_bold(ifBold)
         if ifItalic:
@@ -57,19 +58,19 @@ def createFont(size,ifBold=False,ifItalic=False):
 
 #创建FreeType字体
 def createFreeTypeFont(size,ifBold=False,ifItalic=False):
-    if FONTTYPE == "default":
+    if ZERO_FONTTYPE == "default":
         try:
-            return pygame.freetype.SysFont(FONT,int(size),ifBold,ifItalic)
+            return pygame.freetype.SysFont(ZERO_FONT,int(size),ifBold,ifItalic)
         except BaseException:
             pygame.freetype.init()
-            return pygame.freetype.SysFont(FONT,int(size),ifBold,ifItalic)
-    elif FONTTYPE == "custom":
+            return pygame.freetype.SysFont(ZERO_FONT,int(size),ifBold,ifItalic)
+    elif ZERO_FONTTYPE == "custom":
         try:
-            normal_font = pygame.freetype.Font("Assets/font/{}.ttf".format(FONT),int(size))
+            normal_font = pygame.freetype.Font("Assets/font/{}.ttf".format(ZERO_FONT),int(size))
         #如果文字没有初始化
         except BaseException:
             pygame.freetype.init()
-            normal_font = pygame.freetype.Font("Assets/font/{}.ttf".format(FONT),int(size))
+            normal_font = pygame.freetype.Font("Assets/font/{}.ttf".format(ZERO_FONT),int(size))
         if ifBold:
             normal_font.set_bold(ifBold)
         if ifItalic:
@@ -82,18 +83,18 @@ def createFreeTypeFont(size,ifBold=False,ifItalic=False):
 def fontRender(txt,color,size,ifBold=False,ifItalic=False):
     normal_font = createFont(size,ifBold,ifItalic)
     if isinstance(color,str):
-        text_out = normal_font.render(txt, MODE, findColorRGB(color))
+        text_out = normal_font.render(txt, ZERO_MODE, findColorRGBA(color))
     else:
-        text_out = normal_font.render(txt, MODE, color)
+        text_out = normal_font.render(txt, ZERO_MODE, color)
     return text_out
 
 #文字制作模块：接受文字，颜色，文字大小，文字样式，模式，返回制作完的文字
 def freeTypeRender(txt,color,size,ifBold=False,ifItalic=False):
     normal_font = createFreeTypeFont(size,ifBold,ifItalic)
     if isinstance(color,str):
-        text_out = normal_font.render(txt, MODE, findColorRGB(color))
+        text_out = normal_font.render(txt, ZERO_MODE, findColorRGBA(color))
     else:
-        text_out = normal_font.render(txt, MODE, color)
+        text_out = normal_font.render(txt, ZERO_MODE, color)
     return text_out
 
 #文字画面类
@@ -123,16 +124,18 @@ def fontRenderPro(txt,color,pos,size=50,ifBold=False,ifItalic=False):
     return TextSurface(fontRender(txt,color,size,ifBold,ifItalic),fontRender(txt,color,size*1.5,ifBold,ifItalic),pos[0],pos[1])
 
 #给定一个颜色的名字，返回对应的RGB列表
-def findColorRGB(colorName):
-    color_rgb = None
-    if colorName == "gray" or colorName == "grey" or colorName == "disable":
-        color_rgb = (105, 105, 105)
-    elif colorName == "white" or colorName == "enable":
-        color_rgb = (255, 255, 255)
-    elif colorName == "black":
-        color_rgb = (0, 0, 0)
-    elif colorName == "green":
-        color_rgb = (0, 255, 0)
-    elif colorName == "red":
-        color_rgb = (255, 0, 0)
-    return color_rgb
+def findColorRGBA(color):
+    if isinstance(color,(tuple,list)):
+        return color
+    elif isinstance(color,(str)):
+        if color == "gray" or color == "grey" or color == "disable":
+            return (105, 105, 105, 255)
+        elif color == "white" or color == "enable":
+            return (255, 255, 255, 255)
+        else:
+            try:
+                return THECOLORS[color]
+            except BaseException:
+                raise Exception('ZeroEngine-Error: This color is currently not available!')
+    else:
+        raise Exception('ZeroEngine-Error: The color has to be a string, tuple or list!')

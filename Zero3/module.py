@@ -613,7 +613,7 @@ class SingleLineInputBox(InputBoxInterface):
                 self._reset_holderIndex(mouse_x)
         # 画出文字
         if self._text != None and len(self._text) > 0:
-            screen.blit(self.FONT.render(self._text,get_fontMode(),findColorRGB(self.txt_color)), (self.x+self.FONTSIZE*0.25,self.y))
+            screen.blit(self.FONT.render(self._text,get_fontMode(),findColorRGBA(self.txt_color)), (self.x+self.FONTSIZE*0.25,self.y))
         #画出输入框
         if self.active:
             pygame.draw.rect(screen, self.color, self.input_box, 2)
@@ -763,7 +763,7 @@ class MultipleLinesInputBox(InputBoxInterface):
         if self._text != None:
             for i in range(len(self._text)): 
                 # 画出文字
-                screen.blit(self.FONT.render(self._text[i],get_fontMode(),findColorRGB(self.txt_color)),(self.x+self.FONTSIZE*0.25,self.y+i*self.deafult_height))
+                screen.blit(self.FONT.render(self._text[i],get_fontMode(),findColorRGBA(self.txt_color)),(self.x+self.FONTSIZE*0.25,self.y+i*self.deafult_height))
         if self.active:
             # 画出输入框
             pygame.draw.rect(screen, self.color, self.input_box, 2)
