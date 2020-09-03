@@ -24,6 +24,8 @@ DialogCreator:
   back: Back to main menu
   delete: Delete current dialog
   next: Next dialog
+  please_enter_content: Content
+  please_enter_name: Name
   previous: Previous dialog
   reload: Reload configuration file
   save: Save

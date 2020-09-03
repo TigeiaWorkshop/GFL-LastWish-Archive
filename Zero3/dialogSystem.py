@@ -26,6 +26,7 @@ class DialogSystem:
         self.window_x,self.window_y = display.get_size()
         #选项栏
         self.optionBox = pygame.image.load(os.path.join("Assets/image/UI/option.png")).convert_alpha()
+        self.optionBoxSelected = pygame.image.load(os.path.join("Assets/image/UI/option_selected.png")).convert_alpha()
         #UI按钮
         self.ButtonsMananger = DialogButtons()
         #黑色帘幕
@@ -115,23 +116,30 @@ class DialogSystem:
                     else:
                         pass
         #显示选项
+        
         if dialogPlayResult == True and self.dialog_content[self.dialogId]["next_dialog_id"] != None and self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "option":
             optionBox_y_base = (self.window_y*3/4-(len(self.dialog_content[self.dialogId]["next_dialog_id"]["target"]))*2*self.window_x*0.03)/4
+            optionBox_height = int(self.window_x*0.05)
+            nextDialogId = None
             for i in range(len(self.dialog_content[self.dialogId]["next_dialog_id"]["target"])):
                 option_txt = self.dialogTxtSystem.fontRender(self.dialog_content[self.dialogId]["next_dialog_id"]["target"][i]["txt"],(255, 255, 255))
-                optionBox_scaled = pygame.transform.scale(self.optionBox,(int(option_txt.get_width()+self.window_x*0.05),int(self.window_x*0.05)))
-                optionBox_x = (self.window_x-optionBox_scaled.get_width())/2
+                optionBox_width = int(option_txt.get_width()+self.window_x*0.05) 
+                optionBox_x = (self.window_x-optionBox_width)/2
                 optionBox_y = (i+1)*2*self.window_x*0.03+optionBox_y_base
+                mouse_x,mouse_y = pygame.mouse.get_pos()
+                if optionBox_x<mouse_x<optionBox_x+optionBox_width and optionBox_y<mouse_y<optionBox_y+optionBox_height:
+                    optionBox_scaled = pygame.transform.scale(self.optionBoxSelected,(optionBox_width,optionBox_height))
+                    if leftClick == True and self.showHistory == False:
+                        #保存选取的选项
+                        nextDialogId = self.dialog_content[self.dialogId]["next_dialog_id"]["target"][i]["id"]
+                else:
+                    optionBox_scaled = pygame.transform.scale(self.optionBox,(optionBox_width,optionBox_height))
                 displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
-                if ifHover(optionBox_scaled,(optionBox_x,optionBox_y)) and leftClick == True and self.showHistory == False:
-                    #保存选取的选项
-                    nextDialogId = self.dialog_content[self.dialogId]["next_dialog_id"]["target"][i]["id"]
-                    self.dialog_options[self.dialogId] = {"id":i,"target":nextDialogId}
-                    #更新场景
-                    self.__update_scene(nextDialogId)
-                    del nextDialogId
-                    leftClick = False
-                    break
+            if nextDialogId != None:
+                self.dialog_options[self.dialogId] = {"id":i,"target":nextDialogId}
+                #更新场景
+                self.__update_scene(nextDialogId)
+                leftClick = False
         #展示历史
         if self.showHistory == True:
             if self.historySurface == None:
@@ -219,16 +227,6 @@ class DialogSystemDev:
         #文字
         self.FONTSIZE = self.window_x*0.0175
         self.FONT = createFont(self.FONTSIZE)
-        #初始格式
-        self.deafult_dialog_format = {
-            "background_img": None,
-            "background_music": None,
-            "characters_img": [],
-            "content": [],
-            "last_dialog_id": None,
-            "narrator": None,
-            "next_dialog_id": {"type":"default","target":1}
-        }
         #对话框
         self.dialoguebox = loadImage("Assets/image/UI/dialoguebox.png",(self.window_x*0.13,self.window_y*0.65),self.window_x*0.74,self.window_y/4)
         self.narrator = SingleLineInputBox(self.window_x*0.2,self.dialoguebox.y+self.FONTSIZE,self.FONTSIZE,"white")
@@ -246,15 +244,19 @@ class DialogSystemDev:
         self.UIContainerRight.rotate(90)
         self.UIContainerRightButton.rotate(90)
         CONFIG = get_lang("DialogCreator")
+        button_width = self.window_x*0.05
+        button_y = self.window_y*0.03
         self.buttonsUI = {
-            "add": ButtonWithDes("Assets/image/UI/add.png",50,50,50,50,CONFIG["add"]),
-            "back": ButtonWithDes("Assets/image/UI/back.png",150,50,50,50,CONFIG["back"]),
-            "delete": ButtonWithDes("Assets/image/UI/delete.png",250,50,50,50,CONFIG["delete"]),
-            "previous": ButtonWithDes("Assets/image/UI/previous.png",350,50,50,50,CONFIG["previous"]),
-            "next": ButtonWithDes("Assets/image/UI/dialog_skip.png",450,50,50,50,CONFIG["next"]),
-            "reload": ButtonWithDes("Assets/image/UI/reload.png",550,50,50,50,CONFIG["reload"]),
-            "save": ButtonWithDes("Assets/image/UI/save.png",650,50,50,50,CONFIG["save"])
+            "back": ButtonWithDes("Assets/image/UI/back.png",button_width,button_y,button_width,button_width,CONFIG["back"]),
+            "delete": ButtonWithDes("Assets/image/UI/delete.png",button_width*2.25,button_y,button_width,button_width,CONFIG["delete"]),
+            "previous": ButtonWithDes("Assets/image/UI/previous.png",button_width*3.5,button_y,button_width,button_width,CONFIG["previous"]),
+            "next": ButtonWithDes("Assets/image/UI/dialog_skip.png",button_width*4.75,button_y,button_width,button_width,CONFIG["next"]),
+            "add": ButtonWithDes("Assets/image/UI/add.png",button_width*4.75,button_y,button_width,button_width,CONFIG["add"]),
+            "reload": ButtonWithDes("Assets/image/UI/reload.png",button_width*6,button_y,button_width,button_width,CONFIG["reload"]),
+            "save": ButtonWithDes("Assets/image/UI/save.png",button_width*7.25,button_y,button_width,button_width,CONFIG["save"])
         } 
+        self.please_enter_content = CONFIG["please_enter_content"]
+        self.please_enter_name = CONFIG["please_enter_name"]
         #加载背景图片
         self.all_background_image = {}
         for imgPath in glob.glob("Assets/image/dialog_background/*"):
@@ -410,8 +412,10 @@ class DialogSystemDev:
         #展示按钮
         for button in self.buttonsUI:
             if button == "next" and theNextDialogId == None or button == "next" and len(theNextDialogId)<2:
-                pass
-            else:
+                if ifHover(self.buttonsUI["add"]):
+                    buttonHovered = "add"
+                self.buttonsUI["add"].display(screen)
+            elif button != "add":
                 if ifHover(self.buttonsUI[button]):
                     buttonHovered = button
                 self.buttonsUI[button].display(screen)
@@ -461,6 +465,21 @@ class DialogSystemDev:
                             self.__update_scene(nextId)
                         else:
                             print("no next_dialog_id")
+                    elif buttonHovered == "add":
+                        nextId=1
+                        while nextId in self.dialogData[self.part]:
+                            nextId+=1
+                        self.dialogData[self.part][nextId] = {
+                            "background_img": None,
+                            "background_music": None,
+                            "characters_img": [],
+                            "content": [self.please_enter_content],
+                            "last_dialog_id": self.dialogId,
+                            "narrator": self.please_enter_name,
+                            "next_dialog_id": None
+                        }
+                        self.dialogData[self.part][self.dialogId]["next_dialog_id"] = {"target":nextId,"type":"default"}
+                        self.__update_scene(nextId)
                     elif buttonHovered == "save":
                         self.__save()
                     elif buttonHovered == "reload":

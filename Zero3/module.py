@@ -331,13 +331,16 @@ class Button:
 class ButtonWithDes(Button):
     def __init__(self,path,x,y,width,height,des):
         Button.__init__(self,path,x,y)
+        width = int(width)
+        height = int(height)
+        self.img = pygame.transform.scale(self.img,(width,height))
         self.img2 = self.img.copy()
         self.img.set_alpha(150)
         self.width = width
         self.height = height
         self.des = des
-        self.des_font_surface = fontRender(des,"black",self.height*0.8)
-        self.des_surface = pygame.Surface((self.des_font_surface.get_width()*1.2,self.height),flags=pygame.SRCALPHA).convert_alpha()
+        self.des_font_surface = fontRender(des,"black",self.height*0.4)
+        self.des_surface = pygame.Surface((self.des_font_surface.get_width()*1.2,self.height*0.6),flags=pygame.SRCALPHA).convert_alpha()
         pygame.draw.rect(self.des_surface,(255,255,255),(0,0, self.des_surface.get_width(),self.des_surface.get_height()))
         self.des_surface.blit(self.des_font_surface,(self.des_font_surface.get_width()*0.1,0))
     def displayDes(self,screen):
