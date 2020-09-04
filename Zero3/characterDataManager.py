@@ -1,6 +1,15 @@
 # cython: language_level=3
 from Zero3.basic import *
 
+__CHARACTERS_IMAGE_DICT = {}
+#获取特定的角色图片
+def getDollImg(self_type,action,imgId,width):
+    img = __CHARACTERS_IMAGE_DICT[self_type][action]["img"][imgId]
+    return pygame.transform.scale(img,(width,width))
+#获取角色对应图片的ID
+def getDollImgNum(self_type,action):
+    return __CHARACTERS_IMAGE_DICT[self_type][action]["imgNum"]
+
 class Doll:
     def __init__(self,DATA,faction,mode):
         self.current_action_point = DATA["action_point"]
@@ -14,7 +23,7 @@ class Doll:
         self.kind = DATA["kind"]
         self.faction = faction
         self.type = DATA["type"]
-        self.gif_dic = character_gif_dic(self.type,faction,mode)
+        self.__imgId_dict = character_gif_dic(self.type,faction,mode)
         self.magazine_capacity = DATA["magazine_capacity"]
         self.max_damage = DATA["max_damage"]
         self.max_hp = DATA["max_hp"]
@@ -43,7 +52,11 @@ class Doll:
             self.ifFlip = theBool
     def draw(self,action,screen,theMapClass,isContinue=True):
         #调整小人图片的尺寸
-        img_of_char = pygame.transform.scale(self.gif_dic[action]["img"][self.gif_dic[action]["imgId"]], (round(theMapClass.perBlockWidth*1.6), round(theMapClass.perBlockWidth*1.6)))
+        img_of_char = getDollImg(self.type,action,self.__imgId_dict[action]["imgId"],round(theMapClass.perBlockWidth*1.6))
+        #调整alpha值
+        imgAlpha = self.get_imgAlpaha(action)
+        if imgAlpha != 255:
+            img_of_char.set_alpha(imgAlpha)
         #反转图片
         if self.ifFlip == True:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
@@ -51,12 +64,12 @@ class Doll:
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)
         screen.blit(img_of_char,(xTemp-theMapClass.perBlockWidth*0.3,yTemp-theMapClass.perBlockWidth*0.85))
         #调整id，并返回对应的bool状态
-        if self.gif_dic[action]["imgId"] < self.gif_dic[action]["imgNum"]-1:
-            self.gif_dic[action]["imgId"] += 1
+        if self.__imgId_dict[action]["imgId"] < getDollImgNum(self.type,action)-1:
+            self.__imgId_dict[action]["imgId"] += 1
             return True
         else:
             if isContinue == True:
-                self.gif_dic[action]["imgId"] = 0
+                self.__imgId_dict[action]["imgId"] = 0
                 return True
             else:
                 return False
@@ -106,13 +119,29 @@ class Doll:
         displayInCenter(current_hp_to_display,hpEmptyScale,xTemp,yTemp,screen)
     #获取角色特定动作的图片播放ID
     def get_imgId(self,action):
-        return self.gif_dic[action]["imgId"]
+        action = self.__imgId_dict[action]
+        if action != None:
+            return action["imgId"]
+        else:
+            return None
+    #获取角色特定动作的图片总数量
+    def get_imgNum(self,action):
+        return getDollImgNum(self.type,action)
     #设定角色特定动作的图片播放ID
     def set_imgId(self,action,theId):
-        self.gif_dic[action]["imgId"] = theId
+        self.__imgId_dict[action]["imgId"] = theId
     #重置角色特定动作的图片播放ID
     def reset_imgId(self,action):
-        self.gif_dic[action]["imgId"] = 0
+        self.__imgId_dict[action]["imgId"] = 0
+    #增加角色特定动作的图片播放ID
+    def add_imgId(self,action,amount=1):
+        self.__imgId_dict[action]["imgId"]+=amount
+    #获取角色特定动作的图片透明度
+    def get_imgAlpaha(self,action):
+        return self.__imgId_dict[action]["alpha"]
+    #设定角色特定动作的图片透明度
+    def set_imgAlpaha(self,action,alpha):
+        self.__imgId_dict[action]["alpha"] = alpha
     #调整角色的隐蔽度
     def noticed(self,force=False):
         if force == False:
@@ -219,27 +248,32 @@ def calculate_range(effective_range_dic):
 #动图制作模块：接受一个友方角色名和动作,当前的方块标准长和高，返回对应角色动作list或者因为没图片而返回None
 #810*810 possition:405/567
 def character_creator(character_name,action,faction):
+    global __CHARACTERS_IMAGE_DICT
+    if character_name in __CHARACTERS_IMAGE_DICT:
+        if action in __CHARACTERS_IMAGE_DICT[character_name]:
+            return {"imgId":0,"alpha":255}
+        else:
+            __CHARACTERS_IMAGE_DICT[character_name][action] = {}
+    else:
+        __CHARACTERS_IMAGE_DICT[character_name] = {}
     if os.path.exists("Assets/image/"+faction+"/"+character_name+"/"+action):
         files_amount = len(glob.glob("Assets/image/"+faction+"/"+character_name+"/"+action+"/*.png"))
-        path = "Assets/image/"+faction+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_NaN.png"
-    else:
-        return None
-    character_gif=[]
-    if files_amount > 0:
-        for i in range(files_amount):
-            character_gif.append(pygame.image.load(os.path.join(path.replace("NaN",str(i)))).convert_alpha())
-        return {
-            "img":character_gif,
-            "imgId":0,
-            "imgNum":files_amount
-        }
+        if files_amount > 0:
+            path = "Assets/image/"+faction+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_NaN.png"
+            images_list = []
+            for i in range(files_amount):
+                images_list.append(pygame.image.load(os.path.join(path.replace("NaN",str(i)))).convert_alpha())
+            __CHARACTERS_IMAGE_DICT[character_name][action] = {"img":images_list,"imgNum":files_amount}
+            return {"imgId":0,"alpha":255}
+        else:
+            return None
     else:
         return None
 
 #动图字典制作模块：接受一个友方角色名，返回对应的动图字典：
 def character_gif_dic(character_name,faction,mode):
     if mode == None:
-        gif_dic = {
+        imgId_dict = {
             "attack":character_creator(character_name,"attack",faction),
             "attack2":character_creator(character_name,"attack2",faction),
             "move":character_creator(character_name,"move",faction),
@@ -252,18 +286,21 @@ def character_gif_dic(character_name,faction,mode):
             "wait":character_creator(character_name,"wait",faction),
             "wait2":character_creator(character_name,"wait2",faction),
         }
+        imgId_dict["die"] = character_creator(character_name,"die",faction)
+        """
         if faction == "character":
-            gif_dic["die"] = character_creator(character_name,"die",faction)
+            imgId_dict["die"] = character_creator(character_name,"die",faction)
         else:
             temp_list = ["","2","3"]
-            gif_dic["die"] = character_creator(character_name,"die"+temp_list[random.randint(0,2)],faction)
-            if gif_dic["die"]==None:
-                gif_dic["die"] = character_creator(character_name,"die",faction)
+            imgId_dict["die"] = character_creator(character_name,"die"+temp_list[random.randint(0,2)],faction)
+            if imgId_dict["die"]==None:
+                imgId_dict["die"] = character_creator(character_name,"die",faction)
+        """
     elif mode == "dev":
-        gif_dic = {"wait":character_creator(character_name,"wait",faction)}
+        imgId_dict = {"wait":character_creator(character_name,"wait",faction)}
     else:
-        raise Exception('ZeroEngine-Error: Mode does not exist.')
-    return gif_dic
+        raise Exception('ZeroEngine-Error: Mode is not supported.')
+    return imgId_dict
 
 #加载并更新更新位于Data中的角色数据配置文件-character_data.yaml
 def loadCharacterData():
