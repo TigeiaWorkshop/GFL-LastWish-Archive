@@ -135,7 +135,7 @@ def battle(chapter_name,screen,setting):
         environment_sound.set_volume(setting["Sound"]["sound_environment"]/100.0)
         weatherController = Zero.WeatherSystem(theWeather,window_x,window_y)    
     #攻击的音效 -- 频道2
-    attackingSounds = Zero.AttackingSoundManager(2,setting["Sound"]["sound_effects"])
+    attackingSounds = Zero.AttackingSoundManager(setting["Sound"]["sound_effects"],2)
     #部分设定初始化
     the_character_get_click = ""
     enemies_get_attack = {}
@@ -755,6 +755,7 @@ def battle(chapter_name,screen,setting):
                                 attacking_range = None
                                 skill_range = None
                                 areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
+                                characters_data[key].playSound("get_click")
                                 the_character_get_click = key
                                 characterInfoBoardUI.update()
                                 friendsCanSave = []
@@ -1039,6 +1040,7 @@ def battle(chapter_name,screen,setting):
                                         characters_data[the_character_get_click].setFlip(True)
                                 else:
                                     characters_data[the_character_get_click].setFlip(False)
+                            characters_data[the_character_get_click].playSound("attack")
                         #播放射击音效
                         elif characters_data[the_character_get_click].get_imgId("attack") == 3:
                             attackingSounds.play(characters_data[the_character_get_click].kind)

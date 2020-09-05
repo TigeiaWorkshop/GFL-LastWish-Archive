@@ -1,6 +1,7 @@
 # cython: language_level=3
 from Zero3.basic import *
 
+#储存角色图片的常量
 __CHARACTERS_IMAGE_DICT = {}
 #获取特定的角色图片
 def getDollImg(self_type,action,imgId,width):
@@ -9,6 +10,37 @@ def getDollImg(self_type,action,imgId,width):
 #获取角色对应图片的ID
 def getDollImgNum(self_type,action):
     return __CHARACTERS_IMAGE_DICT[self_type][action]["imgNum"]
+
+#储存角色音效的常量
+__CHARACTERS_SOUND_DICT = {}
+__CHARACTERS_SOUND_CHANNEL = 5
+def _load_sound_to_CHARACTERS_SOUND_DICT(self_type):
+    if self_type not in __CHARACTERS_SOUND_DICT:
+        if os.path.exists("Assets/sound/character/"+self_type):
+            sound_files = os.listdir("Assets/sound/character/{}/".format(self_type))
+            if len(sound_files) > 0:
+                volume = get_setting("Sound")["sound_effects"]
+                __CHARACTERS_SOUND_DICT[self_type] = {}
+                for kindOfSound in sound_files:
+                    __CHARACTERS_SOUND_DICT[self_type][kindOfSound] = []
+                    allSoundOfThatKind = glob.glob("Assets/sound/character/{}/{}/*".format(self_type,kindOfSound))
+                    if len(allSoundOfThatKind) > 0:
+                        for soundPath in allSoundOfThatKind:
+                            sound = pygame.mixer.Sound(soundPath)
+                            sound.set_volume(volume/100.0)
+                            __CHARACTERS_SOUND_DICT[self_type][kindOfSound].append(sound)
+    else:
+        pass
+def _play_CHARACTERS_SOUND(self_type,kind_of_sound):
+    if pygame.mixer.Channel(__CHARACTERS_SOUND_CHANNEL).get_busy() == False and self_type in __CHARACTERS_SOUND_DICT:
+        sound_list = __CHARACTERS_SOUND_DICT[self_type]
+        if kind_of_sound in sound_list:
+            sound_list = sound_list[kind_of_sound]
+            if len(sound_list) == 1:
+                pygame.mixer.Channel(__CHARACTERS_SOUND_CHANNEL).play(sound_list[0])
+            elif len(sound_list) > 1:
+                pygame.mixer.Channel(__CHARACTERS_SOUND_CHANNEL).play(sound_list[random.randint(0,len(sound_list)-1)])
+
 
 class Doll:
     def __init__(self,DATA,faction,mode):
@@ -32,6 +64,7 @@ class Doll:
         self.x = DATA["x"]
         self.y = DATA["y"]
         self.FONT = createFont(10)
+        _load_sound_to_CHARACTERS_SOUND_DICT(self.type)
     def decreaseHp(self,damage,result_of_round=None):
         self.current_hp-=damage
         if self.current_hp<=0:
@@ -41,6 +74,7 @@ class Doll:
             self.ImageGetHurt.x = -self.ImageGetHurt.width
             self.ImageGetHurt.set_alpha(255)
             self.ImageGetHurt.yToGo = 255
+            self.playSound("injured")
             result_of_round["times_characters_down"] += 1
         return result_of_round
     def heal(self,hpHealed):
@@ -179,6 +213,9 @@ class Doll:
                         elif "near" in self.effective_range and self.effective_range["near"] != None and self.effective_range["near"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["near"][1]:
                             attacking_range["near"].append((x,y))
         return attacking_range
+    #播放角色声音
+    def playSound(self,kind_of_sound):
+        _play_CHARACTERS_SOUND(self.type,kind_of_sound)
 
 #格里芬角色类
 class CharacterDataManager(Doll):
@@ -351,3 +388,30 @@ def loadCharacterData():
         with open("Data/character_data.yaml", "w", encoding='utf-8') as f:
             yaml.dump(loadData, f, allow_unicode=True)
     return loadData
+
+#射击音效 -- 频道2
+class AttackingSoundManager:
+    def __init__(self,volume,channel):
+        self.__soundsData = {
+            #突击步枪
+            "AR": glob.glob(r'Assets/sound/attack/ar_*.ogg'),
+            #手枪
+            "HG": glob.glob(r'Assets/sound/attack/hg_*.ogg'),
+            #机枪
+            "MG": glob.glob(r'Assets/sound/attack/mg_*.ogg'),
+            #步枪
+            "RF": glob.glob(r'Assets/sound/attack/rf_*.ogg'),
+            #冲锋枪
+            "SMG": glob.glob(r'Assets/sound/attack/smg_*.ogg'),
+        }
+        self.__channel = channel
+        self.volume = volume
+        for key in self.__soundsData:
+            for i in range(len(self.__soundsData[key])):
+                self.__soundsData[key][i] = pygame.mixer.Sound(self.__soundsData[key][i])
+                self.__soundsData[key][i].set_volume(volume/100.0)
+    def set_channel(self,channel):
+        self.__channel = channel
+    def play(self,kind):
+        if kind in self.__soundsData:
+            pygame.mixer.Channel(self.__channel).play(self.__soundsData[kind][random.randint(0,len(self.__soundsData[kind])-1)])

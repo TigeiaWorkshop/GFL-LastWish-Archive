@@ -109,31 +109,6 @@ class DisplayController:
 #帧率控制器
 display = DisplayController(get_setting("FPS"))
 
-#射击音效 -- 频道2
-class AttackingSoundManager:
-    def __init__(self,channel,volume):
-        self.__soundsData = {
-            #突击步枪
-            "AR": glob.glob(r'Assets/sound/attack/ar_*.ogg'),
-            #手枪
-            "HG": glob.glob(r'Assets/sound/attack/hg_*.ogg'),
-            #机枪
-            "MG": glob.glob(r'Assets/sound/attack/mg_*.ogg'),
-            #步枪
-            "RF": glob.glob(r'Assets/sound/attack/rf_*.ogg'),
-            #冲锋枪
-            "SMG": glob.glob(r'Assets/sound/attack/smg_*.ogg'),
-        }
-        self.__channel = channel
-        self.volume = volume
-        for key in self.__soundsData:
-            for i in range(len(self.__soundsData[key])):
-                self.__soundsData[key][i] = pygame.mixer.Sound(self.__soundsData[key][i])
-                self.__soundsData[key][i].set_volume(volume/100.0)
-    def play(self,kind):
-        if kind in self.__soundsData:
-            pygame.mixer.Channel(self.__channel).play(self.__soundsData[kind][random.randint(0,len(self.__soundsData[kind])-1)])
-
 #环境系统
 class WeatherSystem:
     def  __init__(self,weather,window_x,window_y):
