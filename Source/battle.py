@@ -732,6 +732,7 @@ def battle(chapter_name,screen,setting):
                             else:
                                 characters_data[the_character_get_click].setFlip(False)
                         characters_data[the_character_get_click].current_action_point -= 8
+                        characters_data[the_character_get_click].playSound("skill")
                         isWaiting = False
                         green_hide = True
                         skill_range = None
@@ -755,8 +756,9 @@ def battle(chapter_name,screen,setting):
                                 attacking_range = None
                                 skill_range = None
                                 areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-                                characters_data[key].playSound("get_click")
-                                the_character_get_click = key
+                                if the_character_get_click != key:
+                                    characters_data[key].playSound("get_click")
+                                    the_character_get_click = key
                                 characterInfoBoardUI.update()
                                 friendsCanSave = []
                                 for key2 in characters_data:

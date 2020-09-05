@@ -133,7 +133,8 @@ class MapObject:
                                 charatcersPos.append((int(dataDic.x),int(dataDic.y)))
                                 charatcersPos.append((int(dataDic.x)+1,int(dataDic.y)+1))
                         if (value2["x"],value2["y"]) in charatcersPos:
-                            imgToBlit.set_alpha(100)
+                            if self.darkMode == False or (value2["x"],value2["y"]) in self.lightArea:
+                                imgToBlit.set_alpha(100)
                     elif key == "decoration" or key == "obstacle":
                         try:
                             imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))

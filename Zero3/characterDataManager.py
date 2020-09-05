@@ -32,7 +32,7 @@ def _load_sound_to_CHARACTERS_SOUND_DICT(self_type):
     else:
         pass
 def _play_CHARACTERS_SOUND(self_type,kind_of_sound):
-    if pygame.mixer.Channel(__CHARACTERS_SOUND_CHANNEL).get_busy() == False and self_type in __CHARACTERS_SOUND_DICT:
+    if self_type in __CHARACTERS_SOUND_DICT:
         sound_list = __CHARACTERS_SOUND_DICT[self_type]
         if kind_of_sound in sound_list:
             sound_list = sound_list[kind_of_sound]
@@ -339,6 +339,17 @@ def character_gif_dic(character_name,faction,mode):
         raise Exception('ZeroEngine-Error: Mode is not supported.')
     return imgId_dict
 
+#为角色创建用于储存音效的文件夹
+def autoMkdirForCharacterSounds():
+    for each_character in os.listdir("Assets/image/character/"):
+        path = os.path.join("Assets/sound/character",each_character)
+        if not os.path.exists(path):
+            os.mkdir(path)
+            os.mkdir(path+"/attack")
+            os.mkdir(path+"/get_click")
+            os.mkdir(path+"/injured")
+            os.mkdir(path+"/skill")
+
 #加载并更新更新位于Data中的角色数据配置文件-character_data.yaml
 def loadCharacterData():
     with open("Data/character_data.yaml", "r", encoding='utf-8') as f:
@@ -387,6 +398,7 @@ def loadCharacterData():
     if ifAnythingChange == True:
         with open("Data/character_data.yaml", "w", encoding='utf-8') as f:
             yaml.dump(loadData, f, allow_unicode=True)
+    autoMkdirForCharacterSounds()
     return loadData
 
 #射击音效 -- 频道2
