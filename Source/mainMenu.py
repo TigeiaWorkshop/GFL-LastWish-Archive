@@ -3,7 +3,6 @@ from Source.battle import *
 from Source.dialog import *
 from Source.mapCreator import *
 from Source.dialogCreator import *
-import Zero3 as Zero
 
 def mainMenu(screen,setting):
     #获取屏幕的尺寸

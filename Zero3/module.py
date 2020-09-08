@@ -326,7 +326,7 @@ class ButtonWithDes(Button):
 #输入管理组件
 class GameController:
     def __init__(self,mouse_icon_width,speed,custom=False):
-        self.joystick = Joystick()
+        self.joystick = SingleJoystick()
         if custom == True:
             pygame.mouse.set_visible(False)
             self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(mouse_icon_width),int(mouse_icon_width*1.3)))
@@ -355,16 +355,16 @@ class GameController:
         return self.mouse_x,self.mouse_y
 
 #手柄控制组件
-class Joystick:
+class SingleJoystick:
     def __init__(self):
         if pygame.joystick.get_init() == False:
             pygame.joystick.init()
-        if pygame.joystick.get_count()>0:
+        self.inputController = None
+        self.update_device()
+    def update_device(self):
+        if self.inputController == None and pygame.joystick.get_count()>0:
             self.inputController = pygame.joystick.Joystick(0)
             self.inputController.init()
-        else:
-            self.inputController = None
-            pygame.joystick.quit()
     def get_init(self):
         if self.inputController != None:
             return self.inputController.get_init()
@@ -573,7 +573,7 @@ class SingleLineInputBox(InputBoxInterface):
         elif event.key == pygame.K_RIGHT and self.holderIndex < len(self._text):
             self.holderIndex += 1
             return True
-        elif event.key == pygame.K_v:
+        elif event.key == pygame.K_LCTRL and pygame.key.get_pressed()[pygame.K_v] or event.key == pygame.K_v and pygame.key.get_pressed()[pygame.K_LCTRL]:
             self._add_char(Tk().clipboard_get())
             return True
         return False
@@ -648,9 +648,23 @@ class MultipleLinesInputBox(InputBoxInterface):
         self._reset_inputbox_height()
     def _add_char(self,char):
         if len(char) > 0:
-            self._text[self.lineId] = self._text[self.lineId][:self.holderIndex]+char+self._text[self.lineId][self.holderIndex:]
-            self.holderIndex += len(char)
-            self._reset_inputbox_width()
+            if "\n" not in char:
+                self._text[self.lineId] = self._text[self.lineId][:self.holderIndex]+char+self._text[self.lineId][self.holderIndex:]
+                self.holderIndex += len(char)
+                self._reset_inputbox_width()
+            else:
+                theStringAfterHolderIndex = self._text[self.lineId][self.holderIndex:]
+                self._text[self.lineId] = self._text[self.lineId][:self.holderIndex]
+                for i in range(len(char)-1):
+                    if char[i] != '\n':
+                        self._text[self.lineId] += char[i]
+                        self.holderIndex += 1
+                    else:
+                        self.lineId += 1
+                        self._text.insert(self.lineId,"")
+                        self.holderIndex = 0
+                self._text[self.lineId] += theStringAfterHolderIndex
+                self._reset_inputbox_size()
         else:
             print('ZeroEngine-Warning: The value of event.unicode is empty!')
     #删除对应字符
@@ -722,6 +736,9 @@ class MultipleLinesInputBox(InputBoxInterface):
                         self.lineId += 1
                         if self.holderIndex > len(self._text[self.lineId])-1:
                             self.holderIndex = len(self._text[self.lineId])-1
+                    elif event.key == pygame.K_LCTRL and pygame.key.get_pressed()[pygame.K_v] or event.key == pygame.K_v and pygame.key.get_pressed()[pygame.K_LCTRL]:
+                        self._add_char(Tk().clipboard_get())
+                        return True
                     #ESC，关闭
                     elif event.key == pygame.K_ESCAPE:
                         self.active = False

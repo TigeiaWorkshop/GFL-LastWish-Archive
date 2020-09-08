@@ -1,5 +1,5 @@
 # cython: language_level=3
-import Zero3 as Zero
+from Source.init import *
 
 def dialogCreator(chapter_name,screen,setting,part):
     #卸载音乐

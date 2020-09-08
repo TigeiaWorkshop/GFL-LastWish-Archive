@@ -1,11 +1,5 @@
 # cython: language_level=3
 from Source.skills import *
-import Zero3 as Zero
-import pygame
-import yaml
-import glob
-import time
-import random
 
 def battle(chapter_name,screen,setting):
     """初始化基础数据"""
@@ -587,11 +581,11 @@ def battle(chapter_name,screen,setting):
                 theMap.perBlockWidth = newPerBlockWidth
                 perBlockHeight = newPerBlockHeight
                 #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
-                UI_img["green"] = resizeImg(original_UI_img["green"], (theMap.perBlockWidth*0.8, None))
-                UI_img["red"] = resizeImg(original_UI_img["red"], (theMap.perBlockWidth*0.8, None))
-                UI_img["yellow"] = resizeImg(original_UI_img["yellow"], (theMap.perBlockWidth*0.8, None))
-                UI_img["blue"] = resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None))
-                UI_img["orange"] = resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
+                UI_img["green"] = Zero.resizeImg(original_UI_img["green"], (theMap.perBlockWidth*0.8, None))
+                UI_img["red"] = Zero.resizeImg(original_UI_img["red"], (theMap.perBlockWidth*0.8, None))
+                UI_img["yellow"] = Zero.resizeImg(original_UI_img["yellow"], (theMap.perBlockWidth*0.8, None))
+                UI_img["blue"] = Zero.resizeImg(original_UI_img["blue"], (theMap.perBlockWidth*0.8, None))
+                UI_img["orange"] = Zero.resizeImg(original_UI_img["orange"], (theMap.perBlockWidth*0.8, None))
                 theMap.changePerBlockSize(theMap.perBlockWidth,window_x,window_y)
                 selectMenuUI.allButton = None
             else:
@@ -1423,7 +1417,7 @@ def battle(chapter_name,screen,setting):
             #结束动画
             if whose_round == "result_win":
                 resultInfo["total_time"] = time.localtime(time.time()-resultInfo["total_time"])
-                ResultBoardUI = ResultBoard(resultTxt,resultInfo,window_x,window_y)
+                ResultBoardUI = Zero.ResultBoard(resultTxt,resultInfo,window_x,window_y)
 
                 whose_round = "result"
             

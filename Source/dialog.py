@@ -1,5 +1,5 @@
 # cython: language_level=3
-import Zero3 as Zero
+from Source.init import *
 
 def dialog(chapter_name,screen,setting,part):
     #加载闸门动画的图片素材

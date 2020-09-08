@@ -1,14 +1,9 @@
 # cython: language_level=3
-import Zero3 as Zero
-import pygame
-import yaml
-import glob
-import random
+from Source.init import *
 
 def mapCreator(chapterName,screen,setting):
     #屏幕尺寸
-    window_x = screen.get_width()
-    window_y = screen.get_height()
+    window_x,window_y = screen.get_size()
     #窗口标题
     Zero.display.set_caption("Girls frontline-Last Wish: MapCreator") 
     #卸载音乐
