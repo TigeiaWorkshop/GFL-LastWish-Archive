@@ -527,10 +527,11 @@ class NpcImageSystem:
         self.npcThisRoundImgAlpha = 0
         self.npcBothRound = []
         self.communication = pygame.image.load(os.path.join("Assets/image/UI/communication.png")).convert_alpha()
+        self.__NPC_IMAGE_DATABASE = NpcImageDatabase()
+        self.img_width = int(get_setting("Screen_size_x")/2)
     def devMode(self):
-        img_width = int(get_setting("Screen_size_x")/2)
         for imgPath in glob.glob("Assets/image/npc/*"):
-            self.__loadNpcImg(imgPath,img_width)
+            self.__loadNpcImg(self.imgPath,self.img_width)
     def __loadNpcImg(self,path,width):
         name = os.path.basename(path)
         self.imgDic[name] = {"normal":pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(),(width,width))}
@@ -541,22 +542,21 @@ class NpcImageSystem:
         if alpha <= 0:
             return False
         nameTemp = name.replace("&communication","").replace("&dark","")
-        img_width = int(screen.get_width()/2)
         #加载npc的基础立绘
         if nameTemp not in self.imgDic:
-            self.__loadNpcImg(os.path.join("Assets/image/npc",nameTemp),img_width)
+            self.__loadNpcImg(os.path.join("Assets/image/npc",nameTemp),self.img_width)
         if "&communication" in name:
             if "communication" not in self.imgDic[nameTemp]:
                 #生成通讯图片
-                self.imgDic[nameTemp]["communication"] = pygame.Surface((int(img_width/1.9), int(img_width/1.8)), flags=pygame.SRCALPHA)
-                self.imgDic[nameTemp]["communication"].blit(self.imgDic[nameTemp]["normal"],(-int(img_width/4),0))
-                self.imgDic[nameTemp]["communication"].blit(pygame.transform.scale(self.communication,(int(img_width/1.9), int(img_width/1.7))),(0,0))
+                self.imgDic[nameTemp]["communication"] = pygame.Surface((int(self.img_width/1.9), int(self.img_width/1.8)), flags=pygame.SRCALPHA)
+                self.imgDic[nameTemp]["communication"].blit(self.imgDic[nameTemp]["normal"],(-int(self.img_width/4),0))
+                self.imgDic[nameTemp]["communication"].blit(pygame.transform.scale(self.communication,(int(self.img_width/1.9), int(self.img_width/1.7))),(0,0))
                 #生成深色的通讯图片
                 self.imgDic[nameTemp]["communication_dark"] = self.imgDic[nameTemp]["communication"].copy()
-                dark = pygame.Surface((int(img_width/1.9), int(img_width/1.8)), flags=pygame.SRCALPHA).convert_alpha()
+                dark = pygame.Surface((int(self.img_width/1.9), int(self.img_width/1.8)), flags=pygame.SRCALPHA).convert_alpha()
                 dark.fill((50,50,50))
                 self.imgDic[nameTemp]["communication_dark"].blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
-            x+=int(img_width/4)
+            x+=int(self.img_width/4)
             if "&dark" in name:
                 img = self.imgDic[nameTemp]["communication_dark"]
             else:
@@ -574,32 +574,36 @@ class NpcImageSystem:
         if self.npcLastRoundImgAlpha != 0 and len(self.npcLastRound)>0:
             #调整alpha值
             self.npcLastRoundImgAlpha -= 15
+            #x_moved = self.img_width/4-self.img_width/4*self.npcLastRoundImgAlpha/255
+            x_moved = 0
             #画上上一幕的立绘
             if len(self.npcLastRound)==2:
                 if self.npcLastRound[0] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcLastRound[0],0,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcLastRound[0],x_moved,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
                 if self.npcLastRound[1] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcLastRound[1],window_x/2,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcLastRound[1],window_x/2+x_moved,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
             elif len(self.npcLastRound)==1 and self.npcLastRound[0] not in self.npcBothRound:
-                self.displayTheNpc(self.npcLastRound[0],window_x/4,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
+                self.displayTheNpc(self.npcLastRound[0],window_x/4+x_moved,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
         #加载对话人物立绘
         if len(self.npcThisRound)>0:
             #调整alpha值
             if self.npcThisRoundImgAlpha < 255:
                 self.npcThisRoundImgAlpha += 25
+            #x_moved = self.img_width/4*self.npcThisRoundImgAlpha/255-self.img_width/4
+            x_moved = 0
             #画上当前幕的立绘
             if len(self.npcThisRound)==2:
                 if self.npcThisRound[0] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcThisRound[0],0,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[0],x_moved,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
                 else:
                     self.displayTheNpc(self.npcThisRound[0],0,window_y-window_x/2,255,screen)
                 if self.npcThisRound[1] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcThisRound[1],window_x/2,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[1],window_x/2+x_moved,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
                 else:
                     self.displayTheNpc(self.npcThisRound[1],window_x/2,window_y-window_x/2,255,screen)
             elif len(self.npcThisRound)==1:
                 if self.npcThisRound[0] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcThisRound[0],window_x/4,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[0],window_x/4+x_moved,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
                 else:
                     self.displayTheNpc(self.npcThisRound[0],window_x/4,window_y-window_x/2,255,screen)
     def process(self,lastRoundCharacterNameList,thisRoundCharacterNameList):
@@ -611,6 +615,32 @@ class NpcImageSystem:
             self.npcThisRound = []
         else:
             self.npcThisRound = thisRoundCharacterNameList
+        """
+        if len(self.npcLastRound) == len(self.npcThisRound):
+            if len(self.npcLastRound) == 1:
+                if not self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[0]):
+                    self.change_image_action.append({"remove":0})
+                    self.change_image_action.append({"append":0})
+            elif len(self.npcLastRound) == 2:
+                if self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[0]) and self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[1],self.npcThisRound[1]):
+                    pass
+                elif self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[0]):
+                    self.change_image_action.append({"remove":1})
+                    self.change_image_action.append({"append":1})
+                elif self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[1],self.npcThisRound[1]):
+                    self.change_image_action.append({"remove":0})
+                    self.change_image_action.append({"append":0})
+                else:
+                    self.change_image_action.append({"remove":0})
+                    self.change_image_action.append({"append":0})
+                    self.change_image_action.append({"remove":1})
+                    self.change_image_action.append({"append":1})
+            else:
+                raise Exception('ZeroEngine-Error: Sorry but Zero Engine currently does not support more than two NPC images !')
+        else:
+            if len(self.npcLastRound) == 1:
+                if len(self.npcThisRound) == 0:
+        """
         self.npcLastRoundImgAlpha = 255
         self.npcThisRoundImgAlpha = 5
         self.npcBothRound = []
@@ -879,3 +909,29 @@ class DialogButtons:
         else:
             self.autoMode = False
             self.autoIconDegree = 0
+
+#立绘配置信息数据库
+class NpcImageDatabase:
+    def __init__(self):
+        with open("Data/npcImageDatabase.yaml","r",encoding='utf-8') as f:
+            self.__DATA = yaml.load(f.read(),Loader=yaml.FullLoader)["Data"]
+    def get_kind(self,fileName):
+        for key in self.__DATA:
+            if fileName in self.__DATA[key]:
+                return key
+        return None
+    def ifSameKind(self,fileName1,fileName2):
+        fileName1 = fileName1.replace("&communication","").replace("&dark","")
+        fileName2 = fileName2.replace("&communication","").replace("&dark","")
+        for key in self.__DATA:
+            if fileName1 in self.__DATA[key]:
+                if fileName2 in self.__DATA[key]:
+                    return True
+                else:
+                    return False
+            elif fileName2 in self.__DATA[key]:
+                if fileName1 in self.__DATA[key]:
+                    return True
+                else:
+                    return False
+        return False
