@@ -525,13 +525,13 @@ class NpcImageSystem:
         self.npcLastRoundImgAlpha = 255
         self.npcThisRound = []
         self.npcThisRoundImgAlpha = 0
-        self.npcBothRound = []
         self.communication = pygame.image.load(os.path.join("Assets/image/UI/communication.png")).convert_alpha()
         self.__NPC_IMAGE_DATABASE = NpcImageDatabase()
         self.img_width = int(get_setting("Screen_size_x")/2)
+        self.move_x = 0
     def devMode(self):
         for imgPath in glob.glob("Assets/image/npc/*"):
-            self.__loadNpcImg(self.imgPath,self.img_width)
+            self.__loadNpcImg(imgPath,self.img_width)
     def __loadNpcImg(self,path,width):
         name = os.path.basename(path)
         self.imgDic[name] = {"normal":pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(),(width,width))}
@@ -571,41 +571,92 @@ class NpcImageSystem:
     def display(self,screen):
         window_x = screen.get_width()
         window_y = screen.get_height()
-        if self.npcLastRoundImgAlpha != 0 and len(self.npcLastRound)>0:
-            #调整alpha值
+        npcImg_y = window_y-window_x/2
+        #调整alpha值
+        if self.npcLastRoundImgAlpha > 0:
             self.npcLastRoundImgAlpha -= 15
-            #x_moved = self.img_width/4-self.img_width/4*self.npcLastRoundImgAlpha/255
-            x_moved = 0
-            #画上上一幕的立绘
-            if len(self.npcLastRound)==2:
-                if self.npcLastRound[0] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcLastRound[0],x_moved,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
-                if self.npcLastRound[1] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcLastRound[1],window_x/2+x_moved,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
-            elif len(self.npcLastRound)==1 and self.npcLastRound[0] not in self.npcBothRound:
-                self.displayTheNpc(self.npcLastRound[0],window_x/4+x_moved,window_y-window_x/2,self.npcLastRoundImgAlpha,screen)
-        #加载对话人物立绘
-        if len(self.npcThisRound)>0:
-            #调整alpha值
-            if self.npcThisRoundImgAlpha < 255:
-                self.npcThisRoundImgAlpha += 25
-            #x_moved = self.img_width/4*self.npcThisRoundImgAlpha/255-self.img_width/4
-            x_moved = 0
-            #画上当前幕的立绘
-            if len(self.npcThisRound)==2:
-                if self.npcThisRound[0] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcThisRound[0],x_moved,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+            x_moved_forNpcLastRound = self.img_width/4-self.img_width/4*self.npcLastRoundImgAlpha/255
+        else:
+            x_moved_forNpcLastRound = 0
+        if self.npcThisRoundImgAlpha < 255:
+            self.npcThisRoundImgAlpha += 25
+            x_moved_forNpcThisRound = self.img_width/4*self.npcThisRoundImgAlpha/255-self.img_width/4
+        else:
+            x_moved_forNpcThisRound = 0
+        #画上上一幕的立绘
+        if len(self.npcLastRound) == 0:
+            #前后都无立绘，那干嘛要显示东西
+            if len(self.npcThisRound) == 0:
+                pass
+            #新增中间那个立绘
+            elif len(self.npcThisRound) == 1:
+                self.displayTheNpc(self.npcThisRound[0],window_x/4+x_moved_forNpcThisRound,npcImg_y,self.npcThisRoundImgAlpha,screen)
+            #同时新增左右两边的立绘
+            elif len(self.npcThisRound) == 2:
+                self.displayTheNpc(self.npcThisRound[0],x_moved_forNpcThisRound,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                self.displayTheNpc(self.npcThisRound[1],window_x/2+x_moved_forNpcThisRound,npcImg_y,self.npcThisRoundImgAlpha,screen)
+        elif len(self.npcLastRound) == 1:
+            #很快不再需要显示原来中间的立绘
+            if len(self.npcThisRound) == 0:
+                self.displayTheNpc(self.npcLastRound[0],window_x/4+x_moved_forNpcLastRound,npcImg_y,self.npcLastRoundImgAlpha,screen)
+            #更换中间的立绘
+            elif len(self.npcThisRound) == 1:
+                self.displayTheNpc(self.npcLastRound[0],window_x/4,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                self.displayTheNpc(self.npcThisRound[0],window_x/4,npcImg_y,self.npcThisRoundImgAlpha,screen)
+            elif len(self.npcThisRound) == 2:
+                #如果之前的中间变成了现在的左边，则立绘应该先向左移动
+                if self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[0]):
+                    if self.move_x+window_x/4 > 0:
+                        self.move_x -= window_x/40
+                    #显示左边立绘
+                    self.displayTheNpc(self.npcLastRound[0],self.move_x+window_x/4,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[0],self.move_x+window_x/4,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                    #显示右边立绘
+                    self.displayTheNpc(self.npcThisRound[1],window_x/2,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                #如果之前的中间变成了现在的右边，则立绘应该先向右移动 - checked
+                elif self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[1]):
+                    if self.move_x+window_x/4 < window_x/2:
+                        self.move_x += window_x/40
+                    #显示左边立绘
+                    self.displayTheNpc(self.npcThisRound[0],0,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                    #显示右边立绘
+                    self.displayTheNpc(self.npcLastRound[0],self.move_x+window_x/4,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[1],self.move_x+window_x/4,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                #之前的中间和现在两边无任何关系，先隐藏之前的立绘，然后显示现在的立绘 - checked
                 else:
-                    self.displayTheNpc(self.npcThisRound[0],0,window_y-window_x/2,255,screen)
-                if self.npcThisRound[1] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcThisRound[1],window_x/2+x_moved,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
+                    if self.npcLastRoundImgAlpha > 0:
+                        self.npcThisRoundImgAlpha -= 25
+                        self.displayTheNpc(self.npcLastRound[0],window_x/4,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    else:
+                        self.displayTheNpc(self.npcThisRound[0],0,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                        self.displayTheNpc(self.npcThisRound[1],window_x/2,npcImg_y,self.npcThisRoundImgAlpha,screen)
+        elif len(self.npcLastRound)==2:
+            #隐藏之前的左右两边立绘
+            if len(self.npcThisRound) == 0:
+                self.displayTheNpc(self.npcLastRound[0],x_moved_forNpcLastRound,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                self.displayTheNpc(self.npcLastRound[1],window_x/2+x_moved_forNpcLastRound,npcImg_y,self.npcLastRoundImgAlpha,screen)
+            elif len(self.npcThisRound) == 1:
+                """
+                NEED WORK
+                self.displayTheNpc(self.npcLastRound[0],window_x/4,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                self.displayTheNpc(self.npcThisRound[0],window_x/4,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                """
+                pass
+            elif len(self.npcThisRound) == 2:
+                if self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[1]) and self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[1],self.npcThisRound[0]):
+                    if self.move_x+window_x/2 > 0:
+                        self.move_x -= window_x/30
+                    #左边到右边去
+                    self.displayTheNpc(self.npcLastRound[0],-self.move_x,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[1],-self.move_x,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                    #右边到左边去
+                    self.displayTheNpc(self.npcLastRound[1],window_x/2+self.move_x,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[0],window_x/2+self.move_x,npcImg_y,self.npcThisRoundImgAlpha,screen)
                 else:
-                    self.displayTheNpc(self.npcThisRound[1],window_x/2,window_y-window_x/2,255,screen)
-            elif len(self.npcThisRound)==1:
-                if self.npcThisRound[0] not in self.npcBothRound:
-                    self.displayTheNpc(self.npcThisRound[0],window_x/4+x_moved,window_y-window_x/2,self.npcThisRoundImgAlpha,screen)
-                else:
-                    self.displayTheNpc(self.npcThisRound[0],window_x/4,window_y-window_x/2,255,screen)
+                    self.displayTheNpc(self.npcLastRound[0],0,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcLastRound[1],window_x/2,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[0],0,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[1],window_x/2,npcImg_y,self.npcThisRoundImgAlpha,screen)
     def process(self,lastRoundCharacterNameList,thisRoundCharacterNameList):
         if lastRoundCharacterNameList == None:
             self.npcLastRound = []
@@ -615,38 +666,9 @@ class NpcImageSystem:
             self.npcThisRound = []
         else:
             self.npcThisRound = thisRoundCharacterNameList
-        """
-        if len(self.npcLastRound) == len(self.npcThisRound):
-            if len(self.npcLastRound) == 1:
-                if not self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[0]):
-                    self.change_image_action.append({"remove":0})
-                    self.change_image_action.append({"append":0})
-            elif len(self.npcLastRound) == 2:
-                if self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[0]) and self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[1],self.npcThisRound[1]):
-                    pass
-                elif self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[0]):
-                    self.change_image_action.append({"remove":1})
-                    self.change_image_action.append({"append":1})
-                elif self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[1],self.npcThisRound[1]):
-                    self.change_image_action.append({"remove":0})
-                    self.change_image_action.append({"append":0})
-                else:
-                    self.change_image_action.append({"remove":0})
-                    self.change_image_action.append({"append":0})
-                    self.change_image_action.append({"remove":1})
-                    self.change_image_action.append({"append":1})
-            else:
-                raise Exception('ZeroEngine-Error: Sorry but Zero Engine currently does not support more than two NPC images !')
-        else:
-            if len(self.npcLastRound) == 1:
-                if len(self.npcThisRound) == 0:
-        """
         self.npcLastRoundImgAlpha = 255
         self.npcThisRoundImgAlpha = 5
-        self.npcBothRound = []
-        for name in self.npcThisRound:
-            if name in self.npcLastRound:
-                self.npcBothRound.append(name)
+        self.move_x = 0
 
 #对话框和对话框内容
 class DialogContent(DialogInterface):
