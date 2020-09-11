@@ -30,6 +30,8 @@ class ImageSurface:
             self.height = self.width/self.img.get_width()*self.img.get_height()
     def draw(self,screen,local_x=0,local_y=0):
         screen.blit(pygame.transform.scale(self.img, (round(self.width),round(self.height))),(self.x+local_x,self.y+local_y))
+    def display(self,screen,local_x=0,local_y=0):
+        self.draw(screen,local_x,local_y)
     def set_alpha(self,value):
         self.img.set_alpha(value)
     def get_alpha(self):
@@ -74,6 +76,8 @@ class DynamicImageSurface(ImageSurface):
                 self.y -= self.moveSpeed_y
             elif self.default_y > self.target_y and self.y < self.default_y:
                 self.y += self.moveSpeed_y
+    def display(self,screen,local_x=0,local_y=0):
+        self.draw(screen,local_x,local_y)
     def switch(self):
         self.__towardTargetPos = not self.__towardTargetPos
     def ifToward(self):
@@ -101,8 +105,12 @@ class DisplayController:
             pygame.display.update(rectangle)
     def set_caption(self,title):
         pygame.display.set_caption(title)
+    def get_width(self):
+        return get_setting("Screen_size_x")
+    def get_height(self):
+        return get_setting("Screen_size_y")
     def get_size(self):
-        return get_setting("Screen_size_x"),get_setting("Screen_size_y")
+        return self.get_width(),self.get_height()
     def quit(self):
         #退出游戏
         exit()
@@ -884,3 +892,25 @@ class Console(SingleLineInputBox):
 
 #初始化控制台模块
 console = Console(0,0)
+
+class GifObject:
+    def __init__(self,imgList,x,y,width,height,updateGap):
+        self.imgList = imgList
+        self.imgId = 0
+        self.x = x
+        self.y = y
+        self.width = int(width)
+        self.height = int(height)
+        self.updateGap = updateGap
+        self.countDown = 0
+    def display(self,screen):
+        screen.blit(pygame.transform.scale(self.imgList[self.imgId],(self.width,self.height)),(self.x,self.y))
+        if self.countDown == self.updateGap:
+            self.countDown = 0
+            self.imgId += 1
+            if self.imgId == len(self.imgList):
+                self.imgId = 0
+        else:
+            self.countDown += 1
+    def draw(self,screen):
+        self.display(screen)

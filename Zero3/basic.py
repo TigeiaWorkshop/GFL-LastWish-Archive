@@ -43,6 +43,9 @@ def loadImage(path,position,width=None,height=None,description="Default",ifConve
 def loadDynamicImage(path,position,target_position,moveSpeed=(0,0),width=None,height=None,description="Default",ifConvertAlpha=True):
     return DynamicImageSurface(imgLoadFunction(path,ifConvertAlpha),position[0],position[1],target_position[0],target_position[1],moveSpeed[0],moveSpeed[1],width,height,description)
 
+def loadGif(imgList,position,size,updateGap):
+    return GifObject(imgList,position[0],position[1],size[0],size[1],updateGap)
+
 #识别图片模块，用于引擎内加载图片，十分不建议在本文件外调用
 def imgLoadFunction(path,ifConvertAlpha):
     if isinstance(path,str):

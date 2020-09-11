@@ -116,7 +116,6 @@ class DialogSystem:
                     else:
                         pass
         #显示选项
-        
         if dialogPlayResult == True and self.dialog_content[self.dialogId]["next_dialog_id"] != None and self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "option":
             optionBox_y_base = (self.window_y*3/4-(len(self.dialog_content[self.dialogId]["next_dialog_id"]["target"]))*2*self.window_x*0.03)/4
             optionBox_height = int(self.window_x*0.05)
@@ -636,12 +635,31 @@ class NpcImageSystem:
                 self.displayTheNpc(self.npcLastRound[0],x_moved_forNpcLastRound,npcImg_y,self.npcLastRoundImgAlpha,screen)
                 self.displayTheNpc(self.npcLastRound[1],window_x/2+x_moved_forNpcLastRound,npcImg_y,self.npcLastRoundImgAlpha,screen)
             elif len(self.npcThisRound) == 1:
-                """
-                NEED WORK
-                self.displayTheNpc(self.npcLastRound[0],window_x/4,npcImg_y,self.npcLastRoundImgAlpha,screen)
-                self.displayTheNpc(self.npcThisRound[0],window_x/4,npcImg_y,self.npcThisRoundImgAlpha,screen)
-                """
-                pass
+                #如果之前的左边变成了现在的中间，则立绘应该先向右边移动
+                if self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[0]):
+                    if self.move_x < window_x/4:
+                        self.move_x += window_x/40
+                    #左边立绘向右移动
+                    self.displayTheNpc(self.npcLastRound[0],self.move_x,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[0],self.move_x,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                    #右边立绘消失
+                    self.displayTheNpc(self.npcLastRound[1],window_x/2,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                #如果之前的右边变成了现在的中间，则立绘应该先向左边移动
+                elif self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[1],self.npcThisRound[0]):
+                    if self.move_x+window_x/2 > window_x/4:
+                        self.move_x -= window_x/40
+                    #左边立绘消失
+                    self.displayTheNpc(self.npcLastRound[0],0,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    #右边立绘向左移动
+                    self.displayTheNpc(self.npcLastRound[1],self.move_x+window_x/2,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    self.displayTheNpc(self.npcThisRound[0],self.move_x+window_x/2,npcImg_y,self.npcThisRoundImgAlpha,screen)
+                else:
+                    if self.npcLastRoundImgAlpha > 0:
+                        self.npcThisRoundImgAlpha -= 25
+                        self.displayTheNpc(self.npcLastRound[0],0,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                        self.displayTheNpc(self.npcLastRound[1],window_x/2,npcImg_y,self.npcLastRoundImgAlpha,screen)
+                    else:
+                        self.displayTheNpc(self.npcThisRound[0],window_x/4,npcImg_y,self.npcThisRoundImgAlpha,screen)
             elif len(self.npcThisRound) == 2:
                 if self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[0],self.npcThisRound[1]) and self.__NPC_IMAGE_DATABASE.ifSameKind(self.npcLastRound[1],self.npcThisRound[0]):
                     if self.move_x+window_x/2 > 0:
@@ -680,9 +698,7 @@ class DialogContent(DialogInterface):
         self.dialoguebox_height = 0
         self.dialoguebox_max_height = None
         #鼠标图标
-        self.mouseImg_none = pygame.image.load(os.path.join("Assets/image/UI/mouse_none.png")).convert_alpha()
-        self.mouseImg_click = pygame.image.load(os.path.join("Assets/image/UI/mouse.png")).convert_alpha()
-        self.mouse_gif_id = 0
+        self.mouseImg = loadGif((pygame.image.load(os.path.join("Assets/image/UI/mouse_none.png")).convert_alpha(),pygame.image.load(os.path.join("Assets/image/UI/mouse.png")).convert_alpha()),(display.get_width()*0.82,display.get_height()*0.83),(self.FONTSIZE,self.FONTSIZE),50)
         self.ifHide = False
         self.readTime = 0
         self.totalLetters = 0
@@ -730,16 +746,8 @@ class DialogContent(DialogInterface):
                 #写上当前讲话人的名字
                 if self.narrator != None:
                     screen.blit(self.FONT.render(self.narrator,get_fontMode(),(255, 255, 255)),(x,self.dialoguebox_y+self.FONTSIZE))
-                #鼠标gif的ID
-                if self.mouse_gif_id<100:
-                    self.mouse_gif_id += 0.25
-                else:
-                    self.mouse_gif_id = 0
-                #根据ID画出鼠标gif
-                if int(self.mouse_gif_id/10)%2==0:
-                    screen.blit(pygame.transform.scale(self.mouseImg_none,(self.FONTSIZE,self.FONTSIZE)),(screen.get_width()*0.82,screen.get_height()*0.83))
-                else:
-                    screen.blit(pygame.transform.scale(self.mouseImg_click,(self.FONTSIZE,self.FONTSIZE)),(screen.get_width()*0.82,screen.get_height()*0.83))
+                #画出鼠标gif
+                self.mouseImg.display(screen)
                 #对话框已播放的内容
                 for i in range(self.displayedLine):
                     screen.blit(self.FONT.render(self.content[i],get_fontMode(),(255, 255, 255)),(x,y+self.FONTSIZE*1.5*i))
