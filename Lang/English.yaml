@@ -22,8 +22,10 @@ Dialog:
 DialogCreator:
   add: New dialog
   back: Back to main menu
+  background: Background Image
   delete: Delete current dialog
   next: Next dialog
+  npc: Npc
   please_enter_content: Content
   please_enter_name: Name
   previous: Previous dialog

@@ -290,15 +290,15 @@ class ApSystem:
 #按钮
 class Button:
     def __init__(self,path,x,y):
-        self.img = pygame.image.load(os.path.join(path)) if isinstance(path,str) else path
+        self.img = pygame.image.load(os.path.join(path)).convert_alpha() if isinstance(path,str) else path
         self.img2 = None
         self.hoverEventTriggered = False
         self.x = x
         self.y = y
     def setHoverImg(self,img):
         self.img2 = img
-    def display(self,screen):
-        screen.blit(self.img,(self.x,self.y))
+    def display(self,screen,local_x=0,local_y=0):
+        screen.blit(self.img,(self.x+local_x,self.y+local_y))
     def hoverEventOn(self):
         if self.img2 != None and self.hoverEventTriggered == False:
             tempSurface = self.img
@@ -311,6 +311,14 @@ class Button:
             self.img = self.img2
             self.img2 = tempSurface
             self.hoverEventTriggered = False
+    def draw(self,screen,local_x=0,local_y=0):
+        self.display(screen,local_x,local_y)
+    def get_width(self):
+        return self.img.get_width()
+    def get_height(self):
+        return self.img.get_height()
+    def get_size(self):
+        return self.img.get_size()
 
 class ButtonWithDes(Button):
     def __init__(self,path,x,y,width,height,des):
@@ -331,6 +339,15 @@ class ButtonWithDes(Button):
         if self.hoverEventTriggered == True:
             screen.blit(self.des_surface,pygame.mouse.get_pos())
 
+class ButtonWithFadeInOut(Button):
+    def __init__(self,buttonImgPath,txt,txt_color,alphaWhenNotHovered,x,y,height):
+        Button.__init__(self,buttonImgPath,x,y)
+        txtSurface = fontRender(txt,txt_color,height*0.6)
+        self.img = pygame.transform.scale(self.img,(int(txtSurface.get_width()+height),int(height)))
+        self.img.blit(txtSurface,(height*0.5,height*0.15))
+        self.img2 = self.img.copy()
+        self.img.set_alpha(alphaWhenNotHovered)
+
 #输入管理组件
 class GameController:
     def __init__(self,mouse_icon_width,speed,custom=False):
@@ -343,6 +360,7 @@ class GameController:
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
         self.movingSpeed = speed
     def display(self,screen=None):
+        self.joystick.update_device()
         self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
         if self.joystick.inputController != None:
             if self.joystick.get_axis(0)>0.1 or self.joystick.get_axis(0)<-0.1:
@@ -373,6 +391,8 @@ class SingleJoystick:
         if self.inputController == None and pygame.joystick.get_count()>0:
             self.inputController = pygame.joystick.Joystick(0)
             self.inputController.init()
+        elif self.inputController != None and pygame.joystick.get_count()==0:
+            self.inputController = None
     def get_init(self):
         if self.inputController != None:
             return self.inputController.get_init()

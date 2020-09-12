@@ -253,8 +253,10 @@ class DialogSystemDev:
             "next": ButtonWithDes("Assets/image/UI/dialog_skip.png",button_width*4.75,button_y,button_width,button_width,CONFIG["next"]),
             "add": ButtonWithDes("Assets/image/UI/add.png",button_width*4.75,button_y,button_width,button_width,CONFIG["add"]),
             "reload": ButtonWithDes("Assets/image/UI/reload.png",button_width*6,button_y,button_width,button_width,CONFIG["reload"]),
-            "save": ButtonWithDes("Assets/image/UI/save.png",button_width*7.25,button_y,button_width,button_width,CONFIG["save"])
-        } 
+            "save": ButtonWithDes("Assets/image/UI/save.png",button_width*7.25,button_y,button_width,button_width,CONFIG["save"]),
+            "npc":ButtonWithFadeInOut("Assets/image/UI/menu.png",CONFIG["npc"],"black",100,10,10,button_width/3)
+        }
+        self.buttonsUI["background"] = ButtonWithFadeInOut("Assets/image/UI/menu.png",CONFIG["background"],"black",100,10+self.buttonsUI["npc"].get_width(),10,button_width/3)
         self.please_enter_content = CONFIG["please_enter_content"]
         self.please_enter_name = CONFIG["please_enter_name"]
         #加载背景图片
@@ -415,7 +417,7 @@ class DialogSystemDev:
                 if ifHover(self.buttonsUI["add"]):
                     buttonHovered = "add"
                 self.buttonsUI["add"].display(screen)
-            elif button != "add":
+            elif button != "add" and button != "npc" and button != "background":
                 if ifHover(self.buttonsUI[button]):
                     buttonHovered = button
                 self.buttonsUI[button].display(screen)
@@ -490,6 +492,10 @@ class DialogSystemDev:
         self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
         self.UIContainerRight.draw(screen)
         if self.UIContainerRight.x<self.window_x:
+            ifHover(self.buttonsUI["npc"],None,self.UIContainerRight.x)
+            ifHover(self.buttonsUI["background"],None,self.UIContainerRight.x)
+            self.buttonsUI["npc"].display(screen,self.UIContainerRight.x)
+            self.buttonsUI["background"].display(screen,self.UIContainerRight.x)
             imgName = self.dialogData[self.part][self.dialogId]["background_img"]
             if imgName != None:
                 imgTmp = resizeImg(self.all_background_image[imgName],(self.UIContainerRight.width*0.8,None))

@@ -96,24 +96,23 @@ def mapCreator(chapterName,screen,setting):
     UIContainerRightButton = Zero.loadImage("Assets/image/UI/container_button.png",(-window_x*0.03,window_y*0.4),int(window_x*0.04),int(window_y*0.2))
     UIContainerRight.rotate(90)
     UIContainerRightButton.rotate(90)
-    #按钮
-    UIButton = {
-        "save": Zero.loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*0.2,window_y*0.01),int(theMap.perBlockWidth*0.7)),
-        "back": Zero.loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*1,window_y*0.01),int(theMap.perBlockWidth*0.7)),
-        "delete": Zero.loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*1.8,window_y*0.01),int(theMap.perBlockWidth*0.7)),
-        "reload": Zero.loadImage("Assets/image/UI/menu.png",(theMap.perBlockWidth*2.6,window_y*0.01),int(theMap.perBlockWidth*0.7)),
-    }
-    UIButtonTxt = {}
-
-    #加载按钮的文字
-    with open("Lang/"+setting["Language"]+".yaml", "r", encoding='utf-8') as f:
-        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        for txt in UIButton:
-            UIButtonTxt[txt] = Zero.fontRender(loadData["MapCreator"][txt],"black",window_x/80)
-            
+    #UI按钮
+    MapCreatorLangTxt = Zero.get_lang("MapCreator")
+    UIButton = {}
+    UI_x = theMap.perBlockWidth*0.5
+    UI_y = int(window_y*0.02)
+    UI_height = int(theMap.perBlockWidth*0.3)
+    UIButton["save"] = Zero.ButtonWithFadeInOut("Assets/image/UI/menu.png",MapCreatorLangTxt["save"],"black",100,UI_x,UI_y,UI_height)
+    UI_x += UIButton["save"].get_width()+UI_height
+    UIButton["back"] = Zero.ButtonWithFadeInOut("Assets/image/UI/menu.png",MapCreatorLangTxt["back"],"black",100,UI_x,UI_y,UI_height)
+    UI_x += UIButton["back"].get_width()+UI_height
+    UIButton["delete"] = Zero.ButtonWithFadeInOut("Assets/image/UI/menu.png",MapCreatorLangTxt["delete"],"black",100,UI_x,UI_y,UI_height)
+    UI_x += UIButton["delete"].get_width()+UI_height
+    UIButton["reload"] = Zero.ButtonWithFadeInOut("Assets/image/UI/menu.png",MapCreatorLangTxt["reload"],"black",100,UI_x,UI_y,UI_height)
+    del UI_x,UI_y,UI_height
     #数据控制器
     data_to_edit = None
-
+    #其他函数
     UI_local_x = 0
     UI_local_y = 0
     screen_to_move_x=None
@@ -121,12 +120,11 @@ def mapCreator(chapterName,screen,setting):
     mouse_move_temp_x = -1
     mouse_move_temp_y = -1
     pressKeyToMove={"up":False,"down":False,"left":False,"right":False}
-
+    isBuilding = True
     #读取地图
     with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
         originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
 
-    isBuilding = True
     # 游戏主循环
     while isBuilding == True:
         ifProcessMap = False
@@ -385,17 +383,9 @@ def mapCreator(chapterName,screen,setting):
         UIContainerRightButton.draw(screen,UIContainerRight.x)
         UIContainerRight.draw(screen)
         for Image in UIButton:
-            if Zero.ifHover(UIButton[Image]) and object_to_put_down == None and deleteMode == False:
-                UIButton[Image].set_alpha(255)
-                UIButtonTxt[Image].set_alpha(255)
-            else:
-                UIButton[Image].set_alpha(100)
-                UIButtonTxt[Image].set_alpha(100)
-            UIButton[Image].draw(screen)
-            posTempX = UIButton[Image].x+(UIButton[Image].width - UIButtonTxt[Image].get_width())/2
-            posTempY = UIButton[Image].y+(UIButton[Image].height - UIButtonTxt[Image].get_height())/2
-            Zero.drawImg(UIButtonTxt[Image],(posTempX,posTempY),screen)
-            
+            Zero.ifHover(UIButton[Image])
+            UIButton[Image].display(screen)
+
         #显示所有可放置的友方角色
         i=0
         for every_chara in all_characters_img_list:
