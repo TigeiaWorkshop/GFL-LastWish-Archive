@@ -230,6 +230,9 @@ class DialogSystemDev:
         self.dialoguebox = loadImage("Assets/image/UI/dialoguebox.png",(self.window_x*0.13,self.window_y*0.65),self.window_x*0.74,self.window_y/4)
         self.narrator = SingleLineInputBox(self.window_x*0.2,self.dialoguebox.y+self.FONTSIZE,self.FONTSIZE,"white")
         self.content = MultipleLinesInputBox(self.window_x*0.2,self.window_y*0.73,self.FONTSIZE,"white")
+        #加载npc立绘系统并初始化
+        self.npc_img_dic = NpcImageSystem()
+        self.npc_img_dic.devMode()
         #从配置文件中加载数据
         self.__loadDialogData()
         #黑色帘幕
@@ -243,9 +246,14 @@ class DialogSystemDev:
         self.UIContainerRight.rotate(90)
         self.UIContainerRightButton.rotate(90)
         self.background_deselect = loadImg("Assets/image/UI/deselect.png")
+        self.UIContainerRight_kind = "background"
+        #UI按钮
         CONFIG = get_lang("DialogCreator")
         button_width = self.window_x*0.05
         button_y = self.window_y*0.03
+        self.button_select_background = ButtonWithFadeInOut("Assets/image/UI/menu.png",CONFIG["background"],"black",100,button_width/3,button_width/3,button_width/3)
+        self.button_select_npc = ButtonWithFadeInOut("Assets/image/UI/menu.png",CONFIG["npc"],"black",100,button_width/2+self.button_select_background.get_width(),button_width/3,button_width/3)
+        self.npc_local_y = 0
         self.buttonsUI = {
             "back": ButtonWithDes("Assets/image/UI/back.png",button_width,button_y,button_width,button_width,CONFIG["back"]),
             "delete": ButtonWithDes("Assets/image/UI/delete.png",button_width*2.25,button_y,button_width,button_width,CONFIG["delete"]),
@@ -253,10 +261,8 @@ class DialogSystemDev:
             "next": ButtonWithDes("Assets/image/UI/dialog_skip.png",button_width*4.75,button_y,button_width,button_width,CONFIG["next"]),
             "add": ButtonWithDes("Assets/image/UI/add.png",button_width*4.75,button_y,button_width,button_width,CONFIG["add"]),
             "reload": ButtonWithDes("Assets/image/UI/reload.png",button_width*6,button_y,button_width,button_width,CONFIG["reload"]),
-            "save": ButtonWithDes("Assets/image/UI/save.png",button_width*7.25,button_y,button_width,button_width,CONFIG["save"]),
-            "npc":ButtonWithFadeInOut("Assets/image/UI/menu.png",CONFIG["npc"],"black",100,10,10,button_width/3)
+            "save": ButtonWithDes("Assets/image/UI/save.png",button_width*7.25,button_y,button_width,button_width,CONFIG["save"])
         }
-        self.buttonsUI["background"] = ButtonWithFadeInOut("Assets/image/UI/menu.png",CONFIG["background"],"black",100,10+self.buttonsUI["npc"].get_width(),10,button_width/3)
         self.please_enter_content = CONFIG["please_enter_content"]
         self.please_enter_name = CONFIG["please_enter_name"]
         #加载背景图片
@@ -264,10 +270,7 @@ class DialogSystemDev:
         for imgPath in glob.glob("Assets/image/dialog_background/*"):
             self.all_background_image[os.path.basename(imgPath)] = loadImg(imgPath)
         self.background_image_local_y = self.window_y*0.1
-        #加载npc立绘系统并初始化
-        self.npc_img_dic = NpcImageSystem()
-        self.npc_img_dic.devMode()
-        self.npc_img_dic.process(None,self.dialogData[self.part][self.dialogId]["characters_img"])
+        
     #保存数据
     def __save(self):
         self.dialogData[self.part][self.dialogId]["narrator"] = self.narrator.get_text()
@@ -328,7 +331,7 @@ class DialogSystemDev:
                     self.dialogData["dialog_after_battle"][key] = currentDialog
         else:
             self.isDefault = True
-        self.__update_dialogbox()
+        self.__update_scene(self.dialogId)
     #更新场景
     def __update_scene(self,theNextDialogId):
         #重设立绘系统
@@ -417,7 +420,7 @@ class DialogSystemDev:
                 if ifHover(self.buttonsUI["add"]):
                     buttonHovered = "add"
                 self.buttonsUI["add"].display(screen)
-            elif button != "add" and button != "npc" and button != "background":
+            elif button != "add":
                 if ifHover(self.buttonsUI[button]):
                     buttonHovered = button
                 self.buttonsUI[button].display(screen)
@@ -488,37 +491,71 @@ class DialogSystemDev:
                         self.__loadDialogData()
                     else:
                         leftClick = True
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
+                    if self.UIContainerRight_kind == "npc":
+                        self.npc_local_y += 10
+                    elif self.UIContainerRight_kind == "background":
+                        self.background_image_local_y += 10
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
+                    if self.UIContainerRight_kind == "npc":
+                        self.npc_local_y -= 10
+                    elif self.UIContainerRight_kind == "background":
+                        self.background_image_local_y -= 10
         #画上右侧的菜单选项
         self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
         self.UIContainerRight.draw(screen)
         if self.UIContainerRight.x<self.window_x:
-            ifHover(self.buttonsUI["npc"],None,self.UIContainerRight.x)
-            ifHover(self.buttonsUI["background"],None,self.UIContainerRight.x)
-            self.buttonsUI["npc"].display(screen,self.UIContainerRight.x)
-            self.buttonsUI["background"].display(screen,self.UIContainerRight.x)
-            imgName = self.dialogData[self.part][self.dialogId]["background_img"]
-            if imgName != None:
-                imgTmp = resizeImg(self.all_background_image[imgName],(self.UIContainerRight.width*0.8,None))
-                pos = (self.UIContainerRight.x+self.UIContainerRight.width*0.1,self.background_image_local_y)
-                screen.blit(imgTmp,pos)
-                screen.blit(resizeImg(self.background_deselect,imgTmp.get_size()),pos)
-                if leftClick == True and ifHover(imgTmp,pos):
-                    self.dialogData[self.part][self.dialogId]["background_img"] = None
-                    leftClick = False
-                    i = 0
-                else:
-                    i = 1
-            else:
-                i = 0
-            for imgName in self.all_background_image:
-                if imgName != self.dialogData[self.part][self.dialogId]["background_img"]:
+            #检测按钮
+            if ifHover(self.button_select_background,None,self.UIContainerRight.x) and leftClick == True:
+                self.UIContainerRight_kind = "background"
+            if ifHover(self.button_select_npc,None,self.UIContainerRight.x) and leftClick == True:
+                self.UIContainerRight_kind = "npc"
+            #画出按钮
+            self.button_select_background.display(screen,self.UIContainerRight.x)
+            self.button_select_npc.display(screen,self.UIContainerRight.x)
+            #画出对应的种类可选的背景图片或者立绘
+            if self.UIContainerRight_kind == "background":
+                imgName = self.dialogData[self.part][self.dialogId]["background_img"]
+                if imgName != None:
                     imgTmp = resizeImg(self.all_background_image[imgName],(self.UIContainerRight.width*0.8,None))
-                    pos = (self.UIContainerRight.x+self.UIContainerRight.width*0.1,self.background_image_local_y+imgTmp.get_height()*1.5*i)
+                    pos = (self.UIContainerRight.x+self.UIContainerRight.width*0.1,self.background_image_local_y)
                     screen.blit(imgTmp,pos)
-                    i+=1
+                    screen.blit(resizeImg(self.background_deselect,imgTmp.get_size()),pos)
                     if leftClick == True and ifHover(imgTmp,pos):
-                        self.dialogData[self.part][self.dialogId]["background_img"] = imgName
+                        self.dialogData[self.part][self.dialogId]["background_img"] = None
                         leftClick = False
+                        i = 0
+                    else:
+                        i = 1
+                else:
+                    i = 0
+                for imgName in self.all_background_image:
+                    if imgName != self.dialogData[self.part][self.dialogId]["background_img"]:
+                        imgTmp = resizeImg(self.all_background_image[imgName],(self.UIContainerRight.width*0.8,None))
+                        pos = (self.UIContainerRight.x+self.UIContainerRight.width*0.1,self.background_image_local_y+imgTmp.get_height()*1.5*i)
+                        screen.blit(imgTmp,pos)
+                        i+=1
+                        if leftClick == True and ifHover(imgTmp,pos):
+                            self.dialogData[self.part][self.dialogId]["background_img"] = imgName
+                            leftClick = False
+            elif self.UIContainerRight_kind == "npc":
+                npc_local_y_temp = self.npc_local_y
+                for key,npcImage in self.npc_img_dic.imgDic.items():
+                    if npc_local_y_temp >= self.window_y:
+                        break
+                    else:
+                        imgTemp = resizeImg(npcImage["normal"],(self.UIContainerRight.width*0.8,None))
+                        if imgTemp.get_alpha() != 255:
+                            imgTemp.set_alpha(255)
+                        if npc_local_y_temp > -imgTemp.get_height():
+                            screen.blit(imgTemp,(self.UIContainerRight.x,npc_local_y_temp))
+                            if ifHover(imgTemp,(self.UIContainerRight.x,npc_local_y_temp)) and leftClick == True:
+                                if self.dialogData[self.part][self.dialogId]["characters_img"] == None:
+                                    self.dialogData[self.part][self.dialogId]["characters_img"] = []
+                                if len(self.dialogData[self.part][self.dialogId]["characters_img"]) < 2:
+                                    self.dialogData[self.part][self.dialogId]["characters_img"].append(key)
+                                    self.npc_img_dic.process(self.dialogData[self.part][self.dialogId]["characters_img"],self.dialogData[self.part][self.dialogId]["characters_img"])
+                        npc_local_y_temp += imgTemp.get_height()*1.1
         return False
 
 #npc立绘系统
