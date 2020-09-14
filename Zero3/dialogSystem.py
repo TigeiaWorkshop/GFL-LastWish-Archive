@@ -46,7 +46,7 @@ class DialogSystem:
         self.dialog_options = {}
         #加载npc立绘系统并初始化
         self.npc_img_dic = NpcImageSystem()
-        self.npc_img_dic.process(None,self.dialog_content[self.dialogId]["characters_img"])
+        self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"])
         self.showHistory = False
         self.historySurface = None
         self.historySurface_local_y = 0
@@ -63,7 +63,7 @@ class DialogSystem:
         #更新背景
         self.backgroundContent.update(self.dialog_content[theNextDialogId]["background_img"],self.dialog_content[theNextDialogId]["background_music"])
         #重设立绘系统
-        self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[theNextDialogId]["characters_img"])
+        self.npc_img_dic.process(self.dialog_content[theNextDialogId]["characters_img"])
         #切换dialogId
         self.dialogId = theNextDialogId
         self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
@@ -184,7 +184,7 @@ class DialogSystem:
                 pygame.time.wait(2000)
                 #重设立绘系统
                 theNextDialogId = self.dialog_content[self.dialogId]["next_dialog_id"]["target"]
-                self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"],self.dialog_content[theNextDialogId]["characters_img"])
+                self.npc_img_dic.process(self.dialog_content[theNextDialogId]["characters_img"])
                 self.dialogId = theNextDialogId
                 self.dialogTxtSystem.resetDialogueboxData()
                 self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
@@ -265,12 +265,16 @@ class DialogSystemDev:
         }
         self.please_enter_content = CONFIG["please_enter_content"]
         self.please_enter_name = CONFIG["please_enter_name"]
+        self.removeNpcButton = fontRender(CONFIG["removeNpc"],"black",self.FONTSIZE)
+        surfaceTmp = pygame.Surface((self.removeNpcButton.get_width()*1.2,self.FONTSIZE*1.2),flags=pygame.SRCALPHA).convert()
+        pygame.draw.rect(surfaceTmp,(255,255,255),(0,0, surfaceTmp.get_width(),surfaceTmp.get_height()))
+        surfaceTmp.blit(self.removeNpcButton,(self.removeNpcButton.get_width()*0.1,0))
+        self.removeNpcButton = surfaceTmp
         #加载背景图片
         self.all_background_image = {}
         for imgPath in glob.glob("Assets/image/dialog_background/*"):
             self.all_background_image[os.path.basename(imgPath)] = loadImg(imgPath)
         self.background_image_local_y = self.window_y*0.1
-        
     #保存数据
     def __save(self):
         self.dialogData[self.part][self.dialogId]["narrator"] = self.narrator.get_text()
@@ -335,7 +339,7 @@ class DialogSystemDev:
     #更新场景
     def __update_scene(self,theNextDialogId):
         #重设立绘系统
-        self.npc_img_dic.process(self.dialogData[self.part][self.dialogId]["characters_img"],self.dialogData[self.part][theNextDialogId]["characters_img"])
+        self.npc_img_dic.process(self.dialogData[self.part][theNextDialogId]["characters_img"])
         self.dialogId = theNextDialogId
         self.__update_dialogbox()
     #更新对话框
@@ -402,6 +406,8 @@ class DialogSystemDev:
             screen.blit(pygame.transform.scale(self.all_background_image[self.dialogData[self.part][self.dialogId]["background_img"]],(self.window_x,self.window_y)),(0,0))
         #画上NPC立绘
         self.npc_img_dic.display(screen)
+        if self.npc_img_dic.npc_get_click != None:
+            screen.blit(self.removeNpcButton,pygame.mouse.get_pos())
         #画上对话框
         self.dialoguebox.draw(screen)
         pygame_events = pygame.event.get()
@@ -489,6 +495,10 @@ class DialogSystemDev:
                         self.__save()
                     elif buttonHovered == "reload":
                         self.__loadDialogData()
+                    elif self.npc_img_dic.npc_get_click != None:
+                        self.dialogData[self.part][self.dialogId]["characters_img"].remove(self.npc_img_dic.npc_get_click)
+                        self.npc_img_dic.process(self.dialogData[self.part][self.dialogId]["characters_img"])
+                        self.npc_img_dic.npc_get_click = None
                     else:
                         leftClick = True
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
@@ -545,8 +555,6 @@ class DialogSystemDev:
                         break
                     else:
                         imgTemp = resizeImg(npcImage["normal"],(self.UIContainerRight.width*0.8,None))
-                        if imgTemp.get_alpha() != 255:
-                            imgTemp.set_alpha(255)
                         if npc_local_y_temp > -imgTemp.get_height():
                             screen.blit(imgTemp,(self.UIContainerRight.x,npc_local_y_temp))
                             if ifHover(imgTemp,(self.UIContainerRight.x,npc_local_y_temp)) and leftClick == True:
@@ -554,7 +562,7 @@ class DialogSystemDev:
                                     self.dialogData[self.part][self.dialogId]["characters_img"] = []
                                 if len(self.dialogData[self.part][self.dialogId]["characters_img"]) < 2:
                                     self.dialogData[self.part][self.dialogId]["characters_img"].append(key)
-                                    self.npc_img_dic.process(self.dialogData[self.part][self.dialogId]["characters_img"],self.dialogData[self.part][self.dialogId]["characters_img"])
+                                    self.npc_img_dic.process(self.dialogData[self.part][self.dialogId]["characters_img"])
                         npc_local_y_temp += imgTemp.get_height()*1.1
         return False
 
@@ -571,9 +579,12 @@ class NpcImageSystem:
         self.__NPC_IMAGE_DATABASE = NpcImageDatabase()
         self.img_width = int(get_setting("Screen_size_x")/2)
         self.move_x = 0
+        self.dev_mode = False
+        self.npc_get_click = None
     def devMode(self):
         for imgPath in glob.glob("Assets/image/npc/*"):
             self.__loadNpcImg(imgPath,self.img_width)
+            self.dev_mode = True
     def __loadNpcImg(self,path,width):
         name = os.path.basename(path)
         self.imgDic[name] = {"normal":pygame.transform.scale(pygame.image.load(os.path.join(path)).convert_alpha(),(width,width))}
@@ -600,16 +611,23 @@ class NpcImageSystem:
                 self.imgDic[nameTemp]["communication_dark"].blit(dark, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
             x+=int(self.img_width/4)
             if "&dark" in name:
-                img = self.imgDic[nameTemp]["communication_dark"]
+                img = self.imgDic[nameTemp]["communication_dark"].copy()
             else:
-                img = self.imgDic[nameTemp]["communication"]
+                img = self.imgDic[nameTemp]["communication"].copy()
         elif "&dark" in name:
-            img = self.imgDic[nameTemp]["dark"]
+            img = self.imgDic[nameTemp]["dark"].copy()
         else:
-            img = self.imgDic[nameTemp]["normal"]
-        if img.get_alpha() != alpha:
+            img = self.imgDic[nameTemp]["normal"].copy()
+        if alpha != 255:
             img.set_alpha(alpha)
-        screen.blit(img,(x,y))
+        if self.dev_mode == False:
+            screen.blit(img,(x,y))
+        else:
+            self.npc_get_click = None
+            if ifHover(img,(x,y)):
+                img.fill((60, 60, 60), special_flags=pygame.BLEND_RGB_ADD)
+                self.npc_get_click = name
+            screen.blit(img,(x,y))
     def display(self,screen):
         window_x = screen.get_width()
         window_y = screen.get_height()
@@ -718,15 +736,12 @@ class NpcImageSystem:
                     self.displayTheNpc(self.npcLastRound[1],window_x/2,npcImg_y,self.npcLastRoundImgAlpha,screen)
                     self.displayTheNpc(self.npcThisRound[0],0,npcImg_y,self.npcThisRoundImgAlpha,screen)
                     self.displayTheNpc(self.npcThisRound[1],window_x/2,npcImg_y,self.npcThisRoundImgAlpha,screen)
-    def process(self,lastRoundCharacterNameList,thisRoundCharacterNameList):
-        if lastRoundCharacterNameList == None:
-            self.npcLastRound = []
-        else:
-            self.npcLastRound = lastRoundCharacterNameList
-        if thisRoundCharacterNameList == None:
-            self.npcThisRound = []
-        else:
+    def process(self,thisRoundCharacterNameList):
+        self.npcLastRound = self.npcThisRound
+        if isinstance(thisRoundCharacterNameList,(list,tuple)):
             self.npcThisRound = thisRoundCharacterNameList
+        else:
+            self.npcThisRound = []
         self.npcLastRoundImgAlpha = 255
         self.npcThisRoundImgAlpha = 5
         self.move_x = 0

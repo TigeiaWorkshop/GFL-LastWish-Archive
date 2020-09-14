@@ -30,6 +30,7 @@ DialogCreator:
   please_enter_name: Name
   previous: Previous dialog
   reload: Reload configuration file
+  removeNpc: Remove this npc
   save: Save
 GameTitle: Girls' Frontline - Last wish
 LoadingTxt:

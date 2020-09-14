@@ -9,6 +9,7 @@ import platform
 from Zero3.font import *
 import time
 from tkinter import Tk
+from PIL import Image
 
 #高级图形类
 class ImageSurface:

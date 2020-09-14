@@ -30,6 +30,7 @@ DialogCreator:
   please_enter_name: 角色名
   previous: 上一个对话
   reload: 重新加载配置文件
+  removeNpc: 移除该角色
   save: 保存
 GameTitle: 少女前线-遗愿
 HealthyGamingAdvice:

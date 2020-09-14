@@ -43,7 +43,24 @@ def loadImage(path,position,width=None,height=None,description="Default",ifConve
 def loadDynamicImage(path,position,target_position,moveSpeed=(0,0),width=None,height=None,description="Default",ifConvertAlpha=True):
     return DynamicImageSurface(imgLoadFunction(path,ifConvertAlpha),position[0],position[1],target_position[0],target_position[1],moveSpeed[0],moveSpeed[1],width,height,description)
 
-def loadGif(imgList,position,size,updateGap):
+def loadGif(imgList,position,size,updateGap=1):
+    return GifObject(imgList,position[0],position[1],size[0],size[1],updateGap)
+
+def loadRealGif(path,position,size,updateGap=1):
+    gif_img = Image.open(path)
+    theFilePath = os.path.dirname(path)
+    imgList = []
+    try:
+        i = 0
+        while True:
+            gif_img.seek(i)
+            pathTmp = theFilePath+'/gifTempFileForLoading__'+str(i)+'.png'
+            gif_img.save(pathTmp)
+            imgList.append(pygame.image.load(os.path.join(pathTmp)).convert_alpha())
+            os.remove(pathTmp)
+            i += 1
+    except:
+        pass
     return GifObject(imgList,position[0],position[1],size[0],size[1],updateGap)
 
 #识别图片模块，用于引擎内加载图片，十分不建议在本文件外调用

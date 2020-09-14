@@ -1,6 +1,7 @@
 # cython: language_level=3
 import cv2
 import pygame
+from Zero3.basic import *
 
 #视频捕捉系统
 class VideoObject:
@@ -46,20 +47,20 @@ def cutscene(screen,videoPath,bgmPath=None):
         thevideo = VideoObject(videoPath)
         fpsClock = pygame.time.Clock()
         video_fps = int(thevideo.getFPS()+2)
-        black_bg = loadImage("Assets/image/UI/black.png",(0,0),surface.get_width(),surface.get_height())
+        black_bg = get_SingleColorSurface("black")
         black_bg.set_alpha(0)
-        skip_button = loadImage("Assets/image/UI/skip.png",(surface.get_width()*0.92,surface.get_height()*0.05),surface.get_width()*0.055,surface.get_height()*0.03)
+        skip_button = loadImage("Assets/image/UI/skip.png",(screen.get_width()*0.92,screen.get_height()*0.05),screen.get_width()*0.055,screen.get_height()*0.03)
         ifSkip = False
         if bgmPath != None and os.path.exists(bgmPath):
             pygame.mixer.music.load(bgmPath)
             pygame.mixer.music.play()
         while True:
-            ifEnd = thevideo.display(surface,screen)
+            ifEnd = thevideo.display(screen)
             if ifEnd == True:
                 break
             skip_button.draw(screen)
             for event in pygame.event.get():
-                if event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and isHover(skip_button) and ifSkip == False:
+                if event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and ifHover(skip_button) and ifSkip == False:
                     ifSkip = True
                     pygame.mixer.music.fadeout(5000)
                     break
