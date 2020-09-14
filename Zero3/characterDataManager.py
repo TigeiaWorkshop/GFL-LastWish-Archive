@@ -293,13 +293,12 @@ def character_creator(character_name,action,faction):
             __CHARACTERS_IMAGE_DICT[character_name][action] = {}
     else:
         __CHARACTERS_IMAGE_DICT[character_name] = {}
-    if os.path.exists("Assets/image/"+faction+"/"+character_name+"/"+action):
-        files_amount = len(glob.glob("Assets/image/"+faction+"/"+character_name+"/"+action+"/*.png"))
+    if os.path.exists("Assets/image/{0}/{1}/{2}".format(faction,character_name,action)):
+        files_amount = len(glob.glob("Assets/image/{0}/{1}/{2}/*.png".format(faction,character_name,action)))
         if files_amount > 0:
-            path = "Assets/image/"+faction+"/"+character_name+"/"+action+"/"+character_name+"_"+action+"_NaN.png"
             images_list = []
             for i in range(files_amount):
-                images_list.append(pygame.image.load(os.path.join(path.replace("NaN",str(i)))).convert_alpha())
+                images_list.append(pygame.image.load(os.path.join("Assets/image/{0}/{1}/{2}/{3}_{4}_{5}.png".format(faction,character_name,action,character_name,action,i))).convert_alpha())
             __CHARACTERS_IMAGE_DICT[character_name][action] = {"img":images_list,"imgNum":files_amount}
             return {"imgId":0,"alpha":255}
         else:

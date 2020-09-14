@@ -924,9 +924,13 @@ class GifObject:
         self.height = int(height)
         self.updateGap = updateGap
         self.countDown = 0
+        self.alpha = 255
     def display(self,screen):
-        screen.blit(pygame.transform.scale(self.imgList[self.imgId],(self.width,self.height)),(self.x,self.y))
-        if self.countDown == self.updateGap:
+        img = pygame.transform.scale(self.imgList[self.imgId],(self.width,self.height))
+        if self.alpha != 255:
+            img.set_alpha(self.alpha)
+        screen.blit(img,(self.x,self.y))
+        if self.countDown >= self.updateGap:
             self.countDown = 0
             self.imgId += 1
             if self.imgId == len(self.imgList):
@@ -935,3 +939,5 @@ class GifObject:
             self.countDown += 1
     def draw(self,screen):
         self.display(screen)
+    def set_alpha(self,alpha):
+        self.alpha = alpha
