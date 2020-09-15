@@ -937,7 +937,54 @@ class GifObject:
                 self.imgId = 0
         else:
             self.countDown += 1
+    def set_pos(self,x=None,y=None):
+        self.x = x if x != None else self.x
+        self.y = y if y != None else self.y
     def draw(self,screen):
         self.display(screen)
     def set_alpha(self,alpha):
         self.alpha = alpha
+
+class PauseMenu:
+    def __init__(self):
+        self.white_bg = None
+        self.button_resume = None
+        self.button_setting = None
+        self.button_back = None
+        self.ifBackToMainMenu = False
+    def __initial(self,screen):
+        width,height = display.get_size()
+        surfaceTmp = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
+        pygame.draw.rect(surfaceTmp,(0,0,0),(0,0,width,height))
+        self.white_bg = ImageSurface(surfaceTmp,0,0,width,height)
+        self.white_bg.set_alpha(50)
+        self.button_resume = fontRenderPro(get_lang("MainMenu")["menu_1"]["text0_continue"],"white",(screen.get_width()*0.1,screen.get_height()*0.5,screen.get_width()/38))
+        self.button_setting = fontRenderPro(get_lang("MainMenu")["menu_0"]["text1_setting"],"gray",(screen.get_width()*0.1,screen.get_height()*0.6,screen.get_width()/38))
+        self.button_back = fontRenderPro(get_lang("DialogCreator")["back"],"white",(screen.get_width()*0.1,screen.get_height()*0.7,screen.get_width()/38))
+    def display(self,screen):
+        screenshot = screen.copy()
+        ifPauseMenu = True
+        if self.white_bg == None:
+            self.__initial(screen)
+        while ifPauseMenu:
+            screen.blit(screenshot,(0,0))
+            self.white_bg.draw(screen)
+            left_click = False
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    ifPauseMenu = False
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    left_click = True
+            #判定按钮
+            if self.button_resume.ifHover() and left_click == True:
+                ifPauseMenu = False
+            if self.button_back.ifHover() and left_click == True:
+                ifPauseMenu = False
+                self.ifBackToMainMenu = True
+            #展示按钮
+            self.button_resume.draw(screen)
+            self.button_setting.draw(screen)
+            self.button_back.draw(screen)
+            display.flip()
+#暂停菜单
+pause_menu = PauseMenu()

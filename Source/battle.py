@@ -27,6 +27,8 @@ def battle(chapter_name,screen,setting):
         chapterDesc = loadData["description"]
     #章节标题显示
     infoToDisplayDuringLoading = Zero.LoadingTitle(window_x,window_y,battleUiTxt["numChapter"],chapter_name,chapter_title,chapterDesc)
+    #正在加载的gif动态图标
+    nowLoadingIcon = Zero.loadRealGif("Assets/image/UI/sv98_walking.gif",(window_x*0.7,window_y*0.83),(window_x*0.003*15,window_x*0.003*21))
 
     #渐入效果
     for i in range(1,255,2):
@@ -37,6 +39,7 @@ def battle(chapter_name,screen,setting):
     infoToDisplayDuringLoading.display(screen)
     now_loading = Zero.fontRender(loading_info["now_loading_map"], "white",window_x/76)
     Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
+    nowLoadingIcon.draw(screen)
     Zero.display.flip(True)
 
     #读取并初始化章节信息
@@ -62,6 +65,7 @@ def battle(chapter_name,screen,setting):
         infoToDisplayDuringLoading.display(screen)
         now_loading = Zero.fontRender(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum), "white",window_x/76)
         Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
+        nowLoadingIcon.draw(screen)
         Zero.display.flip(True)
     characters_data,sangvisFerris_data = characterDataThread.getResult()
 
@@ -75,6 +79,7 @@ def battle(chapter_name,screen,setting):
     infoToDisplayDuringLoading.display(screen)
     now_loading = Zero.fontRender(loading_info["now_loading_level"], "white",window_x/76)
     Zero.drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
+    nowLoadingIcon.draw(screen)
     Zero.display.flip(True)
 
     #加载UI:
@@ -439,7 +444,9 @@ def battle(chapter_name,screen,setting):
                     for event in pygame.event.get():
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_ESCAPE:
-                                Zero.display.quit()
+                                Zero.pause_menu.display(screen)
+                                if Zero.pause_menu.ifBackToMainMenu == True:
+                                    return None
                         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and Zero.controller.joystick.get_button(0) == 1:
                             display_num += 1
                             if display_num < len(dialog_to_display):
@@ -499,6 +506,10 @@ def battle(chapter_name,screen,setting):
             mouse_x,mouse_y = Zero.controller.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE and the_character_get_click == "":
+                        Zero.pause_menu.display(screen)
+                        if Zero.pause_menu.ifBackToMainMenu == True:
+                            return None
                     if event.key == pygame.K_ESCAPE and isWaiting == True:
                         green_hide = True
                         the_character_get_click = ""

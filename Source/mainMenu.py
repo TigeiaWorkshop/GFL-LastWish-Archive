@@ -182,10 +182,16 @@ def mainMenu(screen,setting):
                     #章节选择
                     elif Zero.ifHover(chapter_select[i]) and i==0:
                         dialog("chapter"+str(i+1),screen,setting,"dialog_before_battle")
-                        battle("chapter"+str(i+1),screen,setting)
-                        dialog("chapter"+str(i+1),screen,setting,"dialog_after_battle")
-                        Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
-                        videoCapture.setFrame(1)
+                        if Zero.pause_menu.ifBackToMainMenu == False:
+                            battle("chapter"+str(i+1),screen,setting)
+                            if Zero.pause_menu.ifBackToMainMenu == False:
+                                dialog("chapter"+str(i+1),screen,setting,"dialog_after_battle")
+                                Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
+                                videoCapture.setFrame(1)
+                            else:
+                                Zero.pause_menu.ifBackToMainMenu = False
+                        else:
+                            Zero.pause_menu.ifBackToMainMenu = False
                         break
         #检测背景音乐是否还在播放
         while pygame.mixer.music.get_busy() != 1:

@@ -116,6 +116,8 @@ class TextSurface:
             screen.blit(self.n,(self.n_x,self.n_y))
             self.__ifHover = False
         return self.__ifHover
+    def draw(self,screen):
+        self.display(screen)
     def ifHover(self):
         return self.__ifHover
 

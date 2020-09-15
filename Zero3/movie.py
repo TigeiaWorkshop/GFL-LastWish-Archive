@@ -60,7 +60,7 @@ def cutscene(screen,videoPath,bgmPath=None):
                 break
             skip_button.draw(screen)
             for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] and ifHover(skip_button) and ifSkip == False:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and ifHover(skip_button) and ifSkip == False:
                     ifSkip = True
                     pygame.mixer.music.fadeout(5000)
                     break

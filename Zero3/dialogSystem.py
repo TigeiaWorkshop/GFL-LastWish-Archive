@@ -81,7 +81,7 @@ class DialogSystem:
         leftClick = False
         for event in self.__events:
             if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
-                if pygame.mouse.get_pressed()[0] or controller.joystick.get_button(0) == 1:
+                if event.button == 1 or controller.joystick.get_button(0) == 1:
                     if buttonEvent == "hide" and self.showHistory != True:
                         self.dialogTxtSystem.hideSwitch()
                     #如果接来下没有文档了或者玩家按到了跳过按钮
@@ -109,12 +109,18 @@ class DialogSystem:
                     self.historySurface = None
                     self.historySurface_local_y -= self.window_y*0.1
                 #返回上一个对话场景（在被允许的情况下）
-                elif pygame.mouse.get_pressed()[2] or controller.joystick.get_button(1) == 1:
+                elif event.button == 3 or controller.joystick.get_button(1) == 1:
                     if self.dialog_content[self.dialogId]["last_dialog_id"] != None:
                         self.__update_scene(self.dialog_content[self.dialogId]["last_dialog_id"])
                         dialogPlayResult = False
                     else:
                         pass
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pause_menu.display(screen)
+                #淡出
+                if pause_menu.ifBackToMainMenu == True:
+                    self.fadeOut(screen)
+                    return True
         #显示选项
         if dialogPlayResult == True and self.dialog_content[self.dialogId]["next_dialog_id"] != None and self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "option":
             optionBox_y_base = (self.window_y*3/4-(len(self.dialog_content[self.dialogId]["next_dialog_id"]["target"]))*2*self.window_x*0.03)/4
