@@ -949,16 +949,19 @@ class PauseMenu:
     def __init__(self):
         self.white_bg = None
         self.button_resume = None
+        self.button_save = None
         self.button_setting = None
         self.button_back = None
         self.ifBackToMainMenu = False
+        self.ifSave = False
     def __initial(self,screen):
         width,height = display.get_size()
         surfaceTmp = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
         pygame.draw.rect(surfaceTmp,(0,0,0),(0,0,width,height))
         self.white_bg = ImageSurface(surfaceTmp,0,0,width,height)
         self.white_bg.set_alpha(50)
-        self.button_resume = fontRenderPro(get_lang("MainMenu")["menu_1"]["text0_continue"],"white",(screen.get_width()*0.1,screen.get_height()*0.5,screen.get_width()/38))
+        self.button_resume = fontRenderPro(get_lang("MainMenu")["menu_1"]["text0_continue"],"white",(screen.get_width()*0.1,screen.get_height()*0.4,screen.get_width()/38))
+        self.button_save = fontRenderPro(get_lang("SaveGame"),"white",(screen.get_width()*0.1,screen.get_height()*0.5,screen.get_width()/38))
         self.button_setting = fontRenderPro(get_lang("MainMenu")["menu_0"]["text1_setting"],"gray",(screen.get_width()*0.1,screen.get_height()*0.6,screen.get_width()/38))
         self.button_back = fontRenderPro(get_lang("DialogCreator")["back"],"white",(screen.get_width()*0.1,screen.get_height()*0.7,screen.get_width()/38))
     def display(self,screen):
@@ -981,8 +984,12 @@ class PauseMenu:
             if self.button_back.ifHover() and left_click == True:
                 ifPauseMenu = False
                 self.ifBackToMainMenu = True
+            if self.button_save.ifHover() and left_click == True:
+                ifPauseMenu = False
+                self.ifSave = True
             #展示按钮
             self.button_resume.draw(screen)
+            self.button_save.draw(screen)
             self.button_setting.draw(screen)
             self.button_back.draw(screen)
             display.flip()

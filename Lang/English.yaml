@@ -65,6 +65,7 @@ ResultBoard:
   total_kills: Total elimination
   total_rounds: Rounds
   total_time: Time
+SaveGame: Save Game
 SelectMenu:
   attack: Attack
   move: Move

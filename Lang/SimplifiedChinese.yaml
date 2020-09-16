@@ -70,6 +70,7 @@ ResultBoard:
   total_kills: 总消灭
   total_rounds: 回合数
   total_time: 通关时间
+SaveGame: 保存游戏
 SelectMenu:
   attack: 攻击
   move: 移动

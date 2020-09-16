@@ -20,6 +20,10 @@ class DialogSystem:
             self.dialog_content = self.dialogData[part]
             if len(self.dialog_content)==0:
                 raise Exception('ZeroEngine-Error: The dialog has no content!')
+        #对话的部分
+        self.chapterName = chapterName
+        self.part = part
+        self.dialogType = dialogType
         #加载对话的背景图片
         self.backgroundContent = DialogBackground()
         #获取屏幕的尺寸
@@ -57,6 +61,16 @@ class DialogSystem:
         self.__events = None
     def __update_event(self):
         self.__events = pygame.event.get()
+    def __save_process(self):
+        with open("Save/save0.yaml","r",encoding='utf-8') as f:
+            oldData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        oldData["Data"]["chapterName"] = self.chapterName
+        oldData["Data"]["dialogType"] = self.dialogType
+        oldData["Data"]["type"] = "dialog"
+        oldData["Data"]["id"] = self.dialogId
+        oldData["Data"]["part"] = self.part
+        with open("Save/save0.yaml", "w", encoding='utf-8') as f:
+            yaml.dump(oldData, f, allow_unicode=True)
     def get_event(self):
         return self.__events
     def __update_scene(self,theNextDialogId):
@@ -117,6 +131,9 @@ class DialogSystem:
                         pass
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 pause_menu.display(screen)
+                if pause_menu.ifSave == True:
+                    pause_menu.ifSave = False
+                    self.__save_process()
                 #淡出
                 if pause_menu.ifBackToMainMenu == True:
                     self.fadeOut(screen)
