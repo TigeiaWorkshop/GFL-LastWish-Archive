@@ -3,7 +3,7 @@ from Zero3.basic import *
 
 #视觉小说系统模块
 class DialogSystem:
-    def __init__(self,dialogType,chapterName,lang,part):
+    def __init__(self,dialogType,chapterName,lang,part,dialogId):
         #读取章节信息
         with open("Data/{0}/{1}_dialogs_{2}.yaml".format(dialogType,chapterName,lang),"r",encoding='utf-8') as f:
             self.dialogData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -38,7 +38,7 @@ class DialogSystem:
         #加载对话框系统
         self.dialogTxtSystem = DialogContent(self.window_x*0.015)
         #设定初始化
-        self.dialogId = "head"
+        self.dialogId = dialogId
         #如果dialog_content没有头
         if self.dialogId not in self.dialog_content:
             raise Exception('ZeroEngine-Error: The dialog must have a head!')
@@ -62,15 +62,14 @@ class DialogSystem:
     def __update_event(self):
         self.__events = pygame.event.get()
     def __save_process(self):
-        with open("Save/save0.yaml","r",encoding='utf-8') as f:
-            oldData = yaml.load(f.read(),Loader=yaml.FullLoader)
-        oldData["Data"]["chapterName"] = self.chapterName
-        oldData["Data"]["dialogType"] = self.dialogType
-        oldData["Data"]["type"] = "dialog"
-        oldData["Data"]["id"] = self.dialogId
-        oldData["Data"]["part"] = self.part
-        with open("Save/save0.yaml", "w", encoding='utf-8') as f:
-            yaml.dump(oldData, f, allow_unicode=True)
+        DataTmp = {}
+        DataTmp["chapterName"] = self.chapterName
+        DataTmp["dialogType"] = self.dialogType
+        DataTmp["type"] = "dialog"
+        DataTmp["id"] = self.dialogId
+        DataTmp["part"] = self.part
+        with open("Save/save.yaml", "w", encoding='utf-8') as f:
+            yaml.dump(DataTmp, f, allow_unicode=True)
     def get_event(self):
         return self.__events
     def __update_scene(self,theNextDialogId):

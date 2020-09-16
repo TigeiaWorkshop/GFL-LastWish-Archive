@@ -28,6 +28,8 @@ def mainMenu(screen,setting):
 
     #当前可用的菜单选项
     enabled_option = ["text0_start","text1_setting","text3_exit","text1_chooseChapter","text4_mapCreator","text5_dialogCreator","text7_back"]
+    if os.path.exists("Save/save.yaml"):
+        enabled_option.append("text0_continue")
     #加载主菜单页面的文字设置
     txt_location = window_x*2/3
     font_size = window_x/38
@@ -167,6 +169,26 @@ def mainMenu(screen,setting):
                 elif Zero.ifHover(main_menu_txt["menu_0"]["text3_exit"]):
                     Zero.display.quit()
             elif menu_type == 1:
+                if Zero.ifHover(main_menu_txt["menu_1"]["text0_continue"]):
+                    if os.path.exists("Save/save.yaml"):
+                        with open("Save/save.yaml", "r", encoding='utf-8') as f:
+                            SAVE = yaml.load(f.read(),Loader=yaml.FullLoader)
+                        if SAVE["type"] == "dialog":
+                            dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],SAVE["id"])
+                            if SAVE["part"] == "dialog_before_battle":
+                                if Zero.pause_menu.ifBackToMainMenu == False:
+                                    battle(SAVE["chapterName"],screen,setting)
+                                    if Zero.pause_menu.ifBackToMainMenu == False:
+                                        dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],"dialog_after_battle")
+                                        Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
+                                        videoCapture.setFrame(1)
+                                    else:
+                                        Zero.pause_menu.ifBackToMainMenu = False
+                                else:
+                                    Zero.pause_menu.ifBackToMainMenu = False
+                    else:
+                        #raise Exception('ZeroEngine-Error: The save.yaml is not exist')
+                        pass
                 if Zero.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"]):
                     menu_type = 2
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
@@ -181,11 +203,11 @@ def mainMenu(screen,setting):
                         menu_type = 1
                     #章节选择
                     elif Zero.ifHover(chapter_select[i]) and i==0:
-                        dialog("chapter"+str(i+1),screen,setting,"dialog_before_battle")
+                        dialog("main_chapter","chapter"+str(i+1),screen,setting,"dialog_before_battle")
                         if Zero.pause_menu.ifBackToMainMenu == False:
                             battle("chapter"+str(i+1),screen,setting)
                             if Zero.pause_menu.ifBackToMainMenu == False:
-                                dialog("chapter"+str(i+1),screen,setting,"dialog_after_battle")
+                                dialog("main_chapter","chapter"+str(i+1),screen,setting,"dialog_after_battle")
                                 Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                                 videoCapture.setFrame(1)
                             else:

@@ -1,7 +1,7 @@
 # cython: language_level=3
 from Source.init import *
 
-def dialog(chapter_name,screen,setting,part):
+def dialog(dialogType,chapterName,screen,setting,part,dialogId="head"):
     #加载闸门动画的图片素材
     LoadingImgAbove = Zero.loadImg("Assets/image/UI/LoadingImgAbove.png",screen.get_width()+8,screen.get_height()/1.7)
     LoadingImgBelow = Zero.loadImg("Assets/image/UI/LoadingImgBelow.png",screen.get_width()+8,screen.get_height()/2.05)
@@ -13,7 +13,7 @@ def dialog(chapter_name,screen,setting,part):
     #卸载音乐
     Zero.unloadBackgroundMusic()
     #初始化对话系统模块
-    DIALOG = Zero.DialogSystem("main_chapter",chapter_name,setting['Language'],part)
+    DIALOG = Zero.DialogSystem(dialogType,chapterName,setting['Language'],part,dialogId)
     #加载完成-闸门开启的效果
     for i in range(100,-1,-1):
         DIALOG.backgroundContent.display(screen)
