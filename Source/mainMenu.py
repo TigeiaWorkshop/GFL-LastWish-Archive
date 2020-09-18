@@ -25,11 +25,13 @@ def mainMenu(screen,setting):
         HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
     else:
         HealthyGamingAdvice = []
-
     #当前可用的菜单选项
     enabled_option = ["text0_start","text1_setting","text3_exit","text1_chooseChapter","text4_mapCreator","text5_dialogCreator","text7_back"]
     if os.path.exists("Save/save.yaml"):
         enabled_option.append("text0_continue")
+        continueButtonIsOn = True
+    else:
+        continueButtonIsOn = False
     #加载主菜单页面的文字设置
     txt_location = window_x*2/3
     font_size = window_x/38
@@ -179,13 +181,20 @@ def mainMenu(screen,setting):
                                 if Zero.pause_menu.ifBackToMainMenu == False:
                                     battle(SAVE["chapterName"],screen,setting)
                                     if Zero.pause_menu.ifBackToMainMenu == False:
-                                        dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],"dialog_after_battle")
+                                        dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],"dialog_after_battle",SAVE["dialog_options"])
                                         Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                                         videoCapture.setFrame(1)
                                     else:
                                         Zero.pause_menu.ifBackToMainMenu = False
                                 else:
                                     Zero.pause_menu.ifBackToMainMenu = False
+                        #是否可以继续游戏了（save文件是否被创建）
+                        if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:
+                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),window_x/38)
+                            continueButtonIsOn = True
+                        elif not os.path.exists("Save/save.yaml") and continueButtonIsOn == True:
+                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),window_x/38)
+                            continueButtonIsOn = False
                     else:
                         #raise Exception('ZeroEngine-Error: The save.yaml is not exist')
                         pass
@@ -214,6 +223,13 @@ def mainMenu(screen,setting):
                                 Zero.pause_menu.ifBackToMainMenu = False
                         else:
                             Zero.pause_menu.ifBackToMainMenu = False
+                        #是否可以继续游戏了（save文件是否被创建）
+                        if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:
+                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),window_x/38)
+                            continueButtonIsOn = True
+                        elif not os.path.exists("Save/save.yaml") and continueButtonIsOn == True:
+                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),window_x/38)
+                            continueButtonIsOn = False
                         break
         #检测背景音乐是否还在播放
         while pygame.mixer.music.get_busy() != 1:

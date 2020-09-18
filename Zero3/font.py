@@ -10,6 +10,7 @@ pygame.init()
 ZERO_FONT = ZERO_DATA["Font"]
 ZERO_FONTTYPE = ZERO_DATA["FontType"]
 ZERO_MODE = ZERO_DATA["Antialias"]
+ZERO_STANDARD_FONTSIZE = None
 
 #获取文字信息
 def get_font():
@@ -20,6 +21,15 @@ def get_fontMode():
     return ZERO_MODE
 def get_fontDetails():
     return ZERO_FONT,ZERO_FONTTYPE,ZERO_MODE
+#设置和获取标准文字大小
+def set_standard_font_size(size):
+    if isinstance (size,int) and size > 0:
+        global ZERO_STANDARD_FONTSIZE
+        ZERO_STANDARD_FONTSIZE = size
+    else:
+        raise Exception('ZeroEngine-Error: Standard font size must be positive interger!')
+def get_standard_font_size(size):
+    return ZERO_STANDARD_FONTSIZE
 
 #重新获取设置信息
 def reload_setting():
@@ -120,6 +130,8 @@ class TextSurface:
         self.display(screen)
     def ifHover(self):
         return self.__ifHover
+    def get_pos(self):
+        return self.n_x,self.n_y
 
 #高级文字制作模块：接受文字，颜色，位置，文字大小，文字样式，模式，返回制作完的文字Class，该Class具有一大一普通的字号
 def fontRenderPro(txt,color,pos,size=50,ifBold=False,ifItalic=False):

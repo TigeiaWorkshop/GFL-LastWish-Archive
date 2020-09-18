@@ -3,7 +3,7 @@ from Zero3.basic import *
 
 #视觉小说系统模块
 class DialogSystem:
-    def __init__(self,dialogType,chapterName,lang,part,dialogId):
+    def __init__(self,dialogType,chapterName,lang,part,dialogId,dialog_options):
         #读取章节信息
         with open("Data/{0}/{1}_dialogs_{2}.yaml".format(dialogType,chapterName,lang),"r",encoding='utf-8') as f:
             self.dialogData = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -47,7 +47,7 @@ class DialogSystem:
         #更新背景音乐
         self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
         #玩家在对话时做出的选择
-        self.dialog_options = {}
+        self.dialog_options = dialog_options
         #加载npc立绘系统并初始化
         self.npc_img_dic = NpcImageSystem()
         self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"])
@@ -68,6 +68,7 @@ class DialogSystem:
         DataTmp["type"] = "dialog"
         DataTmp["id"] = self.dialogId
         DataTmp["part"] = self.part
+        DataTmp["dialog_options"] = self.dialog_options
         with open("Save/save.yaml", "w", encoding='utf-8') as f:
             yaml.dump(DataTmp, f, allow_unicode=True)
     def get_event(self):
