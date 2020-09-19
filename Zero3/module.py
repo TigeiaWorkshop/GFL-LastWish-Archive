@@ -389,11 +389,17 @@ class SingleJoystick:
         self.inputController = None
         self.update_device()
     def update_device(self):
-        if self.inputController == None and pygame.joystick.get_count()>0:
+        if self.inputController == None and pygame.joystick.get_count() > 0:
             self.inputController = pygame.joystick.Joystick(0)
             self.inputController.init()
-        elif self.inputController != None and pygame.joystick.get_count()==0:
-            self.inputController = None
+            print("ZeroEngine: Joystick is detected and initialized successfully.")
+        elif self.inputController != None:
+            if pygame.joystick.get_count() == 0:
+                self.inputController = None
+            elif self.inputController.get_id() != pygame.joystick.Joystick(0).get_id():
+                self.inputController = pygame.joystick.Joystick(0)
+                self.inputController.init()
+                print("ZeroEngine: Joystick changed! New joystick is detected and initialized successfully.")
     def get_init(self):
         if self.inputController != None:
             return self.inputController.get_init()

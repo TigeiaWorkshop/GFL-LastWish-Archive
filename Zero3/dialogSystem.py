@@ -63,9 +63,9 @@ class DialogSystem:
         self.__events = pygame.event.get()
     def __save_process(self):
         DataTmp = {}
+        DataTmp["type"] = "dialog"
         DataTmp["chapterName"] = self.chapterName
         DataTmp["dialogType"] = self.dialogType
-        DataTmp["type"] = "dialog"
         DataTmp["id"] = self.dialogId
         DataTmp["part"] = self.part
         DataTmp["dialog_options"] = self.dialog_options
