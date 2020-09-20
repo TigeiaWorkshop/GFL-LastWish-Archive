@@ -27,14 +27,14 @@ dialog_after_battle:
     - But if I don't have the stuff, I won't let them go.
   4:
     content:
-    - Then I'd like to know why there was no mention of SangvisFerri in the information
-      you
-    - provided in the first place.
+    - Then I'd like to know why there was no mention of SangvisFerri in the documents
+      which
+    - were provided in the first place.
     narrator: Me
   5:
     content:
-    - By all rights, SangvisFerri should not know about this. But as things stood.
-    - Someone on the inside must have leaked this information.
+    - By all rights, SangvisFerri should not know about this. But as things stood,
+    - someone on the inside must have leaked this information.
   6:
     content:
     - If we don't have support, our echelon will soon be unable to hold up, so how
@@ -43,12 +43,11 @@ dialog_after_battle:
     narrator: Me
   7:
     content:
-    - That's okay. Since the human forms under your command can only do so much to
-      support
-    - you, keep supporting them, and I'll continue to think of the rest
+    - That's okay. Since the girls under your command can only do so much to support
+    - you, then just keep going. I'll figure out the rest
   8:
     content:
-    - End of communication
+    - End of communication.
   9:
     content:
     - Damn it, I should have never accepted this commission in the first place.
@@ -60,8 +59,8 @@ dialog_after_battle:
   11:
     content:
     - Now, let's just hope that sv-98 and the others will be back in time, and we'll
-      think about other
-    - things after that!
+      think about
+    - other things after that!
     narrator: Me
   12:
     content:
@@ -69,7 +68,7 @@ dialog_after_battle:
     narrator: Kalina
   13:
     content:
-    - Then I'm... There's no other way...
+    - Then... There's no other way...
     narrator: Me
   14:
     content:
@@ -82,24 +81,22 @@ dialog_before_battle:
     - In my subconscious, I used to worry about accidents.
   1:
     content:
-    - But I didn't expect, that the accident will come so soon.
+    - But I didn't expect, that the accident will come such soon.
   2:
     content:
-    - Commander, SangvisFerri's attack is getting fiercer.
-    - If this continues, the remaining echelon will soon be routed!
-    - It's time to order a standard evacuation procedure.
+    - Commander, SangvisFerri's attack is getting fiercer. If this continues, the
+      remaining
+    - echelon will soon be routed! It's time to order a standard evacuation procedure.
     narrator: Kalina
   3:
     content:
-    - Still no news about them
-    - The tenth logistic unit...
+    - Any good news about them? The tenth logistic unit...
     narrator: Me
   4:
     content:
-    - I haven't been able to get ahold of them. I don't know what's going on... That's
-      worrisome.
-    - If we keep this up, it's only a matter of time before SangvisFerri surrounds
-      the place.
+    - I haven't been able to get ahold of them, so i have no idea what's going on...
+    - That's worrisome. If we keep this up, it's only a matter of time before SangvisFerri
+    - surrounds the place.
     narrator: Kalina
     next_dialog_id:
       target:
@@ -108,31 +105,33 @@ dialog_before_battle:
       type: option
   5:
     content:
-    - It's on a certain plain about 50 kilometers east of here.
+    - It's on a plain about 50 kilometers east of here.
     - It fell under SangvisFerri's control 13 hours ago.
     narrator: Kalina
   6:
     content:
-    - Can you send some of the dolls out to search the area?
+    - Can we send someone out to search the area?
     narrator: Me
   7:
     content:
     - All operational echelons are currently spread out on the first line of defense.
-    - Not to mention breaking through,
-    - it's already fortunate to be able to barely block SangvisFerri's attack!
-    - If we pull out any more force at this point, the defense may soon be routed.
+      Not to mention
+    - breaking through, it's already fortunate to be able to barely block SangvisFerri's
+      attack! If we
+    - pull out any more force at this point, the defense may soon be routed.
     narrator: Kalina
   8:
     content:
-    - Damn it, where's that backup we were talking about?
-    - And this is just an island with no resources whatsoever
-    - Why the National Security Bureau is so concerned?
+    - Damn it, where's that backup we were talking about? And this is just an island
+      with no
+    - resources whatsoever! Why the National Security Bureau is so concerned?
     narrator: Me
   9:
     content:
     - I don't really know. The commission only mentions that it's related to information
-    - intercepted by the National Security Bureau.
-    - Other than that, no more information was revealed.
+    - intercepted by the National Security Bureau. Other than that, no more information
+      was
+    - revealed.
     narrator: Kalina
   10:
     content:
@@ -159,10 +158,11 @@ dialog_before_battle:
     - Griffin and even the National Security Bureau themselves don't know about yet.
   15:
     content:
-    - 24 hours ago
+    - 24 hours ago.
   16:
     content:
     - Asval, how's everything going so far?
+    narrator: SV-98
   17:
     content:
     - The commander has already sent a helicopter to pick us up.
@@ -170,16 +170,17 @@ dialog_before_battle:
       lands.
   18:
     content:
-    - Let's work harder, as long as we take out as much of the current SangvisFerri
-      forces
+    - Let's hurry up! As long as we take out as much of the current SangvisFerri forces
     - in the area before the helicopters arrive, then we'll be able to evacuate safely.
+    narrator: SV-98
   19:
     content:
     - Great!
-    narrator: other dolls
+    narrator: Other dolls
   20:
     content:
     - Keep your voice down! It's not like SangvisFerri didn't have ears.
+    narrator: SV-98l
 dialog_during_battle:
   initial_dialog:
   - move:

@@ -907,11 +907,11 @@ def battle(chapter_name,screen,setting):
                                         for y in range(block_get_click["y"]-characters_data[the_character_get_click].skill_cover_range,block_get_click["y"]+characters_data[the_character_get_click].skill_cover_range):
                                             if y < block_get_click["y"]:
                                                 for x in range(block_get_click["x"]-characters_data[the_character_get_click].skill_cover_range-(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].skill_cover_range+(y-block_get_click["y"])):
-                                                    if theMap.mapData[y][x].canPassThrough == True:
+                                                    if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0 and theMap.mapData[y][x].canPassThrough == True:
                                                         the_skill_cover_area.append([x,y])
                                             else:
                                                 for x in range(block_get_click["x"]-characters_data[the_character_get_click].skill_cover_range+(y-block_get_click["y"])+1,block_get_click["x"]+characters_data[the_character_get_click].skill_cover_range-(y-block_get_click["y"])):
-                                                    if theMap.mapData[y][x].canPassThrough == True:
+                                                    if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0 and theMap.mapData[y][x].canPassThrough == True:
                                                         the_skill_cover_area.append([x,y])
                                         areaDrawColorBlock["orange"] = the_skill_cover_area
                                         skill_target = skill(the_character_get_click,{"x":block_get_click["x"],"y":block_get_click["y"]},the_skill_cover_area,sangvisFerris_data,characters_data)

@@ -247,7 +247,7 @@ class DialogSystemDev:
         #获取屏幕的尺寸
         self.window_x,self.window_y = display.get_size()
         #文字
-        self.FONTSIZE = self.window_x*0.0175
+        self.FONTSIZE = self.window_x*0.015
         self.FONT = createFont(self.FONTSIZE)
         #对话框
         self.dialoguebox = loadImage("Assets/image/UI/dialoguebox.png",(self.window_x*0.13,self.window_y*0.65),self.window_x*0.74,self.window_y/4)
@@ -457,83 +457,93 @@ class DialogSystemDev:
             self.buttonsUI[buttonHovered].displayDes(screen)
         leftClick = False
         for event in pygame_events:
-            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.JOYBUTTONDOWN:
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
-                    if ifHover(self.UIContainerRightButton,None,self.UIContainerRight.x):
-                        self.UIContainerRight.switch()
-                        self.UIContainerRightButton.flip(True,False)
-                    #退出
-                    elif buttonHovered == "back":
-                        return True
-                    elif buttonHovered == "previous":
-                        lastId = self.__get_last_id()
-                        if lastId != None:
-                            self.__update_scene(lastId)
-                        else:
-                            print("no last_dialog_id")
-                    elif buttonHovered == "delete":
-                        lastId = self.__get_last_id()
-                        nextId = self.__get_next_id(screen)
-                        if lastId != None:
-                            if self.dialogData[self.part][lastId]["next_dialog_id"]["type"] == "default" or self.dialogData[self.part][lastId]["next_dialog_id"]["type"] == "changeScene":
-                                self.dialogData[self.part][lastId]["next_dialog_id"]["target"] = nextId
-                            elif self.dialogData[self.part][lastId]["next_dialog_id"]["type"] == "option":
-                                for optionChoice in self.dialogData[self.part][lastId]["next_dialog_id"]["target"]:
-                                    if optionChoice["id"] == self.dialogId:
-                                        optionChoice["id"] = nextId
-                                        break
-                            else:
-                                #如果当前next_dialog_id的类型不支持的话，报错
-                                Exception('ZeroEngine-Error: Cannot recognize next_dialog_id type: {}, please fix it'.formate(self.dialogData[self.part][lastId]["next_dialog_id"]["type"]))
-                            #修改下一个对白配置文件中的"last_dialog_id"的参数
-                            if "last_dialog_id" in self.dialogData[self.part][nextId] and self.dialogData[self.part][nextId]["last_dialog_id"] != None:
-                                self.dialogData[self.part][nextId]["last_dialog_id"] = lastId
-                            needDeleteId = self.dialogId
-                            self.__update_scene(lastId)
-                            del self.dialogData[self.part][needDeleteId]
-                        else:
-                            print("no last_dialog_id")
-                    elif buttonHovered == "next":
-                        nextId = self.__get_next_id(screen)
-                        if nextId != None:
-                            self.__update_scene(nextId)
-                        else:
-                            print("no next_dialog_id")
-                    elif buttonHovered == "add":
-                        nextId=1
-                        while nextId in self.dialogData[self.part]:
-                            nextId+=1
-                        self.dialogData[self.part][nextId] = {
-                            "background_img": None,
-                            "background_music": None,
-                            "characters_img": [],
-                            "content": [self.please_enter_content],
-                            "last_dialog_id": self.dialogId,
-                            "narrator": self.please_enter_name,
-                            "next_dialog_id": None
-                        }
-                        self.dialogData[self.part][self.dialogId]["next_dialog_id"] = {"target":nextId,"type":"default"}
-                        self.__update_scene(nextId)
-                    elif buttonHovered == "save":
-                        self.__save()
-                    elif buttonHovered == "reload":
-                        self.__loadDialogData()
-                    elif self.npc_img_dic.npc_get_click != None:
-                        self.dialogData[self.part][self.dialogId]["characters_img"].remove(self.npc_img_dic.npc_get_click)
-                        self.npc_img_dic.process(self.dialogData[self.part][self.dialogId]["characters_img"])
-                        self.npc_img_dic.npc_get_click = None
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
+                if ifHover(self.UIContainerRightButton,None,self.UIContainerRight.x):
+                    self.UIContainerRight.switch()
+                    self.UIContainerRightButton.flip(True,False)
+                #退出
+                elif buttonHovered == "back":
+                    return True
+                elif buttonHovered == "previous":
+                    lastId = self.__get_last_id()
+                    if lastId != None:
+                        self.__update_scene(lastId)
                     else:
-                        leftClick = True
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
-                    if self.UIContainerRight_kind == "npc":
-                        self.npc_local_y += 10
-                    elif self.UIContainerRight_kind == "background":
-                        self.background_image_local_y += 10
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
-                    if self.UIContainerRight_kind == "npc":
-                        self.npc_local_y -= 10
-                    elif self.UIContainerRight_kind == "background":
-                        self.background_image_local_y -= 10
+                        print("no last_dialog_id")
+                elif buttonHovered == "delete":
+                    lastId = self.__get_last_id()
+                    nextId = self.__get_next_id(screen)
+                    if lastId != None:
+                        if self.dialogData[self.part][lastId]["next_dialog_id"]["type"] == "default" or self.dialogData[self.part][lastId]["next_dialog_id"]["type"] == "changeScene":
+                            self.dialogData[self.part][lastId]["next_dialog_id"]["target"] = nextId
+                        elif self.dialogData[self.part][lastId]["next_dialog_id"]["type"] == "option":
+                            for optionChoice in self.dialogData[self.part][lastId]["next_dialog_id"]["target"]:
+                                if optionChoice["id"] == self.dialogId:
+                                    optionChoice["id"] = nextId
+                                    break
+                        else:
+                            #如果当前next_dialog_id的类型不支持的话，报错
+                            Exception('ZeroEngine-Error: Cannot recognize next_dialog_id type: {}, please fix it'.formate(self.dialogData[self.part][lastId]["next_dialog_id"]["type"]))
+                        #修改下一个对白配置文件中的"last_dialog_id"的参数
+                        if "last_dialog_id" in self.dialogData[self.part][nextId] and self.dialogData[self.part][nextId]["last_dialog_id"] != None:
+                            self.dialogData[self.part][nextId]["last_dialog_id"] = lastId
+                        needDeleteId = self.dialogId
+                        self.__update_scene(lastId)
+                        del self.dialogData[self.part][needDeleteId]
+                    else:
+                        print("no last_dialog_id")
+                elif buttonHovered == "next":
+                    nextId = self.__get_next_id(screen)
+                    if nextId != None:
+                        self.__update_scene(nextId)
+                    else:
+                        print("no next_dialog_id")
+                elif buttonHovered == "add":
+                    nextId=1
+                    while nextId in self.dialogData[self.part]:
+                        nextId+=1
+                    self.dialogData[self.part][nextId] = {
+                        "background_img": None,
+                        "background_music": None,
+                        "characters_img": [],
+                        "content": [self.please_enter_content],
+                        "last_dialog_id": self.dialogId,
+                        "narrator": self.please_enter_name,
+                        "next_dialog_id": None
+                    }
+                    self.dialogData[self.part][self.dialogId]["next_dialog_id"] = {"target":nextId,"type":"default"}
+                    self.__update_scene(nextId)
+                elif buttonHovered == "save":
+                    self.__save()
+                elif buttonHovered == "reload":
+                    self.__loadDialogData()
+                else:
+                    leftClick = True
+            #鼠标中键 -- 切换场景
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
+                if self.part == "dialog_after_battle":
+                    self.part = "dialog_before_battle"
+                elif self.part == "dialog_before_battle":
+                    self.part = "dialog_after_battle"
+                self.__update_scene("head")
+            #鼠标右键
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                #移除角色立绘
+                if self.npc_img_dic.npc_get_click != None:
+                    self.dialogData[self.part][self.dialogId]["characters_img"].remove(self.npc_img_dic.npc_get_click)
+                    self.npc_img_dic.process(self.dialogData[self.part][self.dialogId]["characters_img"])
+                    self.npc_img_dic.npc_get_click = None
+            #鼠标滚轮
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
+                if self.UIContainerRight_kind == "npc":
+                    self.npc_local_y += 10
+                elif self.UIContainerRight_kind == "background":
+                    self.background_image_local_y += 10
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
+                if self.UIContainerRight_kind == "npc":
+                    self.npc_local_y -= 10
+                elif self.UIContainerRight_kind == "background":
+                    self.background_image_local_y -= 10
         #画上右侧的菜单选项
         self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
         self.UIContainerRight.draw(screen)

@@ -1,7 +1,27 @@
 from Zero3.dialogSystem import *
+from Zero3.characterDataManager import *
+from Zero3.map import *
+from Zero3.battleUI import *
 
 class BattleSystem:
-    def __init__(self):
+    def __init__(self,chapterName,setting):
+        #-----主要的参数-----#
+        #读取并初始化章节信息
+        with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
+            loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+            self.zoomIn = loadData["zoomIn"]*100
+            #初始化角色信息
+            self.characterDataThread = initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],setting)
+            self.bg_music = loadData["background_music"]
+            self.theWeather = loadData["weather"]
+            self.dialogInfo = loadData["dialogs"]
+        self.chapterName = chapterName
+        #检测zoomIn参数是否越界
+        if self.zoomIn < 200:
+            self.zoomIn = 200
+        elif self.zoomIn > 400:
+            self.zoomIn = 400
+        self.zoomIntoBe = self.zoomIn
         #-----需要储存的参数-----#
         #被选中的角色
         self.characterGetClick = ""
@@ -46,3 +66,21 @@ class BattleSystem:
         self.damage_do_to_characters = {}
         self.txt_alpha = None
         self.stayingTime = 0
+    def process_data(self,screen):
+        #加载角色信息
+        self.characterDataThread.start()
+        """"
+        while characterDataThread.isAlive():
+            self.infoToDisplayDuringLoading.display(screen)
+            now_loading = fontRender(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum), "white",window_x/76)
+            drawImg(now_loading,(window_x*0.75,window_y*0.9),screen)
+            nowLoadingIcon.draw(screen)
+            display.flip(True)
+        characters_data,sangvisFerris_data = characterDataThread.getResult()
+        with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
+            loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        #初始化地图模块
+        self.theMap = MapObject(loadData,round(window_x/10),loadData["local_x"],loadData["local_y"])
+        #计算光亮区域 并初始化地图
+        self.theMap.calculate_darkness(characters_data,window_x,window_y)
+        """
