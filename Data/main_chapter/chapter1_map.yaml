@@ -441,8 +441,8 @@ facility:
       image: Forest_big_tree_needle_03
       x: 3
       y: 5
-local_x: -1000
-local_y: -200
+local_x: -3000
+local_y: 1000
 map:
 - - TileSnow02
   - TileSnow01ToStone01

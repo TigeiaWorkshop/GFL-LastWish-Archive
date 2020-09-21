@@ -162,7 +162,7 @@ dialog_before_battle:
   16:
     content:
     - Asval, how's everything going so far?
-    narrator: SV-98
+    narrator: Sv-98
   17:
     content:
     - The commander has already sent a helicopter to pick us up.
@@ -172,7 +172,7 @@ dialog_before_battle:
     content:
     - Let's hurry up! As long as we take out as much of the current SangvisFerri forces
     - in the area before the helicopters arrive, then we'll be able to evacuate safely.
-    narrator: SV-98
+    narrator: Sv-98
   19:
     content:
     - Great!
@@ -180,7 +180,7 @@ dialog_before_battle:
   20:
     content:
     - Keep your voice down! It's not like SangvisFerri didn't have ears.
-    narrator: SV-98l
+    narrator: Sv-98
 dialog_during_battle:
   initial_dialog:
   - move:

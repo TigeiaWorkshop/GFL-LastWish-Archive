@@ -176,16 +176,26 @@ def mainMenu(screen,setting):
                         with open("Save/save.yaml", "r", encoding='utf-8') as f:
                             SAVE = yaml.load(f.read(),Loader=yaml.FullLoader)
                         if SAVE["type"] == "dialog":
-                            dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],SAVE["id"])
                             if SAVE["part"] == "dialog_before_battle":
+                                dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],SAVE["id"])
                                 if Zero.pause_menu.ifBackToMainMenu == False:
                                     battle(SAVE["chapterName"],screen,setting)
                                     if Zero.pause_menu.ifBackToMainMenu == False:
-                                        dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],"dialog_after_battle",SAVE["dialog_options"])
-                                        Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
-                                        videoCapture.setFrame(1)
+                                        dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,"dialog_after_battle",SAVE["dialog_options"])
+                                        if Zero.pause_menu.ifBackToMainMenu == False:
+                                            Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
+                                            videoCapture.setFrame(1)
+                                        else:
+                                            Zero.pause_menu.ifBackToMainMenu = False
                                     else:
                                         Zero.pause_menu.ifBackToMainMenu = False
+                                else:
+                                    Zero.pause_menu.ifBackToMainMenu = False
+                            elif SAVE["part"] == "dialog_after_battle":
+                                dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],SAVE["id"])
+                                if Zero.pause_menu.ifBackToMainMenu == False:
+                                    Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
+                                    videoCapture.setFrame(1)
                                 else:
                                     Zero.pause_menu.ifBackToMainMenu = False
                         #是否可以继续游戏了（save文件是否被创建）

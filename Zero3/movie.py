@@ -2,6 +2,7 @@
 import cv2
 import pygame
 from Zero3.basic import *
+from moviepy.editor import VideoFileClip
 
 #视频捕捉系统
 class VideoObject:
@@ -40,7 +41,6 @@ class VideoObject:
 #过场动画
 def cutscene(screen,videoPath,bgmPath=None):
     try:
-        from moviepy.editor import VideoFileClip
         clip = VideoFileClip(videoPath)
         clip.preview()
     except BaseException:
