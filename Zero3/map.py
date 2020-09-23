@@ -1,6 +1,10 @@
 # cython: language_level=3
-from Zero3.basic import *
+import yaml
 import numpy
+import pygame
+import os
+import random
+from Zero3.basic import addDarkness,loadImg,dicMerge,resizeImg
 
 class MapObject:
     def  __init__(self,mapDataDic,perBlockWidth,local_x=0,local_y=0):

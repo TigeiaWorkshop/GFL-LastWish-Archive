@@ -1,6 +1,4 @@
 # cython: language_level=3
-from Zero3.basic import *
-from Zero3.map import *
 
 def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round):
     character_with_min_hp = None
