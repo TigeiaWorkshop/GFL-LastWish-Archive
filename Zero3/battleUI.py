@@ -108,9 +108,9 @@ class RoundSwitch:
 
 #警告系统
 class WarningSystem:
-    def __init__(self,warningsTxt):
+    def __init__(self):
         self.all_warnings = []
-        self.warnings = warningsTxt
+        self.warnings = get_lang("Warnings")
     def add(self,the_warning,fontSize=30):
         if len(self.all_warnings)>=5:
             self.all_warnings.pop()
@@ -131,7 +131,8 @@ class WarningSystem:
 
 #角色行动选项菜单
 class SelectMenu:
-    def __init__(self,selectMenuTxtDic):
+    def __init__(self):
+        selectMenuTxtDic = get_lang("SelectMenu")
         self.selectButtonImg = loadImg("Assets/image/UI/menu.png")
         #攻击
         self.attackAP = 5
@@ -287,7 +288,8 @@ class CharacterInfoBoard:
 
 #计分板
 class ResultBoard:
-    def __init__(self,resultTxt,finalResult,window_x,window_y):
+    def __init__(self,finalResult,window_x,window_y):
+        resultTxt = get_lang("ResultBoard")
         self.x = int(window_x/9.6)
         self.y = int(window_x/9.6)
         self.txt_x = int(window_x/7.68)
