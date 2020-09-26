@@ -62,6 +62,9 @@ class BattleSystem:
             "total_time" : time.time(),
             "times_characters_down" : 0
         }
+        self.__pygame_events = None
+    def __update_events(self):
+        self.__pygame_events = pygame.event.get()
     def process_data(self,screen,chapter_name):
         #卸载音乐
         unloadBackgroundMusic()
@@ -204,6 +207,7 @@ class BattleSystem:
     def display(self,screen):
         #战斗系统主要loop
         while self.battleSystemMainLoop == True:
+            self.__update_events()
             #加载地图
             self.theMap.display_map(screen)
             #环境声音-频道1
@@ -385,24 +389,24 @@ class BattleSystem:
                                     del actionLoop[character_key]
                             display_num += 1
                         #开始对话
-                        elif "self.dialoguebox_up" in self.dialog_to_display[display_num] or "self.dialoguebox_down" in self.dialog_to_display[display_num]:
+                        elif "dialoguebox_up" in self.dialog_to_display[display_num] or "dialoguebox_down" in self.dialog_to_display[display_num]:
                             #对话框的移动
                             if self.dialoguebox_up.x > self.window_x/2+self.dialoguebox_up.get_width()*0.4:
                                 self.dialoguebox_up.x -= 150
                             if self.dialoguebox_down.x < self.window_x/2-self.dialoguebox_down.get_width()*1.4:
                                 self.dialoguebox_down.x += 150
                             #上方对话框
-                            if self.dialog_to_display[display_num]["self.dialoguebox_up"] != None:
+                            if self.dialog_to_display[display_num]["dialoguebox_up"] != None:
                                 if self.dialoguebox_up.updated == False:
-                                    currentTmp = self.dialog_to_display[display_num]["self.dialoguebox_up"]
+                                    currentTmp = self.dialog_to_display[display_num]["dialoguebox_up"]
                                     self.dialoguebox_up.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
                                     del currentTmp
                                 #对话框图片
                                 self.dialoguebox_up.display(screen,self.characterInfoBoardUI)
                             #下方对话框
-                            if self.dialog_to_display[display_num]["self.dialoguebox_down"] != None:
+                            if self.dialog_to_display[display_num]["dialoguebox_down"] != None:
                                 if self.dialoguebox_down.updated == False:
-                                    currentTmp = self.dialog_to_display[display_num]["self.dialoguebox_down"]
+                                    currentTmp = self.dialog_to_display[display_num]["dialoguebox_down"]
                                     self.dialoguebox_down.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
                                     del currentTmp
                                 #对话框图片
@@ -446,14 +450,14 @@ class BattleSystem:
                                 self.screen_to_move_y = None
                                 display_num += 1
                         #玩家输入按键判定
-                        for event in pygame.event.get():
+                        for event in self.__pygame_events:
                             if event.type == pygame.KEYDOWN:
                                 if event.key == pygame.K_ESCAPE:
                                     pause_menu.display(screen)
                                     if pause_menu.ifSave == True:
                                         pause_menu.ifSave = False
                                         DataTmp = {}
-                                        DataTmp["type"] = "self.battle"
+                                        DataTmp["type"] = "battle"
                                         with open("Save/save.yaml", "w", encoding='utf-8') as f:
                                             yaml.dump(DataTmp, f, allow_unicode=True)
                                     if pause_menu.ifBackToMainMenu == True:
@@ -461,22 +465,22 @@ class BattleSystem:
                             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
                                 display_num += 1
                                 if display_num < len(self.dialog_to_display):
-                                    if "self.dialoguebox_up" in self.dialog_to_display[display_num]:
+                                    if "dialoguebox_up" in self.dialog_to_display[display_num]:
                                         #检测上方对话框
-                                        if self.dialog_to_display[display_num]["self.dialoguebox_up"] == None or "self.dialoguebox_up" not in self.dialog_to_display[display_num-1] or self.dialog_to_display[display_num-1]["self.dialoguebox_up"] == None or self.dialog_to_display[display_num]["self.dialoguebox_up"]["speaker"] != self.dialog_to_display[display_num-1]["self.dialoguebox_up"]["speaker"]:
+                                        if self.dialog_to_display[display_num]["dialoguebox_up"] == None or "dialoguebox_up" not in self.dialog_to_display[display_num-1] or self.dialog_to_display[display_num-1]["dialoguebox_up"] == None or self.dialog_to_display[display_num]["dialoguebox_up"]["speaker"] != self.dialog_to_display[display_num-1]["dialoguebox_up"]["speaker"]:
                                             self.dialoguebox_up.reset_pos()
                                             self.dialoguebox_up.updated = False
-                                        elif self.dialog_to_display[display_num]["self.dialoguebox_up"]["content"] != self.dialog_to_display[display_num-1]["self.dialoguebox_up"]["content"]:
+                                        elif self.dialog_to_display[display_num]["dialoguebox_up"]["content"] != self.dialog_to_display[display_num-1]["dialoguebox_up"]["content"]:
                                             self.dialoguebox_up.updated = False
                                     else:
                                         self.dialoguebox_up.reset_pos()
                                         self.dialoguebox_up.updated = False
-                                    if "self.dialoguebox_down" in self.dialog_to_display[display_num]:
+                                    if "dialoguebox_down" in self.dialog_to_display[display_num]:
                                         #检测下方对话框    
-                                        if self.dialog_to_display[display_num]["self.dialoguebox_down"] == None or "self.dialoguebox_down" not in self.dialog_to_display[display_num-1] or self.dialog_to_display[display_num-1]["self.dialoguebox_down"] == None or self.dialog_to_display[display_num]["self.dialoguebox_down"]["speaker"] != self.dialog_to_display[display_num-1]["self.dialoguebox_down"]["speaker"]:
+                                        if self.dialog_to_display[display_num]["dialoguebox_down"] == None or "dialoguebox_down" not in self.dialog_to_display[display_num-1] or self.dialog_to_display[display_num-1]["dialoguebox_down"] == None or self.dialog_to_display[display_num]["dialoguebox_down"]["speaker"] != self.dialog_to_display[display_num-1]["dialoguebox_down"]["speaker"]:
                                             self.dialoguebox_down.reset_pos()
                                             self.dialoguebox_down.updated = False
-                                        elif self.dialog_to_display[display_num]["self.dialoguebox_down"]["content"] != self.dialog_to_display[display_num-1]["self.dialoguebox_down"]["content"]:
+                                        elif self.dialog_to_display[display_num]["dialoguebox_down"]["content"] != self.dialog_to_display[display_num-1]["dialoguebox_down"]["content"]:
                                             self.dialoguebox_down.updated = False
                                     else:
                                         self.dialoguebox_down.reset_pos()
@@ -511,22 +515,15 @@ class BattleSystem:
                     if self.txt_alpha == 0:
                         self.battle = True
             # 游戏主循环
-            elif self.battle == True:
+            if self.battle == True:
                 right_click = False
+                show_pause_menu = False
                 #获取鼠标坐标
                 mouse_x,mouse_y = controller.get_pos()
-                for event in pygame.event.get():
+                for event in self.__pygame_events:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE and self.characterGetClick == "":
-                            pause_menu.display(screen)
-                            if pause_menu.ifSave == True:
-                                pause_menu.ifSave = False
-                                DataTmp = {}
-                                DataTmp["type"] = "self.battle"
-                                with open("Save/save.yaml", "w", encoding='utf-8') as f:
-                                    yaml.dump(DataTmp, f, allow_unicode=True)
-                            if pause_menu.ifBackToMainMenu == True:
-                                return None
+                            show_pause_menu = True
                         if event.key == pygame.K_ESCAPE and self.isWaiting == True:
                             self.NotDrawRangeBlocks = True
                             self.characterGetClick = ""
@@ -1087,9 +1084,9 @@ class BattleSystem:
                             self.characters_data[self.characterGetClick].draw("skill",screen,self.theMap,False)
                             if self.characters_data[self.characterGetClick].get_imgId("skill") == self.characters_data[self.characterGetClick].get_imgNum("skill")-2:
                                 temp_dic = skill(self.characterGetClick,None,None,self.sangvisFerris_data,self.characters_data,"react",self.skill_target,self.damage_do_to_characters)
-                                self.characters_data = temp_dic["self.characters_data"]
-                                self.sangvisFerris_data = temp_dic["self.sangvisFerris_data"]
-                                self.damage_do_to_characters = temp_dic["self.damage_do_to_characters"]
+                                self.characters_data = temp_dic["characters_data"]
+                                self.sangvisFerris_data = temp_dic["sangvisFerris_data"]
+                                self.damage_do_to_characters = temp_dic["damage_do_to_characters"]
                                 del temp_dic
                             elif self.characters_data[self.characterGetClick].get_imgId("skill") == self.characters_data[self.characterGetClick].get_imgNum("skill")-1:
                                 self.characters_data[self.characterGetClick].reset_imgId("skill")
@@ -1446,16 +1443,25 @@ class BattleSystem:
                 if self.whose_round == "result_win":
                     self.resultInfo["total_time"] = time.localtime(time.time()-self.resultInfo["total_time"])
                     ResultBoardUI = ResultBoard(self.resultInfo,self.window_x,self.window_y)
-
                     self.whose_round = "result"
-                
                 if self.whose_round == "result":
-                    for event in pygame.event.get():
+                    for event in self.__pygame_events:
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_SPACE:
                                 self.battle = False
                                 self.battleSystemMainLoop = False
                     ResultBoardUI.display(screen)
+                #展示暂停菜单
+                if show_pause_menu == True:
+                    pause_menu.display(screen)
+                    if pause_menu.ifSave == True:
+                        pause_menu.ifSave = False
+                        DataTmp = {}
+                        DataTmp["type"] = "battle"
+                        with open("Save/save.yaml", "w", encoding='utf-8') as f:
+                            yaml.dump(DataTmp, f, allow_unicode=True)
+                    if pause_menu.ifBackToMainMenu == True:
+                        return None
         
             #渐变效果：一次性的
             if self.txt_alpha == None:
