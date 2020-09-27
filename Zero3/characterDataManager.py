@@ -41,6 +41,28 @@ def _play_CHARACTERS_SOUND(self_type,kind_of_sound):
             elif len(sound_list) > 1:
                 pygame.mixer.Channel(__CHARACTERS_SOUND_CHANNEL).play(sound_list[random.randint(0,len(sound_list)-1)])
 
+#角色UI的文字
+DOLL_UI_FONT = createFont(get_setting("Screen_size_x")/192)
+__CHARACTERS_GET_HURT_IMAGE_DICT = {}
+def _get_CHARACTERS_GET_HURT_IMAGE(self_type):
+    return __CHARACTERS_GET_HURT_IMAGE_DICT[self_type]
+def _add_CHARACTERS_GET_HURT_IMAGE(self_type):
+    if self_type not in __CHARACTERS_GET_HURT_IMAGE_DICT:
+        __CHARACTERS_GET_HURT_IMAGE_DICT[self_type] = pygame.image.load(os.path.join("Assets/image/npc/{}_hurt.png".format(self_type))).convert_alpha()
+
+class CHARACTERS_GET_HURT_IMAGE:
+    def __init__(self,self_type,y,width):
+        self.x = None
+        self.y = y
+        self.yToGo = None
+        self.width = int(width)
+        self.alpha = 255
+        _add_CHARACTERS_GET_HURT_IMAGE(self_type)
+    def draw(self,screen,self_type):
+        GetHurtImage = pygame.transform.scale(_get_CHARACTERS_GET_HURT_IMAGE(self_type),(self.width,self.width))
+        if self.alpha != 255:
+            GetHurtImage.set_alpha(self.alpha)
+        screen.blit(GetHurtImage,(self.x,self.y))
 
 class Doll:
     def __init__(self,DATA,faction,mode):
@@ -63,18 +85,18 @@ class Doll:
         self.ifFlip = False
         self.x = DATA["x"]
         self.y = DATA["y"]
-        self.FONT = createFont(10)
-        _load_sound_to_CHARACTERS_SOUND_DICT(self.type)
+        self.ImageGetHurt = None
     def decreaseHp(self,damage,result_of_round=None):
         self.current_hp-=damage
         if self.current_hp<=0:
             self.current_hp = 0
         if self.faction == "character" and self.dying == False and self.current_hp == 0 and self.kind != "HOC":
             self.dying = 3
-            self.ImageGetHurt.x = -self.ImageGetHurt.width
-            self.ImageGetHurt.set_alpha(255)
-            self.ImageGetHurt.yToGo = 255
-            self.playSound("injured")
+            if self.ImageGetHurt != None:
+                self.ImageGetHurt.x = -self.ImageGetHurt.width
+                self.ImageGetHurt.alpha = 255
+                self.ImageGetHurt.yToGo = 255
+                self.playSound("injured")
             result_of_round["times_characters_down"] += 1
         return result_of_round
     def heal(self,hpHealed):
@@ -112,12 +134,12 @@ class Doll:
         if self.dying == False:
             if original_UI_img != None:
                 hp_img = original_UI_img["hp_green"]
-            current_hp_to_display = self.FONT.render("{}/{}".format(self.current_hp,self.max_hp),get_fontMode(),(0,0,0))
+            current_hp_to_display = DOLL_UI_FONT.render("{}/{}".format(self.current_hp,self.max_hp),get_fontMode(),(0,0,0))
             percent_of_hp = self.current_hp/self.max_hp
         else:
             if original_UI_img != None:
                 hp_img = original_UI_img["hp_red"]
-            current_hp_to_display = self.FONT.render("{}/3".format(self.dying),get_fontMode(),(0,0,0))
+            current_hp_to_display = DOLL_UI_FONT.render("{}/3".format(self.dying),get_fontMode(),(0,0,0))
             percent_of_hp = self.dying/3
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)
@@ -134,17 +156,16 @@ class Doll:
                 screen.blit(resizeImg(original_UI_img["eye_orange"], (eyeImgWidth,eyeImgHeight)),(xTemp+theMapClass.perBlockWidth*0.51-numberX,yTemp-numberY))
             if self.eyeImgSize > 1:
                 self.eyeImgSize-=1
-            if self.kind != "HOC" and self.ImageGetHurt.x != None:
-                self.ImageGetHurt.draw(screen)
+            if self.ImageGetHurt != None and self.ImageGetHurt.x != None:
+                self.ImageGetHurt.draw(screen,self.type)
                 if self.ImageGetHurt.x < self.ImageGetHurt.width/4:
                     self.ImageGetHurt.x += self.ImageGetHurt.width/25
                 else:
                     if self.ImageGetHurt.yToGo > 0:
                         self.ImageGetHurt.yToGo -= 5
                     else:
-                        alphaTemp = self.ImageGetHurt.get_alpha()
-                        if alphaTemp > 0:
-                            self.ImageGetHurt.set_alpha(alphaTemp-2)
+                        if self.ImageGetHurt.alpha > 0:
+                            self.ImageGetHurt.alpha -= 2
                         else:
                             self.ImageGetHurt.x = None
         hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(theMapClass.perBlockWidth/2), round(theMapClass.perBlockWidth/10)))
@@ -219,7 +240,7 @@ class Doll:
 
 #格里芬角色类
 class CharacterDataManager(Doll):
-    def __init__(self,theCharacterDataDic,defaultData,window_y,mode=None):
+    def __init__(self,theCharacterDataDic,defaultData,mode=None):
         for key in theCharacterDataDic:
             defaultData[key] = theCharacterDataDic[key]
         Doll.__init__(self,defaultData,"character",mode)
@@ -229,9 +250,9 @@ class CharacterDataManager(Doll):
         self.skill_cover_range = defaultData["skill_cover_range"]
         self.detection = defaultData["detection"] if "detection" in defaultData else None
         self.eyeImgSize = 0
-        if defaultData["kind"] != "HOC":
+        if self.kind != "HOC":
             try:
-                self.ImageGetHurt = loadImage("Assets/image/npc/"+defaultData["type"]+"_hurt.png",(None,window_y/4),window_y/2,window_y/2)
+                self.ImageGetHurt = CHARACTERS_GET_HURT_IMAGE(self.type,get_setting("Screen_size_y")/4,get_setting("Screen_size_y")/2)
             except BaseException:
                 print('警告：角色 {} 没有对应的破衣动画'.format(defaultData["type"]))
                 if not os.path.exists("Assets/image/npc_icon/{}.png".format(defaultData["type"])):
@@ -247,7 +268,7 @@ class SangvisFerriDataManager(Doll):
 
 #初始化角色信息
 class initializeCharacterDataThread(threading.Thread):
-    def __init__(self,characters,sangvisFerris,setting,mode=None):
+    def __init__(self,characters,sangvisFerris,mode=None):
         threading.Thread.__init__(self)
         self.DATABASE = loadCharacterData()
         self.characters_data = {}
@@ -256,11 +277,10 @@ class initializeCharacterDataThread(threading.Thread):
         self.sangvisFerris = sangvisFerris
         self.totalNum = len(characters)+len(sangvisFerris)
         self.currentID = 0
-        self.setting = setting
         self.mode = mode
     def run(self):
         for each_character in self.characters:
-            self.characters_data[each_character] = CharacterDataManager(self.characters[each_character],self.DATABASE[self.characters[each_character]["type"]],self.setting["Screen_size_y"],self.mode)
+            self.characters_data[each_character] = CharacterDataManager(self.characters[each_character],self.DATABASE[self.characters[each_character]["type"]],self.mode)
             self.currentID+=1
         for each_character in self.sangvisFerris:
             self.sangvisFerris_data[each_character] = SangvisFerriDataManager(self.sangvisFerris[each_character],self.DATABASE[self.sangvisFerris[each_character]["type"]],self.mode)
@@ -332,6 +352,8 @@ def character_gif_dic(character_name,faction,mode):
             if imgId_dict["die"]==None:
                 imgId_dict["die"] = character_creator(character_name,"die",faction)
         """
+        #加载角色的音效
+        _load_sound_to_CHARACTERS_SOUND_DICT(character_name)
     elif mode == "dev":
         imgId_dict = {"wait":character_creator(character_name,"wait",faction)}
     else:

@@ -99,7 +99,7 @@ class BattleSystem:
             DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
             self.zoomIn = DataTmp["zoomIn"]*100
             #初始化角色信息
-            characterDataThread = initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"],get_setting())
+            characterDataThread = initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
             self.bg_music = DataTmp["background_music"] 
             self.dialogInfo = DataTmp["dialogs"]
             #初始化天气和环境的音效 -- 频道1
@@ -125,20 +125,16 @@ class BattleSystem:
             nowLoadingIcon.draw(screen)
             display.flip(True)
         self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
-
         #初始化地图模块
         self.theMap = MapObject(DataTmp,round(self.window_x/10),DataTmp["local_x"],DataTmp["local_y"])
-
         #计算光亮区域 并初始化地图
         self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
-        
         #开始加载关卡设定
         self.infoToDisplayDuringLoading.display(screen)
         now_loading = fontRender(loading_info["now_loading_level"], "white",self.window_x/76)
         drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
         display.flip(True)
-
         #加载UI:
         #加载结束回合的图片
         self.end_round_button = loadImage("Assets/image/UI/endRound.png",(self.window_x*0.8,self.window_y*0.7),self.window_x/10, self.window_y/10)
@@ -183,7 +179,6 @@ class BattleSystem:
         self.the_sound_id = None
         #攻击的音效 -- 频道2
         self.attackingSounds = AttackingSoundManager(get_setting("Sound")["sound_effects"],2)
-        
         #切换回合时的UI
         self.RoundSwitchUI = RoundSwitch(self.window_x,self.window_y,self.battleUiTxt)
         #关卡背景介绍信息文字
@@ -204,6 +199,15 @@ class BattleSystem:
             self.dialog_to_display = None
         else:
             self.dialog_to_display = self.dialog_during_battle[self.dialogInfo["initial"]]
+    def save_data(self):
+        if pause_menu.ifSave == True:
+            pause_menu.ifSave = False
+            DataTmp = {}
+            DataTmp["type"] = "battle"
+            DataTmp["characters_data"] = self.characters_data
+            DataTmp["sangvisFerris_data"] = self.sangvisFerris_data
+            with open("Save/save.yaml", "w", encoding='utf-8') as f:
+                yaml.dump(DataTmp, f, allow_unicode=True)
     def display(self,screen):
         #战斗系统主要loop
         while self.battleSystemMainLoop == True:
@@ -454,12 +458,7 @@ class BattleSystem:
                             if event.type == pygame.KEYDOWN:
                                 if event.key == pygame.K_ESCAPE:
                                     pause_menu.display(screen)
-                                    if pause_menu.ifSave == True:
-                                        pause_menu.ifSave = False
-                                        DataTmp = {}
-                                        DataTmp["type"] = "battle"
-                                        with open("Save/save.yaml", "w", encoding='utf-8') as f:
-                                            yaml.dump(DataTmp, f, allow_unicode=True)
+                                    self.save_data()
                                     if pause_menu.ifBackToMainMenu == True:
                                         return None
                             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
@@ -1454,12 +1453,7 @@ class BattleSystem:
                 #展示暂停菜单
                 if show_pause_menu == True:
                     pause_menu.display(screen)
-                    if pause_menu.ifSave == True:
-                        pause_menu.ifSave = False
-                        DataTmp = {}
-                        DataTmp["type"] = "battle"
-                        with open("Save/save.yaml", "w", encoding='utf-8') as f:
-                            yaml.dump(DataTmp, f, allow_unicode=True)
+                    self.save_data()
                     if pause_menu.ifBackToMainMenu == True:
                         return None
         

@@ -21,7 +21,7 @@ def mapCreator(chapterName,screen,setting):
     with open("Data/main_chapter/"+chapterName+"_map.yaml", "r", encoding='utf-8') as f:
         loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
         #初始化角色信息
-        characterDataThread = Zero.initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],setting,"dev")
+        characterDataThread = Zero.initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],"dev")
         #加载角色信息
         characterDataThread.start()
         characterDataThread.join()

@@ -12,14 +12,8 @@ class VideoObject:
     def __init__(self,path,ifLoop=False,endPoint=None,loopStartPoint=None):
         self.video = cv2.VideoCapture(path)
         self.ifLoop = ifLoop
-        if endPoint != None:
-            self.endPoint = endPoint
-        else:
-            self.endPoint = self.getFrameNum()
-        if loopStartPoint != None:
-            self.loopStartPoint = loopStartPoint
-        else:
-            self.loopStartPoint = 1
+        self.endPoint = endPoint if endPoint != None and endPoint > 1 else self.getFrameNum()
+        self.loopStartPoint = loopStartPoint if loopStartPoint != None and loopStartPoint > 1 else 1
     def getFPS(self):
         return self.video.get(cv2.CAP_PROP_FPS)
     def getFrameNum(self):
@@ -41,15 +35,32 @@ class VideoObject:
         frame = cv2.transpose(frame)
         pygame.surfarray.blit_array(screen, frame)
 
+#视频捕捉系统
+class VideoObjectWithMusic(VideoObject):
+    def __init__(self,movie_path,music_path,ifLoop=False,endPoint=None,loopStartPoint=None):
+        VideoObject.__init__(self,movie_path,ifLoop,endPoint,loopStartPoint)
+        self.fps = self.video.get(cv2.CAP_PROP_FPS)
+        self.musicPlayed = False
+        pygame.mixer.music.unload()
+        pygame.mixer.music.load(music_path)
+    def getFPS(self):
+        return self.fps
+    def display(self,screen):
+        if self.musicPlayed == False:
+            pygame.mixer.music.play()
+            self.musicPlayed = True
+        super().display(screen)
+        #framePlayed = self.getFrameNum()
+        #print(int(pygame.mixer.music.get_pos()/1000))
+        #if framePlayed %5 == 0 and framePlayed :
+
 #过场动画
 def cutscene(screen,videoPath,bgmPath=None):
     try:
         clip = VideoFileClip(videoPath)
         clip.preview()
     except BaseException:
-        thevideo = VideoObject(videoPath)
-        fpsClock = pygame.time.Clock()
-        video_fps = int(thevideo.getFPS()+2)
+        thevideo = VideoObjectWithMusic(videoPath,bgmPath)
         width,height = screen.get_size()
         black_bg = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
         pygame.draw.rect(black_bg,(0,0,0),(0,0,width,height))
@@ -62,12 +73,8 @@ def cutscene(screen,videoPath,bgmPath=None):
         skip_button_y_end = skip_button_y+skip_button_height
         skip_button = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/dialog_skip.png")).convert_alpha(), (skip_button_width,skip_button_height))
         ifSkip = False
-        if bgmPath != None and os.path.exists(bgmPath):
-            pygame.mixer.music.load(bgmPath)
-            pygame.mixer.music.play()
         while True:
-            ifEnd = thevideo.display(screen)
-            if ifEnd == True:
+            if thevideo.display(screen) == True:
                 break
             screen.blit(skip_button,(skip_button_x,skip_button_y))
             events_of_mouse_click = pygame.event.get(pygame.MOUSEBUTTONDOWN)
@@ -85,7 +92,6 @@ def cutscene(screen,videoPath,bgmPath=None):
                     black_bg.set_alpha(temp_alpha+5)
                 else:
                     break
-            screen.blit(black_bg,(0,0))
-            fpsClock.tick(video_fps)
-            pygame.display.update()
+                screen.blit(black_bg,(0,0))
+            pygame.display.flip()
         pygame.mixer.music.stop()

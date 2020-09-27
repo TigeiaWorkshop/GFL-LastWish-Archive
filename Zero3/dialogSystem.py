@@ -59,6 +59,8 @@ class DialogSystem:
         self.history_back = Button(addDarkness(buttonTemp,100),self.window_x*0.04,self.window_y*0.04)
         self.history_back.setHoverImg(buttonTemp)
         self.__events = None
+        #是否开启自动保存
+        self.auto_save = False
     def __update_event(self):
         self.__events = pygame.event.get()
     def __save_process(self):
@@ -81,6 +83,9 @@ class DialogSystem:
         #切换dialogId
         self.dialogId = theNextDialogId
         self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
+        #是否保存
+        if self.auto_save == True:
+            self.__save_process()
     def display(self,screen):
         #背景
         self.backgroundContent.display(screen)

@@ -22,6 +22,7 @@ def dialog(dialogType,chapterName,screen,setting,part,dialogId="head",dialog_opt
         Zero.display.flip(True)
     #背景音乐可以开始播放了
     DIALOG.ready()
+    #DIALOG.auto_save = True
     #主循环
     while True:
         if not DIALOG.display(screen):

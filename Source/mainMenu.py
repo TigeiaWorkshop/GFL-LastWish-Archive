@@ -224,7 +224,7 @@ def mainMenu(screen,setting):
                     elif Zero.ifHover(chapter_select[i]) and i==0:
                         dialog("main_chapter","chapter"+str(i+1),screen,setting,"dialog_before_battle")
                         if Zero.pause_menu.ifBackToMainMenu == False:
-                            battle("chapter"+str(i+1),screen,setting)
+                            battle("chapter"+str(i+1),screen)
                             if Zero.pause_menu.ifBackToMainMenu == False:
                                 dialog("main_chapter","chapter"+str(i+1),screen,setting,"dialog_after_battle")
                                 Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
