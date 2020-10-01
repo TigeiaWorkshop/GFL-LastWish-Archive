@@ -1,7 +1,6 @@
 # cython: language_level=3
 import glob
 import math
-import os
 import random
 from sys import exit
 import threading

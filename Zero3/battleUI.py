@@ -25,7 +25,7 @@ class RoundSwitch:
     def display(self,screen,whose_round,total_rounds):
         #如果“第N回合”的文字surface还没有初始化，则初始化该文字
         if self.now_total_rounds_surface == None:
-            self.now_total_rounds_surface = fontRender(self.now_total_rounds_text.replace("NaN",str(total_rounds)), "white",screen.get_width()/38)
+            self.now_total_rounds_surface = fontRender(self.now_total_rounds_text.format(str(total_rounds)), "white",screen.get_width()/38)
             self.now_total_rounds_surface.set_alpha(0)
         #如果UI底的alpha值在渐入阶段
         if self.baseAlphaUp == True:
@@ -313,7 +313,7 @@ class ResultBoard:
 class LoadingTitle:
     def __init__(self,window_x,window_y,numChapter_txt,chapter_name,chapterTitle_txt,chapterDesc_txt):
         self.black_bg = get_SingleColorSurface("black")
-        title_chapterNum = fontRender(numChapter_txt.replace("NaN",chapter_name.replace("chapter","")),"white",window_x/38)
+        title_chapterNum = fontRender(numChapter_txt.format(chapter_name.replace("chapter","")),"white",window_x/38)
         self.title_chapterNum = ImageSurface(title_chapterNum,(window_x-title_chapterNum.get_width())/2,window_y*0.37)
         title_chapterName = fontRender(chapterTitle_txt,"white",window_x/38)
         self.title_chapterName = ImageSurface(title_chapterName,(window_x-title_chapterName.get_width())/2,window_y*0.46)

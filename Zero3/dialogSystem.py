@@ -71,8 +71,17 @@ class DialogSystem:
         DataTmp["id"] = self.dialogId
         DataTmp["part"] = self.part
         DataTmp["dialog_options"] = self.dialog_options
+        #别忘了看看Save文件夹是不是都不存在
+        if not os.path.exists("Save"):
+            os.makedirs("Save")
+        #存档数据
         with open("Save/save.yaml", "w", encoding='utf-8') as f:
             yaml.dump(DataTmp, f, allow_unicode=True)
+        #检查global.yaml配置文件
+        if not os.path.exists("Save/global.yaml"):
+            DataTmp = {"chapter_unlocked":1}
+            with open("Save/global.yaml", "w", encoding='utf-8') as f:
+                yaml.dump(DataTmp, f, allow_unicode=True)
     def get_event(self):
         return self.__events
     def __update_scene(self,theNextDialogId):
