@@ -11,17 +11,31 @@ class MapObject:
         #加载地图设置
         with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
             blocks_setting = yaml.load(f.read(),Loader=yaml.FullLoader)["blocks"]
-        mapData = mapDataDic["map"]
         facilityData = mapDataDic["facility"]
         self.darkMode = mapDataDic["darkMode"]
         self.perBlockWidth = perBlockWidth
+        mapData = mapDataDic["map"]
         self.row = len(mapData)
         self.column = len(mapData[0])
         self.env_img_list_original = load_env_images(mapData,None,None,self.darkMode)
         self.env_img_list = load_env_images(mapData,perBlockWidth,None,self.darkMode)
-        self.mapData = initialBlockData(mapData,facilityData,blocks_setting)
+        #初始化地图数据
+        self.mapData = mapData
+        for y in range(len(mapData)):
+            for x in range(len(mapData[y])):
+                self.mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
+        for facilityType,itemsThatType in facilityData.items():
+            for itemKey,itemData in itemsThatType.items():
+                y = itemData["y"]
+                x = itemData["x"]
+                #del itemData["y"],itemData["x"]
+                self.mapData[y][x].facilityType = facilityType
+                self.mapData[y][x].facilityData = itemData
+        self.mapData = numpy.asarray(self.mapData)
         self.facilityImg = loadFacilityImg(facilityData,self.darkMode)
-        self.facilityData = initialFacility(facilityData)
+        self.facilityData = facilityData
+        for key in self.facilityData["campfire"]:
+            self.facilityData["campfire"][key]["imgId"] = random.randint(0,9)
         self.lightArea = []
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
@@ -303,25 +317,13 @@ class MapObject:
     def calPosInMap(self,x,y):
         return round((x-y)*self.perBlockWidth*0.43+self.__local_x+self.row*self.perBlockWidth*0.43,1),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4,1)
 
-#初始化地图数据
-def initialBlockData(mapData,facilityData,blocks_setting):
-    for y in range(len(mapData)):
-        for x in range(len(mapData[y])):
-            mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
-    mapDataNumpyArray = numpy.asarray(mapData)
-    return mapDataNumpyArray
-
-#初始化设施数据
-def initialFacility(facilityData):
-    for key in facilityData["campfire"]:
-        facilityData["campfire"][key]["imgId"] = random.randint(0,9)
-    return facilityData
-
 #方块类
 class Block:
     def  __init__(self,name,canPassThrough):
         self.name = name
         self.canPassThrough = canPassThrough
+        self.facilityType = None
+        self.facilityData = None
 
 #加载场地设施的图片
 def loadFacilityImg(facilityData,darkMode=False):
