@@ -246,7 +246,7 @@ class BattleSystem:
                                 else:
                                     value.draw("wait",screen,self.theMap)
                         #展示设施
-                        self.theMap.display_facility(screen,self.characters_data,self.sangvisFerris_data)
+                        self.theMap.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
                         #加载雪花
                         if self.weatherController != None:
                             self.weatherController.display(screen,self.theMap.perBlockWidth,self.perBlockHeight)
@@ -462,7 +462,8 @@ class BattleSystem:
                                     if pause_menu.ifBackToMainMenu == True:
                                         return None
                             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
-                                display_num += 1
+                                if "dialoguebox_up" in self.dialog_to_display[display_num] or "dialoguebox_down" in self.dialog_to_display[display_num]:
+                                    display_num += 1
                                 if display_num < len(self.dialog_to_display):
                                     if "dialoguebox_up" in self.dialog_to_display[display_num]:
                                         #检测上方对话框
@@ -485,6 +486,8 @@ class BattleSystem:
                                         self.dialoguebox_down.reset_pos()
                                         self.dialoguebox_down.updated = False
                                 else:
+                                    self.dialoguebox_up.reset_pos()
+                                    self.dialoguebox_up.updated = False
                                     self.dialoguebox_down.reset_pos()
                                     self.dialoguebox_down.updated = False
                                 break
@@ -501,7 +504,7 @@ class BattleSystem:
                         if (self.sangvisFerris_data[enemies].x,self.sangvisFerris_data[enemies].y) in self.theMap.lightArea or self.theMap.darkMode != True:
                             self.sangvisFerris_data[enemies].draw("wait",screen,self.theMap)
                     #展示设施
-                    self.theMap.display_facility(screen,self.characters_data,self.sangvisFerris_data)
+                    self.theMap.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
                     #角色动画
                     for every_chara in self.characters_data:
                         self.characters_data[every_chara].drawUI(screen,self.original_UI_img,self.theMap)
@@ -664,8 +667,6 @@ class BattleSystem:
                     for position in self.areaDrawColorBlock[area]:
                         xTemp,yTemp = self.theMap.calPosInMap(position[0],position[1])
                         drawImg(self.UI_img[area],(xTemp+self.theMap.perBlockWidth*0.1,yTemp),screen)
-                #显示设施
-                self.theMap.display_facility_ahead(screen)
 
                 #玩家回合
                 if self.whose_round == "player":
@@ -1009,11 +1010,10 @@ class BattleSystem:
                             else:
                                 pygame.mixer.Channel(0).stop()
                                 #检测是不是站在补给上
-                                chest_need_to_remove = None
-                                for key,value in self.theMap.facilityData["chest"].items():
-                                    if value["x"] == self.characters_data[self.characterGetClick].x and value["y"] == self.characters_data[self.characterGetClick].y:
+                                for i in range(len(self.theMap.ornamentationData)-1,-1,-1):
+                                    if self.theMap.ornamentationData[i].type == "chest" and self.theMap.ornamentationData[i].get_pos() == self.characters_data[self.characterGetClick].get_pos():
                                         self.original_UI_img["supplyBoard"].items = []
-                                        for key2,value2 in value["item"].items():
+                                        for key2,value2 in self.theMap.ornamentationData[i].items.items():
                                             if key2 == "bullet":
                                                 self.characters_data[self.characterGetClick].bullets_carried += value2
                                                 self.original_UI_img["supplyBoard"].items.append(fontRender(self.battleUiTxt["getBullets"]+": "+str(value2),"white",self.window_x/80))
@@ -1022,10 +1022,8 @@ class BattleSystem:
                                                 self.original_UI_img["supplyBoard"].items.append(fontRender(self.battleUiTxt["getHealth"]+": "+str(value2),"white",self.window_x/80))
                                         if len(self.original_UI_img["supplyBoard"].items)>0:
                                             self.original_UI_img["supplyBoard"].yTogo = 10
-                                        chest_need_to_remove = key
+                                        del self.theMap.ornamentationData[i]
                                         break
-                                if chest_need_to_remove != None:
-                                    del self.theMap.facilityData["chest"][chest_need_to_remove]
                                 keyTemp = str(self.characters_data[self.characterGetClick].x)+"-"+str(self.characters_data[self.characterGetClick].y) 
                                 #检测是否角色有set的动画
                                 imgIdForSet = self.characters_data[self.characterGetClick].get_imgId("set")
@@ -1352,7 +1350,7 @@ class BattleSystem:
                         del self.the_dead_one[key]
                 #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑#
                 #展示设施
-                self.theMap.display_facility(screen,self.characters_data,self.sangvisFerris_data)
+                self.theMap.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
                 #展示所有角色Ui
                 for every_chara in self.characters_data:
                     self.characters_data[every_chara].drawUI(screen,self.original_UI_img,self.theMap)

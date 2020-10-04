@@ -26,7 +26,7 @@ dialogs:
   initial: initial_dialog
   move:
     15-10: tutorial1
-facility:
+ornamentation:
   campfire:
     campfire1:
       range: 3
@@ -38,7 +38,7 @@ facility:
       y: 15
   chest:
     chest1:
-      item:
+      items:
         bullet: 100
       x: 15
       y: 10

@@ -11,7 +11,7 @@ class MapObject:
         #加载地图设置
         with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
             blocks_setting = yaml.load(f.read(),Loader=yaml.FullLoader)["blocks"]
-        facilityData = mapDataDic["facility"]
+        ornamentationData = mapDataDic["ornamentation"]
         self.darkMode = mapDataDic["darkMode"]
         self.perBlockWidth = perBlockWidth
         mapData = mapDataDic["map"]
@@ -23,19 +23,29 @@ class MapObject:
         self.mapData = mapData
         for y in range(len(mapData)):
             for x in range(len(mapData[y])):
-                self.mapData[y][x] = Block(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
-        for facilityType,itemsThatType in facilityData.items():
+                self.mapData[y][x] = BlockObject(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
+        for ornamentationType,itemsThatType in ornamentationData.items():
             for itemKey,itemData in itemsThatType.items():
                 y = itemData["y"]
                 x = itemData["x"]
                 #del itemData["y"],itemData["x"]
-                self.mapData[y][x].facilityType = facilityType
-                self.mapData[y][x].facilityData = itemData
+                self.mapData[y][x].ornamentationType = ornamentationType
+                self.mapData[y][x].ornamentationData = itemData
         self.mapData = numpy.asarray(self.mapData)
-        self.facilityImg = loadFacilityImg(facilityData,self.darkMode)
-        self.facilityData = facilityData
-        for key in self.facilityData["campfire"]:
-            self.facilityData["campfire"][key]["imgId"] = random.randint(0,9)
+        self.ornamentationImg = loadOrnamentationImg(ornamentationData,self.darkMode)
+        self.ornamentationData = []
+        for ornamentationType,itemsThatType in ornamentationData.items():
+            for itemKey,itemData in itemsThatType.items():
+                if ornamentationType == "campfire":
+                    self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,ornamentationType))
+                    self.ornamentationData[-1].imgId = random.randint(0,9)
+                    self.ornamentationData[-1].range = itemData["range"]
+                elif ornamentationType == "chest":
+                    self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,ornamentationType))
+                    self.ornamentationData[-1].items = itemData["items"]
+                else:
+                    self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,itemData["image"]))
+        self.ornamentationData.sort()
         self.lightArea = []
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
@@ -111,67 +121,59 @@ class MapObject:
             self.ifProcessMap = False
             self.process_map(screen.get_width(),screen.get_height())
         screen.blit(self.mapSurface,(0,0))
-        self.display_facility_ahead(screen)
         return (screen_to_move_x,screen_to_move_y)
     #画上设施
-    def display_facility(self,screen,characters_data,sangvisFerris_data):
+    def display_ornamentation(self,screen,characters_data,sangvisFerris_data):
         charatcersPos = None
-        for key,value in self.facilityData.items():
-            for key2,value2 in value.items():
-                imgToBlit = None
-                xTemp,yTemp = self.calPosInMap(value2["x"],value2["y"])
-                if -self.perBlockWidth<=xTemp<screen.get_width() and -self.perBlockWidth<=yTemp<screen.get_height():
-                    if self.darkMode == True and (value2["x"],value2["y"]) not in self.lightArea:
-                        keyWordTemp = "dark"
+        for item in self.ornamentationData:
+            imgToBlit = None
+            xTemp,yTemp = self.calPosInMap(item.x,item.y)
+            if -self.perBlockWidth<=xTemp<screen.get_width() and -self.perBlockWidth<=yTemp<screen.get_height():
+                if self.darkMode == True and item.get_pos() not in self.lightArea:
+                    keyWordTemp = "dark"
+                else:
+                    keyWordTemp = "normal"
+                #画上篝火
+                if item.type == "campfire":
+                    imgToBlit = pygame.transform.scale(self.ornamentationImg["normal"]["campfire"][int(item.imgId)], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                    if item.imgId >= len(self.ornamentationImg["normal"]["campfire"])-1:
+                        item.imgId = 0
                     else:
-                        keyWordTemp = "normal"
-                    #画上篝火
-                    if key == "campfire":
-                        imgToBlit = pygame.transform.scale(self.facilityImg["normal"]["campfire"][int(value2["imgId"])], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-                        if value2["imgId"] >= len(self.facilityImg["normal"]["campfire"])-1:
-                            value2["imgId"] = 0
-                        else:
-                            value2["imgId"] += 0.1
-                    # 画上树
-                    elif key == "tree":
-                        try:
-                            imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
-                        #如果图片没找到
-                        except BaseException:
-                            self.facilityImg["normal"][value2["image"]] = loadImg("Assets/image/environment/decoration/"+value2["image"]+".png")
-                            if self.darkMode == True:
-                                self.facilityImg["dark"][value2["image"]] = addDarkness(loadImg("Assets/image/environment/decoration/"+value2["image"]+".png"),150)
-                            imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
-                        xTemp -= self.perBlockWidth*0.125
-                        yTemp -= self.perBlockWidth*0.25
-                        #如果的确有树需要被画出
-                        if charatcersPos == None:
-                            charatcersPos = []
-                            for name,dataDic in dicMerge(characters_data,sangvisFerris_data).items():
-                                charatcersPos.append((int(dataDic.x),int(dataDic.y)))
-                                charatcersPos.append((int(dataDic.x)+1,int(dataDic.y)+1))
-                        if (value2["x"],value2["y"]) in charatcersPos:
-                            if self.darkMode == False or (value2["x"],value2["y"]) in self.lightArea:
-                                imgToBlit.set_alpha(100)
-                    elif key == "decoration" or key == "obstacle":
-                        try:
-                            imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-                        #如果图片没找到
-                        except BaseException:
-                            self.facilityImg["normal"][value2["image"]] = loadImg("Assets/image/environment/decoration/"+value2["image"]+".png")
-                            if self.darkMode == True:
-                                self.facilityImg["dark"][value2["image"]] = addDarkness(loadImg("Assets/image/environment/decoration/"+value2["image"]+".png"),150)
-                            imgToBlit = pygame.transform.scale(self.facilityImg[keyWordTemp][value2["image"]], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-                    if imgToBlit != None:
-                        screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
-    #画上比角色图层先画的装饰物
-    def display_facility_ahead(self,screen):
-        for key,value in self.facilityData["chest"].items():
-            xTemp,yTemp = self.calPosInMap(value["x"],value["y"])
-            if self.darkMode == True and (value["x"],value["y"]) not in self.lightArea:
-                screen.blit(pygame.transform.scale(self.facilityImg["dark"]["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
-            else:
-                screen.blit(pygame.transform.scale(self.facilityImg["normal"]["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2))),(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+                        item.imgId += 0.1
+                # 画上树
+                elif item.type == "tree":
+                    try:
+                        imgToBlit = pygame.transform.scale(self.ornamentationImg[keyWordTemp][item.image], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
+                    #如果图片没找到
+                    except BaseException:
+                        self.ornamentationImg["normal"][item.image] = loadImg("Assets/image/environment/decoration/"+item.image+".png")
+                        if self.darkMode == True:
+                            self.ornamentationImg["dark"][item.image] = addDarkness(loadImg("Assets/image/environment/decoration/"+item.image+".png"),150)
+                        imgToBlit = pygame.transform.scale(self.ornamentationImg[keyWordTemp][item.image], (round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
+                    xTemp -= self.perBlockWidth*0.125
+                    yTemp -= self.perBlockWidth*0.25
+                    #如果的确有树需要被画出
+                    if charatcersPos == None:
+                        charatcersPos = []
+                        for name,dataDic in dicMerge(characters_data,sangvisFerris_data).items():
+                            charatcersPos.append((int(dataDic.x),int(dataDic.y)))
+                            charatcersPos.append((int(dataDic.x)+1,int(dataDic.y)+1))
+                    if item.get_pos() in charatcersPos:
+                        if self.darkMode == False or item.get_pos() in self.lightArea:
+                            imgToBlit.set_alpha(100)
+                elif item.type == "decoration" or item.type == "obstacle":
+                    try:
+                        imgToBlit = pygame.transform.scale(self.ornamentationImg[keyWordTemp][item.image], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                    #如果图片没找到
+                    except BaseException:
+                        self.ornamentationImg["normal"][item.image] = loadImg("Assets/image/environment/decoration/"+item.image+".png")
+                        if self.darkMode == True:
+                            self.ornamentationImg["dark"][item.image] = addDarkness(loadImg("Assets/image/environment/decoration/"+item.image+".png"),150)
+                        imgToBlit = pygame.transform.scale(self.ornamentationImg[keyWordTemp][item.image], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                elif item.type == "chest":
+                    imgToBlit = pygame.transform.scale(self.ornamentationImg[keyWordTemp]["chest"], (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                if imgToBlit != None:
+                    screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
     #寻路功能
     def findPath(self,startPosition,endPosition,characters_data,sangvisFerris_data,routeLen=None,ignoreCharacter=[]):
         startX = startPosition[0]
@@ -188,10 +190,9 @@ class MapObject:
                     map2d[x][y]=1
         """
         #历遍设施，设置障碍方块
-        for key,value in self.facilityData.items():
-            if key == "obstacle" or key == "campfire":
-                for key2,value2 in value.items():
-                    map2d[value2["x"]][value2["y"]]=1
+        for item in self.ornamentationData:
+            if item.type == "obstacle" or item.type == "campfire":
+                map2d[item.x][item.y]=1
         # 历遍所有角色，将角色的坐标点设置为障碍方块
         for key,value in characters_data.items():
             if key not in ignoreCharacter:
@@ -301,15 +302,15 @@ class MapObject:
                     for x in range(int(characters_data[each_chara].x-the_character_effective_range+(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range-(y-characters_data[each_chara].y))):
                         if (x,y) not in self.lightArea:
                             self.lightArea.append((x,y))
-        if self.facilityData["campfire"] != None:
-            for the_campfire in self.facilityData["campfire"]:
-                for y in range(int(self.facilityData["campfire"][the_campfire]["y"]-self.facilityData["campfire"][the_campfire]["range"]),int(self.facilityData["campfire"][the_campfire]["y"]+self.facilityData["campfire"][the_campfire]["range"])):
-                    if y < self.facilityData["campfire"][the_campfire]["y"]:
-                        for x in range(int(self.facilityData["campfire"][the_campfire]["x"]-self.facilityData["campfire"][the_campfire]["range"]-(y-self.facilityData["campfire"][the_campfire]["y"])+1),int(self.facilityData["campfire"][the_campfire]["x"]+self.facilityData["campfire"][the_campfire]["range"]+(y-self.facilityData["campfire"][the_campfire]["y"]))):
+        for item in self.ornamentationData:
+            if item.type == "campfire":
+                for y in range(int(item.y-item.range),int(item.y+item.range)):
+                    if y < item.y:
+                        for x in range(int(item.x-item.range-(y-item.y)+1),int(item.x+item.range+(y-item.y))):
                             if (x,y) not in self.lightArea:
                                 self.lightArea.append((x,y))
                     else:
-                        for x in range(int(self.facilityData["campfire"][the_campfire]["x"]-self.facilityData["campfire"][the_campfire]["range"]+(y-self.facilityData["campfire"][the_campfire]["y"])+1),int(self.facilityData["campfire"][the_campfire]["x"]+self.facilityData["campfire"][the_campfire]["range"]-(y-self.facilityData["campfire"][the_campfire]["y"]))):
+                        for x in range(int(item.x-item.range+(y-item.y)+1),int(item.x+item.range-(y-item.y))):
                             if (x,y) not in self.lightArea:
                                 self.lightArea.append((x,y))
         self.ifProcessMap = True
@@ -318,41 +319,53 @@ class MapObject:
         return round((x-y)*self.perBlockWidth*0.43+self.__local_x+self.row*self.perBlockWidth*0.43,1),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4,1)
 
 #方块类
-class Block:
+class BlockObject:
     def  __init__(self,name,canPassThrough):
         self.name = name
         self.canPassThrough = canPassThrough
-        self.facilityType = None
-        self.facilityData = None
+        self.ornamentationType = None
+        self.ornamentationData = None
+
+#管理场景装饰物的类
+class OrnamentationObject:
+    def  __init__(self,x,y,type,image):
+        self.x = x
+        self.y = y
+        self.type = type
+        self.image = image
+    def __lt__(self,other):
+        return self.y+self.x < other.y+other.x
+    def get_pos(self):
+        return self.x,self.y
 
 #加载场地设施的图片
-def loadFacilityImg(facilityData,darkMode=False):
-    Facility_images = {"normal":{}}
+def loadOrnamentationImg(ornamentationData,darkMode=False):
+    Ornamentation_images = {"normal":{}}
     #加载篝火的图片
-    if "campfire" in facilityData and facilityData["campfire"] != None:
-        Facility_images["normal"]["campfire"] = []
+    if "campfire" in ornamentationData and ornamentationData["campfire"] != None:
+        Ornamentation_images["normal"]["campfire"] = []
         for i in range(1,11):
-            Facility_images["normal"]["campfire"].append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
+            Ornamentation_images["normal"]["campfire"].append(loadImg("Assets/image/environment/campfire/"+str(i)+".png"))
     #加载箱子的图片
-    if "chest" in facilityData and facilityData["chest"] != None:
-        Facility_images["normal"]["chest"] = loadImg("Assets/image/environment/decoration/chest.png")
+    if "chest" in ornamentationData and ornamentationData["chest"] != None:
+        Ornamentation_images["normal"]["chest"] = loadImg("Assets/image/environment/decoration/chest.png")
     #加载树的图片
-    if "tree" in facilityData and facilityData["tree"] != None:
-        for item in facilityData["tree"]:
-            imageName = facilityData["tree"][item]["image"]
-            if imageName not in Facility_images["normal"]:
-                Facility_images["normal"][imageName] = loadImg("Assets/image/environment/decoration/"+imageName+".png")
+    if "tree" in ornamentationData and ornamentationData["tree"] != None:
+        for item in ornamentationData["tree"]:
+            imageName = ornamentationData["tree"][item]["image"]
+            if imageName not in Ornamentation_images["normal"]:
+                Ornamentation_images["normal"][imageName] = loadImg("Assets/image/environment/decoration/"+imageName+".png")
     #加载其他设施的图片
-    if "decoration" in facilityData and facilityData["decoration"] != None:
-        for key,value in facilityData["decoration"].items():
-            if value["image"] not in Facility_images["normal"]:
-                Facility_images["normal"][value["image"]] = loadImg("Assets/image/environment/decoration/"+value["image"]+".png")
+    if "decoration" in ornamentationData and ornamentationData["decoration"] != None:
+        for key,value in ornamentationData["decoration"].items():
+            if value["image"] not in Ornamentation_images["normal"]:
+                Ornamentation_images["normal"][value["image"]] = loadImg("Assets/image/environment/decoration/"+value["image"]+".png")
     if darkMode == True:
-        Facility_images["dark"] = {}
-        for key,value in Facility_images["normal"].items():
+        Ornamentation_images["dark"] = {}
+        for key,value in Ornamentation_images["normal"].items():
             if key != "campfire":
-                Facility_images["dark"][key] = addDarkness(value,150)
-    return Facility_images
+                Ornamentation_images["dark"][key] = addDarkness(value,150)
+    return Ornamentation_images
 
 #读取需要的地图图片
 def load_env_images(theMap,theWidth=None,theHeight=None,darkMode=False):
@@ -386,7 +399,6 @@ class Point:
         if self.x == other.x and self.y == other.y:
             return True
         return False
-
 
 class AStar:
     class Node:  # 描述AStar算法中的节点数据

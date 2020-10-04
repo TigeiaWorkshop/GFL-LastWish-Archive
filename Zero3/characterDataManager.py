@@ -86,6 +86,8 @@ class Doll:
         self.x = DATA["x"]
         self.y = DATA["y"]
         self.ImageGetHurt = None
+    def get_pos(self):
+        return self.x,self.y
     def decreaseHp(self,damage,result_of_round=None):
         self.current_hp-=damage
         if self.current_hp<=0:
