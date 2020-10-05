@@ -6,6 +6,55 @@ import os
 import random
 from Zero3.basic import addDarkness,loadImg,dicMerge,resizeImg
 
+MAP_ENV_IMAGE = None
+
+class EnvImagesManagement:
+    def __init__(self,theMap,theWidth,darkMode,darkness=150):
+        self.__ENV_IMAGE_LIST_ORIGINAL = {}
+        self.__ENV_IMAGE_LIST_ORIGINAL_DARK = None
+        self.__ENV_IMAGE_LIST = {}
+        self.__ENV_IMAGE_LIST_DARK = None
+        all_images_needed = []
+        for i in range(len(theMap)):
+            for a in range(len(theMap[i])):
+                if theMap[i][a] not in all_images_needed:
+                    all_images_needed.append(theMap[i][a])
+        #加载背景图片
+        for i in range(len(all_images_needed)):
+            try:
+                self.__ENV_IMAGE_LIST_ORIGINAL[all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png")
+                self.__ENV_IMAGE_LIST[all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,None)
+            except BaseException:
+                raise Exception('ZeroEngine-Error: An map-block called '+all_images_needed[i]+' cannot find its image in the folder.')
+        #如果是夜战模式
+        if darkMode==True:
+            self.__ENV_IMAGE_LIST_ORIGINAL_DARK = {}
+            for img,value in self.__ENV_IMAGE_LIST_ORIGINAL.items():
+                self.__ENV_IMAGE_LIST_ORIGINAL_DARK[img] = addDarkness(value,darkness)
+            self.__ENV_IMAGE_LIST_DARK = {}
+            for img,value in self.__ENV_IMAGE_LIST.items():
+                self.__ENV_IMAGE_LIST_DARK[img] = addDarkness(value,darkness)
+    def resize(self,newWidth):
+        for key in self.__ENV_IMAGE_LIST:
+            self.__ENV_IMAGE_LIST[key] = resizeImg(self.__ENV_IMAGE_LIST_ORIGINAL[key],(newWidth, None))
+        if self.__ENV_IMAGE_LIST_ORIGINAL_DARK != None:
+            for key in self.__ENV_IMAGE_LIST_DARK:
+                self.__ENV_IMAGE_LIST_DARK[key] = resizeImg(self.__ENV_IMAGE_LIST_ORIGINAL_DARK[key],(newWidth,None))
+    def get_image(self,key,darkMode,darkness=150):
+        try:
+            if darkMode == True:
+                return self.__ENV_IMAGE_LIST_DARK[key]
+            else:
+                return self.__ENV_IMAGE_LIST[key]
+        except BaseException:
+            imgTmp = loadImg("Assets/image/environment/block/"+key+".png")
+            self.__ENV_IMAGE_LIST_ORIGINAL[key] = imgTmp
+            self.__ENV_IMAGE_LIST[key] = resizeImg(imgTmp,(self.perBlockWidth,None))
+            if self.__ENV_IMAGE_LIST_ORIGINAL_DARK != None:
+                imgTmp = addDarkness(imgTmp,150)
+                self.__ENV_IMAGE_LIST_ORIGINAL_DARK[key] = imgTmp
+                self.__ENV_IMAGE_LIST_DARK[key] = resizeImg(imgTmp,(self.perBlockWidth,None))
+            
 class MapObject:
     def  __init__(self,mapDataDic,perBlockWidth,local_x=0,local_y=0):
         #加载地图设置
@@ -17,20 +66,13 @@ class MapObject:
         mapData = mapDataDic["map"]
         self.row = len(mapData)
         self.column = len(mapData[0])
-        self.env_img_list_original = load_env_images(mapData,None,None,self.darkMode)
-        self.env_img_list = load_env_images(mapData,perBlockWidth,None,self.darkMode)
+        global MAP_ENV_IMAGE
+        MAP_ENV_IMAGE = EnvImagesManagement(mapData,self.perBlockWidth,self.darkMode)
         #初始化地图数据
         self.mapData = mapData
         for y in range(len(mapData)):
             for x in range(len(mapData[y])):
                 self.mapData[y][x] = BlockObject(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
-        for ornamentationType,itemsThatType in ornamentationData.items():
-            for itemKey,itemData in itemsThatType.items():
-                y = itemData["y"]
-                x = itemData["x"]
-                #del itemData["y"],itemData["x"]
-                self.mapData[y][x].ornamentationType = ornamentationType
-                self.mapData[y][x].ornamentationData = itemData
         self.mapData = numpy.asarray(self.mapData)
         self.ornamentationImg = loadOrnamentationImg(ornamentationData,self.darkMode)
         self.ornamentationData = []
@@ -57,11 +99,7 @@ class MapObject:
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
-        for key in self.env_img_list["normal"]:
-            self.env_img_list["normal"][key] = pygame.transform.scale(self.env_img_list_original["normal"][key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original["normal"][key].get_width()*self.env_img_list_original["normal"][key].get_height())))
-        if self.darkMode == True:
-            for key in self.env_img_list["dark"]:
-                self.env_img_list["dark"][key] = pygame.transform.scale(self.env_img_list_original["dark"][key], (self.perBlockWidth, round(self.perBlockWidth/self.env_img_list_original["dark"][key].get_width()*self.env_img_list_original["dark"][key].get_height())))
+        MAP_ENV_IMAGE.resize(self.perBlockWidth)
         self.surface_width = int(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
         self.surface_height = int(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
         if self.surface_width < window_x:
@@ -238,21 +276,9 @@ class MapObject:
                 if -self.perBlockWidth<=xTemp<window_x and -self.perBlockWidth<=yTemp<window_y:
                     anyBlockPrint = True
                     if self.darkMode == True and (x,y) not in self.lightArea:
-                        try:
-                            self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
-                        #如果图片没找到
-                        except BaseException:
-                            self.env_img_list_original["dark"][self.mapData[y][x].name] = addDarkness(loadImg("Assets/image/environment/block/"+self.mapData[y][x].name+".png"),150)
-                            self.env_img_list["dark"][self.mapData[y][x].name] = resizeImg(self.env_img_list_original["dark"][self.mapData[y][x].name],(self.perBlockWidth,None))
-                            self.mapSurface.blit(self.env_img_list["dark"][self.mapData[y][x].name],(xTemp,yTemp))
+                        self.mapSurface.blit(MAP_ENV_IMAGE.get_image(self.mapData[y][x].name,True),(xTemp,yTemp))
                     else:
-                        try:
-                            self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
-                        #如果图片没找到
-                        except BaseException:
-                            self.env_img_list_original["normal"][self.mapData[y][x].name] = loadImg("Assets/image/environment/block/"+self.mapData[y][x].name+".png")
-                            self.env_img_list["normal"][self.mapData[y][x].name] = resizeImg(self.env_img_list_original["normal"][self.mapData[y][x].name],(self.perBlockWidth,None))
-                            self.mapSurface.blit(self.env_img_list["normal"][self.mapData[y][x].name],(xTemp,yTemp))
+                        self.mapSurface.blit(MAP_ENV_IMAGE.get_image(self.mapData[y][x].name,False),(xTemp,yTemp))
                 elif xTemp>=window_x or yTemp>=window_y:
                     break
             if anyBlockPrint == False and yTemp>=window_y:
@@ -277,9 +303,9 @@ class MapObject:
         xStart,yStart = self.calPosInMap(x,y)
         return {
         "xStart": xStart,
-        "xEnd": xStart + self.env_img_list["normal"][self.mapData[y][x].name].get_width(),
+        "xEnd": xStart + self.perBlockWidth,
         "yStart": yStart,
-        "yEnd": yStart + self.env_img_list["normal"][self.mapData[y][x].name].get_width()*0.5
+        "yEnd": yStart + self.perBlockWidth*0.5
         }
     #计算光亮区域
     def calculate_darkness(self,characters_data,window_x,window_y):
@@ -323,8 +349,6 @@ class BlockObject:
     def  __init__(self,name,canPassThrough):
         self.name = name
         self.canPassThrough = canPassThrough
-        self.ornamentationType = None
-        self.ornamentationData = None
 
 #管理场景装饰物的类
 class OrnamentationObject:
@@ -366,27 +390,6 @@ def loadOrnamentationImg(ornamentationData,darkMode=False):
             if key != "campfire":
                 Ornamentation_images["dark"][key] = addDarkness(value,150)
     return Ornamentation_images
-
-#读取需要的地图图片
-def load_env_images(theMap,theWidth=None,theHeight=None,darkMode=False):
-    all_images_needed = []
-    for i in range(len(theMap)):
-        for a in range(len(theMap[i])):
-            if theMap[i][a] not in all_images_needed:
-                all_images_needed.append(theMap[i][a])
-    #加载背景图片
-    env_img_list={"normal":{}}
-    for i in range(len(all_images_needed)):
-        try:
-            env_img_list["normal"][all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,theHeight)
-        except BaseException:
-            raise Exception('Error: An map-block called '+all_images_needed[i]+' cannot find its image in the folder.')
-    #如果是夜战模式
-    if darkMode==True:
-        env_img_list["dark"] = {}
-        for img,value in env_img_list["normal"].items():
-            env_img_list["dark"][img] = addDarkness(value,150)
-    return env_img_list
 
 class Point:
     """
