@@ -192,7 +192,9 @@ dialog_after_battle:
     - 感谢试玩《少女前线-遗愿》，更多内容仍在研发当中，敬请期待
     last_dialog_id: 13
     narrator: null
-    next_dialog_id: null
+    next_dialog_id:
+      target: WhatAmIFightingFor.mp4
+      type: cutscene
 dialog_before_battle:
   head:
     background_img: null

@@ -1,12 +1,12 @@
 # cython: language_level=3
-from Source.battle import *
-from Source.dialog import *
+from Source.scene import *
 from Source.mapCreator import *
-from Source.dialogCreator import *
 
 def mainMenu(screen,setting):
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
+    #设置引擎的标准文字大小
+    Zero.set_standard_font_size(int(window_x/38),"medium")
     #修改控制台的位置
     Zero.console.set_pos(window_x*0.1,window_y*0.8)
     #加载主菜单文字
@@ -33,9 +33,8 @@ def mainMenu(screen,setting):
     else:
         continueButtonIsOn = False
     #加载主菜单页面的文字设置
-    txt_location = window_x*2/3
-    font_size = window_x/38
-    font_size2 = font_size*2
+    txt_location = int(window_x*2/3)
+    font_size2 = Zero.get_standard_font_size("medium")*2
     main_menu_txt_start_height0 = (window_y-len(main_menu_txt["menu_0"])*font_size2)/2
     main_menu_txt_start_height1 = (window_y-len(main_menu_txt["menu_1"])*font_size2)/2
     chapter_select_txt_start_height = (window_y-len(chapter_select)*font_size2)/2
@@ -52,17 +51,17 @@ def mainMenu(screen,setting):
             elif text == "menu_1":
                 yTmp = main_menu_txt_start_height1
                 main_menu_txt_start_height1 += font_size2
-            main_menu_txt[text][key] = Zero.fontRenderPro(txt,mode,(txt_location,yTmp),font_size)
+            main_menu_txt[text][key] = Zero.fontRenderPro(txt,mode,(txt_location,yTmp),Zero.get_standard_font_size("medium"))
     #加载菜单章节选择页面的文字
     for i in range(len(chapter_select)):
         if i == 0 or i == len(chapter_select)-1:
             mode = "enable"
         else:
             mode = "disable"
-        chapter_select[i] = Zero.fontRenderPro(chapter_select[i],mode,(txt_location,chapter_select_txt_start_height),font_size)
+        chapter_select[i] = Zero.fontRenderPro(chapter_select[i],mode,(txt_location,chapter_select_txt_start_height),Zero.get_standard_font_size("medium"))
         chapter_select_txt_start_height += font_size2
     #加载完成，删除不需要的数据
-    del txt_location,font_size,font_size2,main_menu_txt_start_height0,main_menu_txt_start_height1,chapter_select_txt_start_height,enabled_option
+    del txt_location,font_size2,main_menu_txt_start_height0,main_menu_txt_start_height1,chapter_select_txt_start_height,enabled_option
 
     # 创建窗口
     icon_img = Zero.loadImg("Assets/image/UI/icon.png")
@@ -177,13 +176,12 @@ def mainMenu(screen,setting):
                             SAVE = yaml.load(f.read(),Loader=yaml.FullLoader)
                         if SAVE["type"] == "dialog":
                             if SAVE["part"] == "dialog_before_battle":
-                                dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],SAVE["id"])
+                                dialog(SAVE["dialogType"],SAVE["chapterName"],screen,SAVE["part"],SAVE["id"])
                                 if Zero.pause_menu.ifBackToMainMenu == False:
                                     battle(screen,SAVE["chapterName"])
                                     if Zero.pause_menu.ifBackToMainMenu == False:
-                                        dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,"dialog_after_battle",SAVE["dialog_options"])
+                                        dialog(SAVE["dialogType"],SAVE["chapterName"],screen,"dialog_after_battle",SAVE["dialog_options"])
                                         if Zero.pause_menu.ifBackToMainMenu == False:
-                                            Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                                             videoCapture.setFrame(1)
                                         else:
                                             Zero.pause_menu.ifBackToMainMenu = False
@@ -192,18 +190,16 @@ def mainMenu(screen,setting):
                                 else:
                                     Zero.pause_menu.ifBackToMainMenu = False
                             elif SAVE["part"] == "dialog_after_battle":
-                                dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],SAVE["id"])
+                                dialog(SAVE["dialogType"],SAVE["chapterName"],screen,SAVE["part"],SAVE["id"])
                                 if Zero.pause_menu.ifBackToMainMenu == False:
-                                    Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                                     videoCapture.setFrame(1)
                                 else:
                                     Zero.pause_menu.ifBackToMainMenu = False
                         elif SAVE["type"] == "battle":
                             battle(screen)
                             if Zero.pause_menu.ifBackToMainMenu == False:
-                                dialog("main_chapter",SAVE["chapterName"],screen,setting,"dialog_after_battle")
+                                dialog("main_chapter",SAVE["chapterName"],screen,"dialog_after_battle")
                                 if Zero.pause_menu.ifBackToMainMenu == False:
-                                    Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
                                     videoCapture.setFrame(1)
                                 else:
                                     Zero.pause_menu.ifBackToMainMenu = False
@@ -211,10 +207,10 @@ def mainMenu(screen,setting):
                                 Zero.pause_menu.ifBackToMainMenu = False
                         #是否可以继续游戏了（save文件是否被创建）
                         if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:
-                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),window_x/38)
+                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
                             continueButtonIsOn = True
                         elif not os.path.exists("Save/save.yaml") and continueButtonIsOn == True:
-                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),window_x/38)
+                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
                             continueButtonIsOn = False
                     else:
                         #raise Exception('ZeroEngine-Error: The save.yaml is not exist')
@@ -224,7 +220,7 @@ def mainMenu(screen,setting):
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
                     mapCreator("chapter1",screen,setting)
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text5_dialogCreator"]):
-                    dialogCreator("chapter1",screen,setting,"dialog_before_battle")
+                    dialogCreator("chapter1",screen,"dialog_before_battle")
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text7_back"]):
                     menu_type = 0
             elif menu_type == 2:
@@ -233,23 +229,14 @@ def mainMenu(screen,setting):
                         menu_type = 1
                     #章节选择
                     elif Zero.ifHover(chapter_select[i]) and i==0:
-                        dialog("main_chapter","chapter"+str(i+1),screen,setting,"dialog_before_battle")
-                        if Zero.pause_menu.ifBackToMainMenu == False:
-                            battle(screen,"chapter"+str(i+1))
-                            if Zero.pause_menu.ifBackToMainMenu == False:
-                                dialog("main_chapter","chapter"+str(i+1),screen,setting,"dialog_after_battle")
-                                Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
-                                videoCapture.setFrame(1)
-                            else:
-                                Zero.pause_menu.ifBackToMainMenu = False
-                        else:
-                            Zero.pause_menu.ifBackToMainMenu = False
+                        scene("main_chapter","chapter"+str(i+1),screen)
+                        videoCapture.setFrame(1)
                         #是否可以继续游戏了（save文件是否被创建）
                         if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:
-                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),window_x/38)
+                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
                             continueButtonIsOn = True
                         elif not os.path.exists("Save/save.yaml") and continueButtonIsOn == True:
-                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),window_x/38)
+                            main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
                             continueButtonIsOn = False
                         break
         #检测背景音乐是否还在播放

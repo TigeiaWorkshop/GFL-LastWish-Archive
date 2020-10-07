@@ -1,11 +1,12 @@
 # cython: language_level=3
 from Zero3.basic import *
+from Zero3.movie import cutscene
 
 #视觉小说系统模块
 class DialogSystem:
-    def __init__(self,dialogType,chapterName,lang,part,dialogId,dialog_options):
+    def __init__(self,dialogType,chapterName,part,dialogId,dialog_options):
         #读取章节信息
-        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(dialogType,chapterName,lang),"r",encoding='utf-8') as f:
+        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(dialogType,chapterName,get_setting("Language")),"r",encoding='utf-8') as f:
             self.dialogData = yaml.load(f.read(),Loader=yaml.FullLoader)
         if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
             with open("Data/{0}/{1}_dialogs_{2}.yaml".format(dialogType,chapterName,self.dialogData["default_lang"]),"r",encoding='utf-8') as f:
@@ -215,6 +216,11 @@ class DialogSystem:
                 return True
             elif self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "default":
                 self.__update_scene(self.dialog_content[self.dialogId]["next_dialog_id"]["target"])
+            #如果是需要播放过程动画
+            elif self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "cutscene":
+                self.fadeOut(screen)
+                cutscene(screen,"Assets\movie\{}".format(self.dialog_content[self.dialogId]["next_dialog_id"]["target"]))
+                return True
             #如果是切换场景
             elif self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "changeScene":
                 self.fadeOut(screen)
@@ -251,11 +257,11 @@ class DialogSystem:
         self.black_bg.set_alpha(255)
 
 class DialogSystemDev:
-    def __init__(self,dialogType,chapterName,lang):
+    def __init__(self,dialogType,chapterName):
         #设定初始化
         self.dialogType = dialogType
         self.chapterName = chapterName
-        self.lang = lang
+        self.lang = get_setting("Language")
         self.dialogId = "head"
         self.part = "dialog_before_battle"
         #获取屏幕的尺寸

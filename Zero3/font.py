@@ -10,7 +10,9 @@ pygame.init()
 ZERO_FONT = ZERO_DATA["Font"]
 ZERO_FONTTYPE = ZERO_DATA["FontType"]
 ZERO_MODE = ZERO_DATA["Antialias"]
-ZERO_STANDARD_FONTSIZE = None
+ZERO_STANDARD_SMALL_FONTSIZE = None
+ZERO_STANDARD_MEDIUM_FONTSIZE = None
+ZERO_STANDARD_BIG_FONTSIZE = None
 
 #获取文字信息
 def get_font():
@@ -22,14 +24,30 @@ def get_fontMode():
 def get_fontDetails():
     return ZERO_FONT,ZERO_FONTTYPE,ZERO_MODE
 #设置和获取标准文字大小
-def set_standard_font_size(size):
+def set_standard_font_size(size,fonType="medium"):
     if isinstance (size,int) and size > 0:
-        global ZERO_STANDARD_FONTSIZE
-        ZERO_STANDARD_FONTSIZE = size
+        if fonType == "medium":
+            global ZERO_STANDARD_MEDIUM_FONTSIZE
+            ZERO_STANDARD_MEDIUM_FONTSIZE = size
+        elif fonType == "small":
+            global ZERO_STANDARD_SMALL_FONTSIZE
+            ZERO_STANDARD_SMALL_FONTSIZE = size
+        elif fonType == "big":
+            global ZERO_STANDARD_BIG_FONTSIZE
+            ZERO_STANDARD_BIG_FONTSIZE = size
+        else:
+            raise Exception('ZeroEngine-Error: Standard font type must be "small","medium", or "big"!')
     else:
-        raise Exception('ZeroEngine-Error: Standard font size must be positive interger!')
-def get_standard_font_size(size):
-    return ZERO_STANDARD_FONTSIZE
+        raise Exception('ZeroEngine-Error: Standard font size must be positive interger not {}!'.format(size))
+def get_standard_font_size(fonType):
+    if fonType == "medium":
+        return ZERO_STANDARD_MEDIUM_FONTSIZE
+    elif fonType == "small":
+        return ZERO_STANDARD_SMALL_FONTSIZE
+    elif fonType == "big":
+        return ZERO_STANDARD_BIG_FONTSIZE
+    else:
+        raise Exception('ZeroEngine-Error: Standard font type must be "small","medium", or "big"!')
 
 #重新获取设置信息
 def reload_setting():
