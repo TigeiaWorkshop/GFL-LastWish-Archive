@@ -179,7 +179,7 @@ def mainMenu(screen,setting):
                             if SAVE["part"] == "dialog_before_battle":
                                 dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,SAVE["part"],SAVE["id"])
                                 if Zero.pause_menu.ifBackToMainMenu == False:
-                                    battle(SAVE["chapterName"],screen)
+                                    battle(screen,SAVE["chapterName"])
                                     if Zero.pause_menu.ifBackToMainMenu == False:
                                         dialog(SAVE["dialogType"],SAVE["chapterName"],screen,setting,"dialog_after_battle",SAVE["dialog_options"])
                                         if Zero.pause_menu.ifBackToMainMenu == False:
@@ -198,6 +198,17 @@ def mainMenu(screen,setting):
                                     videoCapture.setFrame(1)
                                 else:
                                     Zero.pause_menu.ifBackToMainMenu = False
+                        elif SAVE["type"] == "battle":
+                            battle(screen)
+                            if Zero.pause_menu.ifBackToMainMenu == False:
+                                dialog("main_chapter",SAVE["chapterName"],screen,setting,"dialog_after_battle")
+                                if Zero.pause_menu.ifBackToMainMenu == False:
+                                    Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")
+                                    videoCapture.setFrame(1)
+                                else:
+                                    Zero.pause_menu.ifBackToMainMenu = False
+                            else:
+                                Zero.pause_menu.ifBackToMainMenu = False
                         #是否可以继续游戏了（save文件是否被创建）
                         if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:
                             main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),window_x/38)
@@ -224,7 +235,7 @@ def mainMenu(screen,setting):
                     elif Zero.ifHover(chapter_select[i]) and i==0:
                         dialog("main_chapter","chapter"+str(i+1),screen,setting,"dialog_before_battle")
                         if Zero.pause_menu.ifBackToMainMenu == False:
-                            battle("chapter"+str(i+1),screen)
+                            battle(screen,"chapter"+str(i+1))
                             if Zero.pause_menu.ifBackToMainMenu == False:
                                 dialog("main_chapter","chapter"+str(i+1),screen,setting,"dialog_after_battle")
                                 Zero.cutscene(screen,"Assets\movie\WhatAmIFightingFor.mp4","Assets/music/WhatAmIFightingFor.ogg")

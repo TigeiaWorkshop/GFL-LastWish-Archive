@@ -10,13 +10,15 @@ MAP_ENV_IMAGE = None
 
 #地图场景模块
 class EnvImagesManagement:
-    def __init__(self,theMap,ornamentationData,theWidth,darkMode,darkness=150):
+    def __init__(self,theMap,ornamentationData,bgImgName,theWidth,darkMode,darkness=150):
         self.__ENV_IMAGE_DICT_ORIGINAL = {}
         self.__ENV_IMAGE_DICT_ORIGINAL_DARK = None
         self.__ENV_IMAGE_DICT = {}
         self.__ENV_IMAGE_DICT_DARK = None
         self.__ORNAMENTATION_IMAGE_DICT = {}
         self.__ORNAMENTATION_IMAGE_DICT_DARK = None
+        self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert() if bgImgName != None else None
+        self.__MAP_SURFACE = None
         all_images_needed = []
         for i in range(len(theMap)):
             for a in range(len(theMap[i])):
@@ -110,6 +112,14 @@ class EnvImagesManagement:
                 self.__ORNAMENTATION_IMAGE_DICT_DARK[ornamentationType][key] = addDarkness(imgTmp,darkness)
     def get_ornamentation_num(self,ornamentationType):
         return len(self.__ORNAMENTATION_IMAGE_DICT[ornamentationType])
+    def get_new_background_image(self,width,height):
+        if self.__BACKGROUND_IMAGE != None:
+            self.__MAP_SURFACE = pygame.transform.scale(self.__BACKGROUND_IMAGE,(width,height))
+        else:
+            self.__MAP_SURFACE = pygame.surface.Surface((width,height)).convert()
+        return self.__MAP_SURFACE
+    def get_background_image(self):
+        return self.__MAP_SURFACE
 
 #地图模块
 class MapObject:
@@ -124,13 +134,12 @@ class MapObject:
         self.row = len(mapData)
         self.column = len(mapData[0])
         global MAP_ENV_IMAGE
-        MAP_ENV_IMAGE = EnvImagesManagement(mapData,ornamentationData,self.perBlockWidth,self.darkMode)
+        MAP_ENV_IMAGE = EnvImagesManagement(mapData,ornamentationData,mapDataDic["backgroundImage"],self.perBlockWidth,self.darkMode)
         #初始化地图数据
         self.mapData = mapData
         for y in range(len(mapData)):
             for x in range(len(mapData[y])):
                 self.mapData[y][x] = BlockObject(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
-        self.mapData = numpy.asarray(self.mapData)
         self.ornamentationData = []
         for ornamentationType,itemsThatType in ornamentationData.items():
             for itemKey,itemData in itemsThatType.items():
@@ -147,8 +156,6 @@ class MapObject:
         self.lightArea = []
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
-        self.bgImg = pygame.image.load(os.path.join("Assets/image/dialog_background/",mapDataDic["backgroundImage"])).convert()
-        self.mapSurface = None
         self.__local_x = local_x
         self.__local_y = local_y
         self.ifProcessMap = True
@@ -162,7 +169,6 @@ class MapObject:
             self.surface_width = window_x
         if self.surface_height < window_y:
             self.surface_height = window_y
-        self.mapSurface = None
         self.process_map(window_x,window_y)
     #获取local坐标
     def getPos(self):
@@ -214,7 +220,7 @@ class MapObject:
         if self.ifProcessMap == True:
             self.ifProcessMap = False
             self.process_map(screen.get_width(),screen.get_height())
-        screen.blit(self.mapSurface,(0,0))
+        screen.blit(MAP_ENV_IMAGE.get_background_image(),(0,0))
         return (screen_to_move_x,screen_to_move_y)
     #画上设施
     def display_ornamentation(self,screen,characters_data,sangvisFerris_data):
@@ -304,10 +310,7 @@ class MapObject:
         return the_route
     #重新绘制地图
     def process_map(self,window_x,window_y):
-        if self.bgImg != None:
-            self.mapSurface = pygame.transform.scale(self.bgImg,(window_x,window_y))
-        else:
-            self.mapSurface = pygame.surface.Surface((window_x,window_y)).convert()
+        mapSurface = MAP_ENV_IMAGE.get_new_background_image(window_x,window_y)
         #画出地图
         for y in range(len(self.mapData)):
             anyBlockPrint = False
@@ -316,9 +319,9 @@ class MapObject:
                 if -self.perBlockWidth<=xTemp<window_x and -self.perBlockWidth<=yTemp<window_y:
                     anyBlockPrint = True
                     if self.darkMode == True and (x,y) not in self.lightArea:
-                        self.mapSurface.blit(MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,True),(xTemp,yTemp))
+                        mapSurface.blit(MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,True),(xTemp,yTemp))
                     else:
-                        self.mapSurface.blit(MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,False),(xTemp,yTemp))
+                        mapSurface.blit(MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,False),(xTemp,yTemp))
                 elif xTemp>=window_x or yTemp>=window_y:
                     break
             if anyBlockPrint == False and yTemp>=window_y:

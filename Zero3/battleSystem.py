@@ -65,9 +65,22 @@ class BattleSystem:
         self.__pygame_events = None
     def __update_events(self):
         self.__pygame_events = pygame.event.get()
-    def process_data(self,screen,chapter_name):
-        #卸载音乐
-        unloadBackgroundMusic()
+    def initialize(self,screen,chapterName):
+        #储存章节信息
+        self.chapterName = chapterName
+        self.process_data(screen)
+    def load(self,screen):
+        with open("Save/save.yaml", "r", encoding='utf-8') as f:
+            DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
+            if DataTmp["type"] == "battle":
+                self.chapterName = DataTmp["chapterName"]
+                #self.characters_data = DataTmp["characters_data"]
+                #self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
+                #self.theMap = DataTmp["theMap"]
+            else:
+                raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
+        self.process_data(screen)
+    def process_data(self,screen):
         #获取屏幕的尺寸
         self.window_x,self.window_y = screen.get_size()
         #加载按钮的文字
@@ -76,10 +89,10 @@ class BattleSystem:
         self.warnings_to_display = WarningSystem()
         loading_info = get_lang("LoadingTxt")
         #加载剧情
-        with open("Data/main_chapter/"+chapter_name+"_dialogs_"+get_setting('Language')+".yaml", "r", encoding='utf-8') as f:
+        with open("Data/main_chapter/"+self.chapterName+"_dialogs_"+get_setting('Language')+".yaml", "r", encoding='utf-8') as f:
             DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
             #章节标题显示
-            self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleUiTxt["numChapter"],chapter_name,DataTmp["title"],DataTmp["description"])
+            self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleUiTxt["numChapter"],self.chapterName,DataTmp["title"],DataTmp["description"])
             self.battle_info = DataTmp["battle_info"]
             self.dialog_during_battle = DataTmp["dialog_during_battle"]
         #正在加载的gif动态图标
@@ -95,7 +108,7 @@ class BattleSystem:
         nowLoadingIcon.draw(screen)
         display.flip(True)
         #读取并初始化章节信息
-        with open("Data/main_chapter/"+chapter_name+"_map.yaml", "r", encoding='utf-8') as f:
+        with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
             DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
             self.zoomIn = DataTmp["zoomIn"]*100
             #初始化角色信息
@@ -204,8 +217,10 @@ class BattleSystem:
             pause_menu.ifSave = False
             DataTmp = {}
             DataTmp["type"] = "battle"
+            DataTmp["chapterName"] = self.chapterName
             DataTmp["characters_data"] = self.characters_data
             DataTmp["sangvisFerris_data"] = self.sangvisFerris_data
+            DataTmp["theMap"] = self.theMap
             with open("Save/save.yaml", "w", encoding='utf-8') as f:
                 yaml.dump(DataTmp, f, allow_unicode=True)
     def display(self,screen):
