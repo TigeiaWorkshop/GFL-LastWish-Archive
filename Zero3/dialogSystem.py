@@ -4,12 +4,12 @@ from Zero3.movie import cutscene
 
 #视觉小说系统模块
 class DialogSystem:
-    def __init__(self,dialogType,chapterName,part,dialogId,dialog_options):
+    def __init__(self,chapterType,chapterName,part,dialogId,dialog_options):
         #读取章节信息
-        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(dialogType,chapterName,get_setting("Language")),"r",encoding='utf-8') as f:
+        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(chapterType,chapterName,get_setting("Language")),"r",encoding='utf-8') as f:
             self.dialogData = yaml.load(f.read(),Loader=yaml.FullLoader)
         if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
-            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(dialogType,chapterName,self.dialogData["default_lang"]),"r",encoding='utf-8') as f:
+            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(chapterType,chapterName,self.dialogData["default_lang"]),"r",encoding='utf-8') as f:
                 self.dialog_content = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
             for key,currentDialog in self.dialogData[part].items():
                 if key in self.dialog_content:
@@ -24,7 +24,7 @@ class DialogSystem:
         #对话的部分
         self.chapterName = chapterName
         self.part = part
-        self.dialogType = dialogType
+        self.chapterType = chapterType
         #加载对话的背景图片
         self.backgroundContent = DialogBackground()
         #获取屏幕的尺寸
@@ -48,7 +48,10 @@ class DialogSystem:
         #更新背景音乐
         self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
         #玩家在对话时做出的选择
-        self.dialog_options = dialog_options
+        if isinstance(dialog_options,dict):
+            self.dialog_options = dialog_options
+        else:
+            raise Exception('ZeroEngine-Error: The "dialog_options" has to be a dict!')
         #加载npc立绘系统并初始化
         self.npc_img_dic = NpcImageSystem()
         self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"])
@@ -66,11 +69,10 @@ class DialogSystem:
         self.__events = pygame.event.get()
     def __save_process(self):
         DataTmp = {}
-        DataTmp["type"] = "dialog"
+        DataTmp["type"] = self.part
         DataTmp["chapterName"] = self.chapterName
-        DataTmp["dialogType"] = self.dialogType
+        DataTmp["chapterType"] = self.chapterType
         DataTmp["id"] = self.dialogId
-        DataTmp["part"] = self.part
         DataTmp["dialog_options"] = self.dialog_options
         #别忘了看看Save文件夹是不是都不存在
         if not os.path.exists("Save"):
@@ -257,13 +259,13 @@ class DialogSystem:
         self.black_bg.set_alpha(255)
 
 class DialogSystemDev:
-    def __init__(self,dialogType,chapterName):
+    def __init__(self,chapterType,chapterName,part):
         #设定初始化
-        self.dialogType = dialogType
+        self.chapterType = chapterType
         self.chapterName = chapterName
         self.lang = get_setting("Language")
         self.dialogId = "head"
-        self.part = "dialog_before_battle"
+        self.part = part
         #获取屏幕的尺寸
         self.window_x,self.window_y = display.get_size()
         #文字
@@ -323,7 +325,7 @@ class DialogSystemDev:
         self.dialogData[self.part][self.dialogId]["narrator"] = self.narrator.get_text()
         self.dialogData[self.part][self.dialogId]["content"] = self.content.get_text()
         if self.isDefault == True:
-            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.dialogType,self.chapterName,self.lang),"w",encoding='utf-8') as f:
+            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),"w",encoding='utf-8') as f:
                 yaml.dump(self.dialogData, f, allow_unicode=True)
         else:
             #移除掉相似的内容
@@ -341,12 +343,12 @@ class DialogSystemDev:
                             del self.dialogData["dialog_after_battle"][key][key2]
                     if len(self.dialogData["dialog_after_battle"][key])==0:
                         del self.dialogData["dialog_after_battle"][key]
-            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.dialogType,self.chapterName,self.lang),"w",encoding='utf-8') as f:
+            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),"w",encoding='utf-8') as f:
                 yaml.dump(self.dialogData, f, allow_unicode=True)
             self.__loadDialogData()
     #读取章节信息
     def __loadDialogData(self):
-        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.dialogType,self.chapterName,self.lang),"r",encoding='utf-8') as f:
+        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),"r",encoding='utf-8') as f:
             self.dialogData = yaml.load(f.read(),Loader=yaml.FullLoader)
         #初始化文件的数据
         if "dialog_before_battle" not in self.dialogData:
@@ -360,7 +362,7 @@ class DialogSystemDev:
         #如果不是默认主语言
         if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
             self.isDefault = False
-            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.dialogType,self.chapterName,self.dialogData["default_lang"]),"r",encoding='utf-8') as f:
+            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.dialogData["default_lang"]),"r",encoding='utf-8') as f:
                 self.dialogData_default = yaml.load(f.read(),Loader=yaml.FullLoader)
             for key,currentDialog in self.dialogData_default["dialog_before_battle"].items():
                 if key in self.dialogData["dialog_before_battle"]:

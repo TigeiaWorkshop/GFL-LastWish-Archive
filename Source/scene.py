@@ -1,19 +1,23 @@
 # cython: language_level=3
 from Source.init import *
 
-def scene(chapterType,chapterName,screen,startPoint="dialog_before_battle"):
+def scene(chapterType,chapterName,screen,startPoint="dialog_before_battle",dialogId="head",dialog_options={}):
     if startPoint == "dialog_before_battle":
-        dialog(chapterType,chapterName,screen,"dialog_before_battle")
-        if Zero.pause_menu.ifBackToMainMenu == False:
+        dialog(chapterType,chapterName,screen,"dialog_before_battle",dialogId,dialog_options)
+        if Zero.pause_menu.checkIfBackToMainMenu() == False:
             battle(screen,chapterName)
-            if Zero.pause_menu.ifBackToMainMenu == False:
-                dialog(chapterType,chapterName,screen,"dialog_after_battle")
-            else:
-                Zero.pause_menu.ifBackToMainMenu = False
         else:
-            Zero.pause_menu.ifBackToMainMenu = False
+            return
+        if Zero.pause_menu.checkIfBackToMainMenu() == False:
+            dialog(chapterType,chapterName,screen,"dialog_after_battle")
+    elif startPoint == "battle":
+        battle(screen,chapterName)
+        if Zero.pause_menu.checkIfBackToMainMenu() == False:
+            dialog(chapterType,chapterName,screen,"dialog_after_battle")
+    elif startPoint == "dialog_after_battle":
+        dialog(chapterType,chapterName,screen,"dialog_after_battle",dialogId,dialog_options)
 
-def dialog(dialogType,chapterName,screen,part,dialogId="head",dialog_options={}):
+def dialog(chapterType,chapterName,screen,part,dialogId="head",dialog_options={}):
     #加载闸门动画的图片素材
     LoadingImgAbove = Zero.loadImg("Assets/image/UI/LoadingImgAbove.png",screen.get_width()+8,screen.get_height()/1.7)
     LoadingImgBelow = Zero.loadImg("Assets/image/UI/LoadingImgBelow.png",screen.get_width()+8,screen.get_height()/2.05)
@@ -25,7 +29,7 @@ def dialog(dialogType,chapterName,screen,part,dialogId="head",dialog_options={})
     #卸载音乐
     Zero.unloadBackgroundMusic()
     #初始化对话系统模块
-    DIALOG = Zero.DialogSystem(dialogType,chapterName,part,dialogId,dialog_options)
+    DIALOG = Zero.DialogSystem(chapterType,chapterName,part,dialogId,dialog_options)
     #加载完成-闸门开启的效果
     for i in range(100,-1,-1):
         DIALOG.backgroundContent.display(screen)
@@ -44,11 +48,11 @@ def dialog(dialogType,chapterName,screen,part,dialogId="head",dialog_options={})
     #返回玩家做出的选项
     return DIALOG.dialog_options
 
-def dialogCreator(chapter_name,screen,part):
+def dialogCreator(chapterType,chapterName,screen,part):
     #卸载音乐
     Zero.unloadBackgroundMusic()
     #加载对话
-    DIALOG = Zero.DialogSystemDev("main_chapter",chapter_name)
+    DIALOG = Zero.DialogSystemDev(chapterType,chapterName,part)
     #主循环
     while True:
         if not DIALOG.display(screen):

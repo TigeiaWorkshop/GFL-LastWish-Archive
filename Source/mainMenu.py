@@ -174,37 +174,8 @@ def mainMenu(screen,setting):
                     if os.path.exists("Save/save.yaml"):
                         with open("Save/save.yaml", "r", encoding='utf-8') as f:
                             SAVE = yaml.load(f.read(),Loader=yaml.FullLoader)
-                        if SAVE["type"] == "dialog":
-                            if SAVE["part"] == "dialog_before_battle":
-                                dialog(SAVE["dialogType"],SAVE["chapterName"],screen,SAVE["part"],SAVE["id"])
-                                if Zero.pause_menu.ifBackToMainMenu == False:
-                                    battle(screen,SAVE["chapterName"])
-                                    if Zero.pause_menu.ifBackToMainMenu == False:
-                                        dialog(SAVE["dialogType"],SAVE["chapterName"],screen,"dialog_after_battle",SAVE["dialog_options"])
-                                        if Zero.pause_menu.ifBackToMainMenu == False:
-                                            videoCapture.setFrame(1)
-                                        else:
-                                            Zero.pause_menu.ifBackToMainMenu = False
-                                    else:
-                                        Zero.pause_menu.ifBackToMainMenu = False
-                                else:
-                                    Zero.pause_menu.ifBackToMainMenu = False
-                            elif SAVE["part"] == "dialog_after_battle":
-                                dialog(SAVE["dialogType"],SAVE["chapterName"],screen,SAVE["part"],SAVE["id"])
-                                if Zero.pause_menu.ifBackToMainMenu == False:
-                                    videoCapture.setFrame(1)
-                                else:
-                                    Zero.pause_menu.ifBackToMainMenu = False
-                        elif SAVE["type"] == "battle":
-                            battle(screen)
-                            if Zero.pause_menu.ifBackToMainMenu == False:
-                                dialog("main_chapter",SAVE["chapterName"],screen,"dialog_after_battle")
-                                if Zero.pause_menu.ifBackToMainMenu == False:
-                                    videoCapture.setFrame(1)
-                                else:
-                                    Zero.pause_menu.ifBackToMainMenu = False
-                            else:
-                                Zero.pause_menu.ifBackToMainMenu = False
+                        scene(SAVE["chapterType"],SAVE["chapterName"],screen,SAVE["type"],SAVE["id"],SAVE["dialog_options"])
+                        videoCapture.setFrame(1)
                         #是否可以继续游戏了（save文件是否被创建）
                         if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:
                             main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
@@ -220,7 +191,7 @@ def mainMenu(screen,setting):
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
                     mapCreator("chapter1",screen,setting)
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text5_dialogCreator"]):
-                    dialogCreator("chapter1",screen,"dialog_before_battle")
+                    dialogCreator("main_chapter","chapter1",screen,"dialog_before_battle")
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text7_back"]):
                     menu_type = 0
             elif menu_type == 2:
