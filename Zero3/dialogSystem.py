@@ -1,6 +1,6 @@
 # cython: language_level=3
 from Zero3.basic import *
-from Zero3.movie import cutscene
+from Zero3.movie import cutscene,VideoObject
 
 #视觉小说系统模块
 class DialogSystem:
@@ -278,6 +278,9 @@ class DialogSystemDev:
         #加载npc立绘系统并初始化
         self.npc_img_dic = NpcImageSystem()
         self.npc_img_dic.devMode()
+        #背景
+        self.backgroundContent = DialogBackground()
+        self.backgroundContent.setBgmVolume(0)
         #从配置文件中加载数据
         self.__loadDialogData()
         #黑色帘幕
@@ -385,6 +388,7 @@ class DialogSystemDev:
     def __update_scene(self,theNextDialogId):
         #重设立绘系统
         self.npc_img_dic.process(self.dialogData[self.part][theNextDialogId]["characters_img"])
+        self.backgroundContent.update(self.dialogData[self.part][theNextDialogId]["background_img"],None)
         self.dialogId = theNextDialogId
         self.__update_dialogbox()
     #更新对话框
@@ -448,7 +452,7 @@ class DialogSystemDev:
         if self.dialogData[self.part][self.dialogId]["background_img"] == None:
             self.black_bg.draw(screen)
         else:
-            screen.blit(pygame.transform.scale(self.all_background_image[self.dialogData[self.part][self.dialogId]["background_img"]],(self.window_x,self.window_y)),(0,0))
+            self.backgroundContent.display(screen)
         #画上NPC立绘
         self.npc_img_dic.display(screen)
         if self.npc_img_dic.npc_get_click != None:
@@ -505,7 +509,7 @@ class DialogSystemDev:
                                     break
                         else:
                             #如果当前next_dialog_id的类型不支持的话，报错
-                            Exception('ZeroEngine-Error: Cannot recognize next_dialog_id type: {}, please fix it'.formate(self.dialogData[self.part][lastId]["next_dialog_id"]["type"]))
+                            Exception('ZeroEngine-Error: Cannot recognize next_dialog_id type: {}, please fix it'.format(self.dialogData[self.part][lastId]["next_dialog_id"]["type"]))
                         #修改下一个对白配置文件中的"last_dialog_id"的参数
                         if "last_dialog_id" in self.dialogData[self.part][nextId] and self.dialogData[self.part][nextId]["last_dialog_id"] != None:
                             self.dialogData[self.part][nextId]["last_dialog_id"] = lastId
@@ -898,8 +902,7 @@ class DialogBackground:
         self.backgroundImgSurface = None
         self.nullSurface = get_SingleColorSurface("black")
         self.backgroundMusicName = None
-        backgroundMusicVolume = get_setting("Sound")
-        self.setBgmVolume(backgroundMusicVolume["background_music"])
+        self.setBgmVolume(get_setting("Sound")["background_music"])
     def setBgmVolume(self,backgroundMusicVolume):
         self.backgroundMusicVolume = backgroundMusicVolume/100.0
         pygame.mixer.music.set_volume(self.backgroundMusicVolume)
@@ -910,11 +913,10 @@ class DialogBackground:
             if self.backgroundImgName != None:
                 #尝试背景加载图片
                 if os.path.exists("Assets/image/dialog_background/{}".format(self.backgroundImgName)):
-                    self.backgroundImgSurface = pygame.image.load(os.path.join("Assets/image/dialog_background",self.backgroundImgName)).convert_alpha()
+                    self.backgroundImgSurface = loadImage(os.path.join("Assets/image/dialog_background",self.backgroundImgName),(0,0),display.get_width(),display.get_height())
                 #如果在背景图片的文件夹里找不到对应的图片，则查看是否是视频文件
                 elif os.path.exists("Assets/movie/"+self.backgroundImgName):
                     try:
-                        from Zero3.movie import VideoObject
                         self.backgroundImgSurface = VideoObject("Assets/movie/"+self.backgroundImgName,True)
                     except BaseException:
                         raise Exception('ZeroEngine-Error: Cannot run movie module')
@@ -935,13 +937,7 @@ class DialogBackground:
                 pygame.mixer.music.unload()
     def display(self,screen):
         if self.backgroundImgName != None:
-            if isinstance(self.backgroundImgSurface,pygame.Surface):
-                screen.blit(pygame.transform.scale(self.backgroundImgSurface,screen.get_size()),(0,0))
-            else:
-                try:
-                    self.backgroundImgSurface.display(screen)
-                except BaseException:
-                    raise Exception('ZeroEngine-Error: "backgroundImgName" in DialogBackground is causing issue')
+            self.backgroundImgSurface.display(screen)
         else:
             self.nullSurface.draw(screen)
 

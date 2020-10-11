@@ -5,13 +5,13 @@ def scene(chapterType,chapterName,screen,startPoint="dialog_before_battle",dialo
     if startPoint == "dialog_before_battle":
         dialog(chapterType,chapterName,screen,"dialog_before_battle",dialogId,dialog_options)
         if Zero.pause_menu.checkIfBackToMainMenu() == False:
-            battle(screen,chapterName)
+            battle(chapterType,chapterName,screen)
         else:
             return
         if Zero.pause_menu.checkIfBackToMainMenu() == False:
             dialog(chapterType,chapterName,screen,"dialog_after_battle")
     elif startPoint == "battle":
-        battle(screen,chapterName)
+        battle(chapterType,None,screen)
         if Zero.pause_menu.checkIfBackToMainMenu() == False:
             dialog(chapterType,chapterName,screen,"dialog_after_battle")
     elif startPoint == "dialog_after_battle":
@@ -60,12 +60,12 @@ def dialogCreator(chapterType,chapterName,screen,part):
         else:
             break
 
-def battle(screen,chapter_name=None):
+def battle(chapterType,chapter_name,screen):
     #卸载音乐
     Zero.unloadBackgroundMusic()
     BATTLE = Zero.BattleSystem()
     if chapter_name != None:
-        BATTLE.initialize(screen,chapter_name)
+        BATTLE.initialize(screen,chapterType,chapter_name)
     else:
         BATTLE.load(screen)
     BATTLE.display(screen)

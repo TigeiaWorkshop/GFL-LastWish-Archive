@@ -6,13 +6,41 @@ from pygame.colordict import THECOLORS
 from Zero3.config import *
 pygame.init()
 
+#文字渲染器管理模块
+class FontGenerator:
+    def __init__(self):
+        self.__SIZE = None
+        self.__FONT = None
+    def update(self,size):
+        self.__SIZE = size
+        self.__FONT = createFont(size)
+    def render(self,txt,color):
+        if self.__SIZE != None:
+            if isinstance(color,str):
+                return self.__FONT.render(txt, ZERO_MODE, findColorRGBA(color))
+            else:
+                return self.__FONT.render(txt, ZERO_MODE, color)
+        else:
+            raise Exception('ZeroEngine-Error: Standard font is not initialized!')
+    def get_size(self):
+        if self.__SIZE != None:
+            return self.__SIZE
+        else:
+            raise Exception('ZeroEngine-Error: Standard font is not initialized!')
+    def get_font(self):
+        if self.__FONT != None:
+            return self.__FONT
+        else:
+            raise Exception('ZeroEngine-Error: Standard font is not initialized!')
+
 #初始化字体的配置文件
 ZERO_FONT = ZERO_DATA["Font"]
 ZERO_FONTTYPE = ZERO_DATA["FontType"]
 ZERO_MODE = ZERO_DATA["Antialias"]
-ZERO_STANDARD_SMALL_FONTSIZE = None
-ZERO_STANDARD_MEDIUM_FONTSIZE = None
-ZERO_STANDARD_BIG_FONTSIZE = None
+#引擎标准文件渲染器
+ZERO_STANDARD_SMALL_FONT = FontGenerator()
+ZERO_STANDARD_MEDIUM_FONT = FontGenerator()
+ZERO_STANDARD_BIG_FONT = FontGenerator()
 
 #获取文字信息
 def get_font():
@@ -27,25 +55,32 @@ def get_fontDetails():
 def set_standard_font_size(size,fonType="medium"):
     if isinstance (size,int) and size > 0:
         if fonType == "medium":
-            global ZERO_STANDARD_MEDIUM_FONTSIZE
-            ZERO_STANDARD_MEDIUM_FONTSIZE = size
+            ZERO_STANDARD_MEDIUM_FONT.update(size)
         elif fonType == "small":
-            global ZERO_STANDARD_SMALL_FONTSIZE
-            ZERO_STANDARD_SMALL_FONTSIZE = size
+            ZERO_STANDARD_SMALL_FONT.update(size)
         elif fonType == "big":
-            global ZERO_STANDARD_BIG_FONTSIZE
-            ZERO_STANDARD_BIG_FONTSIZE = size
+            ZERO_STANDARD_BIG_FONT.update(size)
         else:
             raise Exception('ZeroEngine-Error: Standard font type must be "small","medium", or "big"!')
     else:
         raise Exception('ZeroEngine-Error: Standard font size must be positive interger not {}!'.format(size))
 def get_standard_font_size(fonType):
     if fonType == "medium":
-        return ZERO_STANDARD_MEDIUM_FONTSIZE
+        return ZERO_STANDARD_MEDIUM_FONT.get_size()
     elif fonType == "small":
-        return ZERO_STANDARD_SMALL_FONTSIZE
+        return ZERO_STANDARD_SMALL_FONT.get_size()
     elif fonType == "big":
-        return ZERO_STANDARD_BIG_FONTSIZE
+        return ZERO_STANDARD_BIG_FONT.get_size()
+    else:
+        raise Exception('ZeroEngine-Error: Standard font type must be "small","medium", or "big"!')
+#标准文字快速渲染
+def standard_font_render(fonType,txt,color):
+    if fonType == "medium":
+        return ZERO_STANDARD_MEDIUM_FONT.render(txt,color)
+    elif fonType == "small":
+        return ZERO_STANDARD_SMALL_FONT.render(txt,color)
+    elif fonType == "big":
+        return ZERO_STANDARD_BIG_FONT.render(txt,color)
     else:
         raise Exception('ZeroEngine-Error: Standard font type must be "small","medium", or "big"!')
 

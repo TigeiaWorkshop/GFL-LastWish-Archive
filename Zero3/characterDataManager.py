@@ -14,23 +14,22 @@ def getDollImgNum(self_type,action):
 #储存角色音效的常量
 __CHARACTERS_SOUND_DICT = {}
 __CHARACTERS_SOUND_CHANNEL = 5
+#加载角色音效
 def _load_sound_to_CHARACTERS_SOUND_DICT(self_type):
-    if self_type not in __CHARACTERS_SOUND_DICT:
-        if os.path.exists("Assets/sound/character/"+self_type):
-            sound_files = os.listdir("Assets/sound/character/{}/".format(self_type))
-            if len(sound_files) > 0:
-                volume = get_setting("Sound")["sound_effects"]
-                __CHARACTERS_SOUND_DICT[self_type] = {}
-                for kindOfSound in sound_files:
-                    __CHARACTERS_SOUND_DICT[self_type][kindOfSound] = []
-                    allSoundOfThatKind = glob.glob("Assets/sound/character/{}/{}/*".format(self_type,kindOfSound))
-                    if len(allSoundOfThatKind) > 0:
-                        for soundPath in allSoundOfThatKind:
-                            sound = pygame.mixer.Sound(soundPath)
-                            sound.set_volume(volume/100.0)
-                            __CHARACTERS_SOUND_DICT[self_type][kindOfSound].append(sound)
-    else:
-        pass
+    if self_type not in __CHARACTERS_SOUND_DICT and os.path.exists("Assets/sound/character/"+self_type):
+        sound_files = os.listdir("Assets/sound/character/{}/".format(self_type))
+        if len(sound_files) > 0:
+            volume = get_setting("Sound")["sound_effects"]
+            __CHARACTERS_SOUND_DICT[self_type] = {}
+            for kindOfSound in sound_files:
+                __CHARACTERS_SOUND_DICT[self_type][kindOfSound] = []
+                allSoundOfThatKind = glob.glob("Assets/sound/character/{}/{}/*".format(self_type,kindOfSound))
+                if len(allSoundOfThatKind) > 0:
+                    for soundPath in allSoundOfThatKind:
+                        sound = pygame.mixer.Sound(soundPath)
+                        sound.set_volume(volume/100.0)
+                        __CHARACTERS_SOUND_DICT[self_type][kindOfSound].append(sound)
+#播放角色音效
 def _play_CHARACTERS_SOUND(self_type,kind_of_sound):
     if self_type in __CHARACTERS_SOUND_DICT:
         sound_list = __CHARACTERS_SOUND_DICT[self_type]
@@ -43,13 +42,14 @@ def _play_CHARACTERS_SOUND(self_type,kind_of_sound):
 
 #角色UI的文字
 DOLL_UI_FONT = createFont(get_setting("Screen_size_x")/192)
+#角色受伤立绘
 __CHARACTERS_GET_HURT_IMAGE_DICT = {}
 def _get_CHARACTERS_GET_HURT_IMAGE(self_type):
     return __CHARACTERS_GET_HURT_IMAGE_DICT[self_type]
 def _add_CHARACTERS_GET_HURT_IMAGE(self_type):
     if self_type not in __CHARACTERS_GET_HURT_IMAGE_DICT:
         __CHARACTERS_GET_HURT_IMAGE_DICT[self_type] = pygame.image.load(os.path.join("Assets/image/npc/{}_hurt.png".format(self_type))).convert_alpha()
-
+#角色受伤立绘图形模块
 class CHARACTERS_GET_HURT_IMAGE:
     def __init__(self,self_type,y,width):
         self.x = None
@@ -64,6 +64,7 @@ class CHARACTERS_GET_HURT_IMAGE:
             GetHurtImage.set_alpha(self.alpha)
         screen.blit(GetHurtImage,(self.x,self.y))
 
+#人形模块
 class Doll:
     def __init__(self,DATA,faction,mode):
         self.current_action_point = DATA["action_point"]
@@ -88,6 +89,12 @@ class Doll:
         self.ImageGetHurt = None
     def get_pos(self):
         return self.x,self.y
+    def loadImg(self):
+        for theAction in self.__imgId_dict:
+            character_creator(self.type,theAction,self.faction)
+        _load_sound_to_CHARACTERS_SOUND_DICT(self.type)
+        if self.faction == "character":
+            _add_CHARACTERS_GET_HURT_IMAGE(self.type)
     def decreaseHp(self,damage,result_of_round=None):
         self.current_hp-=damage
         if self.current_hp<=0:
@@ -290,6 +297,23 @@ class initializeCharacterDataThread(threading.Thread):
     def getResult(self):
         return self.characters_data,self.sangvisFerris_data
 
+class loadCharacterDataFromSaveThread(threading.Thread):
+    def __init__(self,characters_data,sangvisFerris_data):
+        threading.Thread.__init__(self)
+        self.totalNum = len(characters_data)+len(sangvisFerris_data)
+        self.currentID = 0
+        self.characters_data = characters_data
+        self.sangvisFerris_data = sangvisFerris_data
+    def run(self):
+        for each_character in self.characters_data:
+            self.characters_data[each_character].loadImg()
+            self.currentID+=1
+        for each_character in self.sangvisFerris_data:
+            self.sangvisFerris_data[each_character].loadImg()
+            self.currentID+=1
+    def getResult(self):
+        return self.characters_data,self.sangvisFerris_data
+
 #计算最远攻击距离
 def calculate_range(effective_range_dic):
     if effective_range_dic != None:
@@ -315,6 +339,7 @@ def character_creator(character_name,action,faction):
             __CHARACTERS_IMAGE_DICT[character_name][action] = {}
     else:
         __CHARACTERS_IMAGE_DICT[character_name] = {}
+        #__CHARACTERS_IMAGE_DICT[character_name][action] = {}
     if os.path.exists("Assets/image/{0}/{1}/{2}".format(faction,character_name,action)):
         files_amount = len(glob.glob("Assets/image/{0}/{1}/{2}/*.png".format(faction,character_name,action)))
         if files_amount > 0:

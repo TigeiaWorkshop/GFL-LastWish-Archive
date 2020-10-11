@@ -174,6 +174,9 @@ def mainMenu(screen,setting):
                     if os.path.exists("Save/save.yaml"):
                         with open("Save/save.yaml", "r", encoding='utf-8') as f:
                             SAVE = yaml.load(f.read(),Loader=yaml.FullLoader)
+                        if SAVE["type"] == "battle":
+                            SAVE["id"] = "head"
+                            SAVE["dialog_options"] = {}
                         scene(SAVE["chapterType"],SAVE["chapterName"],screen,SAVE["type"],SAVE["id"],SAVE["dialog_options"])
                         videoCapture.setFrame(1)
                         #是否可以继续游戏了（save文件是否被创建）

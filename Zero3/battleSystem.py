@@ -63,19 +63,23 @@ class BattleSystem:
             "times_characters_down" : 0
         }
         self.__pygame_events = None
+        self.characters_data = None
+        self.sangvisFerris_data = None
     def __update_events(self):
         self.__pygame_events = pygame.event.get()
-    def initialize(self,screen,chapterName):
+    def initialize(self,screen,chapterType,chapterName):
         #储存章节信息
+        self.chapterType = chapterType
         self.chapterName = chapterName
         self.process_data(screen)
     def load(self,screen):
         with open("Save/save.yaml", "r", encoding='utf-8') as f:
             DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
             if DataTmp["type"] == "battle":
+                self.chapterType = DataTmp["chapterType"]
                 self.chapterName = DataTmp["chapterName"]
-                #self.characters_data = DataTmp["characters_data"]
-                #self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
+                self.characters_data = DataTmp["characters_data"]
+                self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
                 #self.theMap = DataTmp["theMap"]
             else:
                 raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
@@ -89,7 +93,7 @@ class BattleSystem:
         self.warnings_to_display = WarningSystem()
         loading_info = get_lang("LoadingTxt")
         #加载剧情
-        with open("Data/main_chapter/"+self.chapterName+"_dialogs_"+get_setting('Language')+".yaml", "r", encoding='utf-8') as f:
+        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,get_setting('Language')), "r", encoding='utf-8') as f:
             DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
             #章节标题显示
             self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleUiTxt["numChapter"],self.chapterName,DataTmp["title"],DataTmp["description"])
@@ -108,11 +112,14 @@ class BattleSystem:
         nowLoadingIcon.draw(screen)
         display.flip(True)
         #读取并初始化章节信息
-        with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
+        with open("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName), "r", encoding='utf-8') as f:
             DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
             self.zoomIn = DataTmp["zoomIn"]*100
             #初始化角色信息
-            characterDataThread = initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
+            if self.characters_data != None and self.sangvisFerris_data != None:
+                characterDataThread = loadCharacterDataFromSaveThread(self.characters_data,self.sangvisFerris_data)
+            else:
+                characterDataThread = initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
             self.bg_music = DataTmp["background_music"] 
             self.dialogInfo = DataTmp["dialogs"]
             #初始化天气和环境的音效 -- 频道1
@@ -217,6 +224,7 @@ class BattleSystem:
             pause_menu.ifSave = False
             DataTmp = {}
             DataTmp["type"] = "battle"
+            DataTmp["chapterType"] = self.chapterType
             DataTmp["chapterName"] = self.chapterName
             DataTmp["characters_data"] = self.characters_data
             DataTmp["sangvisFerris_data"] = self.sangvisFerris_data
