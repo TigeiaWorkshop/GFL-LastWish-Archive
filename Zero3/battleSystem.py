@@ -65,6 +65,7 @@ class BattleSystem:
         self.__pygame_events = None
         self.characters_data = None
         self.sangvisFerris_data = None
+        self.theMap = None
     def __update_events(self):
         self.__pygame_events = pygame.event.get()
     def initialize(self,screen,chapterType,chapterName):
@@ -72,6 +73,18 @@ class BattleSystem:
         self.chapterType = chapterType
         self.chapterName = chapterName
         self.process_data(screen)
+    def save_data(self):
+        if pause_menu.ifSave == True:
+            pause_menu.ifSave = False
+            DataTmp = {}
+            DataTmp["type"] = "battle"
+            DataTmp["chapterType"] = self.chapterType
+            DataTmp["chapterName"] = self.chapterName
+            DataTmp["characters_data"] = self.characters_data
+            DataTmp["sangvisFerris_data"] = self.sangvisFerris_data
+            DataTmp["theMap"] = self.theMap
+            with open("Save/save.yaml", "w", encoding='utf-8') as f:
+                yaml.dump(DataTmp, f, allow_unicode=True)
     def load(self,screen):
         with open("Save/save.yaml", "r", encoding='utf-8') as f:
             DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -80,7 +93,7 @@ class BattleSystem:
                 self.chapterName = DataTmp["chapterName"]
                 self.characters_data = DataTmp["characters_data"]
                 self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
-                #self.theMap = DataTmp["theMap"]
+                self.theMap = DataTmp["theMap"]
             else:
                 raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
         self.process_data(screen)
@@ -146,7 +159,10 @@ class BattleSystem:
             display.flip(True)
         self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
         #初始化地图模块
-        self.theMap = MapObject(DataTmp,round(self.window_x/10),DataTmp["local_x"],DataTmp["local_y"])
+        if self.theMap == None:
+            self.theMap = MapObject(DataTmp,round(self.window_x/10),DataTmp["local_x"],DataTmp["local_y"])
+        else:
+            self.theMap.load_env_img()
         #计算光亮区域 并初始化地图
         self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
         #开始加载关卡设定
@@ -219,18 +235,6 @@ class BattleSystem:
             self.dialog_to_display = None
         else:
             self.dialog_to_display = self.dialog_during_battle[self.dialogInfo["initial"]]
-    def save_data(self):
-        if pause_menu.ifSave == True:
-            pause_menu.ifSave = False
-            DataTmp = {}
-            DataTmp["type"] = "battle"
-            DataTmp["chapterType"] = self.chapterType
-            DataTmp["chapterName"] = self.chapterName
-            DataTmp["characters_data"] = self.characters_data
-            DataTmp["sangvisFerris_data"] = self.sangvisFerris_data
-            DataTmp["theMap"] = self.theMap
-            with open("Save/save.yaml", "w", encoding='utf-8') as f:
-                yaml.dump(DataTmp, f, allow_unicode=True)
     def display(self,screen):
         #战斗系统主要loop
         while self.battleSystemMainLoop == True:

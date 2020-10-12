@@ -176,3 +176,12 @@ def get_SingleColorSurface(color,size=None):
     surfaceTmp = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
     pygame.draw.rect(surfaceTmp,findColorRGBA(color),(0,0,width,height))
     return ImageSurface(surfaceTmp,0,0,width,height)
+
+#yaml配置文件加载
+def loadYaml(path):
+    with open(path, "r", encoding='utf-8') as f:
+        return yaml.load(f.read(),Loader=yaml.FullLoader)
+
+#随机数
+def randomInt(start,end):
+    return random.randint(start,end)

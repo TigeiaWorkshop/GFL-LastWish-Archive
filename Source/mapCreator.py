@@ -38,7 +38,7 @@ def mapCreator(chapterName,screen,setting):
             for i in range(block_y):
                 map_per_line = []
                 for a in range(block_x):
-                    map_per_line.append(SnowEnvImg[random.randint(0,5)])
+                    map_per_line.append(SnowEnvImg[Zero.randomInt(0,5)])
                 default_map.append(map_per_line)
             with open("Data/main_chapter/"+chapterName+"_map.yaml", "w", encoding='utf-8') as f:
                 loadData["map"] = default_map

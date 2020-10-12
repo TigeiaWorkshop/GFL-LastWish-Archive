@@ -3,5 +3,4 @@ import pygame
 import yaml
 import glob
 import time
-import random
 import os

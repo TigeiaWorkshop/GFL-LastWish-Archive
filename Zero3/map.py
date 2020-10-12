@@ -1,10 +1,8 @@
 # cython: language_level=3
-import yaml
 import numpy
 import pygame
 import os
-import random
-from Zero3.basic import addDarkness,loadImg,dicMerge,resizeImg
+from Zero3.basic import addDarkness, dicMerge, loadImg, loadYaml, randomInt, resizeImg
 
 MAP_ENV_IMAGE = None
 
@@ -22,8 +20,8 @@ class EnvImagesManagement:
         all_images_needed = []
         for i in range(len(theMap)):
             for a in range(len(theMap[i])):
-                if theMap[i][a] not in all_images_needed:
-                    all_images_needed.append(theMap[i][a])
+                if theMap[i][a].name not in all_images_needed:
+                    all_images_needed.append(theMap[i][a].name)
         #加载背景图片
         for i in range(len(all_images_needed)):
             try:
@@ -32,36 +30,18 @@ class EnvImagesManagement:
             except BaseException:
                 raise Exception('ZeroEngine-Error: An map-block called '+all_images_needed[i]+' cannot find its image in the folder.')
         #加载场地设施的图片
-        #--篝火--
-        if "campfire" in ornamentationData and ornamentationData["campfire"] != None:
-            self.__ORNAMENTATION_IMAGE_DICT["campfire"] = []
-            for i in range(1,11):
-                self.__ORNAMENTATION_IMAGE_DICT["campfire"].append(loadImg("Assets/image/environment/campfire/{}.png".format(i)))
-        #--箱子--
-        if "chest" in ornamentationData and ornamentationData["chest"] != None:
-            self.__ORNAMENTATION_IMAGE_DICT["chest"] = {}
-            self.__ORNAMENTATION_IMAGE_DICT["chest"]["chest"] = loadImg("Assets/image/environment/decoration/chest.png")
-        #--树--
-        if "tree" in ornamentationData and ornamentationData["tree"] != None:
-            self.__ORNAMENTATION_IMAGE_DICT["tree"] = {}
-            for item in ornamentationData["tree"]:
-                imageName = ornamentationData["tree"][item]["image"]
-                if imageName not in self.__ORNAMENTATION_IMAGE_DICT["tree"]:
-                    self.__ORNAMENTATION_IMAGE_DICT["tree"][imageName] = loadImg("Assets/image/environment/decoration/"+imageName+".png")
-        #--装饰物--
-        if "decoration" in ornamentationData and ornamentationData["decoration"] != None:
-            self.__ORNAMENTATION_IMAGE_DICT["decoration"] = {}
-            for item in ornamentationData["decoration"]:
-                imageName = ornamentationData["decoration"][item]["image"]
-                if imageName not in self.__ORNAMENTATION_IMAGE_DICT["decoration"]:
-                    self.__ORNAMENTATION_IMAGE_DICT["decoration"][imageName] = loadImg("Assets/image/environment/decoration/"+imageName+".png")
-        #--障碍物--
-        if "obstacle" in ornamentationData and ornamentationData["obstacle"] != None:
-            self.__ORNAMENTATION_IMAGE_DICT["obstacle"] = {}
-            for item in ornamentationData["obstacle"]:
-                imageName = ornamentationData["obstacle"][item]["image"]
-                if imageName not in self.__ORNAMENTATION_IMAGE_DICT["obstacle"]:
-                    self.__ORNAMENTATION_IMAGE_DICT["obstacle"][imageName] = loadImg("Assets/image/environment/decoration/"+imageName+".png")
+        for ornamentation in ornamentationData:
+            #--篝火--
+            if ornamentation.type == "campfire":
+                if "campfire" not in self.__ORNAMENTATION_IMAGE_DICT:
+                    self.__ORNAMENTATION_IMAGE_DICT["campfire"] = []
+                    for i in range(1,11):
+                        self.__ORNAMENTATION_IMAGE_DICT["campfire"].append(loadImg("Assets/image/environment/campfire/{}.png".format(i)))
+            elif ornamentation.type not in self.__ORNAMENTATION_IMAGE_DICT:
+                self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type] = {}
+                self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type][ornamentation.image] = loadImg("Assets/image/environment/decoration/"+ornamentation.image+".png")
+            elif ornamentation.image not in self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type]:
+                self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type][ornamentation.image] = loadImg("Assets/image/environment/decoration/"+ornamentation.image+".png")
         #如果是夜战模式
         if darkMode==True:
             self.__ENV_IMAGE_DICT_ORIGINAL_DARK = {}
@@ -125,27 +105,24 @@ class EnvImagesManagement:
 class MapObject:
     def  __init__(self,mapDataDic,perBlockWidth,local_x=0,local_y=0):
         #加载地图设置
-        with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
-            blocks_setting = yaml.load(f.read(),Loader=yaml.FullLoader)["blocks"]
-        ornamentationData = mapDataDic["ornamentation"]
+        blocks_setting = loadYaml("Data/blocks.yaml")["blocks"]
         self.darkMode = mapDataDic["darkMode"]
         self.perBlockWidth = perBlockWidth
         mapData = mapDataDic["map"]
         self.row = len(mapData)
         self.column = len(mapData[0])
-        global MAP_ENV_IMAGE
-        MAP_ENV_IMAGE = EnvImagesManagement(mapData,ornamentationData,mapDataDic["backgroundImage"],self.perBlockWidth,self.darkMode)
         #初始化地图数据
         self.mapData = mapData
+        self.backgroundImageName = mapDataDic["backgroundImage"]
         for y in range(len(mapData)):
             for x in range(len(mapData[y])):
                 self.mapData[y][x] = BlockObject(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
         self.ornamentationData = []
-        for ornamentationType,itemsThatType in ornamentationData.items():
+        for ornamentationType,itemsThatType in mapDataDic["ornamentation"].items():
             for itemKey,itemData in itemsThatType.items():
                 if ornamentationType == "campfire":
                     self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,ornamentationType))
-                    self.ornamentationData[-1].imgId = random.randint(0,9)
+                    self.ornamentationData[-1].imgId = randomInt(0,9)
                     self.ornamentationData[-1].range = itemData["range"]
                 elif ornamentationType == "chest":
                     self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,ornamentationType))
@@ -159,6 +136,10 @@ class MapObject:
         self.__local_x = local_x
         self.__local_y = local_y
         self.ifProcessMap = True
+        self.load_env_img()
+    def load_env_img(self):
+        global MAP_ENV_IMAGE
+        MAP_ENV_IMAGE = EnvImagesManagement(self.mapData,self.ornamentationData,self.backgroundImageName,self.perBlockWidth,self.darkMode)
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
