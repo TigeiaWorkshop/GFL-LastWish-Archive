@@ -67,26 +67,56 @@ class CHARACTERS_GET_HURT_IMAGE:
 #人形模块
 class Doll:
     def __init__(self,DATA,faction,mode):
-        self.current_action_point = DATA["action_point"]
+        #当前行动值
+        self.__current_action_point = DATA["action_point"]
+        #最大行动值
         self.max_action_point = DATA["action_point"]
+        #攻击范围
         self.attack_range = DATA["attack_range"]
+        #当然弹夹的子弹数
         self.current_bullets = DATA["current_bullets"] if "current_hp" in DATA else DATA["magazine_capacity"]
+        #当前血量
         self.current_hp = DATA["current_hp"] if "current_hp" in DATA else DATA["max_hp"]
+        #是否濒死
         self.dying = False if self.current_hp > 0 else 3
+        #攻击距离
         self.effective_range = DATA["effective_range"]
+        #最大攻击距离
         self.max_effective_range = calculate_range(self.effective_range)
+        #武器类型
         self.kind = DATA["kind"]
+        #阵营
         self.faction = faction
+        #角色武器名称
         self.type = DATA["type"]
+        #gif图片管理
         self.__imgId_dict = character_gif_dic(self.type,faction,mode)
+        #弹夹容量
         self.magazine_capacity = DATA["magazine_capacity"]
+        #最大攻击力
         self.max_damage = DATA["max_damage"]
+        #最大血量
         self.max_hp = DATA["max_hp"]
+        #最小攻击力
         self.min_damage = DATA["min_damage"]
+        #是否图片镜像
         self.ifFlip = False
+        #x坐标
         self.x = DATA["x"]
+        #y坐标
         self.y = DATA["y"]
+        #受伤的立绘
         self.ImageGetHurt = None
+    def reduce_action_point(self,value):
+        if console.get_events("cheat") == False:
+            self.__current_action_point -= value
+        else:
+            #作弊模式开启时不扣行动力
+            pass
+    def get_action_point(self):
+        return self.__current_action_point
+    def reset_action_point(self):
+        self.__current_action_point = self.max_action_point
     def get_pos(self):
         return self.x,self.y
     def loadImg(self):
@@ -311,8 +341,6 @@ class loadCharacterDataFromSaveThread(threading.Thread):
         for each_character in self.sangvisFerris_data:
             self.sangvisFerris_data[each_character].loadImg()
             self.currentID+=1
-    def getResult(self):
-        return self.characters_data,self.sangvisFerris_data
 
 #计算最远攻击距离
 def calculate_range(effective_range_dic):
