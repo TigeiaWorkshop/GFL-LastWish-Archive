@@ -35,7 +35,7 @@ class EnvImagesManagement:
             if ornamentation.type == "campfire":
                 if "campfire" not in self.__ORNAMENTATION_IMAGE_DICT:
                     self.__ORNAMENTATION_IMAGE_DICT["campfire"] = []
-                    for i in range(1,11):
+                    for i in range(1,12):
                         self.__ORNAMENTATION_IMAGE_DICT["campfire"].append(loadImg("Assets/image/environment/campfire/{}.png".format(i)))
             elif ornamentation.type not in self.__ORNAMENTATION_IMAGE_DICT:
                 self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type] = {}
@@ -124,6 +124,8 @@ class MapObject:
                     self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,ornamentationType))
                     self.ornamentationData[-1].imgId = randomInt(0,9)
                     self.ornamentationData[-1].range = itemData["range"]
+                    self.ornamentationData[-1].alpha = 255
+                    self.ornamentationData[-1].triggered = True
                 elif ornamentationType == "chest":
                     self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,ornamentationType))
                     self.ornamentationData[-1].items = itemData["items"]
@@ -216,11 +218,29 @@ class MapObject:
                     keyWordTemp = False
                 #画上篝火
                 if item.type == "campfire":
-                    imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-                    if item.imgId >= MAP_ENV_IMAGE.get_ornamentation_num("campfire")-1:
-                        item.imgId = 0
+                    #查看篝火的状态是否正在变化，并调整对应的alpha值
+                    if item.triggered == True and item.alpha < 255:
+                        item.alpha += 15
+                    elif item.triggered == False and item.alpha > 0:
+                        item.alpha -= 15
+                    #根据alpha值生成对应的图片
+                    if item.alpha >= 255:
+                        imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        if item.imgId >= MAP_ENV_IMAGE.get_ornamentation_num("campfire")-2:
+                            item.imgId = 0
+                        else:
+                            item.imgId += 0.1
+                    elif item.alpha <= 0:
+                        imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     else:
-                        item.imgId += 0.1
+                        imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+                        imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        imgToBlit.set_alpha(item.alpha)
+                        if item.imgId >= MAP_ENV_IMAGE.get_ornamentation_num("campfire")-2:
+                            item.imgId = 0
+                        else:
+                            item.imgId += 0.1
                 # 画上树
                 elif item.type == "tree":
                     imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("tree",item.image,keyWordTemp),(round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
@@ -381,6 +401,7 @@ class OrnamentationObject:
         self.y = y
         self.type = type
         self.image = image
+        self.alpha = None
     def __lt__(self,other):
         return self.y+self.x < other.y+other.x
     def get_pos(self):
