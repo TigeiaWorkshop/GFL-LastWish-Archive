@@ -37,7 +37,7 @@ class BattleSystem:
         #被按到的按键
         self.buttonGetHover = None
         #被救助的那个角色
-        self.theFriendGetHelp = None
+        self.friendGetHelp = None
         #AI系统正在操控的地方角色ID
         self.enemy_in_control = None
         self.enemies_in_control_id = None
@@ -730,39 +730,45 @@ class BattleSystem:
                             self.characters_data[self.characterGetClick].reduce_action_point(len(self.the_route)*2)
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "attack":
-                            if self.characters_data[self.characterGetClick].current_bullets > 0 and self.characters_data[self.characterGetClick].get_action_point() >= 5:
+                            if self.characters_data[self.characterGetClick].current_bullets > 0 and self.characters_data[self.characterGetClick].if_have_enough_action_point(5):
                                 self.action_choice = "attack"
                                 self.NotDrawRangeBlocks = False
-                            if self.characters_data[self.characterGetClick].current_bullets <= 0:
+                            elif self.characters_data[self.characterGetClick].current_bullets <= 0:
                                 self.warnings_to_display.add("magazine_is_empty")
-                            if self.characters_data[self.characterGetClick].get_action_point() < 5:
+                            elif not self.characters_data[self.characterGetClick].if_have_enough_action_point(5):
                                 self.warnings_to_display.add("no_enough_ap_to_attack")
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "move":
-                            if self.characters_data[self.characterGetClick].get_action_point() >= 2:
+                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(2):
                                 self.action_choice = "move"
                                 self.NotDrawRangeBlocks = False
                             else:
                                 self.warnings_to_display.add("no_enough_ap_to_move")
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "skill":
-                            if self.characters_data[self.characterGetClick].get_action_point() >= 8:
+                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(8):
                                 self.action_choice = "skill"
                                 self.NotDrawRangeBlocks = False
                             else:
                                 self.warnings_to_display.add("no_enough_ap_to_use_skill")
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "reload":
-                            if self.characters_data[self.characterGetClick].get_action_point() >= 5 and self.characters_data[self.characterGetClick].bullets_carried > 0:
+                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(5) and self.characters_data[self.characterGetClick].bullets_carried > 0:
                                 self.action_choice = "reload"
                                 self.NotDrawRangeBlocks = False
                             elif self.characters_data[self.characterGetClick].bullets_carried <= 0:
                                 self.warnings_to_display.add("no_bullets_left")
-                            elif self.characters_data[self.characterGetClick].get_action_point() < 5:
+                            elif not self.characters_data[self.characterGetClick].if_have_enough_action_point(5):
                                 self.warnings_to_display.add("no_enough_ap_to_reload")
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "rescue":
-                            if self.characters_data[self.characterGetClick].get_action_point() >= 8:
+                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(8):
                                 self.action_choice = "rescue"
                                 self.NotDrawRangeBlocks = False
                             else:
                                 self.warnings_to_display.add("no_enough_ap_to_rescue")
+                        elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "interact":
+                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(2):
+                                self.action_choice = "interact"
+                                self.NotDrawRangeBlocks = False
+                            else:
+                                self.warnings_to_display.add("no_enough_ap_to_interact")
                         #攻击判定
                         elif self.action_choice == "attack" and self.NotDrawRangeBlocks == False and self.characterGetClick != "" and len(self.enemiesGetAttack)>0:
                             self.characters_data[self.characterGetClick].reduce_action_point(5)
@@ -799,10 +805,20 @@ class BattleSystem:
                             self.NotDrawRangeBlocks = True
                             skill_range = None
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-                        elif self.action_choice == "rescue" and self.NotDrawRangeBlocks == False and self.characterGetClick != "" and self.theFriendGetHelp != None:
+                        elif self.action_choice == "rescue" and self.NotDrawRangeBlocks == False and self.characterGetClick != "" and self.friendGetHelp != None:
                             self.characters_data[self.characterGetClick].reduce_action_point(8)
                             self.characters_data[self.characterGetClick].noticed()
-                            self.characters_data[self.theFriendGetHelp].heal(1)
+                            self.characters_data[self.friendGetHelp].heal(1)
+                            self.characterGetClick = ""
+                            self.action_choice = ""
+                            self.isWaiting = True
+                            self.NotDrawRangeBlocks = True
+                            attacking_range = None
+                            self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
+                        elif self.action_choice == "interact" and self.NotDrawRangeBlocks == False and self.characterGetClick != "" and self.ornamentationGetClick != None:
+                            self.characters_data[self.characterGetClick].reduce_action_point(2)
+                            self.theMap.ornamentationData[self.ornamentationGetClick].triggered = not self.theMap.ornamentationData[self.ornamentationGetClick].triggered
+                            self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
                             self.characterGetClick = ""
                             self.action_choice = ""
                             self.isWaiting = True
@@ -823,17 +839,15 @@ class BattleSystem:
                                         self.characterGetClick = key
                                     self.characterInfoBoardUI.update()
                                     friendsCanSave = []
+                                    thingsCanReact = []
                                     for key2 in self.characters_data:
-                                        if self.characters_data[key2].dying != False:
-                                            if self.characters_data[key2].x == self.characters_data[key].x:
-                                                if self.characters_data[key2].y+1 == self.characters_data[key].y or self.characters_data[key2].y-1 == self.characters_data[key].y:
-                                                    friendsCanSave.append(key2)
-                                            elif self.characters_data[key2].y == self.characters_data[key].y:
-                                                if self.characters_data[key2].x+1 == self.characters_data[key].x or self.characters_data[key2].x-1 == self.characters_data[key].x:
-                                                    friendsCanSave.append(key2)
+                                        if self.characters_data[key2].dying != False and self.characters_data[key].near(self.characters_data[key2].dying):
+                                            friendsCanSave.append(key2)
+                                    for i in range(len(self.theMap.ornamentationData)):
+                                        if self.theMap.ornamentationData[i].type == "campfire" and self.characters_data[key].near(self.theMap.ornamentationData[i]):
+                                            thingsCanReact.append(i)
                                     self.NotDrawRangeBlocks = "SelectMenu"
                                     break
-                            
                     #选择菜单的判定，显示功能在角色动画之后
                     if self.NotDrawRangeBlocks == "SelectMenu":
                         #移动画面以使得被点击的角色可以被更好的操作
@@ -998,13 +1012,23 @@ class BattleSystem:
                         elif self.action_choice == "rescue":
                             self.areaDrawColorBlock["green"] = []
                             self.areaDrawColorBlock["orange"] = []
-                            self.theFriendGetHelp = None
+                            self.friendGetHelp = None
                             for friendNeedHelp in friendsCanSave:
                                 if block_get_click != None and block_get_click["x"] == self.characters_data[friendNeedHelp].x and block_get_click["y"] == self.characters_data[friendNeedHelp].y:
                                     self.areaDrawColorBlock["orange"] = [(block_get_click["x"],block_get_click["y"])]
-                                    self.theFriendGetHelp = friendNeedHelp
+                                    self.friendGetHelp = friendNeedHelp
                                 else:
                                     self.areaDrawColorBlock["green"].append((self.characters_data[friendNeedHelp].x,self.characters_data[friendNeedHelp].y))
+                        elif self.action_choice == "interact":
+                            self.areaDrawColorBlock["green"] = []
+                            self.areaDrawColorBlock["orange"] = []
+                            self.ornamentationGetClick = None
+                            for ornamentationId in thingsCanReact:
+                                if block_get_click != None and block_get_click["x"] == self.theMap.ornamentationData[ornamentationId].x and block_get_click["y"] == self.theMap.ornamentationData[ornamentationId].y:
+                                    self.areaDrawColorBlock["orange"] = [(block_get_click["x"],block_get_click["y"])]
+                                    self.ornamentationGetClick = ornamentationId
+                                else:
+                                    self.areaDrawColorBlock["green"].append((self.theMap.ornamentationData[ornamentationId].x,self.theMap.ornamentationData[ornamentationId].y))
 
                     #当有角色被点击时
                     if self.characterGetClick != "" and self.isWaiting == False:
@@ -1410,7 +1434,7 @@ class BattleSystem:
                     #左下角的角色信息
                     self.characterInfoBoardUI.display(screen,self.characters_data[self.characterGetClick],self.original_UI_img)
                     #----选择菜单----
-                    self.buttonGetHover = self.selectMenuUI.display(screen,round(self.theMap.perBlockWidth/10),self.theMap.getBlockExactLocation(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].kind,friendsCanSave)
+                    self.buttonGetHover = self.selectMenuUI.display(screen,round(self.theMap.perBlockWidth/10),self.theMap.getBlockExactLocation(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].kind,friendsCanSave,thingsCanReact)
                 #加载雪花
                 if self.weatherController != None:
                     self.weatherController.display(screen,self.theMap.perBlockWidth,self.perBlockHeight)

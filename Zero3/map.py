@@ -4,7 +4,7 @@ import pygame
 import os
 from Zero3.basic import addDarkness, dicMerge, loadImg, loadYaml, randomInt, resizeImg
 
-MAP_ENV_IMAGE = None
+_MAP_ENV_IMAGE = None
 
 #地图场景模块
 class EnvImagesManagement:
@@ -56,6 +56,9 @@ class EnvImagesManagement:
                     self.__ORNAMENTATION_IMAGE_DICT_DARK[key] = {}
                     for key2,value2 in value.items():
                         self.__ORNAMENTATION_IMAGE_DICT_DARK[key][key2] = addDarkness(value2,darkness)
+                elif "campfire" not in self.__ORNAMENTATION_IMAGE_DICT_DARK:
+                    self.__ORNAMENTATION_IMAGE_DICT_DARK["campfire"] = {}
+                    self.__ORNAMENTATION_IMAGE_DICT_DARK["campfire"]["campfire"] = (addDarkness(self.__ORNAMENTATION_IMAGE_DICT["campfire"][-1],darkness))
     def resize(self,newWidth):
         for key in self.__ENV_IMAGE_DICT:
             self.__ENV_IMAGE_DICT[key] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL[key],(newWidth, None))
@@ -140,12 +143,12 @@ class MapObject:
         self.ifProcessMap = True
         self.load_env_img()
     def load_env_img(self):
-        global MAP_ENV_IMAGE
-        MAP_ENV_IMAGE = EnvImagesManagement(self.mapData,self.ornamentationData,self.backgroundImageName,self.perBlockWidth,self.darkMode)
+        global _MAP_ENV_IMAGE
+        _MAP_ENV_IMAGE = EnvImagesManagement(self.mapData,self.ornamentationData,self.backgroundImageName,self.perBlockWidth,self.darkMode)
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
         self.perBlockWidth = newPerBlockWidth
-        MAP_ENV_IMAGE.resize(self.perBlockWidth)
+        _MAP_ENV_IMAGE.resize(self.perBlockWidth)
         self.surface_width = int(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
         self.surface_height = int(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
         if self.surface_width < window_x:
@@ -203,7 +206,7 @@ class MapObject:
         if self.ifProcessMap == True:
             self.ifProcessMap = False
             self.process_map(screen.get_width(),screen.get_height())
-        screen.blit(MAP_ENV_IMAGE.get_background_image(),(0,0))
+        screen.blit(_MAP_ENV_IMAGE.get_background_image(),(0,0))
         return (screen_to_move_x,screen_to_move_y)
     #画上设施
     def display_ornamentation(self,screen,characters_data,sangvisFerris_data):
@@ -225,25 +228,28 @@ class MapObject:
                         item.alpha -= 15
                     #根据alpha值生成对应的图片
                     if item.alpha >= 255:
-                        imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-                        if item.imgId >= MAP_ENV_IMAGE.get_ornamentation_num("campfire")-2:
+                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        if item.imgId >= _MAP_ENV_IMAGE.get_ornamentation_num("campfire")-2:
                             item.imgId = 0
                         else:
                             item.imgId += 0.1
                     elif item.alpha <= 0:
-                        imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        if keyWordTemp == False:
+                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        else:
+                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire","campfire",True), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     else:
-                        imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                         screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
-                        imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                         imgToBlit.set_alpha(item.alpha)
-                        if item.imgId >= MAP_ENV_IMAGE.get_ornamentation_num("campfire")-2:
+                        if item.imgId >= _MAP_ENV_IMAGE.get_ornamentation_num("campfire")-2:
                             item.imgId = 0
                         else:
                             item.imgId += 0.1
                 # 画上树
                 elif item.type == "tree":
-                    imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image("tree",item.image,keyWordTemp),(round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
+                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("tree",item.image,keyWordTemp),(round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
                     xTemp -= self.perBlockWidth*0.125
                     yTemp -= self.perBlockWidth*0.25
                     #如果的确有树需要被画出
@@ -256,7 +262,7 @@ class MapObject:
                         if self.darkMode == False or item.get_pos() in self.lightArea:
                             imgToBlit.set_alpha(100)
                 elif item.type == "decoration" or item.type == "obstacle" or item.type == "chest":
-                    imgToBlit = pygame.transform.scale(MAP_ENV_IMAGE.get_ornamentation_image(item.type,item.image,keyWordTemp),(round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image(item.type,item.image,keyWordTemp),(round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                 if imgToBlit != None:
                     screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
     #寻路功能
@@ -311,7 +317,7 @@ class MapObject:
         return the_route
     #重新绘制地图
     def process_map(self,window_x,window_y):
-        mapSurface = MAP_ENV_IMAGE.get_new_background_image(window_x,window_y)
+        mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_x,window_y)
         #画出地图
         for y in range(len(self.mapData)):
             anyBlockPrint = False
@@ -320,9 +326,9 @@ class MapObject:
                 if -self.perBlockWidth<=xTemp<window_x and -self.perBlockWidth<=yTemp<window_y:
                     anyBlockPrint = True
                     if self.darkMode == True and (x,y) not in self.lightArea:
-                        mapSurface.blit(MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,True),(xTemp,yTemp))
+                        mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,True),(xTemp,yTemp))
                     else:
-                        mapSurface.blit(MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,False),(xTemp,yTemp))
+                        mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,False),(xTemp,yTemp))
                 elif xTemp>=window_x or yTemp>=window_y:
                     break
             if anyBlockPrint == False and yTemp>=window_y:
@@ -373,7 +379,7 @@ class MapObject:
                         if (x,y) not in self.lightArea:
                             self.lightArea.append((x,y))
         for item in self.ornamentationData:
-            if item.type == "campfire":
+            if item.type == "campfire" and item.triggered == True:
                 for y in range(int(item.y-item.range),int(item.y+item.range)):
                     if y < item.y:
                         for x in range(int(item.x-item.range-(y-item.y)+1),int(item.x+item.range+(y-item.y))):

@@ -154,6 +154,10 @@ class SelectMenu:
         self.rescueAP = 8
         self.rescueTxt = selectMenuTxtDic["rescue"]
         self.rescueAPTxt = str(self.rescueAP)+" AP"
+        #互动
+        self.interactAP = 2
+        self.interactTxt = selectMenuTxtDic["interact"]
+        self.interactAPTxt = str(self.interactAP)+" AP"
         #所有按钮
         self.allButton = None
     #初始化按钮
@@ -167,7 +171,8 @@ class SelectMenu:
             "move": selectButtonBase.copy(),
             "reload": selectButtonBase.copy(),
             "skill": selectButtonBase.copy(),
-            "rescue": selectButtonBase.copy()
+            "rescue": selectButtonBase.copy(),
+            "interact": selectButtonBase.copy()
         }
         #攻击按钮
         txt_temp = fontRender(self.attackTxt,"black",sizeBig)
@@ -194,7 +199,12 @@ class SelectMenu:
         txt_temp2 = fontRender(self.rescueAPTxt,"black",sizeSmall)
         self.allButton["rescue"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
         self.allButton["rescue"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
-    def display(self,screen,fontSize,location,kind,friendsCanSave):
+        #互动按钮
+        txt_temp = fontRender(self.interactTxt,"black",sizeBig)
+        txt_temp2 = fontRender(self.interactAPTxt,"black",sizeSmall)
+        self.allButton["interact"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
+        self.allButton["interact"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
+    def display(self,screen,fontSize,location,kind,friendsCanSave,thingsCanReact):
         if self.allButton == None:
             self.initialButtons(fontSize)
         buttonGetHover = None
@@ -231,6 +241,13 @@ class SelectMenu:
             if ifHover(self.allButton["rescue"],(txt_tempX,txt_tempY)):
                 buttonGetHover = "rescue"
             screen.blit(self.allButton["rescue"],(txt_tempX,txt_tempY))
+        #互动
+        if len(thingsCanReact)>0:
+            txt_tempX = location["xEnd"]-selectButtonBaseWidth*0.4
+            txt_tempY = location["yStart"]-selectButtonBaseWidth*0.7
+            if ifHover(self.allButton["interact"],(txt_tempX,txt_tempY)):
+                buttonGetHover = "interact"
+            screen.blit(self.allButton["interact"],(txt_tempX,txt_tempY))
         return buttonGetHover
 
 #角色信息版

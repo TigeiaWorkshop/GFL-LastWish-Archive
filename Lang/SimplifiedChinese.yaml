@@ -73,6 +73,7 @@ ResultBoard:
 SaveGame: 保存游戏
 SelectMenu:
   attack: 攻击
+  interact: 互动
   move: 移动
   reload: 换弹
   rescue: 救助
@@ -91,10 +92,11 @@ Warnings:
   magazine_is_full: 当前弹夹已满，无需换弹
   no_bullets_left: 当前角色已经没有备弹
   no_enemy_in_effective_range: 当前角色的攻击范围内没有敌人
-  no_enough_ap_to_attack: 当前角色没有足够的行动值用于攻击
+  no_enough_ap_to_attack: 当前角色没有足够的行动值进行攻击
+  no_enough_ap_to_interact: 当前角色没有足够的行动值进行互动
   no_enough_ap_to_move: 当前角色没有足够的行动值用于移动
   no_enough_ap_to_reload: 当前角色没有足够的行动值用于换弹
-  no_enough_ap_to_rescue: 当前角色没有足够的行动值用于救助
-  no_enough_ap_to_use_skill: 当前角色没有足够的行动值用于使用技能
+  no_enough_ap_to_rescue: 当前角色没有足够的行动值进行救助
+  no_enough_ap_to_use_skill: 当前角色没有足够的行动值使用技能
 title1: 缇吉娅工坊 呈现
 title2: 警告：所有内容仍处于研发阶段，不代表最终效果

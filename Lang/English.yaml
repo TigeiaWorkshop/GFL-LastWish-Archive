@@ -68,6 +68,7 @@ ResultBoard:
 SaveGame: Save Game
 SelectMenu:
   attack: Attack
+  interact: Interact
   move: Move
   reload: Reload
   rescue: Rescue
@@ -87,6 +88,7 @@ Warnings:
   no_bullets_left: Current character has no bullet left.
   no_enemy_in_effective_range: There is no enemy in this character's attack range.
   no_enough_ap_to_attack: You don't have enough action points for attacking.
+  no_enough_ap_to_interact: You don't have enough action points for interacting.
   no_enough_ap_to_move: You don't have enough action points for moving.
   no_enough_ap_to_reload: You don't have enough action points for reloading.
   no_enough_ap_to_rescue: You don't have enough action points for rescuing.

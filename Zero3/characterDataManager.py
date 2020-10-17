@@ -109,14 +109,38 @@ class Doll:
         self.ImageGetHurt = None
     def reduce_action_point(self,value):
         if console.get_events("cheat") == False:
-            self.__current_action_point -= value
+            if isinstance(value,int):
+                if self.__current_action_point >= value:
+                    #有足够的行动值来减去
+                    self.__current_action_point -= value
+                    return True
+                else:
+                    #没有足够的行动值来减去
+                    return False
+            else:
+                raise Exception('ZeroEngine-Error: While you reduce the action points, the module cannot reduce a non-int value!')
         else:
             #作弊模式开启时不扣行动力
-            pass
+            return True
     def get_action_point(self):
         return self.__current_action_point
+    def if_have_enough_action_point(self,value):
+        return self.__current_action_point >= value
     def reset_action_point(self):
         self.__current_action_point = self.max_action_point
+    def near(self,otherDoll):
+        if self.x == otherDoll.x:
+            if abs(self.y-otherDoll.y) <= 1:
+                return True
+            else:
+                return False
+        elif self.y == otherDoll.y:
+            if abs(self.x-otherDoll.x) <= 1:
+                return True
+            else:
+                return False
+        else:
+            return False
     def get_pos(self):
         return self.x,self.y
     def loadImg(self):
