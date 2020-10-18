@@ -882,7 +882,8 @@ class BattleSystem:
                                         #显示路径
                                         self.areaDrawColorBlock["green"] = self.the_route
                                         xTemp,yTemp = self.theMap.calPosInMap(self.the_route[-1][0],self.the_route[-1][1])
-                                        displayInCenter(fontRender("-"+str(len(self.the_route)*2)+"AP","green",self.theMap.perBlockWidth/8,True),self.UI_img["green"],xTemp,yTemp,screen)
+                                        displayInCenter(fontRender(str(len(self.the_route)*2)+"   ","white",self.theMap.perBlockWidth/8,True),self.UI_img["green"],xTemp,yTemp,screen)
+                                        self.characters_data[self.characterGetClick].draw_custom("move",(xTemp,yTemp),screen,self.theMap)
                         #显示攻击范围        
                         elif self.action_choice == "attack":
                             if attacking_range == None:

@@ -192,6 +192,25 @@ class Doll:
                 return True
             else:
                 return False
+    def draw_custom(self,action,pos,screen,theMapClass,alpha=155,isContinue=True):
+        #调整小人图片的尺寸
+        img_of_char = getDollImg(self.type,action,self.__imgId_dict[action]["imgId"],round(theMapClass.perBlockWidth*1.6))
+        #反转图片
+        if self.ifFlip == True:
+            img_of_char = pygame.transform.flip(img_of_char,True,False)
+        img_of_char.set_alpha(alpha)
+        #把角色图片画到屏幕上
+        screen.blit(img_of_char,(pos[0]-theMapClass.perBlockWidth*0.3,pos[1]-theMapClass.perBlockWidth*0.85))
+        #调整id，并返回对应的bool状态
+        if self.__imgId_dict[action]["imgId"] < getDollImgNum(self.type,action)-1:
+            self.__imgId_dict[action]["imgId"] += 1
+            return True
+        else:
+            if isContinue == True:
+                self.__imgId_dict[action]["imgId"] = 0
+                return True
+            else:
+                return False
     def drawUI(self,screen,original_UI_img,theMapClass):
         hp_img = None
         if self.dying == False:
