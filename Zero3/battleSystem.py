@@ -43,6 +43,13 @@ class BattleSystem:
         self.enemies_in_control_id = None
         #所有敌对角色的名字列表
         self.sangvisFerris_name_list = None
+        #战斗状态数据
+        self.resultInfo = {
+            "total_rounds" : 1,
+            "total_kills" : 0,
+            "total_time" : time.time(),
+            "times_characters_down" : 0
+        }
         #-----不需要储存的参数，每次加载都需初始化-----#
         #储存角色受到伤害的文字surface
         self.damage_do_to_characters = {}
@@ -54,12 +61,6 @@ class BattleSystem:
         #格式：角色：[x,y]
         self.the_characters_detected_last_round = {}
         self.enemy_action = None
-        self.resultInfo = {
-            "total_rounds" : 1,
-            "total_kills" : 0,
-            "total_time" : time.time(),
-            "times_characters_down" : 0
-        }
         self.__pygame_events = None
         self.characters_data = None
         self.sangvisFerris_data = None
@@ -85,6 +86,7 @@ class BattleSystem:
             DataTmp["theMap"] = self.theMap
             DataTmp["dialogKey"] = self.dialogKey
             DataTmp["dialogData"] = self.dialogData
+            DataTmp["resultInfo"] = self.resultInfo
             with open("Save/save.yaml", "w", encoding='utf-8') as f:
                 yaml.dump(DataTmp, f, allow_unicode=True)
     def load(self,screen):
@@ -98,6 +100,7 @@ class BattleSystem:
                 self.theMap = DataTmp["theMap"]
                 self.dialogKey = DataTmp["dialogKey"]
                 self.dialogData = DataTmp["dialogData"]
+                self.resultInfo = DataTmp["resultInfo"]
             else:
                 raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
         self.loadFromSave = True
@@ -105,6 +108,9 @@ class BattleSystem:
     def process_data(self,screen):
         #获取屏幕的尺寸
         self.window_x,self.window_y = screen.get_size()
+        #生成标准文字渲染器
+        self.FONTSIZE = int(self.window_x/76)
+        self.FONT = createFont(self.FONTSIZE)
         #加载按钮的文字
         self.selectMenuUI = SelectMenu()
         self.battleUiTxt = get_lang("Battle_UI")
@@ -125,7 +131,7 @@ class BattleSystem:
             display.flip(True)
         #开始加载地图场景
         self.infoToDisplayDuringLoading.display(screen)
-        now_loading = fontRender(loading_info["now_loading_map"], "white",self.window_x/76)
+        now_loading = self.FONT.render(loading_info["now_loading_map"],get_fontMode(),(255,255,255))
         drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
         display.flip(True)
@@ -166,7 +172,7 @@ class BattleSystem:
         characterDataThread.start()
         while characterDataThread.isAlive():
             self.infoToDisplayDuringLoading.display(screen)
-            now_loading = fontRender(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum), "white",self.window_x/76)
+            now_loading = self.FONT.render(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum),get_fontMode(),(255,255,255))
             drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
             nowLoadingIcon.draw(screen)
             display.flip(True)
@@ -183,7 +189,7 @@ class BattleSystem:
         self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
         #开始加载关卡设定
         self.infoToDisplayDuringLoading.display(screen)
-        now_loading = fontRender(loading_info["now_loading_level"], "white",self.window_x/76)
+        now_loading = self.FONT.render(loading_info["now_loading_level"],get_fontMode(),(255,255,255))
         drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
         display.flip(True)
@@ -219,9 +225,9 @@ class BattleSystem:
         #角色信息UI管理
         self.characterInfoBoardUI = CharacterInfoBoard(self.window_x,self.window_y)
         #加载对话框图片
-        self.dialoguebox_up = DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,self.window_x,self.window_y/2-self.window_y*0.35,self.window_x/80)
+        self.dialoguebox_up = DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,self.window_x,self.window_y/2-self.window_y*0.35,self.FONTSIZE)
         self.dialoguebox_up.flip()
-        self.dialoguebox_down = DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,-self.window_x*0.3,self.window_y/2+self.window_y*0.2,self.window_x/80)
+        self.dialoguebox_down = DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,-self.window_x*0.3,self.window_y/2+self.window_y*0.2,self.FONTSIZE)
         #-----加载音效-----
         #行走的音效 -- 频道0
         self.walking_sound = []
@@ -235,7 +241,7 @@ class BattleSystem:
         self.RoundSwitchUI = RoundSwitch(self.window_x,self.window_y,self.battleUiTxt)
         #关卡背景介绍信息文字
         for i in range(len(self.battle_info)):
-            self.battle_info[i] = fontRender(self.battle_info[i],"white",self.window_x/76)
+            self.battle_info[i] = self.FONT.render(self.battle_info[i],get_fontMode(),(255,255,255))
         #显示章节信息
         for a in range(0,250,2):
             self.infoToDisplayDuringLoading.display(screen)
@@ -243,7 +249,7 @@ class BattleSystem:
                 self.battle_info[i].set_alpha(a)
                 drawImg(self.battle_info[i],(self.window_x/20,self.window_y*0.75+self.battle_info[i].get_height()*1.2*i),screen)
                 if i == 1:
-                    temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",self.window_x/76)
+                    temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),get_fontMode(),(255,255,255))
                     temp_secode.set_alpha(a)
                     drawImg(temp_secode,(self.window_x/20+self.battle_info[i].get_width(),self.window_y*0.75+self.battle_info[i].get_height()*1.2),screen)
             display.flip(True)
@@ -882,7 +888,7 @@ class BattleSystem:
                                         #显示路径
                                         self.areaDrawColorBlock["green"] = self.the_route
                                         xTemp,yTemp = self.theMap.calPosInMap(self.the_route[-1][0],self.the_route[-1][1])
-                                        displayInCenter(fontRender(str(len(self.the_route)*2)+"   ","white",self.theMap.perBlockWidth/8,True),self.UI_img["green"],xTemp,yTemp,screen)
+                                        screen.blit(self.FONT.render(str(len(self.the_route)*2),get_fontMode(),(255,255,255)),(xTemp+self.FONTSIZE*2,yTemp+self.FONTSIZE))
                                         self.characters_data[self.characterGetClick].draw_custom("move",(xTemp,yTemp),screen,self.theMap)
                         #显示攻击范围        
                         elif self.action_choice == "attack":
@@ -1084,10 +1090,10 @@ class BattleSystem:
                                         for key2,value2 in self.theMap.ornamentationData[i].items.items():
                                             if key2 == "bullet":
                                                 self.characters_data[self.characterGetClick].bullets_carried += value2
-                                                self.original_UI_img["supplyBoard"].items.append(fontRender(self.battleUiTxt["getBullets"]+": "+str(value2),"white",self.window_x/80))
+                                                self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleUiTxt["getBullets"]+": "+str(value2),get_fontMode(),(255,255,255)))
                                             elif key2 == "hp":
                                                 self.characters_data[self.characterGetClick].current_hp += value2
-                                                self.original_UI_img["supplyBoard"].items.append(fontRender(self.battleUiTxt["getHealth"]+": "+str(value2),"white",self.window_x/80))
+                                                self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleUiTxt["getHealth"]+": "+str(value2),get_fontMode(),(255,255,255)))
                                         if len(self.original_UI_img["supplyBoard"].items)>0:
                                             self.original_UI_img["supplyBoard"].yTogo = 10
                                         del self.theMap.ornamentationData[i]
@@ -1136,9 +1142,9 @@ class BattleSystem:
                                     if self.enemiesGetAttack[each_enemy] == "near" and random.randint(1,100) <= 95 or self.enemiesGetAttack[each_enemy] == "middle" and random.randint(1,100) <= 80 or self.enemiesGetAttack[each_enemy] == "far" and random.randint(1,100) <= 65:
                                         the_damage = random.randint(self.characters_data[self.characterGetClick].min_damage,self.characters_data[self.characterGetClick].max_damage)
                                         self.sangvisFerris_data[each_enemy].decreaseHp(the_damage)
-                                        self.damage_do_to_characters[each_enemy] = fontRender("-"+str(the_damage),"red",self.window_x/76)
+                                        self.damage_do_to_characters[each_enemy] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
                                     else:
-                                        self.damage_do_to_characters[each_enemy] = fontRender("Miss","red",self.window_x/76)
+                                        self.damage_do_to_characters[each_enemy] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
                             elif self.characters_data[self.characterGetClick].get_imgId("attack") == self.characters_data[self.characterGetClick].get_imgNum("attack")-1:
                                 self.characters_data[self.characterGetClick].reset_imgId("attack")
                                 self.characters_data[self.characterGetClick].current_bullets -= 1
@@ -1246,9 +1252,9 @@ class BattleSystem:
                                 the_damage = random.randint(self.sangvisFerris_data[self.enemy_in_control].min_damage,self.sangvisFerris_data[self.enemy_in_control].max_damage)
                                 self.resultInfo = self.characters_data[self.enemy_action["target"]].decreaseHp(the_damage,self.resultInfo)
                                 self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
-                                self.damage_do_to_characters[self.enemy_action["target"]] = fontRender("-"+str(the_damage),"red",self.window_x/76)
+                                self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
                             else:
-                                self.damage_do_to_characters[self.enemy_action["target"]] = fontRender("Miss","red",self.window_x/76)
+                                self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
                             self.sangvisFerris_data[self.enemy_in_control].reset_imgId("attack")
                             self.enemies_in_control_id +=1
                             if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
@@ -1311,9 +1317,9 @@ class BattleSystem:
                                     the_damage = random.randint(self.sangvisFerris_data[self.enemy_in_control].min_damage,self.sangvisFerris_data[self.enemy_in_control].max_damage)
                                     self.resultInfo = self.characters_data[self.enemy_action["target"]].decreaseHp(the_damage,self.resultInfo)
                                     self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
-                                    self.damage_do_to_characters[self.enemy_action["target"]] = fontRender("-"+str(the_damage),"red",self.window_x/76)
+                                    self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
                                 else:
-                                    self.damage_do_to_characters[self.enemy_action["target"]] = fontRender("Miss","red",self.window_x/76)
+                                    self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
                                 self.sangvisFerris_data[self.enemy_in_control].reset_imgId("attack")
                                 self.enemies_in_control_id +=1
                                 if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
@@ -1534,7 +1540,7 @@ class BattleSystem:
                     self.battle_info[i].set_alpha(self.txt_alpha)
                     drawImg(self.battle_info[i],(self.window_x/20,self.window_y*0.75+self.battle_info[i].get_height()*1.2*i),screen)
                     if i == 1:
-                        temp_secode = fontRender(time.strftime(":%S", time.localtime()),"white",self.window_x/76)
+                        temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),get_fontMode(),(255,255,255))
                         temp_secode.set_alpha(self.txt_alpha)
                         drawImg(temp_secode,(self.window_x/20+self.battle_info[i].get_width(),self.window_y*0.75+self.battle_info[i].get_height()*1.2),screen)
                 self.txt_alpha -= 5
