@@ -244,6 +244,7 @@ class DialogSystem:
     #淡出
     def fadeOut(self,screen):
         pygame.mixer.music.fadeout(1000)
+        pygame.mixer.fadeout(1000)
         for i in range(0,255,5):
             self.black_bg.set_alpha(i)
             self.black_bg.draw(screen)

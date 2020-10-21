@@ -165,6 +165,7 @@ def ifHover(imgObject,objectPos=(0,0),local_x=0,local_y=0):
 #关闭背景音乐
 def unloadBackgroundMusic():
     pygame.mixer.music.unload()
+    pygame.mixer.stop()
 
 #获取特定颜色的表面
 def get_SingleColorSurface(color,size=None):

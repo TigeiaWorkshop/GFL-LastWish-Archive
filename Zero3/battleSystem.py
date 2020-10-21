@@ -8,9 +8,9 @@ class BattleSystem:
     def __init__(self):
         #-----需要储存的参数-----#
         #被选中的角色
-        self.characterGetClick = ""
+        self.characterGetClick = None
         self.enemiesGetAttack = {}
-        self.action_choice = ""
+        self.action_choice = None
         #是否不要画出用于表示范围的方块
         self.NotDrawRangeBlocks = True
         self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
@@ -312,8 +312,6 @@ class BattleSystem:
                                         if len(self.the_route)>0:
                                             self.dialogData["charactersPaths"][key] = self.the_route
                             if len(self.dialogData["charactersPaths"])>0:
-                                if pygame.mixer.Channel(1).get_busy() == False and self.environment_sound != None:
-                                    pygame.mixer.Channel(1).play(self.environment_sound)
                                 key_to_remove = []
                                 reProcessMap = False
                                 for key,value in self.dialogData["charactersPaths"].items():
@@ -573,12 +571,12 @@ class BattleSystem:
                 mouse_x,mouse_y = controller.get_pos()
                 for event in self.__pygame_events:
                     if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE and self.characterGetClick == "":
+                        if event.key == pygame.K_ESCAPE and self.characterGetClick == None:
                             show_pause_menu = True
                         if event.key == pygame.K_ESCAPE and self.isWaiting == True:
                             self.NotDrawRangeBlocks = True
-                            self.characterGetClick = ""
-                            self.action_choice = ""
+                            self.characterGetClick = None
+                            self.action_choice = None
                             attacking_range = None
                             skill_range = None
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
@@ -724,7 +722,7 @@ class BattleSystem:
                         #如果点击了回合结束的按钮
                         if ifHover(self.end_round_button) and self.isWaiting == True:
                             self.whose_round = "playerToSangvisFerris"
-                            self.characterGetClick = ""
+                            self.characterGetClick = None
                             self.NotDrawRangeBlocks = True
                             attacking_range = None
                             skill_range = None
@@ -736,54 +734,54 @@ class BattleSystem:
                             self.characters_data[self.characterGetClick].reduce_action_point(len(self.the_route)*2)
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "attack":
-                            if self.characters_data[self.characterGetClick].current_bullets > 0 and self.characters_data[self.characterGetClick].if_have_enough_action_point(5):
+                            if self.characters_data[self.characterGetClick].current_bullets > 0 and self.characters_data[self.characterGetClick].have_enough_action_point(5):
                                 self.action_choice = "attack"
                                 self.NotDrawRangeBlocks = False
                             elif self.characters_data[self.characterGetClick].current_bullets <= 0:
                                 self.warnings_to_display.add("magazine_is_empty")
-                            elif not self.characters_data[self.characterGetClick].if_have_enough_action_point(5):
+                            elif not self.characters_data[self.characterGetClick].have_enough_action_point(5):
                                 self.warnings_to_display.add("no_enough_ap_to_attack")
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "move":
-                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(2):
+                            if self.characters_data[self.characterGetClick].have_enough_action_point(2):
                                 self.action_choice = "move"
                                 self.NotDrawRangeBlocks = False
                             else:
                                 self.warnings_to_display.add("no_enough_ap_to_move")
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "skill":
-                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(8):
+                            if self.characters_data[self.characterGetClick].have_enough_action_point(8):
                                 self.action_choice = "skill"
                                 self.NotDrawRangeBlocks = False
                             else:
                                 self.warnings_to_display.add("no_enough_ap_to_use_skill")
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "reload":
-                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(5) and self.characters_data[self.characterGetClick].bullets_carried > 0:
+                            if self.characters_data[self.characterGetClick].have_enough_action_point(5) and self.characters_data[self.characterGetClick].bullets_carried > 0:
                                 self.action_choice = "reload"
                                 self.NotDrawRangeBlocks = False
                             elif self.characters_data[self.characterGetClick].bullets_carried <= 0:
                                 self.warnings_to_display.add("no_bullets_left")
-                            elif not self.characters_data[self.characterGetClick].if_have_enough_action_point(5):
+                            elif not self.characters_data[self.characterGetClick].have_enough_action_point(5):
                                 self.warnings_to_display.add("no_enough_ap_to_reload")
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "rescue":
-                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(8):
+                            if self.characters_data[self.characterGetClick].have_enough_action_point(8):
                                 self.action_choice = "rescue"
                                 self.NotDrawRangeBlocks = False
                             else:
                                 self.warnings_to_display.add("no_enough_ap_to_rescue")
                         elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "interact":
-                            if self.characters_data[self.characterGetClick].if_have_enough_action_point(2):
+                            if self.characters_data[self.characterGetClick].have_enough_action_point(2):
                                 self.action_choice = "interact"
                                 self.NotDrawRangeBlocks = False
                             else:
                                 self.warnings_to_display.add("no_enough_ap_to_interact")
                         #攻击判定
-                        elif self.action_choice == "attack" and self.NotDrawRangeBlocks == False and self.characterGetClick != "" and len(self.enemiesGetAttack)>0:
+                        elif self.action_choice == "attack" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and len(self.enemiesGetAttack)>0:
                             self.characters_data[self.characterGetClick].reduce_action_point(5)
                             self.characters_data[self.characterGetClick].noticed()
                             self.isWaiting = False
                             self.NotDrawRangeBlocks = True
                             attacking_range = None
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-                        elif self.action_choice == "skill" and self.NotDrawRangeBlocks == False and self.characterGetClick != "" and self.skill_target != None:
+                        elif self.action_choice == "skill" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.skill_target != None:
                             if self.skill_target in self.characters_data:
                                 if self.characters_data[self.skill_target].x < self.characters_data[self.characterGetClick].x:
                                     self.characters_data[self.characterGetClick].setFlip(True)
@@ -811,22 +809,22 @@ class BattleSystem:
                             self.NotDrawRangeBlocks = True
                             skill_range = None
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-                        elif self.action_choice == "rescue" and self.NotDrawRangeBlocks == False and self.characterGetClick != "" and self.friendGetHelp != None:
+                        elif self.action_choice == "rescue" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.friendGetHelp != None:
                             self.characters_data[self.characterGetClick].reduce_action_point(8)
                             self.characters_data[self.characterGetClick].noticed()
                             self.characters_data[self.friendGetHelp].heal(1)
-                            self.characterGetClick = ""
-                            self.action_choice = ""
+                            self.characterGetClick = None
+                            self.action_choice = None
                             self.isWaiting = True
                             self.NotDrawRangeBlocks = True
                             attacking_range = None
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-                        elif self.action_choice == "interact" and self.NotDrawRangeBlocks == False and self.characterGetClick != "" and self.ornamentationGetClick != None:
+                        elif self.action_choice == "interact" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.ornamentationGetClick != None:
                             self.characters_data[self.characterGetClick].reduce_action_point(2)
                             self.theMap.ornamentationData[self.ornamentationGetClick].triggered = not self.theMap.ornamentationData[self.ornamentationGetClick].triggered
                             self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
-                            self.characterGetClick = ""
-                            self.action_choice = ""
+                            self.characterGetClick = None
+                            self.action_choice = None
                             self.isWaiting = True
                             self.NotDrawRangeBlocks = True
                             attacking_range = None
@@ -870,7 +868,7 @@ class BattleSystem:
                                 self.screen_to_move_y = self.window_y*0.8-tempY
                             
                     #显示攻击/移动/技能范围
-                    if self.NotDrawRangeBlocks == False and self.characterGetClick != "":
+                    if self.NotDrawRangeBlocks == False and self.characterGetClick != None:
                         block_get_click = self.theMap.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                         #显示移动范围
                         if self.action_choice == "move":
@@ -931,7 +929,7 @@ class BattleSystem:
                                                     self.enemiesGetAttack[enemies] = "near"
                             else:
                                 self.warnings_to_display.add("no_enemy_in_effective_range")
-                                self.action_choice = ""
+                                self.action_choice = None
                                 self.NotDrawRangeBlocks = "SelectMenu"
                         #显示技能范围        
                         elif self.action_choice == "skill":
@@ -1006,8 +1004,8 @@ class BattleSystem:
                                         self.characters_data[self.characterGetClick].current_bullets += self.characters_data[self.characterGetClick].bullets_carried
                                         self.characters_data[self.characterGetClick].bullets_carried = 0
                                     self.isWaiting = True
-                                    self.characterGetClick = ""
-                                    self.action_choice = ""
+                                    self.characterGetClick = None
+                                    self.action_choice = None
                                     self.NotDrawRangeBlocks = True
                             #无需换弹
                             elif bullets_to_add <= 0:
@@ -1038,7 +1036,7 @@ class BattleSystem:
                                     self.areaDrawColorBlock["green"].append((self.theMap.ornamentationData[ornamentationId].x,self.theMap.ornamentationData[ornamentationId].y))
 
                     #当有角色被点击时
-                    if self.characterGetClick != "" and self.isWaiting == False:
+                    if self.characterGetClick != None and self.isWaiting == False:
                         #被点击的角色动画
                         self.NotDrawRangeBlocks=True
                         if self.action_choice == "move":
@@ -1106,15 +1104,15 @@ class BattleSystem:
                                     if imgIdForSet == self.characters_data[self.characterGetClick].get_imgNum("set")-1:
                                         self.characters_data[self.characterGetClick].reset_imgId("set")
                                         self.isWaiting = True
-                                        self.characterGetClick = ""
-                                        self.action_choice = ""
+                                        self.characterGetClick = None
+                                        self.action_choice = None
                                         if "move" in self.dialogInfo and keyTemp in self.dialogInfo["move"]:
                                             self.dialogKey = self.dialogInfo["move"][keyTemp]
                                             self.battle = False
                                 else:
                                     self.isWaiting = True
-                                    self.characterGetClick = ""
-                                    self.action_choice = ""
+                                    self.characterGetClick = None
+                                    self.action_choice = None
                                     if "move" in self.dialogInfo and keyTemp in self.dialogInfo["move"]:
                                         self.dialogKey = self.dialogInfo["move"][keyTemp]
                                         self.battle = False
@@ -1149,8 +1147,8 @@ class BattleSystem:
                                 self.characters_data[self.characterGetClick].reset_imgId("attack")
                                 self.characters_data[self.characterGetClick].current_bullets -= 1
                                 self.isWaiting = True
-                                self.characterGetClick = ""
-                                self.action_choice = ""
+                                self.characterGetClick = None
+                                self.action_choice = None
                         elif self.action_choice == "skill":
                             self.characters_data[self.characterGetClick].draw("skill",screen,self.theMap,False)
                             if self.characters_data[self.characterGetClick].get_imgId("skill") == self.characters_data[self.characterGetClick].get_imgNum("skill")-2:
@@ -1163,8 +1161,8 @@ class BattleSystem:
                                 self.characters_data[self.characterGetClick].reset_imgId("skill")
                                 self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
                                 self.isWaiting =True
-                                self.characterGetClick = ""
-                                self.action_choice = ""
+                                self.characterGetClick = None
+                                self.action_choice = None
                         elif self.action_choice == "reload":
                             self.characters_data[self.characterGetClick].draw("reload",screen,self.theMap,False)
                             if self.characters_data[self.characterGetClick].get_imgNum("reload") == self.characters_data[self.characterGetClick].get_imgNum("reload")-2:
@@ -1179,9 +1177,9 @@ class BattleSystem:
                                     self.characters_data[self.characterGetClick].current_bullets += self.characters_data[self.characterGetClick].bullets_carried
                                     self.characters_data[self.characterGetClick].bullets_carried = 0
                                 self.isWaiting =True
-                                self.characterGetClick = ""
-                                self.action_choice = ""
-                    elif self.characterGetClick != "" and self.isWaiting == True:
+                                self.characterGetClick = None
+                                self.action_choice = None
+                    elif self.characterGetClick != None and self.isWaiting == True:
                         self.characters_data[self.characterGetClick].draw("wait",screen,self.theMap)
 
                 #敌方回合
@@ -1229,7 +1227,7 @@ class BattleSystem:
                                 self.whose_round = "sangvisFerrisToPlayer"
                                 self.resultInfo["total_rounds"] += 1
                             self.enemy_action = None
-                            self.enemy_in_control = ""
+                            self.enemy_in_control = None
                     elif self.enemy_action["action"] == "attack":
                         if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == 3:
                             self.attackingSounds.play(self.sangvisFerris_data[self.enemy_in_control].kind)
@@ -1261,7 +1259,7 @@ class BattleSystem:
                                 self.whose_round = "sangvisFerrisToPlayer"
                                 self.resultInfo["total_rounds"] += 1
                             self.enemy_action = None
-                            self.enemy_in_control = ""
+                            self.enemy_in_control = None
                     elif self.enemy_action["action"] == "move&attack":
                         if len(self.enemy_action["route"]) > 0:
                             if pygame.mixer.Channel(0).get_busy() == False:
@@ -1326,14 +1324,14 @@ class BattleSystem:
                                     self.whose_round = "sangvisFerrisToPlayer"
                                     self.resultInfo["total_rounds"] += 1
                                 self.enemy_action = None
-                                self.enemy_in_control = ""
+                                self.enemy_in_control = None
                     elif self.enemy_action["action"] == "stay":
                         self.enemies_in_control_id +=1
                         if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
                             self.whose_round = "sangvisFerrisToPlayer"
                             self.resultInfo["total_rounds"] += 1
                         self.enemy_action = None
-                        self.enemy_in_control = ""
+                        self.enemy_in_control = None
                     else:
                         print("warning: not choice")
 
@@ -1468,7 +1466,7 @@ class BattleSystem:
                             self.whose_round = "player"
                 #检测所有敌人是否都已经被消灭
                 if len(self.sangvisFerris_data) == 0 and self.whose_round != "result":
-                    self.characterGetClick = ""
+                    self.characterGetClick = None
                     self.NotDrawRangeBlocks = False
                     self.whose_round = "result_win"
 

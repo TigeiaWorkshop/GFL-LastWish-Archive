@@ -124,7 +124,7 @@ class Doll:
             return True
     def get_action_point(self):
         return self.__current_action_point
-    def if_have_enough_action_point(self,value):
+    def have_enough_action_point(self,value):
         return self.__current_action_point >= value
     def reset_action_point(self):
         self.__current_action_point = self.max_action_point
