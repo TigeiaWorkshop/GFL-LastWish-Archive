@@ -50,7 +50,6 @@ class BattleSystem:
             "total_time" : time.time(),
             "times_characters_down" : 0
         }
-        #-----不需要储存的参数，每次加载都需初始化-----#
         #储存角色受到伤害的文字surface
         self.damage_do_to_characters = {}
         self.txt_alpha = None
@@ -60,21 +59,44 @@ class BattleSystem:
         #上个回合因为暴露被敌人发现的角色
         #格式：角色：[x,y]
         self.the_characters_detected_last_round = {}
+        #敌人的状态
         self.enemy_action = None
+        #战斗系统进行时的输入事件
         self.__pygame_events = None
+        self.right_click = False
+        #角色数据
         self.characters_data = None
         self.sangvisFerris_data = None
+        #地图数据
         self.theMap = None
+        #对话数据
         self.dialogData = None
+        #是否从存档中加载的数据-默认否
         self.loadFromSave = False
+    #更新游戏事件
     def __update_events(self):
         self.__pygame_events = pygame.event.get()
-    def initialize(self,screen,chapterType,chapterName):
-        #储存章节信息
-        self.chapterType = chapterType
-        self.chapterName = chapterName
-        self.process_data(screen)
-    def save_data(self):
+    #检测手柄事件
+    def __check_jostick_events(self):
+        if controller.joystick.get_init() == True:
+            if round(controller.joystick.get_axis(4)) == -1:
+                self.pressKeyToMove["up"]=True
+            else:
+                self.pressKeyToMove["up"]=False
+            if round(controller.joystick.get_axis(4)) == 1:
+                self.pressKeyToMove["down"]=True
+            else:
+                self.pressKeyToMove["down"]=False
+            if round(controller.joystick.get_axis(3)) == 1:
+                self.pressKeyToMove["right"]=True
+            else:
+                self.pressKeyToMove["right"]=False
+            if round(controller.joystick.get_axis(3)) == -1:
+                self.pressKeyToMove["left"]=True
+            else:
+                self.pressKeyToMove["left"]=False
+    #储存章节信息
+    def __save_data(self):
         if pause_menu.ifSave == True:
             pause_menu.ifSave = False
             DataTmp = {}
@@ -89,6 +111,12 @@ class BattleSystem:
             DataTmp["resultInfo"] = self.resultInfo
             with open("Save/save.yaml", "w", encoding='utf-8') as f:
                 yaml.dump(DataTmp, f, allow_unicode=True)
+    #重新加载游戏进程
+    def initialize(self,screen,chapterType,chapterName):
+        self.chapterType = chapterType
+        self.chapterName = chapterName
+        self.process_data(screen)
+    #从存档中加载游戏进程
     def load(self,screen):
         with open("Save/save.yaml", "r", encoding='utf-8') as f:
             DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
@@ -315,7 +343,7 @@ class BattleSystem:
                                 key_to_remove = []
                                 reProcessMap = False
                                 for key,value in self.dialogData["charactersPaths"].items():
-                                    if value != []:
+                                    if len(value) > 0:
                                         if pygame.mixer.Channel(0).get_busy() == False:
                                             self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
                                             pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
@@ -503,7 +531,7 @@ class BattleSystem:
                             if event.type == pygame.KEYDOWN:
                                 if event.key == pygame.K_ESCAPE:
                                     pause_menu.display(screen)
-                                    self.save_data()
+                                    self.__save_data()
                                     if pause_menu.ifBackToMainMenu == True:
                                         unloadBackgroundMusic()
                                         return None
@@ -565,7 +593,7 @@ class BattleSystem:
                         self.battle = True
             # 游戏主循环
             if self.battle == True:
-                right_click = False
+                self.right_click = False
                 show_pause_menu = False
                 #获取鼠标坐标
                 mouse_x,mouse_y = controller.get_pos()
@@ -600,31 +628,16 @@ class BattleSystem:
                         if event.key == pygame.K_d:
                             self.pressKeyToMove["right"]=False
                     #鼠标点击
-                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
-                        right_click = True
                     elif event.type == pygame.MOUSEBUTTONDOWN:
+                        #右键
+                        if event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
+                            self.right_click = True
                         #上下滚轮-放大和缩小地图
-                        if event.button == 4 and self.zoomIntoBe < 400:
+                        elif event.button == 4 and self.zoomIntoBe < 400:
                             self.zoomIntoBe += 20
                         elif event.button == 5 and self.zoomIntoBe > 200:
                             self.zoomIntoBe -= 20
-                    if controller.joystick.get_init() == True:
-                        if round(controller.joystick.get_axis(4)) == -1:
-                            self.pressKeyToMove["up"]=True
-                        else:
-                            self.pressKeyToMove["up"]=False
-                        if round(controller.joystick.get_axis(4)) == 1:
-                            self.pressKeyToMove["down"]=True
-                        else:
-                            self.pressKeyToMove["down"]=False
-                        if round(controller.joystick.get_axis(3)) == 1:
-                            self.pressKeyToMove["right"]=True
-                        else:
-                            self.pressKeyToMove["right"]=False
-                        if round(controller.joystick.get_axis(3)) == -1:
-                            self.pressKeyToMove["left"]=True
-                        else:
-                            self.pressKeyToMove["left"]=False
+                self.__check_jostick_events()
                 #移动屏幕
                 if pygame.mouse.get_pressed()[2]:
                     if self.mouse_move_temp_x == -1 and self.mouse_move_temp_y == -1:
@@ -717,7 +730,7 @@ class BattleSystem:
 
                 #玩家回合
                 if self.whose_round == "player":
-                    if right_click == True:
+                    if self.right_click == True:
                         block_get_click = self.theMap.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                         #如果点击了回合结束的按钮
                         if ifHover(self.end_round_button) and self.isWaiting == True:
@@ -1041,7 +1054,7 @@ class BattleSystem:
                         self.NotDrawRangeBlocks=True
                         if self.action_choice == "move":
                             theCharacterMoved = False
-                            if self.the_route != []:
+                            if len(self.the_route) > 0:
                                 if pygame.mixer.Channel(0).get_busy() == False:
                                     self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
                                     pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
@@ -1189,7 +1202,7 @@ class BattleSystem:
                         self.enemy_action = AI(self.enemy_in_control,self.theMap,self.characters_data,self.sangvisFerris_data,self.the_characters_detected_last_round)
                         print(self.enemy_in_control+" choses "+self.enemy_action["action"])
                     if self.enemy_action["action"] == "move":
-                        if self.enemy_action["route"] != []:
+                        if len(self.enemy_action["route"]) > 0:
                             if pygame.mixer.Channel(0).get_busy() == False:
                                 self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
                                 pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
@@ -1523,7 +1536,7 @@ class BattleSystem:
                 #展示暂停菜单
                 if show_pause_menu == True:
                     pause_menu.display(screen)
-                    self.save_data()
+                    self.__save_data()
                     if pause_menu.ifBackToMainMenu == True:
                         unloadBackgroundMusic()
                         return None

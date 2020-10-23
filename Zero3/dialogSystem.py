@@ -593,6 +593,7 @@ class DialogSystemDev:
                     screen.blit(resizeImg(self.background_deselect,imgTmp.get_size()),pos)
                     if leftClick == True and ifHover(imgTmp,pos):
                         self.dialogData[self.part][self.dialogId]["background_img"] = None
+                        self.backgroundContent.update(None,None)
                         leftClick = False
                         i = 0
                     else:
@@ -607,6 +608,7 @@ class DialogSystemDev:
                         i+=1
                         if leftClick == True and ifHover(imgTmp,pos):
                             self.dialogData[self.part][self.dialogId]["background_img"] = imgName
+                            self.backgroundContent.update(imgName,None)
                             leftClick = False
             elif self.UIContainerRight_kind == "npc":
                 npc_local_y_temp = self.npc_local_y
