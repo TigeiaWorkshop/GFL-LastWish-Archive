@@ -813,6 +813,7 @@ class DialogContent(DialogInterface):
     def __init__(self,fontSize):
         DialogInterface.__init__(self,pygame.image.load(os.path.join("Assets/image/UI/dialoguebox.png")).convert_alpha(),fontSize)
         self.textPlayingSound = pygame.mixer.Sound("Assets/sound/ui/dialog_words_playing.ogg")
+        self.textPlayingSound.set_volume(get_setting("Sound","sound_effects")/100.0)
         self.READINGSPEED = get_setting("ReadingSpeed")
         self.dialoguebox_y = None
         self.dialoguebox_height = 0
@@ -905,7 +906,7 @@ class DialogBackground:
         self.backgroundImgSurface = None
         self.nullSurface = get_SingleColorSurface("black")
         self.backgroundMusicName = None
-        self.setBgmVolume(get_setting("Sound")["background_music"])
+        self.setBgmVolume(get_setting("Sound","background_music"))
     def setBgmVolume(self,backgroundMusicVolume):
         self.backgroundMusicVolume = backgroundMusicVolume/100.0
         pygame.mixer.music.set_volume(self.backgroundMusicVolume)

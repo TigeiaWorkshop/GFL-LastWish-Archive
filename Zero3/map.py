@@ -15,7 +15,8 @@ class EnvImagesManagement:
         self.__ENV_IMAGE_DICT_DARK = None
         self.__ORNAMENTATION_IMAGE_DICT = {}
         self.__ORNAMENTATION_IMAGE_DICT_DARK = None
-        self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert() if bgImgName != None else None
+        #self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert() if bgImgName != None else None
+        self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert_alpha() if bgImgName != None else None
         self.__MAP_SURFACE = None
         all_images_needed = []
         for i in range(len(theMap)):

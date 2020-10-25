@@ -6,12 +6,12 @@ def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,ch
         skill_target = None
         if characters_data[characterName].type == "gsh-18":
             for character in characters_data:
-                if click_potcion["x"] == characters_data[character].x and click_potcion["y"] == characters_data[character].y:
+                if characters_data[character].on_pos(click_potcion):
                     skill_target = character
                     break
         elif characters_data[characterName].type == "asval" or characters_data[characterName].type == "pp1901" or characters_data[characterName].type == "sv-98":
             for enemies in sangvisFerris_data:
-                if click_potcion["x"] == sangvisFerris_data[enemies].x and click_potcion["y"] == sangvisFerris_data[enemies].y and sangvisFerris_data[enemies].current_hp>0:
+                if sangvisFerris_data[enemies].on_pos(click_potcion) and sangvisFerris_data[enemies].current_hp>0:
                     skill_target = enemies
                     break
         return skill_target

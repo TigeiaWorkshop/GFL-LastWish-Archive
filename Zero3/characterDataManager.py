@@ -19,7 +19,7 @@ def _load_sound_to_CHARACTERS_SOUND_DICT(self_type):
     if self_type not in __CHARACTERS_SOUND_DICT and os.path.exists("Assets/sound/character/"+self_type):
         sound_files = os.listdir("Assets/sound/character/{}/".format(self_type))
         if len(sound_files) > 0:
-            volume = get_setting("Sound")["sound_effects"]
+            volume = get_setting("Sound","sound_effects")
             __CHARACTERS_SOUND_DICT[self_type] = {}
             for kindOfSound in sound_files:
                 __CHARACTERS_SOUND_DICT[self_type][kindOfSound] = []
@@ -107,6 +107,15 @@ class Doll:
         self.y = DATA["y"]
         #受伤的立绘
         self.ImageGetHurt = None
+        #当前动作
+        self.__current_action = "wait"
+        #动作是否重复
+        self.__ifActionLoop = True
+    #设置动作
+    def set_action(self,action="wait",ifLoop=True):
+        self.__current_action = action
+        self.__ifActionLoop = ifLoop
+    #减少行动值
     def reduce_action_point(self,value):
         if console.get_events("cheat") == False:
             if isinstance(value,int):
@@ -143,6 +152,12 @@ class Doll:
             return False
     def get_pos(self):
         return self.x,self.y
+    #检测是否在对应位置上
+    def on_pos(self,pos):
+        if isinstance(pos,dict):
+            return self.x == pos["x"] and self.y == pos["y"]
+        else:
+            return self.x == pos[0] and self.y == pos[1]
     def loadImg(self):
         for theAction in self.__imgId_dict:
             character_creator(self.type,theAction,self.faction)

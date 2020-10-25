@@ -187,7 +187,7 @@ class BattleSystem:
             self.weatherController = None
             if DataTmp["weather"] != None:
                 self.environment_sound = pygame.mixer.Sound("Assets/sound/environment/"+DataTmp["weather"]+".ogg")
-                self.environment_sound.set_volume(get_setting("Sound")["sound_environment"]/100.0)
+                self.environment_sound.set_volume(get_setting("Sound","sound_environment")/100.0)
                 self.weatherController = WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
         #检测self.zoomIn参数是否越界
         if self.zoomIn < 200:
@@ -261,10 +261,10 @@ class BattleSystem:
         self.walking_sound = []
         for walkingSound in glob.glob(r'Assets/sound/snow/*.wav'):
             self.walking_sound.append(pygame.mixer.Sound(walkingSound))
-            self.walking_sound[-1].set_volume(get_setting("Sound")["sound_effects"]/100.0)
+            self.walking_sound[-1].set_volume(get_setting("Sound","sound_effects")/100.0)
         self.the_sound_id = None
         #攻击的音效 -- 频道2
-        self.attackingSounds = AttackingSoundManager(get_setting("Sound")["sound_effects"],2)
+        self.attackingSounds = AttackingSoundManager(get_setting("Sound","sound_effects"),2)
         #切换回合时的UI
         self.RoundSwitchUI = RoundSwitch(self.window_x,self.window_y,self.battleUiTxt)
         #关卡背景介绍信息文字
@@ -285,12 +285,12 @@ class BattleSystem:
         #战斗系统主要loop
         while self.battleSystemMainLoop == True:
             self.__update_events()
-            #加载地图
-            self.theMap.display_map(screen)
             #环境声音-频道1
             if pygame.mixer.Channel(1).get_busy() == False and self.environment_sound != None:
                 pygame.mixer.Channel(1).play(self.environment_sound)
             if self.battle == False:
+                #加载地图
+                self.theMap.display_map(screen)
                 #如果战斗有对话
                 if self.dialogKey != None:
                     #设定初始化
@@ -845,7 +845,7 @@ class BattleSystem:
                         #判断是否有被点击的角色
                         elif block_get_click != None:
                             for key in self.characters_data:
-                                if self.characters_data[key].x == block_get_click["x"] and self.characters_data[key].y == block_get_click["y"] and self.isWaiting == True and self.characters_data[key].dying == False and self.NotDrawRangeBlocks != False:
+                                if self.characters_data[key].on_pos(block_get_click) and self.isWaiting == True and self.characters_data[key].dying == False and self.NotDrawRangeBlocks != False:
                                     self.screen_to_move_x = None
                                     self.screen_to_move_y = None
                                     attacking_range = None
@@ -1519,7 +1519,7 @@ class BattleSystem:
                 if pygame.mixer.music.get_busy() != 1:
                     pygame.mixer.music.load("Assets/music/"+self.bg_music)
                     pygame.mixer.music.play(loops=9999, start=0.0)
-                    pygame.mixer.music.set_volume(get_setting("Sound")["background_music"]/100.0)
+                    pygame.mixer.music.set_volume(get_setting("Sound","background_music")/100.0)
 
                 #结束动画
                 if self.whose_round == "result_win":

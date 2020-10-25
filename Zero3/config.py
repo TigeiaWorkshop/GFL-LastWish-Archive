@@ -39,11 +39,13 @@ else:
         yaml.dump(ZERO_DATA, f, allow_unicode=True)
 
 #获取设置配置文件
-def get_setting(key=None):
-    if key== None:
+def get_setting(key=None,key2=None):
+    if key == None:
         return ZERO_DATA
-    else:
+    elif key2 == None:
         return ZERO_DATA[key]
+    else:
+        return ZERO_DATA[key][key2]
 
 #语言配置文件
 ZERO_LANG = None
