@@ -15,8 +15,7 @@ class EnvImagesManagement:
         self.__ENV_IMAGE_DICT_DARK = None
         self.__ORNAMENTATION_IMAGE_DICT = {}
         self.__ORNAMENTATION_IMAGE_DICT_DARK = None
-        #self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert() if bgImgName != None else None
-        self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert_alpha() if bgImgName != None else None
+        self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert() if bgImgName != None else None
         self.__MAP_SURFACE = None
         all_images_needed = []
         for i in range(len(theMap)):
@@ -267,11 +266,27 @@ class MapObject:
                 if imgToBlit != None:
                     screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
     #寻路功能
-    def findPath(self,startPosition,endPosition,characters_data,sangvisFerris_data,routeLen=None,ignoreCharacter=[]):
-        startX = startPosition[0]
-        startY = startPosition[1]
-        endX = endPosition[0]
-        endY = endPosition[1]
+    def findPath(self,startPosition,endPosition,friend_data_dict,enemies_data_dict,routeLen=None,ignoreEnemyCharacters=[]):
+        #检测起点
+        if isinstance(startPosition,(list,tuple)):
+            startX = startPosition[0]
+            startY = startPosition[1]
+        elif isinstance(startPosition,dict):
+            startX = startPosition["x"]
+            startY = startPosition["y"]
+        else:
+            startX = startPosition.x
+            startY = startPosition.y
+        #检测终点
+        if isinstance(endPosition,(list,tuple)):
+            endX = endPosition[0]
+            endY = endPosition[1]
+        elif isinstance(endPosition,dict):
+            endX = endPosition["x"]
+            endY = endPosition["y"]
+        else:
+            endX = endPosition.x
+            endY = endPosition.y
         #建立地图
         map2d=numpy.zeros((self.column,self.row), dtype=numpy.int8)
         #历遍地图，设置障碍方块
@@ -285,13 +300,15 @@ class MapObject:
         for item in self.ornamentationData:
             if item.type == "obstacle" or item.type == "campfire":
                 map2d[item.x][item.y]=1
-        # 历遍所有角色，将角色的坐标点设置为障碍方块
-        for key,value in characters_data.items():
-            if key not in ignoreCharacter:
+        #如果终点有我方角色，则不允许
+        for key,value in friend_data_dict.items():
+            if value.x == endX and value.y == endY:
+                return []
+        #历遍所有角色，将角色的坐标点设置为障碍方块
+        for key,value in enemies_data_dict.items():
+            if key != ignoreEnemyCharacters:
                 map2d[value.x][value.y] = 1
-        for key,value in sangvisFerris_data.items():
-            if key not in ignoreCharacter and value.current_hp>0:
-                map2d[value.x][value.y] = 1
+        #如果终点是障碍物
         if map2d[endX][endY] != 0:
             return []
         aStar=AStar(map2d,Point(startX,startY),Point(endX,endY))

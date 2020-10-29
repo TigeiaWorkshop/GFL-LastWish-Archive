@@ -71,6 +71,8 @@ class BattleSystem:
         self.theMap = None
         #对话数据
         self.dialogData = None
+        #对话-动作是否被设置
+        self.dialog_ifPathSet = False
         #是否从存档中加载的数据-默认否
         self.loadFromSave = False
     #更新游戏事件
@@ -298,28 +300,19 @@ class BattleSystem:
                         self.dialogData = {
                             "dialogId": 0,
                             "charactersPaths": None,
-                            "actionOnce":None,
-                            "actionLoop":{},
                             "secondsAlreadyIdle":0,
                             "secondsToIdle":None
                         }
+                        
                     dialog_to_display = self.dialog_during_battle[self.dialogKey]
                     #对话系统总循环
                     if self.dialogData["dialogId"] < len(dialog_to_display):
                         #角色动画
-                        for key,value in dicMerge(self.sangvisFerris_data,self.characters_data).items():
-                            if value.faction == "character" or (value.x,value.y) in self.theMap.lightArea or self.theMap.darkMode != True:
-                                if self.dialogData["charactersPaths"] != None and key in self.dialogData["charactersPaths"]:
-                                    value.draw("move",screen,self.theMap)
-                                elif self.dialogData["actionOnce"] != None and key in self.dialogData["actionOnce"]:
-                                    pass
-                                elif key in self.dialogData["actionLoop"]:
-                                    if self.dialogData["actionLoop"][key] != "die":
-                                        value.draw(self.dialogData["actionLoop"][key],screen,self.theMap,False)
-                                    else:
-                                        value.draw(self.dialogData["actionLoop"][key],screen,self.theMap)
-                                else:
-                                    value.draw("wait",screen,self.theMap)
+                        for every_chara in self.characters_data:
+                            self.characters_data[every_chara].draw(screen,self.theMap)
+                        for enemies in self.sangvisFerris_data:
+                            if (self.sangvisFerris_data[enemies].x,self.sangvisFerris_data[enemies].y) in self.theMap.lightArea or self.theMap.darkMode != True:
+                                self.sangvisFerris_data[enemies].draw(screen,self.theMap)
                         #展示设施
                         self.theMap.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
                         #加载雪花
@@ -327,96 +320,52 @@ class BattleSystem:
                             self.weatherController.display(screen,self.theMap.perBlockWidth,self.perBlockHeight)
                         #如果操作是移动
                         if "move" in dialog_to_display[self.dialogData["dialogId"]]:
-                            if self.dialogData["charactersPaths"] == None:
-                                self.dialogData["charactersPaths"] = {}
-                                for key,value in dicMerge(self.sangvisFerris_data,self.characters_data).items():
-                                    if key in dialog_to_display[self.dialogData["dialogId"]]["move"]:
-                                        #创建AStar对象,并设置起点和终点为
-                                        start_x = value.x
-                                        start_y = value.y
-                                        end_x = dialog_to_display[self.dialogData["dialogId"]]["move"][key]["x"]
-                                        end_y = dialog_to_display[self.dialogData["dialogId"]]["move"][key]["y"]
-                                        self.the_route = self.theMap.findPath((start_x,start_y),(end_x,end_y),self.characters_data,self.sangvisFerris_data,None,dialog_to_display[self.dialogData["dialogId"]]["move"])
-                                        if len(self.the_route)>0:
-                                            self.dialogData["charactersPaths"][key] = self.the_route
-                            if len(self.dialogData["charactersPaths"])>0:
-                                key_to_remove = []
-                                reProcessMap = False
-                                for key,value in self.dialogData["charactersPaths"].items():
-                                    if len(value) > 0:
-                                        if pygame.mixer.Channel(0).get_busy() == False:
-                                            self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
-                                            pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
+                            characterNeedToMoveDict = dialog_to_display[self.dialogData["dialogId"]]["move"]
+                            if characterNeedToMoveDict != None:
+                                #为所有角色设置路径
+                                if self.dialog_ifPathSet == False:
+                                    for key,pos in characterNeedToMoveDict.items():
                                         if key in self.characters_data:
-                                            if self.characters_data[key].x < value[0][0]:
-                                                self.characters_data[key].x+=0.05
-                                                self.characters_data[key].setFlip(False)
-                                                if self.characters_data[key].x >= value[0][0]:
-                                                    self.characters_data[key].x = value[0][0]
-                                                    value.pop(0)
-                                                    reProcessMap = True
-                                            elif self.characters_data[key].x > value[0][0]:
-                                                self.characters_data[key].x-=0.05
-                                                self.characters_data[key].setFlip(True)
-                                                if self.characters_data[key].x <= value[0][0]:
-                                                    self.characters_data[key].x = value[0][0]
-                                                    value.pop(0)
-                                                    reProcessMap = True
-                                            elif self.characters_data[key].y < value[0][1]:
-                                                self.characters_data[key].y+=0.05
-                                                self.characters_data[key].setFlip(True)
-                                                if self.characters_data[key].y >= value[0][1]:
-                                                    self.characters_data[key].y = value[0][1]
-                                                    value.pop(0)
-                                                    reProcessMap = True
-                                            elif self.characters_data[key].y > value[0][1]:
-                                                self.characters_data[key].y-=0.05
-                                                self.characters_data[key].setFlip(False)
-                                                if self.characters_data[key].y <= value[0][1]:
-                                                    self.characters_data[key].y = value[0][1]
-                                                    value.pop(0)
-                                                    reProcessMap = True
+                                            routeTmp = self.theMap.findPath(self.characters_data[key],pos,self.characters_data,self.sangvisFerris_data)
+                                            if len(routeTmp)>0:
+                                                self.characters_data[key].move_follow(routeTmp)
+                                            else:
+                                                raise Exception('ZeroEngine-Error: Character {} cannot find a valid path!'.format(key))
                                         elif key in self.sangvisFerris_data:
-                                            if self.sangvisFerris_data[key].x < value[0][0]:
-                                                self.sangvisFerris_data[key].x+=0.05
-                                                self.sangvisFerris_data[key].setFlip(True)
-                                                if self.sangvisFerris_data[key].x >= value[0][0]:
-                                                    self.sangvisFerris_data[key].x = value[0][0]
-                                                    value.pop(0)
-                                                    reProcessMap = True
-                                            elif self.sangvisFerris_data[key].x > value[0][0]:
-                                                self.sangvisFerris_data[key].x-=0.05
-                                                self.sangvisFerris_data[key].setFlip(False)
-                                                if self.sangvisFerris_data[key].x <= value[0][0]:
-                                                    self.sangvisFerris_data[key].x = value[0][0]
-                                                    value.pop(0)
-                                                    reProcessMap = True
-                                            elif self.sangvisFerris_data[key].y < value[0][1]:
-                                                self.sangvisFerris_data[key].y+=0.05
-                                                self.sangvisFerris_data[key].setFlip(False)
-                                                if self.sangvisFerris_data[key].y >= value[0][1]:
-                                                    self.sangvisFerris_data[key].y = value[0][1]
-                                                    value.pop(0)
-                                                    reProcessMap = True
-                                            elif self.sangvisFerris_data[key].y > value[0][1]:
-                                                self.sangvisFerris_data[key].y-=0.05
-                                                self.sangvisFerris_data[key].setFlip(True)
-                                                if self.sangvisFerris_data[key].y <= value[0][1]:
-                                                    self.sangvisFerris_data[key].y = value[0][1]
-                                                    value.pop(0)
-                                                    reProcessMap = True
+                                            routeTmp = self.theMap.findPath(self.sangvisFerris_data[key],pos,self.sangvisFerris_data,self.characters_data)
+                                            if len(routeTmp)>0:
+                                                self.sangvisFerris_data[key].move_follow(routeTmp)
+                                            else:
+                                                raise Exception('ZeroEngine-Error: Character {} cannot find a valid path!'.format(key))
+                                        else:
+                                            raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
+                                    self.dialog_ifPathSet = True
+                                #播放脚步声
+                                if not pygame.mixer.Channel(0).get_busy():
+                                    self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
+                                    pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
+                                #是否所有角色都已经到达对应点
+                                allGetToTargetPos = True
+                                #是否需要重新渲染地图
+                                reProcessMap = False
+                                for key in characterNeedToMoveDict:
+                                    if key in self.characters_data:
+                                        if self.characters_data[key].is_idle() == False:
+                                            allGetToTargetPos = False
+                                        if self.characters_data[key].needUpdateMap():
+                                            reProcessMap = True
+                                    elif key in self.sangvisFerris_data and self.sangvisFerris_data[key].is_idle() == False:
+                                        allGetToTargetPos = False
                                     else:
-                                        key_to_remove.append(key)
-                                if self.theMap.darkMode == True and reProcessMap == True:
+                                        raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
+                                if reProcessMap:
                                     self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
-                                for i in range(len(key_to_remove)):
-                                    self.dialogData["charactersPaths"].pop(key_to_remove[i])
-                            else:
-                                #脚步停止
-                                if pygame.mixer.Channel(0).get_busy() != False:
-                                    pygame.mixer.Channel(0).stop()
-                                self.dialogData["dialogId"] += 1
-                                self.dialogData["charactersPaths"] = None
+                                if allGetToTargetPos:
+                                    #脚步停止
+                                    if pygame.mixer.Channel(0).get_busy() != False:
+                                        pygame.mixer.Channel(0).stop()
+                                    self.dialogData["dialogId"] += 1
+                                    self.dialog_ifPathSet = False
                         #改变方向
                         elif "direction" in dialog_to_display[self.dialogData["dialogId"]]:
                             for key,value in dialog_to_display[self.dialogData["dialogId"]]["direction"].items():
@@ -574,10 +523,10 @@ class BattleSystem:
                 elif self.dialogKey == None:
                     #角色动画
                     for every_chara in self.characters_data:
-                        self.characters_data[every_chara].draw("wait",screen,self.theMap)
+                        self.characters_data[every_chara].draw(screen,self.theMap)
                     for enemies in self.sangvisFerris_data:
                         if (self.sangvisFerris_data[enemies].x,self.sangvisFerris_data[enemies].y) in self.theMap.lightArea or self.theMap.darkMode != True:
-                            self.sangvisFerris_data[enemies].draw("wait",screen,self.theMap)
+                            self.sangvisFerris_data[enemies].draw(screen,self.theMap)
                     #展示设施
                     self.theMap.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
                     #角色动画
@@ -887,14 +836,10 @@ class BattleSystem:
                         if self.action_choice == "move":
                             self.areaDrawColorBlock["green"] = []
                             if block_get_click != None:
-                                #创建AStar对象,并设置起点和终点为
-                                start_x = self.characters_data[self.characterGetClick].x
-                                start_y = self.characters_data[self.characterGetClick].y
-                                end_x = block_get_click["x"]
-                                end_y = block_get_click["y"]
+                                #根据行动值计算最远可以移动的距离
                                 max_blocks_can_move = int(self.characters_data[self.characterGetClick].get_action_point()/2)
-                                if 0<abs(end_x-start_x)+abs(end_y-start_y)<=max_blocks_can_move:
-                                    self.the_route = self.theMap.findPath((start_x,start_y),(end_x,end_y),self.characters_data,self.sangvisFerris_data,max_blocks_can_move)
+                                if 0<abs(block_get_click["x"]-self.characters_data[self.characterGetClick].x)+abs(block_get_click["y"]-self.characters_data[self.characterGetClick].y)<=max_blocks_can_move:
+                                    self.the_route = self.theMap.findPath(self.characters_data[self.characterGetClick],block_get_click,self.characters_data,self.sangvisFerris_data,max_blocks_can_move)
                                     if len(self.the_route)>0:
                                         #显示路径
                                         self.areaDrawColorBlock["green"] = self.the_route

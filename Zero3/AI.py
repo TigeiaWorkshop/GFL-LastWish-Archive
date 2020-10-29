@@ -40,7 +40,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
         for character in characters_data:
             if characters_data[character].detection == True and characters_data[character].current_hp>0:
                 #检测当前角色移动后足以攻击到这个敌对阵营的角色
-                the_route = theMap.findPath((sangvisFerris_data[aiInControl].x,sangvisFerris_data[aiInControl].y),(characters_data[character].x,characters_data[character].y),characters_data,sangvisFerris_data,max_moving_routes_for_attacking,[character])
+                the_route = theMap.findPath(sangvisFerris_data[aiInControl],characters_data[character],sangvisFerris_data,characters_data,max_moving_routes_for_attacking,[character])
                 if len(the_route)>0:
                     temp_area = None
                     temp_distance = abs(characters_data[character].x-the_route[-1][0])+abs(characters_data[character].y-the_route[-1][1])
@@ -77,7 +77,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                         return {"action": "stay"}
                     #如果敌人有巡逻路线
                     else:
-                        the_route = theMap.findPath((sangvisFerris_data[aiInControl].x,sangvisFerris_data[aiInControl].y),(sangvisFerris_data[aiInControl].patrol_path[0][0],sangvisFerris_data[aiInControl].patrol_path[0][1]),characters_data,sangvisFerris_data,max_moving_routes_for_attacking)
+                        the_route = theMap.findPath(sangvisFerris_data[aiInControl],sangvisFerris_data[aiInControl].patrol_path[0],sangvisFerris_data,characters_data,max_moving_routes_for_attacking)
                         if len(the_route) > 0:
                             return {"action": "move","route":the_route}
                         else:
@@ -92,7 +92,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
                             if sangvisFerris_data[that_character].current_hp < sangvisFerris_data[that_character].current_hp:
                                 that_character = that_character
                     targetPosTemp = (the_characters_detected_last_round[that_character][0],the_characters_detected_last_round[that_character][1])
-                    the_route = theMap.findPath((sangvisFerris_data[aiInControl].x,sangvisFerris_data[aiInControl].y),targetPosTemp,characters_data,sangvisFerris_data,max_moving_routes_for_attacking,[that_character])
+                    the_route = theMap.findPath(sangvisFerris_data[aiInControl],targetPosTemp,sangvisFerris_data,characters_data,max_moving_routes_for_attacking,[that_character])
                     if len(the_route) > 0:
                         if (targetPosTemp) in the_route:
                             the_route.remove(targetPosTemp)
@@ -103,7 +103,7 @@ def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_dete
             #如果这一回合有敌人暴露
             else:
                 targetPosTemp = (characters_data[characters_can_be_detect[0]].x,characters_data[characters_can_be_detect[0]].y)
-                the_route = theMap.findPath((sangvisFerris_data[aiInControl].x,sangvisFerris_data[aiInControl].y),targetPosTemp,characters_data,sangvisFerris_data,max_moving_routes_for_attacking,[characters_can_be_detect[0]])
+                the_route = theMap.findPath(sangvisFerris_data[aiInControl],targetPosTemp,sangvisFerris_data,characters_data,max_moving_routes_for_attacking,[characters_can_be_detect[0]])
                 if len(the_route) > 0:
                     if (targetPosTemp) in the_route:
                         the_route.remove(targetPosTemp)

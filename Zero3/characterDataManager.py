@@ -77,6 +77,8 @@ class Doll:
         self.current_bullets = DATA["current_bullets"] if "current_hp" in DATA else DATA["magazine_capacity"]
         #当前血量
         self.current_hp = DATA["current_hp"] if "current_hp" in DATA else DATA["max_hp"]
+        #当前护甲值
+        self.current_armor = 0
         #是否濒死
         self.dying = False if self.current_hp > 0 else 3
         #攻击距离
@@ -108,13 +110,76 @@ class Doll:
         #受伤的立绘
         self.ImageGetHurt = None
         #当前动作
-        self.__current_action = "wait"
+        self.__currentAction = "wait"
         #动作是否重复
         self.__ifActionLoop = True
+        #是否动作已经播放一遍
+        self.__ifActionPlayedOnce = False
+        #需要移动的路径
+        self.__movingPath = None
+        #是否需要重新渲染地图
+        self.__reProcessMap = False
+    def __lt__(self,other):
+        return self.y+self.x < other.y+other.x
     #设置动作
     def set_action(self,action="wait",ifLoop=True):
-        self.__current_action = action
+        self.__currentAction = action
         self.__ifActionLoop = ifLoop
+        self.__ifActionPlayedOnce = False
+    #获取当前动作
+    def get_action(self):
+        return self.__currentAction
+    #是否闲置
+    def is_idle(self):
+        return self.__currentAction == "wait"
+    #设置需要移动的路径
+    def move_follow(self,path):
+        self.__movingPath = path
+        self.set_action("move")
+    #查看是否需要重新渲染地图
+    def needUpdateMap(self):
+        if self.__reProcessMap == True:
+            self.__reProcessMap = False
+            return True
+        else:
+            return False
+    #根据路径移动
+    def __move_based_on_path(self,theMapClass):
+        if len(self.__movingPath) > 0:
+            if self.x < self.__movingPath[0][0]:
+                self.x+=0.05
+                self.setFlip(False)
+                if self.x >= self.__movingPath[0][0]:
+                    self.x = self.__movingPath[0][0]
+                    self.__movingPath.pop(0)
+                    if theMapClass.darkMode:
+                        self.__reProcessMap = True
+            elif self.x > self.__movingPath[0][0]:
+                self.x-=0.05
+                self.setFlip(True)
+                if self.x <= self.__movingPath[0][0]:
+                    self.x = self.__movingPath[0][0]
+                    self.__movingPath.pop(0)
+                    if theMapClass.darkMode:
+                        self.__reProcessMap = True
+            elif self.y < self.__movingPath[0][1]:
+                self.y+=0.05
+                self.setFlip(True)
+                if self.y >= self.__movingPath[0][1]:
+                    self.y = self.__movingPath[0][1]
+                    self.__movingPath.pop(0)
+                    if theMapClass.darkMode:
+                        self.__reProcessMap = True
+            elif self.y > self.__movingPath[0][1]:
+                self.y-=0.05
+                self.setFlip(False)
+                if self.y <= self.__movingPath[0][1]:
+                    self.y = self.__movingPath[0][1]
+                    self.__movingPath.pop(0)
+                    if theMapClass.darkMode:
+                        self.__reProcessMap = True
+        else:
+            self.set_action()
     #减少行动值
     def reduce_action_point(self,value):
         if console.get_events("cheat") == False:
@@ -131,6 +196,7 @@ class Doll:
         else:
             #作弊模式开启时不扣行动力
             return True
+    #获取行动值
     def get_action_point(self):
         return self.__current_action_point
     def have_enough_action_point(self,value):
@@ -184,29 +250,31 @@ class Doll:
     def setFlip(self,theBool):
         if self.ifFlip != theBool:
             self.ifFlip = theBool
-    def draw(self,action,screen,theMapClass,isContinue=True):
+    def draw(self,screen,theMapClass):
         #调整小人图片的尺寸
-        img_of_char = getDollImg(self.type,action,self.__imgId_dict[action]["imgId"],round(theMapClass.perBlockWidth*1.6))
+        img_of_char = getDollImg(self.type,self.__currentAction,self.__imgId_dict[self.__currentAction]["imgId"],round(theMapClass.perBlockWidth*1.6))
         #调整alpha值
-        imgAlpha = self.get_imgAlpaha(action)
+        imgAlpha = self.get_imgAlpaha(self.__currentAction)
         if imgAlpha != 255:
             img_of_char.set_alpha(imgAlpha)
         #反转图片
         if self.ifFlip == True:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
+        #如果当前动作是移动
+        if self.__currentAction == "move":
+            self.__move_based_on_path(theMapClass)
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)
         screen.blit(img_of_char,(xTemp-theMapClass.perBlockWidth*0.3,yTemp-theMapClass.perBlockWidth*0.85))
         #调整id，并返回对应的bool状态
-        if self.__imgId_dict[action]["imgId"] < getDollImgNum(self.type,action)-1:
-            self.__imgId_dict[action]["imgId"] += 1
-            return True
+        if self.__imgId_dict[self.__currentAction]["imgId"] < getDollImgNum(self.type,self.__currentAction)-1:
+            self.__imgId_dict[self.__currentAction]["imgId"] += 1
         else:
-            if isContinue == True:
-                self.__imgId_dict[action]["imgId"] = 0
-                return True
+            if self.__ifActionLoop == True:
+                self.__ifActionPlayedOnce = True
+                self.__imgId_dict[self.__currentAction]["imgId"] = 0
             else:
-                return False
+                self.set_action()
     def draw_custom(self,action,pos,screen,theMapClass,alpha=155,isContinue=True):
         #调整小人图片的尺寸
         img_of_char = getDollImg(self.type,action,self.__imgId_dict[action]["imgId"],round(theMapClass.perBlockWidth*1.6))

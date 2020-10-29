@@ -174,8 +174,8 @@ def get_SingleColorSurface(color,size=None):
     else:
         width = size[0]
         height = size[1]
-    surfaceTmp = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
-    pygame.draw.rect(surfaceTmp,findColorRGBA(color),(0,0,width,height))
+    surfaceTmp = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert()
+    surfaceTmp.fill(color)
     return ImageSurface(surfaceTmp,0,0,width,height)
 
 #yaml配置文件加载
