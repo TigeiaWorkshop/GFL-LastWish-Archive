@@ -123,6 +123,7 @@ class Doll:
         return self.y+self.x < other.y+other.x
     #设置动作
     def set_action(self,action="wait",ifLoop=True):
+        self.reset_imgId(self.__currentAction)
         self.__currentAction = action
         self.__ifActionLoop = ifLoop
         self.__ifActionPlayedOnce = False
@@ -134,8 +135,11 @@ class Doll:
         return self.__currentAction == "wait"
     #设置需要移动的路径
     def move_follow(self,path):
-        self.__movingPath = path
-        self.set_action("move")
+        if isinstance(path,(list,tuple)) and len(path)>0:
+            self.__movingPath = path
+            self.set_action("move")
+        else:
+            raise Exception('ZeroEngine-Error: Character cannot move to a invalid path!')
     #查看是否需要重新渲染地图
     def needUpdateMap(self):
         if self.__reProcessMap == True:
@@ -179,6 +183,7 @@ class Doll:
                     if theMapClass.darkMode:
                         self.__reProcessMap = True
         else:
+            self.__movingPath = None
             self.set_action()
     #减少行动值
     def reduce_action_point(self,value):
@@ -261,7 +266,7 @@ class Doll:
         if self.ifFlip == True:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
         #如果当前动作是移动
-        if self.__currentAction == "move":
+        if self.__currentAction == "move" and self.__movingPath != None:
             self.__move_based_on_path(theMapClass)
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)

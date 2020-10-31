@@ -936,7 +936,7 @@ class DialogBackground:
                     pygame.mixer.music.load("Assets/music/{}".format(self.backgroundMusicName))
                 else:
                     raise Exception('ZeroEngine-Error: Cannot find background music file.')
-                pygame.mixer.music.play(loops=9999, start=0.0)
+                pygame.mixer.music.play(-1)
             else:
                 pygame.mixer.music.unload()
     def display(self,screen):

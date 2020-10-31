@@ -69,7 +69,7 @@ def mainMenu(screen,setting):
     pygame.display.set_caption(game_title) #窗口标题
     
     #加载主菜单背景
-    videoCapture = Zero.VideoObject("Assets/movie/SquadAR.mp4",True,3105,935)
+    videoCapture = Zero.VideoObjectWithMusic("Assets/movie/SquadAR.mp4","Assets/music/LoadOut.mp3",True,3105,935)
     #数值初始化
     cover_alpha = 0
     menu_type = 0
@@ -213,10 +213,4 @@ def mainMenu(screen,setting):
                             main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
                             continueButtonIsOn = False
                         break
-        #检测背景音乐是否还在播放
-        while pygame.mixer.music.get_busy() != 1:
-            pygame.mixer.music.load('Assets/music/LoadOut.mp3')
-            pygame.mixer.music.play(loops=9999, start=0.0)
-            pygame.mixer.music.set_volume(setting["Sound"]["background_music"]/100.0)
-
         Zero.display.flip()

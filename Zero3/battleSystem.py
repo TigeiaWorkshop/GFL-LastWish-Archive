@@ -303,10 +303,10 @@ class BattleSystem:
                             "secondsAlreadyIdle":0,
                             "secondsToIdle":None
                         }
-                        
-                    dialog_to_display = self.dialog_during_battle[self.dialogKey]
                     #对话系统总循环
-                    if self.dialogData["dialogId"] < len(dialog_to_display):
+                    if self.dialogData["dialogId"] < len(self.dialog_during_battle[self.dialogKey]):
+                        currentDialog = self.dialog_during_battle[self.dialogKey][self.dialogData["dialogId"]]
+                        lastDialog = self.dialog_during_battle[self.dialogKey][self.dialogData["dialogId"]-1]
                         #角色动画
                         for every_chara in self.characters_data:
                             self.characters_data[every_chara].draw(screen,self.theMap)
@@ -319,128 +319,104 @@ class BattleSystem:
                         if self.weatherController != None:
                             self.weatherController.display(screen,self.theMap.perBlockWidth,self.perBlockHeight)
                         #如果操作是移动
-                        if "move" in dialog_to_display[self.dialogData["dialogId"]]:
-                            characterNeedToMoveDict = dialog_to_display[self.dialogData["dialogId"]]["move"]
-                            if characterNeedToMoveDict != None:
-                                #为所有角色设置路径
-                                if self.dialog_ifPathSet == False:
-                                    for key,pos in characterNeedToMoveDict.items():
-                                        if key in self.characters_data:
-                                            routeTmp = self.theMap.findPath(self.characters_data[key],pos,self.characters_data,self.sangvisFerris_data)
-                                            if len(routeTmp)>0:
-                                                self.characters_data[key].move_follow(routeTmp)
-                                            else:
-                                                raise Exception('ZeroEngine-Error: Character {} cannot find a valid path!'.format(key))
-                                        elif key in self.sangvisFerris_data:
-                                            routeTmp = self.theMap.findPath(self.sangvisFerris_data[key],pos,self.sangvisFerris_data,self.characters_data)
-                                            if len(routeTmp)>0:
-                                                self.sangvisFerris_data[key].move_follow(routeTmp)
-                                            else:
-                                                raise Exception('ZeroEngine-Error: Character {} cannot find a valid path!'.format(key))
-                                        else:
-                                            raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
-                                    self.dialog_ifPathSet = True
-                                #播放脚步声
-                                if not pygame.mixer.Channel(0).get_busy():
-                                    self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
-                                    pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
-                                #是否所有角色都已经到达对应点
-                                allGetToTargetPos = True
-                                #是否需要重新渲染地图
-                                reProcessMap = False
-                                for key in characterNeedToMoveDict:
+                        if "move" in currentDialog and currentDialog["move"] != None:
+                            #为所有角色设置路径
+                            if self.dialog_ifPathSet == False:
+                                for key,pos in currentDialog["move"].items():
                                     if key in self.characters_data:
-                                        if self.characters_data[key].is_idle() == False:
-                                            allGetToTargetPos = False
-                                        if self.characters_data[key].needUpdateMap():
-                                            reProcessMap = True
-                                    elif key in self.sangvisFerris_data and self.sangvisFerris_data[key].is_idle() == False:
-                                        allGetToTargetPos = False
+                                        routeTmp = self.theMap.findPath(self.characters_data[key],pos,self.characters_data,self.sangvisFerris_data)
+                                        if len(routeTmp)>0:
+                                            self.characters_data[key].move_follow(routeTmp)
+                                        else:
+                                            raise Exception('ZeroEngine-Error: Character {} cannot find a valid path!'.format(key))
+                                    elif key in self.sangvisFerris_data:
+                                        routeTmp = self.theMap.findPath(self.sangvisFerris_data[key],pos,self.sangvisFerris_data,self.characters_data)
+                                        if len(routeTmp)>0:
+                                            self.sangvisFerris_data[key].move_follow(routeTmp)
+                                        else:
+                                            raise Exception('ZeroEngine-Error: Character {} cannot find a valid path!'.format(key))
                                     else:
                                         raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
-                                if reProcessMap:
-                                    self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
-                                if allGetToTargetPos:
-                                    #脚步停止
-                                    if pygame.mixer.Channel(0).get_busy() != False:
-                                        pygame.mixer.Channel(0).stop()
-                                    self.dialogData["dialogId"] += 1
-                                    self.dialog_ifPathSet = False
+                                self.dialog_ifPathSet = True
+                            #播放脚步声
+                            if not pygame.mixer.Channel(0).get_busy():
+                                self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
+                                pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
+                            #是否所有角色都已经到达对应点
+                            allGetToTargetPos = True
+                            #是否需要重新渲染地图
+                            reProcessMap = False
+                            for key in currentDialog["move"]:
+                                if key in self.characters_data:
+                                    if self.characters_data[key].is_idle() == False:
+                                        allGetToTargetPos = False
+                                    if self.characters_data[key].needUpdateMap():
+                                        reProcessMap = True
+                                elif key in self.sangvisFerris_data and self.sangvisFerris_data[key].is_idle() == False:
+                                    allGetToTargetPos = False
+                                else:
+                                    raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
+                            if reProcessMap:
+                                self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                            if allGetToTargetPos:
+                                #脚步停止
+                                if pygame.mixer.Channel(0).get_busy() != False:
+                                    pygame.mixer.Channel(0).stop()
+                                self.dialogData["dialogId"] += 1
+                                self.dialog_ifPathSet = False
                         #改变方向
-                        elif "direction" in dialog_to_display[self.dialogData["dialogId"]]:
-                            for key,value in dialog_to_display[self.dialogData["dialogId"]]["direction"].items():
+                        elif "direction" in currentDialog and currentDialog["direction"] != None:
+                            for key,value in currentDialog["direction"].items():
                                 if key in self.characters_data:
                                     self.characters_data[key].setFlip(value)
                                 elif key in self.sangvisFerris_data:
                                     self.sangvisFerris_data[key].setFlip(value)
+                                else:
+                                    raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
                             self.dialogData["dialogId"] += 1
                         #改变动作（一次性）
-                        elif "action" in dialog_to_display[self.dialogData["dialogId"]]:
-                            if self.dialogData["actionOnce"] == None:
-                                self.dialogData["actionOnce"] = dialog_to_display[self.dialogData["dialogId"]]["action"]
-                            else:
-                                theActionNeedPop = []
-                                if len(self.dialogData["actionOnce"]) > 0:
-                                    for key,action in self.dialogData["actionOnce"].items():
-                                        if key in self.characters_data and self.characters_data[key].draw(action,screen,self.theMap,False) == False:
-                                            if action != "die":
-                                                self.characters_data[key].reset_imgId(action)
-                                            theActionNeedPop.append(key)
-                                        elif key in self.sangvisFerris_data and self.sangvisFerris_data[key].draw(action,screen,self.theMap,False) == False:
-                                            if action != "die":
-                                                self.sangvisFerris_data[key].reset_imgId(action)
-                                            theActionNeedPop.append(key)
-                                    if len(theActionNeedPop) > 0:
-                                        for i in range(len(theActionNeedPop)):
-                                            self.dialogData["actionOnce"].pop(theActionNeedPop[i])
-                                else:
-                                    self.dialogData["dialogId"] += 1
-                                    self.dialogData["actionOnce"] = None
+                        elif "action" in currentDialog and currentDialog["action"] != None:
+                            for key,action in currentDialog["action"].items():
+                                if key in self.characters_data:
+                                    self.characters_data[key].set_action(action,False)
+                                elif key in self.sangvisFerris_data:
+                                    self.sangvisFerris_data[key].set_action(action,False)
+                            self.dialogData["dialogId"] += 1 
                         #改变动作（长期）
-                        elif "actionLoop" in dialog_to_display[self.dialogData["dialogId"]]:
-                            for key,action in dialog_to_display[self.dialogData["dialogId"]]["actionLoop"].items():
-                                self.dialogData["actionLoop"][key] = action
-                            self.dialogData["dialogId"] += 1
-                        #停止长期的动作改变
-                        elif "actionLoopStop" in dialog_to_display[self.dialogData["dialogId"]]:
-                            for i in range(len(dialog_to_display[self.dialogData["dialogId"]]["actionLoopStop"])):
-                                character_key = dialog_to_display[self.dialogData["dialogId"]]["actionLoopStop"][i]
-                                if character_key in self.dialogData["actionLoop"]:
-                                    if character_key in self.characters_data:
-                                        self.characters_data[character_key].reset_imgId(self.dialogData["actionLoop"][character_key])
-                                    elif character_key in self.sangvisFerris_data:
-                                        self.sangvisFerris_data[character_key].reset_imgId(self.dialogData["actionLoop"][character_key])
-                                    else:
-                                        raise Exception("Error: Cannot find ",character_key," while the system is trying to reset the action.")
-                                    del self.dialogData["actionLoop"][character_key]
+                        elif "actionLoop" in currentDialog and currentDialog["actionLoop"] != None:
+                            for key,action in currentDialog["actionLoop"].items():
+                                if key in self.characters_data:
+                                    self.characters_data[key].set_action(action)
+                                elif key in self.sangvisFerris_data:
+                                    self.sangvisFerris_data[key].set_action(action)
                             self.dialogData["dialogId"] += 1
                         #开始对话
-                        elif "dialoguebox_up" in dialog_to_display[self.dialogData["dialogId"]] or "dialoguebox_down" in dialog_to_display[self.dialogData["dialogId"]]:
+                        elif "dialoguebox_up" in currentDialog or "dialoguebox_down" in currentDialog:
                             #对话框的移动
                             if self.dialoguebox_up.x > self.window_x/2+self.dialoguebox_up.get_width()*0.4:
                                 self.dialoguebox_up.x -= 150
                             if self.dialoguebox_down.x < self.window_x/2-self.dialoguebox_down.get_width()*1.4:
                                 self.dialoguebox_down.x += 150
                             #上方对话框
-                            if dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_up"] != None:
+                            if currentDialog["dialoguebox_up"] != None:
                                 if self.dialoguebox_up.updated == False:
-                                    currentTmp = dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_up"]
+                                    currentTmp = currentDialog["dialoguebox_up"]
                                     self.dialoguebox_up.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
                                     del currentTmp
                                 #对话框图片
                                 self.dialoguebox_up.display(screen,self.characterInfoBoardUI)
                             #下方对话框
-                            if dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_down"] != None:
+                            if currentDialog["dialoguebox_down"] != None:
                                 if self.dialoguebox_down.updated == False:
-                                    currentTmp = dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_down"]
+                                    currentTmp = currentDialog["dialoguebox_down"]
                                     self.dialoguebox_down.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
                                     del currentTmp
                                 #对话框图片
                                 self.dialoguebox_down.display(screen,self.characterInfoBoardUI)
                         #闲置一定时间（秒）
-                        elif "idle" in dialog_to_display[self.dialogData["dialogId"]]:
+                        elif "idle" in currentDialog and currentDialog["idle"] != None:
                             if self.dialogData["secondsToIdle"] == None:
-                                self.dialogData["secondsToIdle"] = dialog_to_display[self.dialogData["dialogId"]]["idle"]*display.fps
+                                self.dialogData["secondsToIdle"] = currentDialog["idle"]*display.fps
                             else:
                                 if self.dialogData["secondsAlreadyIdle"] < self.dialogData["secondsToIdle"]:
                                     self.dialogData["secondsAlreadyIdle"] += 1
@@ -448,11 +424,12 @@ class BattleSystem:
                                     self.dialogData["dialogId"] += 1
                                     self.dialogData["secondsAlreadyIdle"] = 0
                                     self.dialogData["secondsToIdle"] = None
-                        elif "changePos" in dialog_to_display[self.dialogData["dialogId"]]:
-                            if self.screen_to_move_x == None and "x" in dialog_to_display[self.dialogData["dialogId"]]["changePos"]:
-                                self.screen_to_move_x = dialog_to_display[self.dialogData["dialogId"]]["changePos"]["x"]
-                            if self.screen_to_move_y == None and "y" in dialog_to_display[self.dialogData["dialogId"]]["changePos"]:
-                                self.screen_to_move_y = dialog_to_display[self.dialogData["dialogId"]]["changePos"]["y"]
+                        #调整窗口位置
+                        elif "changePos" in currentDialog and currentDialog["changePos"] != None:
+                            if self.screen_to_move_x == None and "x" in currentDialog["changePos"]:
+                                self.screen_to_move_x = currentDialog["changePos"]["x"]
+                            if self.screen_to_move_y == None and "y" in currentDialog["changePos"]:
+                                self.screen_to_move_y = currentDialog["changePos"]["y"]
                             if self.screen_to_move_x != None and self.screen_to_move_x != 0:
                                 temp_value = int(self.theMap.getPos_x() + self.screen_to_move_x*0.2)
                                 if self.window_x-self.theMap.surface_width<=temp_value<=0:
@@ -485,25 +462,25 @@ class BattleSystem:
                                         unloadBackgroundMusic()
                                         return None
                             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
-                                if "dialoguebox_up" in dialog_to_display[self.dialogData["dialogId"]] or "dialoguebox_down" in dialog_to_display[self.dialogData["dialogId"]]:
+                                if "dialoguebox_up" in currentDialog or "dialoguebox_down" in currentDialog:
                                     self.dialogData["dialogId"] += 1
-                                if self.dialogData["dialogId"] < len(dialog_to_display):
-                                    if "dialoguebox_up" in dialog_to_display[self.dialogData["dialogId"]]:
+                                if self.dialogData["dialogId"] < len(self.dialog_during_battle[self.dialogKey]):
+                                    if "dialoguebox_up" in currentDialog:
                                         #检测上方对话框
-                                        if dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_up"] == None or "dialoguebox_up" not in dialog_to_display[self.dialogData["dialogId"]-1] or dialog_to_display[self.dialogData["dialogId"]-1]["dialoguebox_up"] == None or dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_up"]["speaker"] != dialog_to_display[self.dialogData["dialogId"]-1]["dialoguebox_up"]["speaker"]:
+                                        if currentDialog["dialoguebox_up"] == None or "dialoguebox_up" not in lastDialog or lastDialog["dialoguebox_up"] == None or currentDialog["dialoguebox_up"]["speaker"] != lastDialog["dialoguebox_up"]["speaker"]:
                                             self.dialoguebox_up.reset_pos()
                                             self.dialoguebox_up.updated = False
-                                        elif dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_up"]["content"] != dialog_to_display[self.dialogData["dialogId"]-1]["dialoguebox_up"]["content"]:
+                                        elif currentDialog["dialoguebox_up"]["content"] != lastDialog["dialoguebox_up"]["content"]:
                                             self.dialoguebox_up.updated = False
                                     else:
                                         self.dialoguebox_up.reset_pos()
                                         self.dialoguebox_up.updated = False
-                                    if "dialoguebox_down" in dialog_to_display[self.dialogData["dialogId"]]:
+                                    if "dialoguebox_down" in currentDialog:
                                         #检测下方对话框    
-                                        if dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_down"] == None or "dialoguebox_down" not in dialog_to_display[self.dialogData["dialogId"]-1] or dialog_to_display[self.dialogData["dialogId"]-1]["dialoguebox_down"] == None or dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_down"]["speaker"] != dialog_to_display[self.dialogData["dialogId"]-1]["dialoguebox_down"]["speaker"]:
+                                        if currentDialog["dialoguebox_down"] == None or "dialoguebox_down" not in lastDialog or lastDialog["dialoguebox_down"] == None or currentDialog["dialoguebox_down"]["speaker"] != lastDialog["dialoguebox_down"]["speaker"]:
                                             self.dialoguebox_down.reset_pos()
                                             self.dialoguebox_down.updated = False
-                                        elif dialog_to_display[self.dialogData["dialogId"]]["dialoguebox_down"]["content"] != dialog_to_display[self.dialogData["dialogId"]-1]["dialoguebox_down"]["content"]:
+                                        elif currentDialog["dialoguebox_down"]["content"] != lastDialog["dialoguebox_down"]["content"]:
                                             self.dialoguebox_down.updated = False
                                     else:
                                         self.dialoguebox_down.reset_pos()
@@ -517,7 +494,7 @@ class BattleSystem:
                     else:
                         self.dialogData = None
                         self.dialogKey = None
-                        del dialog_to_display
+                        del currentDialog
                         self.battle = True
                 #如果战斗前无·对话
                 elif self.dialogKey == None:
@@ -1036,7 +1013,7 @@ class BattleSystem:
                                             break
                                     if self.theMap.darkMode == True:
                                         self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
-                                self.characters_data[self.characterGetClick].draw("move",screen,self.theMap)
+                                self.characters_data[self.characterGetClick].draw(screen,self.theMap)
                             else:
                                 pygame.mixer.Channel(0).stop()
                                 #检测是不是站在补给上
@@ -1058,7 +1035,7 @@ class BattleSystem:
                                 #检测是否角色有set的动画
                                 imgIdForSet = self.characters_data[self.characterGetClick].get_imgId("set")
                                 if imgIdForSet != None:
-                                    self.characters_data[self.characterGetClick].draw("set",screen,self.theMap,False)
+                                    self.characters_data[self.characterGetClick].draw(screen,self.theMap,False)
                                     if imgIdForSet == self.characters_data[self.characterGetClick].get_imgNum("set")-1:
                                         self.characters_data[self.characterGetClick].reset_imgId("set")
                                         self.isWaiting = True
@@ -1092,7 +1069,7 @@ class BattleSystem:
                             #播放射击音效
                             elif self.characters_data[self.characterGetClick].get_imgId("attack") == 3:
                                 self.attackingSounds.play(self.characters_data[self.characterGetClick].kind)
-                            self.characters_data[self.characterGetClick].draw("attack",screen,self.theMap,False)
+                            self.characters_data[self.characterGetClick].draw(screen,self.theMap,False)
                             if self.characters_data[self.characterGetClick].get_imgId("attack") == self.characters_data[self.characterGetClick].get_imgNum("attack")-2:
                                 for each_enemy in self.enemiesGetAttack:
                                     if self.enemiesGetAttack[each_enemy] == "near" and random.randint(1,100) <= 95 or self.enemiesGetAttack[each_enemy] == "middle" and random.randint(1,100) <= 80 or self.enemiesGetAttack[each_enemy] == "far" and random.randint(1,100) <= 65:
@@ -1108,7 +1085,7 @@ class BattleSystem:
                                 self.characterGetClick = None
                                 self.action_choice = None
                         elif self.action_choice == "skill":
-                            self.characters_data[self.characterGetClick].draw("skill",screen,self.theMap,False)
+                            self.characters_data[self.characterGetClick].draw(screen,self.theMap,False)
                             if self.characters_data[self.characterGetClick].get_imgId("skill") == self.characters_data[self.characterGetClick].get_imgNum("skill")-2:
                                 temp_dic = skill(self.characterGetClick,None,None,self.sangvisFerris_data,self.characters_data,"react",self.skill_target,self.damage_do_to_characters)
                                 self.characters_data = temp_dic["characters_data"]
@@ -1122,7 +1099,7 @@ class BattleSystem:
                                 self.characterGetClick = None
                                 self.action_choice = None
                         elif self.action_choice == "reload":
-                            self.characters_data[self.characterGetClick].draw("reload",screen,self.theMap,False)
+                            self.characters_data[self.characterGetClick].draw(screen,self.theMap,False)
                             if self.characters_data[self.characterGetClick].get_imgNum("reload") == self.characters_data[self.characterGetClick].get_imgNum("reload")-2:
                                 self.characters_data[self.characterGetClick].reset_imgId("reload")
                                 self.characters_data[self.characterGetClick].reduce_action_point(5)
@@ -1138,7 +1115,7 @@ class BattleSystem:
                                 self.characterGetClick = None
                                 self.action_choice = None
                     elif self.characterGetClick != None and self.isWaiting == True:
-                        self.characters_data[self.characterGetClick].draw("wait",screen,self.theMap)
+                        self.characters_data[self.characterGetClick].draw(screen,self.theMap)
 
                 #敌方回合
                 if self.whose_round == "sangvisFerris":
@@ -1176,7 +1153,7 @@ class BattleSystem:
                                     self.sangvisFerris_data[self.enemy_in_control].y = self.enemy_action["route"][0][1]
                                     self.enemy_action["route"].pop(0)
                             if (int(self.sangvisFerris_data[self.enemy_in_control].x),int(self.sangvisFerris_data[self.enemy_in_control].y)) in self.theMap.lightArea or self.theMap.darkMode != True:
-                                self.sangvisFerris_data[self.enemy_in_control].draw("move",screen,self.theMap)
+                                self.sangvisFerris_data[self.enemy_in_control].draw(screen,self.theMap)
                         else:
                             if pygame.mixer.Channel(0).get_busy() == True:
                                 pygame.mixer.Channel(0).stop()
@@ -1199,7 +1176,7 @@ class BattleSystem:
                                     self.sangvisFerris_data[self.enemy_in_control].setFlip(True)
                             else:
                                 self.sangvisFerris_data[self.enemy_in_control].setFlip(False)
-                            self.sangvisFerris_data[self.enemy_in_control].draw("attack",screen,self.theMap,False)
+                            self.sangvisFerris_data[self.enemy_in_control].draw(screen,self.theMap,False)
                         else:
                             self.sangvisFerris_data[self.enemy_in_control].add_imgId("attack")
                         if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == self.sangvisFerris_data[self.enemy_in_control].get_imgNum("attack")-1:
@@ -1248,7 +1225,7 @@ class BattleSystem:
                                     self.sangvisFerris_data[self.enemy_in_control].y = self.enemy_action["route"][0][1]
                                     self.enemy_action["route"].pop(0)
                             if (int(self.sangvisFerris_data[self.enemy_in_control].x),int(self.sangvisFerris_data[self.enemy_in_control].y)) in self.theMap.lightArea or self.theMap.darkMode != True:
-                                self.sangvisFerris_data[self.enemy_in_control].draw("move",screen,self.theMap)
+                                self.sangvisFerris_data[self.enemy_in_control].draw(screen,self.theMap)
                         else:
                             if pygame.mixer.Channel(0).get_busy() == True:
                                 pygame.mixer.Channel(0).stop()
@@ -1264,7 +1241,7 @@ class BattleSystem:
                                         self.sangvisFerris_data[self.enemy_in_control].setFlip(True)
                                 else:
                                     self.sangvisFerris_data[self.enemy_in_control].setFlip(False)
-                                self.sangvisFerris_data[self.enemy_in_control].draw("attack",screen,self.theMap,False)
+                                self.sangvisFerris_data[self.enemy_in_control].draw(screen,self.theMap,False)
                             else:
                                 self.sangvisFerris_data[self.enemy_in_control].add_imgId("attack")
                             if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == self.sangvisFerris_data[self.enemy_in_control].get_imgNum("attack")-1:
@@ -1300,7 +1277,7 @@ class BattleSystem:
                     if value.faction == "character" and key != self.characterGetClick or value.faction == "sangvisFerri" and key != self.enemy_in_control and (value.x,value.y) in self.theMap.lightArea or value.faction == "sangvisFerri" and key != self.enemy_in_control and self.theMap.darkMode != True:
                         if value.current_hp > 0:
                             if value.faction == "character" and value.get_imgId("die") > 0:
-                                value.draw("die",screen,self.theMap,False)
+                                value.draw(screen,self.theMap,False)
                                 value.add_imgId("die", -2)
                                 if value.get_imgId("die") <= 0:
                                     value.set_imgId("die",0)
@@ -1320,9 +1297,9 @@ class BattleSystem:
                                         self.areaDrawColorBlock["yellow"] = rangeCanAttack["far"]
                                         self.areaDrawColorBlock["blue"] =  rangeCanAttack["middle"]
                                         self.areaDrawColorBlock["green"] = rangeCanAttack["near"]
-                                value.draw("wait",screen,self.theMap)
+                                value.draw(screen,self.theMap)
                         elif value.current_hp<=0:
-                            value.draw("die",screen,self.theMap,False)
+                            value.draw(screen,self.theMap,False)
 
                     #是否有在播放死亡角色的动画（而不是倒地状态）
                     if value.current_hp<=0 and key not in self.the_dead_one:
@@ -1461,9 +1438,9 @@ class BattleSystem:
                 self.warnings_to_display.display(screen)
 
                 #加载并播放音乐
-                if pygame.mixer.music.get_busy() != 1:
+                if not pygame.mixer.music.get_busy():
                     pygame.mixer.music.load("Assets/music/"+self.bg_music)
-                    pygame.mixer.music.play(loops=9999, start=0.0)
+                    pygame.mixer.music.play()
                     pygame.mixer.music.set_volume(get_setting("Sound","background_music")/100.0)
 
                 #结束动画
