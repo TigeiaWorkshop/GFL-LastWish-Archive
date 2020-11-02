@@ -113,6 +113,8 @@ class Doll:
         self.__currentAction = "wait"
         #动作是否重复
         self.__ifActionLoop = True
+        #动作是正序列播放还是反序播放
+        self._ifActionPlayReverse = False
         #是否动作已经播放一遍
         self.__ifActionPlayedOnce = False
         #需要移动的路径
@@ -184,7 +186,10 @@ class Doll:
                         self.__reProcessMap = True
         else:
             self.__movingPath = None
-            self.set_action()
+            if self.get_imgId("set") != None:
+                self.set_action("set",False)
+            else:
+                self.set_action()
     #减少行动值
     def reduce_action_point(self,value):
         if console.get_events("cheat") == False:
@@ -235,23 +240,17 @@ class Doll:
         _load_sound_to_CHARACTERS_SOUND_DICT(self.type)
         if self.faction == "character":
             _add_CHARACTERS_GET_HURT_IMAGE(self.type)
-    def decreaseHp(self,damage,result_of_round=None):
-        self.current_hp-=damage
-        if self.current_hp<=0:
+    def attackBy(self,attacker,resultInfo=None):
+        damage = random.randint(attacker.min_damage,attacker.max_damage)
+        self.decreaseHp(damage,self.resultInfo)
+        return damage
+    def decreaseHp(self,damage):
+        self.current_hp-=abs(damage)
+        if self.current_hp <= 0:
             self.current_hp = 0
-        if self.faction == "character" and self.dying == False and self.current_hp == 0 and self.kind != "HOC":
-            self.dying = 3
-            if self.ImageGetHurt != None:
-                self.ImageGetHurt.x = -self.ImageGetHurt.width
-                self.ImageGetHurt.alpha = 255
-                self.ImageGetHurt.yToGo = 255
-                self.playSound("injured")
-            result_of_round["times_characters_down"] += 1
-        return result_of_round
+            self.set_action("die",None)
     def heal(self,hpHealed):
-        self.current_hp+=hpHealed
-        if self.faction == "character" and self.dying != False:
-            self.dying = False
+        self.current_hp+=abs(hpHealed)
     def setFlip(self,theBool):
         if self.ifFlip != theBool:
             self.ifFlip = theBool
@@ -271,14 +270,27 @@ class Doll:
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)
         screen.blit(img_of_char,(xTemp-theMapClass.perBlockWidth*0.3,yTemp-theMapClass.perBlockWidth*0.85))
-        #调整id，并返回对应的bool状态
-        if self.__imgId_dict[self.__currentAction]["imgId"] < getDollImgNum(self.type,self.__currentAction)-1:
-            self.__imgId_dict[self.__currentAction]["imgId"] += 1
-        else:
-            if self.__ifActionLoop == True:
+        #如果角色图片还没播放完
+        if not self._ifActionPlayReverse:
+            if self.__imgId_dict[self.__currentAction]["imgId"] < getDollImgNum(self.type,self.__currentAction)-1:
+                self.__imgId_dict[self.__currentAction]["imgId"] += 1
+            #如果角色图片播放完需要重新播
+            elif self.__ifActionLoop == True:
                 self.__ifActionPlayedOnce = True
                 self.__imgId_dict[self.__currentAction]["imgId"] = 0
+            #如果角色图片播放完但不打算重新播
+            elif self.__ifActionLoop == None:
+                self.__ifActionPlayedOnce = True
+            #如果角色图片播放完需要回到待机状态
+            elif self.__ifActionLoop == False:
+                self.set_action()
             else:
+                raise Exception('ZeroEngine-Error: self.__ifActionLoop data error: '+self.__ifActionLoop)
+        else:
+            if self.__imgId_dict[self.__currentAction]["imgId"] > 0:
+                self.__imgId_dict[self.__currentAction]["imgId"] -= 1
+            else:
+                self._ifActionPlayReverse = False
                 self.set_action()
     def draw_custom(self,action,pos,screen,theMapClass,alpha=155,isContinue=True):
         #调整小人图片的尺寸
@@ -379,6 +391,13 @@ class Doll:
         elif force == True:
             self.eyeImgSize = 10
             self.detection = True
+    #判断是否在攻击范围内
+    def isInAttackRange(self,other,theMap):
+        attackRange = self.getAttackRange(theMap)
+        for key in attackRange:
+            if (other.x,other.y) in attackRange[key]:
+                return True
+        return False
     #获取角色的攻击范围
     def getAttackRange(self,theMap):
         attacking_range = {"near":[],"middle":[],"far":[]}
@@ -427,6 +446,21 @@ class CharacterDataManager(Doll):
                 print('警告：角色 {} 没有对应的破衣动画'.format(defaultData["type"]))
                 if not os.path.exists("Assets/image/npc_icon/{}.png".format(defaultData["type"])):
                     print("而且你也忘了加入对应的头像")
+    def decreaseHp(self,damage,result_of_round=None):
+        super().decreaseHp(damage)
+        if self.dying == False and self.kind != "HOC":
+            self.dying = 3
+            if self.ImageGetHurt != None:
+                self.ImageGetHurt.x = -self.ImageGetHurt.width
+                self.ImageGetHurt.alpha = 255
+                self.ImageGetHurt.yToGo = 255
+                self.playSound("injured")
+            result_of_round["times_characters_down"] += 1
+    def heal(self,hpHealed):
+        super().heal(hpHealed)
+        if self.dying != False:
+            self.dying = False
+            self._ifActionPlayReverse = True
 
 #铁血角色类
 class SangvisFerriDataManager(Doll):
