@@ -254,6 +254,7 @@ class SettingContoller:
                         settingData["Sound"]["sound_environment"] = self.soundVolume_sound_environment
                     with open("Save/setting.yaml", "w", encoding='utf-8') as f:
                         yaml.dump(settingData, f)
+                    reload_setting()
                     pygame.mixer.music.set_volume(settingData["Sound"]["background_music"]/100.0)
                     self.ifDisplay = False
                     return True

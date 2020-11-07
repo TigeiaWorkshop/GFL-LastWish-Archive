@@ -411,6 +411,12 @@ class MapObject:
     #计算在地图中的位置
     def calPosInMap(self,x,y):
         return round((x-y)*self.perBlockWidth*0.43+self.__local_x+self.row*self.perBlockWidth*0.43,1),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4,1)
+    #查看角色是否在光亮范围内
+    def inLightArea(self,doll):
+        if self.darkMode == False:
+            return True
+        else:
+            return (doll.x,doll.y) in self.lightArea
 
 #方块类
 class BlockObject:

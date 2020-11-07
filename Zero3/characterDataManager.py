@@ -250,16 +250,16 @@ class Doll:
         return damage
     def decreaseHp(self,damage):
         damage = abs(damage)
-        if self.current_armor <= 0:
+        if self.irrecoverable_armor <= 0:
             self.current_hp -= damage
         else:
             #如果伤害大于护甲值,则以护甲值为最大护甲将承受的伤害
-            if damage > self.current_armor:
-                damage_take_by_armor = random.randint(0,self.current_armor)
+            if damage > self.irrecoverable_armor:
+                damage_take_by_armor = random.randint(0,self.irrecoverable_armor)
             #如果伤害小于护甲值,则以伤害为最大护甲将承受的伤害
             else:
                 damage_take_by_armor = random.randint(0,damage)
-            self.current_armor -= damage_take_by_armor
+            self.irrecoverable_armor -= damage_take_by_armor
             self.current_hp -= (damage-damage_take_by_armor)
         #如果角色血量小等于0，进入死亡状态
         if self.current_hp <= 0:
@@ -477,6 +477,28 @@ class CharacterDataManager(Doll):
         if self.dying != False:
             self.dying = False
             self._ifActionPlayReverse = True
+    #根据坐标反转角色
+    def setFlipBasedPos(self,pos):
+        #检测坐标
+        if isinstance(pos,(list,tuple)):
+            x = pos[0]
+            y = pos[1]
+        elif isinstance(pos,dict):
+            x = pos["x"]
+            y = pos["y"]
+        else:
+            x = pos.x
+            y = pos.y
+        #检测坐标
+        if self.x > x:
+            self.setFlip(True)
+        elif self.x == x:
+            if self.y > y:
+                self.setFlip(False)
+            else:
+                self.setFlip(True)
+        else:
+            self.setFlip(False)
 
 #铁血角色类
 class SangvisFerriDataManager(Doll):
@@ -485,6 +507,27 @@ class SangvisFerriDataManager(Doll):
             defaultData[key] = theSangvisFerrisDataDic[key]
         Doll.__init__(self,defaultData,"sangvisFerri",mode)
         self.patrol_path = defaultData["patrol_path"] if "patrol_path" in defaultData else []
+    def setFlipBasedPos(self,pos):
+        #检测坐标
+        if isinstance(pos,(list,tuple)):
+            x = pos[0]
+            y = pos[1]
+        elif isinstance(pos,dict):
+            x = pos["x"]
+            y = pos["y"]
+        else:
+            x = pos.x
+            y = pos.y
+        #检测坐标
+        if self.x < x:
+            self.setFlip(True)
+        elif self.x == x:
+            if self.y < y:
+                self.setFlip(False)
+            else:
+                self.setFlip(True)
+        else:
+            self.setFlip(False)
 
 #初始化角色信息
 class initializeCharacterDataThread(threading.Thread):

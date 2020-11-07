@@ -713,32 +713,18 @@ class BattleSystem:
                         elif self.action_choice == "attack" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and len(self.enemiesGetAttack)>0:
                             self.characters_data[self.characterGetClick].reduce_action_point(5)
                             self.characters_data[self.characterGetClick].noticed()
+                            self.characters_data[self.characterGetClick].set_action("attack",False)
                             self.isWaiting = False
                             self.NotDrawRangeBlocks = True
                             attacking_range = None
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                         elif self.action_choice == "skill" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.skill_target != None:
                             if self.skill_target in self.characters_data:
-                                if self.characters_data[self.skill_target].x < self.characters_data[self.characterGetClick].x:
-                                    self.characters_data[self.characterGetClick].setFlip(True)
-                                elif self.characters_data[self.skill_target].x == self.characters_data[self.characterGetClick].x:
-                                    if self.characters_data[self.skill_target].y < self.characters_data[self.characterGetClick].y:
-                                        self.characters_data[self.characterGetClick].setFlip(False)
-                                    else:
-                                        self.characters_data[self.characterGetClick].setFlip(True)
-                                else:
-                                    self.characters_data[self.characterGetClick].setFlip(False)
+                                self.characters_data[self.characterGetClick].setFlipBasedPos(self.characters_data[self.skill_target])
+                                
                             elif self.skill_target in self.sangvisFerris_data:
                                 self.characters_data[self.characterGetClick].noticed()
-                                if self.sangvisFerris_data[self.skill_target].x < self.characters_data[self.characterGetClick].x:
-                                    self.characters_data[self.characterGetClick].setFlip(True)
-                                elif self.sangvisFerris_data[self.skill_target].x == self.characters_data[self.characterGetClick].x:
-                                    if self.sangvisFerris_data[self.skill_target].y < self.characters_data[self.characterGetClick].y:
-                                        self.characters_data[self.characterGetClick].setFlip(False)
-                                    else:
-                                        self.characters_data[self.characterGetClick].setFlip(True)
-                                else:
-                                    self.characters_data[self.characterGetClick].setFlip(False)
+                                self.characters_data[self.characterGetClick].setFlipBasedPos(self.sangvisFerris_data[self.skill_target])
                             self.characters_data[self.characterGetClick].reduce_action_point(8)
                             self.characters_data[self.characterGetClick].playSound("skill")
                             self.isWaiting = False
@@ -1012,20 +998,11 @@ class BattleSystem:
                             if self.characters_data[self.characterGetClick].get_imgId("attack") == 0:
                                 block_get_click = self.theMap.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                                 if block_get_click != None:
-                                    if block_get_click["x"] < self.characters_data[self.characterGetClick].x:
-                                        self.characters_data[self.characterGetClick].setFlip(True)
-                                    elif block_get_click["x"] == self.characters_data[self.characterGetClick].x:
-                                        if block_get_click["y"] < self.characters_data[self.characterGetClick].y:
-                                            self.characters_data[self.characterGetClick].setFlip(False)
-                                        else:
-                                            self.characters_data[self.characterGetClick].setFlip(True)
-                                    else:
-                                        self.characters_data[self.characterGetClick].setFlip(False)
+                                    self.characters_data[self.characterGetClick].setFlipBasedPos(block_get_click)
                                 self.characters_data[self.characterGetClick].playSound("attack")
                             #播放射击音效
                             elif self.characters_data[self.characterGetClick].get_imgId("attack") == 3:
                                 self.attackingSounds.play(self.characters_data[self.characterGetClick].kind)
-                            self.characters_data[self.characterGetClick].draw(screen,self.theMap,False)
                             if self.characters_data[self.characterGetClick].get_imgId("attack") == self.characters_data[self.characterGetClick].get_imgNum("attack")-2:
                                 for each_enemy in self.enemiesGetAttack:
                                     if self.enemiesGetAttack[each_enemy] == "near" and random.randint(1,100) <= 95 or self.enemiesGetAttack[each_enemy] == "middle" and random.randint(1,100) <= 80 or self.enemiesGetAttack[each_enemy] == "far" and random.randint(1,100) <= 65:
@@ -1078,13 +1055,11 @@ class BattleSystem:
                     self.enemy_in_control = self.sangvisFerris_name_list[self.enemies_in_control_id]
                     if self.enemy_action == None:
                         self.enemy_action = AI(self.enemy_in_control,self.theMap,self.characters_data,self.sangvisFerris_data,self.the_characters_detected_last_round)
-                        if self.enemy_action["action"] == "move":
+                        if self.enemy_action["action"] == "move" or self.enemy_action["action"] == "move&attack":
                             self.sangvisFerris_data[self.enemy_in_control].move_follow(self.enemy_action["route"])
                         elif self.enemy_action["action"] == "attack":
                             self.sangvisFerris_data[self.enemy_in_control].set_action("attack")
-                        elif self.enemy_action["action"] == "move&attack"
-                            self.sangvisFerris_data[self.enemy_in_control].move_follow(self.enemy_action["route"])
-
+                            self.sangvisFerris_data[self.enemy_in_control].setFlipBasedPos(self.characters_data[self.enemy_action["target"]])
                         print(self.enemy_in_control+" choses "+self.enemy_action["action"])
                     if self.enemy_action["action"] == "move":
                         if self.sangvisFerris_data[self.enemy_in_control].is_idle():
@@ -1100,20 +1075,7 @@ class BattleSystem:
                     elif self.enemy_action["action"] == "attack":
                         if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == 3:
                             self.attackingSounds.play(self.sangvisFerris_data[self.enemy_in_control].kind)
-                        if (self.sangvisFerris_data[self.enemy_in_control].x,self.sangvisFerris_data[self.enemy_in_control].y) in self.theMap.lightArea or self.theMap.darkMode != True:
-                            if self.characters_data[self.enemy_action["target"]].x > self.sangvisFerris_data[self.enemy_in_control].x:
-                                self.sangvisFerris_data[self.enemy_in_control].setFlip(True)
-                            elif self.characters_data[self.enemy_action["target"]].x == self.sangvisFerris_data[self.enemy_in_control].x:
-                                if self.characters_data[self.enemy_action["target"]].y > self.sangvisFerris_data[self.enemy_in_control].y:
-                                    self.sangvisFerris_data[self.enemy_in_control].setFlip(False)
-                                else:
-                                    self.sangvisFerris_data[self.enemy_in_control].setFlip(True)
-                            else:
-                                self.sangvisFerris_data[self.enemy_in_control].setFlip(False)
-                            self.sangvisFerris_data[self.enemy_in_control].draw(screen,self.theMap,False)
-                        else:
-                            self.sangvisFerris_data[self.enemy_in_control].add_imgId("attack")
-                        if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == self.sangvisFerris_data[self.enemy_in_control].get_imgNum("attack")-1:
+                        elif self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == self.sangvisFerris_data[self.enemy_in_control].get_imgNum("attack")-1:
                             temp_value = random.randint(0,100)
                             if self.enemy_action["target_area"] == "near" and temp_value <= 95 or self.enemy_action["target_area"] == "middle" and temp_value <= 80 or self.enemy_action["target_area"] == "far" and temp_value <= 65:
                                 the_damage = self.characters_data[self.enemy_action["target"]].attackBy(self.sangvisFerris_data[self.enemy_in_control],self.resultInfo)
@@ -1133,37 +1095,9 @@ class BattleSystem:
                             self.footstep_sounds.play()
                         else:
                             self.footstep_sounds.stop()
-                            if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == 3:
-                                self.attackingSounds.play(self.sangvisFerris_data[self.enemy_in_control].kind)
-                            if (self.sangvisFerris_data[self.enemy_in_control].x,self.sangvisFerris_data[self.enemy_in_control].y) in self.theMap.lightArea or self.theMap.darkMode != True:
-                                if self.characters_data[self.enemy_action["target"]].x > self.sangvisFerris_data[self.enemy_in_control].x:
-                                    self.sangvisFerris_data[self.enemy_in_control].setFlip(True)
-                                elif self.characters_data[self.enemy_action["target"]].x == self.sangvisFerris_data[self.enemy_in_control].x:
-                                    if self.characters_data[self.enemy_action["target"]].y > self.sangvisFerris_data[self.enemy_in_control].y:
-                                        self.sangvisFerris_data[self.enemy_in_control].setFlip(False)
-                                    else:
-                                        self.sangvisFerris_data[self.enemy_in_control].setFlip(True)
-                                else:
-                                    self.sangvisFerris_data[self.enemy_in_control].setFlip(False)
-                                self.sangvisFerris_data[self.enemy_in_control].draw(screen,self.theMap,False)
-                            else:
-                                self.sangvisFerris_data[self.enemy_in_control].add_imgId("attack")
-                            if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == self.sangvisFerris_data[self.enemy_in_control].get_imgNum("attack")-1:
-                                temp_value = random.randint(0,100)
-                                if self.enemy_action["target_area"] == "near" and temp_value <= 95 or self.enemy_action["target_area"] == "middle" and temp_value <= 80 or self.enemy_action["target_area"] == "far" and temp_value <= 65:
-                                    the_damage = random.randint(self.sangvisFerris_data[self.enemy_in_control].min_damage,self.sangvisFerris_data[self.enemy_in_control].max_damage)
-                                    self.characters_data[self.enemy_action["target"]].decreaseHp(the_damage,self.resultInfo)
-                                    self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
-                                    self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
-                                else:
-                                    self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
-                                self.sangvisFerris_data[self.enemy_in_control].reset_imgId("attack")
-                                self.enemies_in_control_id +=1
-                                if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
-                                    self.whose_round = "sangvisFerrisToPlayer"
-                                    self.resultInfo["total_rounds"] += 1
-                                self.enemy_action = None
-                                self.enemy_in_control = None
+                            self.enemy_action["action"] = "attack"
+                            self.sangvisFerris_data[self.enemy_in_control].set_action("attack")
+                            self.sangvisFerris_data[self.enemy_in_control].setFlipBasedPos(self.characters_data[self.enemy_action["target"]])
                     elif self.enemy_action["action"] == "stay":
                         self.enemies_in_control_id +=1
                         if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
@@ -1178,7 +1112,7 @@ class BattleSystem:
                 rightClickCharacterAlphaDeduct = True
                 for key,value in dicMerge(self.characters_data,self.sangvisFerris_data).items():
                     #如果天亮的双方都可以看见/天黑，但是是友方角色/天黑，但是是敌方角色在可观测的范围内 -- 则画出角色
-                    if self.theMap.darkMode == False or value.faction == "character" or value.faction == "sangvisFerri" and (value.x,value.y) in self.theMap.lightArea:
+                    if value.faction == "character" or value.faction == "sangvisFerri" and self.theMap.inLightArea(value):
                         if self.NotDrawRangeBlocks == True and pygame.mouse.get_pressed()[2]:
                             block_get_click = self.theMap.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                             if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
