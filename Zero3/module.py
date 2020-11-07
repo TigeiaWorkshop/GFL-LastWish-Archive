@@ -919,6 +919,7 @@ class Console(SingleLineInputBox):
 #初始化控制台模块
 console = Console(0,0)
 
+#gif图片管理
 class GifObject:
     def __init__(self,imgList,x,y,width,height,updateGap):
         self.imgList = imgList
@@ -950,6 +951,7 @@ class GifObject:
     def set_alpha(self,alpha):
         self.alpha = alpha
 
+#暂停菜单
 class PauseMenu:
     def __init__(self):
         self.white_bg = None
@@ -1006,3 +1008,24 @@ class PauseMenu:
             display.flip()
 #暂停菜单
 pause_menu = PauseMenu()
+
+#音效管理模块
+class SoundManagement:
+    def __init__(self,channel_id):
+        self.channel_id = channel_id
+        self.sound_id = 0
+        self.__sounds_list = []
+    def add(self,path):
+        self.__sounds_list.append(pygame.mixer.Sound(path))
+    def play(self,sound_id=None):
+        if len(self.__sounds_list)>0 and not pygame.mixer.Channel(self.channel_id).get_busy():
+            if sound_id == None:
+                self.sound_id = random.randint(0,len(self.__sounds_list)-1)
+            else:
+                self.sound_id = sound_id
+            pygame.mixer.Channel(self.channel_id).play(self.__sounds_list[self.sound_id])
+    def stop(self):
+        pygame.mixer.Channel(self.channel_id).stop()
+    def set_volume(self,volume):
+        for i in range(len(self.__sounds_list)):
+            self.__sounds_list[i].set_volume(volume)

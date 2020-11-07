@@ -185,10 +185,10 @@ class BattleSystem:
                 self.dialogData = None
             self.bg_music = DataTmp["background_music"] 
             #初始化天气和环境的音效 -- 频道1
-            self.environment_sound = None
+            self.environment_sound = SoundManagement(1)
             self.weatherController = None
             if DataTmp["weather"] != None:
-                self.environment_sound = pygame.mixer.Sound("Assets/sound/environment/"+DataTmp["weather"]+".ogg")
+                self.environment_sound.add("Assets/sound/environment/{}.ogg".format(DataTmp["weather"]))
                 self.environment_sound.set_volume(get_setting("Sound","sound_environment")/100.0)
                 self.weatherController = WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
         #检测self.zoomIn参数是否越界
@@ -260,11 +260,10 @@ class BattleSystem:
         self.dialoguebox_down = DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,-self.window_x*0.3,self.window_y/2+self.window_y*0.2,self.FONTSIZE)
         #-----加载音效-----
         #行走的音效 -- 频道0
-        self.walking_sound = []
-        for walkingSound in glob.glob(r'Assets/sound/snow/*.wav'):
-            self.walking_sound.append(pygame.mixer.Sound(walkingSound))
-            self.walking_sound[-1].set_volume(get_setting("Sound","sound_effects")/100.0)
-        self.the_sound_id = None
+        self.footstep_sounds = SoundManagement(0)
+        for walkingSoundPath in glob.glob(r'Assets/sound/snow/*.wav'):
+            self.footstep_sounds.add(walkingSoundPath)
+        self.footstep_sounds.set_volume(get_setting("Sound","sound_effects")/100)
         #攻击的音效 -- 频道2
         self.attackingSounds = AttackingSoundManager(get_setting("Sound","sound_effects"),2)
         #切换回合时的UI
@@ -288,8 +287,8 @@ class BattleSystem:
         while self.battleSystemMainLoop == True:
             self.__update_events()
             #环境声音-频道1
-            if pygame.mixer.Channel(1).get_busy() == False and self.environment_sound != None:
-                pygame.mixer.Channel(1).play(self.environment_sound)
+            self.environment_sound.play()
+            #不在战斗状态
             if self.battle == False:
                 #加载地图
                 self.theMap.display_map(screen)
@@ -338,9 +337,7 @@ class BattleSystem:
                                         raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
                                 self.dialog_ifPathSet = True
                             #播放脚步声
-                            if not pygame.mixer.Channel(0).get_busy():
-                                self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
-                                pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
+                            self.footstep_sounds.play()
                             #是否所有角色都已经到达对应点
                             allGetToTargetPos = True
                             #是否需要重新渲染地图
@@ -359,8 +356,7 @@ class BattleSystem:
                                 self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
                             if allGetToTargetPos:
                                 #脚步停止
-                                if pygame.mixer.Channel(0).get_busy() != False:
-                                    pygame.mixer.Channel(0).stop()
+                                self.footstep_sounds.stop()
                                 self.dialogData["dialogId"] += 1
                                 self.dialog_ifPathSet = False
                         #改变方向
@@ -978,9 +974,7 @@ class BattleSystem:
                         if self.action_choice == "move":
                             if not self.characters_data[self.characterGetClick].is_idle():
                                 #播放脚步声
-                                if not pygame.mixer.Channel(0).get_busy():
-                                    self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
-                                    pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
+                                self.footstep_sounds.play()
                                 #是否需要更新
                                 if self.characters_data[self.characterGetClick].needUpdateMap():
                                     for key in self.sangvisFerris_data:
@@ -989,7 +983,7 @@ class BattleSystem:
                                             break
                                     self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
                             else:
-                                pygame.mixer.Channel(0).stop()
+                                self.footstep_sounds.stop()
                                 #检测是不是站在补给上
                                 for i in range(len(self.theMap.ornamentationData)-1,-1,-1):
                                     if self.theMap.ornamentationData[i].type == "chest" and self.theMap.ornamentationData[i].get_pos() == self.characters_data[self.characterGetClick].get_pos():
@@ -1087,17 +1081,16 @@ class BattleSystem:
                         if self.enemy_action["action"] == "move":
                             self.sangvisFerris_data[self.enemy_in_control].move_follow(self.enemy_action["route"])
                         elif self.enemy_action["action"] == "attack":
-                            self.sangvisFerris_data[self.enemy_in_control].move_follow("attack")
+                            self.sangvisFerris_data[self.enemy_in_control].set_action("attack")
+                        elif self.enemy_action["action"] == "move&attack"
+                            self.sangvisFerris_data[self.enemy_in_control].move_follow(self.enemy_action["route"])
 
                         print(self.enemy_in_control+" choses "+self.enemy_action["action"])
                     if self.enemy_action["action"] == "move":
                         if self.sangvisFerris_data[self.enemy_in_control].is_idle():
-                            if pygame.mixer.Channel(0).get_busy() == False:
-                                self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
-                                pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
+                            self.footstep_sounds.play()
                         else:
-                            if pygame.mixer.Channel(0).get_busy() == True:
-                                pygame.mixer.Channel(0).stop()
+                            self.footstep_sounds.stop()
                             self.enemies_in_control_id +=1
                             if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
                                 self.whose_round = "sangvisFerrisToPlayer"
@@ -1136,39 +1129,10 @@ class BattleSystem:
                             self.enemy_action = None
                             self.enemy_in_control = None
                     elif self.enemy_action["action"] == "move&attack":
-                        if len(self.enemy_action["route"]) > 0:
-                            if pygame.mixer.Channel(0).get_busy() == False:
-                                self.the_sound_id = random.randint(0,len(self.walking_sound)-1)
-                                pygame.mixer.Channel(0).play(self.walking_sound[self.the_sound_id])
-                            if self.sangvisFerris_data[self.enemy_in_control].x < self.enemy_action["route"][0][0]:
-                                self.sangvisFerris_data[self.enemy_in_control].x+=0.05
-                                self.sangvisFerris_data[self.enemy_in_control].setFlip(True)
-                                if self.sangvisFerris_data[self.enemy_in_control].x >= self.enemy_action["route"][0][0]:
-                                    self.sangvisFerris_data[self.enemy_in_control].x = self.enemy_action["route"][0][0]
-                                    self.enemy_action["route"].pop(0)
-                            elif self.sangvisFerris_data[self.enemy_in_control].x > self.enemy_action["route"][0][0]:
-                                self.sangvisFerris_data[self.enemy_in_control].x-=0.05
-                                self.sangvisFerris_data[self.enemy_in_control].setFlip(False)
-                                if self.sangvisFerris_data[self.enemy_in_control].x <= self.enemy_action["route"][0][0]:
-                                    self.sangvisFerris_data[self.enemy_in_control].x = self.enemy_action["route"][0][0]
-                                    self.enemy_action["route"].pop(0)
-                            elif self.sangvisFerris_data[self.enemy_in_control].y < self.enemy_action["route"][0][1]:
-                                self.sangvisFerris_data[self.enemy_in_control].y+=0.05
-                                self.sangvisFerris_data[self.enemy_in_control].setFlip(False)
-                                if self.sangvisFerris_data[self.enemy_in_control].y >= self.enemy_action["route"][0][1]:
-                                    self.sangvisFerris_data[self.enemy_in_control].y = self.enemy_action["route"][0][1]
-                                    self.enemy_action["route"].pop(0)
-                            elif self.sangvisFerris_data[self.enemy_in_control].y > self.enemy_action["route"][0][1]:
-                                self.sangvisFerris_data[self.enemy_in_control].y-=0.05
-                                self.sangvisFerris_data[self.enemy_in_control].setFlip(True)
-                                if self.sangvisFerris_data[self.enemy_in_control].y <= self.enemy_action["route"][0][1]:
-                                    self.sangvisFerris_data[self.enemy_in_control].y = self.enemy_action["route"][0][1]
-                                    self.enemy_action["route"].pop(0)
-                            if (int(self.sangvisFerris_data[self.enemy_in_control].x),int(self.sangvisFerris_data[self.enemy_in_control].y)) in self.theMap.lightArea or self.theMap.darkMode != True:
-                                self.sangvisFerris_data[self.enemy_in_control].draw(screen,self.theMap)
+                        if self.sangvisFerris_data[self.enemy_in_control].get_action("move"):
+                            self.footstep_sounds.play()
                         else:
-                            if pygame.mixer.Channel(0).get_busy() == True:
-                                pygame.mixer.Channel(0).stop()
+                            self.footstep_sounds.stop()
                             if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == 3:
                                 self.attackingSounds.play(self.sangvisFerris_data[self.enemy_in_control].kind)
                             if (self.sangvisFerris_data[self.enemy_in_control].x,self.sangvisFerris_data[self.enemy_in_control].y) in self.theMap.lightArea or self.theMap.darkMode != True:

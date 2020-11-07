@@ -77,8 +77,12 @@ class Doll:
         self.current_bullets = DATA["current_bullets"] if "current_hp" in DATA else DATA["magazine_capacity"]
         #当前血量
         self.current_hp = DATA["current_hp"] if "current_hp" in DATA else DATA["max_hp"]
-        #当前护甲值
-        self.current_armor = 0
+        #不可再生的护甲值
+        self.irrecoverable_armor = DATA["irrecoverable_armor"] if "irrecoverable_armor" in DATA else 0
+        #当前可再生的护甲值
+        self.current_recoverable_armor = DATA["recoverable_armor"] if "recoverable_armor" in DATA else 0
+        #最大可再生的护甲值
+        self.max_recoverable_armor = DATA["recoverable_armor"] if "recoverable_armor" in DATA else 0
         #是否濒死
         self.dying = False if self.current_hp > 0 else 3
         #攻击距离
@@ -192,7 +196,7 @@ class Doll:
                 self.set_action()
     #减少行动值
     def reduce_action_point(self,value):
-        if console.get_events("cheat") == False:
+        if not console.get_events("cheat"):
             if isinstance(value,int):
                 if self.__current_action_point >= value:
                     #有足够的行动值来减去
@@ -245,7 +249,19 @@ class Doll:
         self.decreaseHp(damage,self.resultInfo)
         return damage
     def decreaseHp(self,damage):
-        self.current_hp-=abs(damage)
+        damage = abs(damage)
+        if self.current_armor <= 0:
+            self.current_hp -= damage
+        else:
+            #如果伤害大于护甲值,则以护甲值为最大护甲将承受的伤害
+            if damage > self.current_armor:
+                damage_take_by_armor = random.randint(0,self.current_armor)
+            #如果伤害小于护甲值,则以伤害为最大护甲将承受的伤害
+            else:
+                damage_take_by_armor = random.randint(0,damage)
+            self.current_armor -= damage_take_by_armor
+            self.current_hp -= (damage-damage_take_by_armor)
+        #如果角色血量小等于0，进入死亡状态
         if self.current_hp <= 0:
             self.current_hp = 0
             self.set_action("die",None)
