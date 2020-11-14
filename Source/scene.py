@@ -68,7 +68,9 @@ def battle(chapterType,chapter_name,screen):
         BATTLE.initialize(screen,chapterType,chapter_name)
     else:
         BATTLE.load(screen)
-    BATTLE.display(screen)
+    #战斗系统主要loop
+    while BATTLE.isPlaying == True:
+        BATTLE.display(screen)
     #暂停声效 - 尤其是环境声
     pygame.mixer.stop()
     return BATTLE.resultInfo

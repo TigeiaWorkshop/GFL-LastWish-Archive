@@ -339,6 +339,7 @@ class MapObject:
         #画出地图
         for y in range(len(self.mapData)):
             anyBlockPrint = False
+            yTemp = 0
             for x in range(len(self.mapData[y])):
                 xTemp,yTemp = self.calPosInMap(x,y)
                 if -self.perBlockWidth<=xTemp<window_x and -self.perBlockWidth<=yTemp<window_y:
