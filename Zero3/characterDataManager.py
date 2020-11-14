@@ -250,17 +250,28 @@ class Doll:
         return damage
     def decreaseHp(self,damage):
         damage = abs(damage)
-        if self.irrecoverable_armor <= 0:
-            self.current_hp -= damage
-        else:
+        #如果有可再生的护甲
+        if self.current_recoverable_armor > 0:
             #如果伤害大于护甲值,则以护甲值为最大护甲将承受的伤害
+            if damage > self.current_recoverable_armor:
+                damage_take_by_armor = random.randint(0,self.current_recoverable_armor)
+            #如果伤害小于护甲值,则以伤害为最大护甲将承受的伤害
+            else:
+                damage_take_by_armor = random.randint(0,damage)
+            self.current_recoverable_armor -= damage_take_by_armor
+            damage -= damage_take_by_armor
+        #如果有不可再生的护甲
+        if self.irrecoverable_armor > 0 and damage > 0:
             if damage > self.irrecoverable_armor:
                 damage_take_by_armor = random.randint(0,self.irrecoverable_armor)
             #如果伤害小于护甲值,则以伤害为最大护甲将承受的伤害
             else:
                 damage_take_by_armor = random.randint(0,damage)
             self.irrecoverable_armor -= damage_take_by_armor
-            self.current_hp -= (damage-damage_take_by_armor)
+            damage -= damage_take_by_armor
+        #如果还有伤害,则扣除血量
+        if damage > 0:
+            self.current_hp -= damage
         #如果角色血量小等于0，进入死亡状态
         if self.current_hp <= 0:
             self.current_hp = 0

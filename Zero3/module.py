@@ -580,6 +580,7 @@ class SingleLineInputBox(InputBoxInterface):
     def _reset_holderIndex(self,mouse_x):
         last_width = 0
         local_x = mouse_x-self.x
+        new_width,i = 0
         for i in range(len(self._text)):
             new_width = self.FONT.size(self._text[:i])[0]+self.FONTSIZE*0.25
             if new_width>local_x:
@@ -738,6 +739,7 @@ class MultipleLinesInputBox(InputBoxInterface):
             self.lineId = len(self._text)-1
         last_width = 0
         local_x = mouse_x-self.x
+        new_width,i = 0
         for i in range(len(self._text[self.lineId])):
             new_width = self.FONT.size(self._text[self.lineId][:i])[0]+self.FONTSIZE*0.25
             if new_width>local_x:

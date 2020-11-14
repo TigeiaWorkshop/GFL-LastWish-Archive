@@ -1,5 +1,4 @@
 # cython: language_level=3
-from Zero3.config import get_setting
 from Source.scene import *
 from Source.mapCreator import *
 
@@ -72,7 +71,7 @@ def mainMenu(screen,setting):
     
     #加载主菜单背景
     videoCapture = Zero.VideoObjectWithMusic("Assets/movie/SquadAR.mp4","Assets/music/LoadOut.mp3",True,3105,935)
-    pygame.mixer.music.set_volume(get_setting("Sound","background_music")/100.0)
+    pygame.mixer.music.set_volume(Zero.get_setting("Sound","background_music")/100.0)
     #数值初始化
     cover_alpha = 0
     menu_type = 0

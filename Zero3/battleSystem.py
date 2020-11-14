@@ -235,11 +235,11 @@ class BattleSystem:
             "hp_green" : loadImg("Assets/image/UI/hp_green.png"),
             "action_point_blue" : loadImg("Assets/image/UI/action_point.png"),
             "bullets_number_brown" : loadImg("Assets/image/UI/bullets_number.png"),
-            "green" : loadImg("Assets/image/UI/green.png",None,None,150),
-            "red" : loadImg("Assets/image/UI/red.png",None,None,150),
-            "yellow": loadImg("Assets/image/UI/yellow.png",None,None,150),
-            "blue": loadImg("Assets/image/UI/blue.png",None,None,150),
-            "orange": loadImg("Assets/image/UI/orange.png",None,None,150),
+            "green" : loadImg("Assets/image/UI/range/green.png"),
+            "red" : loadImg("Assets/image/UI/range/red.png"),
+            "yellow": loadImg("Assets/image/UI/range/yellow.png"),
+            "blue": loadImg("Assets/image/UI/range/blue.png"),
+            "orange": loadImg("Assets/image/UI/range/orange.png"),
             "eye_orange": loadImg("Assets/image/UI/eye_orange.png"),
             "eye_red": loadImg("Assets/image/UI/eye_red.png"),
             "supplyBoard":loadImage("Assets/image/UI/score.png",((self.window_x-self.window_x/3)/2,-self.window_y/12),self.window_x/3,self.window_y/12),
@@ -389,9 +389,9 @@ class BattleSystem:
                         elif "dialoguebox_up" in currentDialog or "dialoguebox_down" in currentDialog:
                             #对话框的移动
                             if self.dialoguebox_up.x > self.window_x/2+self.dialoguebox_up.get_width()*0.4:
-                                self.dialoguebox_up.x -= 150
+                                self.dialoguebox_up.x -= self.dialoguebox_up.get_width()*0.134
                             if self.dialoguebox_down.x < self.window_x/2-self.dialoguebox_down.get_width()*1.4:
-                                self.dialoguebox_down.x += 150
+                                self.dialoguebox_down.x += self.dialoguebox_down.get_width()*0.134
                             #上方对话框
                             if currentDialog["dialoguebox_up"] != None:
                                 if self.dialoguebox_up.updated == False:
@@ -1119,8 +1119,8 @@ class BattleSystem:
                                 rightClickCharacterAlphaDeduct = False
                                 if self.rightClickCharacterAlpha == None:
                                     self.rightClickCharacterAlpha = 0
-                                if self.rightClickCharacterAlpha < 150:
-                                    self.rightClickCharacterAlpha += 10
+                                if self.rightClickCharacterAlpha < 255:
+                                    self.rightClickCharacterAlpha += 17
                                     self.UI_img["yellow"].set_alpha(self.rightClickCharacterAlpha)
                                     self.UI_img["blue"].set_alpha(self.rightClickCharacterAlpha)
                                     self.UI_img["green"].set_alpha(self.rightClickCharacterAlpha)
@@ -1181,9 +1181,9 @@ class BattleSystem:
                         self.areaDrawColorBlock["yellow"] = []
                         self.areaDrawColorBlock["blue"] = []
                         self.areaDrawColorBlock["green"] = []
-                        self.UI_img["yellow"].set_alpha(150)
-                        self.UI_img["blue"].set_alpha(150)
-                        self.UI_img["green"].set_alpha(150)
+                        self.UI_img["yellow"].set_alpha(255)
+                        self.UI_img["blue"].set_alpha(255)
+                        self.UI_img["green"].set_alpha(255)
                         self.rightClickCharacterAlpha = None
                 #展示设施
                 self.theMap.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
