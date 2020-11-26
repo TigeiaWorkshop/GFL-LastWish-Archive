@@ -1,6 +1,46 @@
 # cython: language_level=3
 import cv2
 import pygame
+import av
+import os
+
+def getAudioFromVideo(moviePath):
+    #把视频载入到流中
+    input_container = av.open(moviePath)
+    input_stream = input_container.streams.get(audio=0)[0]
+    #获取路径
+    filePath = os.path.split(moviePath)[0]
+
+    i = 0
+    while os.path.exists(filePath+"Tmp"+str(i)):
+        i+=1
+    outPutPath = filePath+"Tmp"+str(i)+".mp3"
+    output_container = av.open(outPutPath, 'w')
+    output_stream = output_container.add_stream('mp3')
+
+    for frame in input_container.decode(input_stream):
+        frame.pts = None
+        for packet in output_stream.encode(frame):
+            output_container.mux(packet)
+
+    for packet in output_stream.encode(None):
+        output_container.mux(packet)
+
+    output_container.close()
+
+    return outPutPath
+
+def loadAudioAsSound(moviePath):
+    path = getAudioFromVideo(moviePath)
+    PygameAudio = pygame.mixer.Sound(path)
+    os.remove(path)
+    return PygameAudio
+
+def loadAudioAsMusic(moviePath):
+    pygame.mixer.music.unload()
+    path = getAudioFromVideo(moviePath)
+    pygame.mixer.music.load(path)
+    
 
 #视频捕捉系统
 class VideoObject:
@@ -34,23 +74,25 @@ class VideoObject:
 
 #视频捕捉系统
 class VideoObjectWithMusic(VideoObject):
-    def __init__(self,moviePath,musicPath,ifLoop=False,endPoint=None,loopStartPoint=None):
+    def __init__(self,moviePath,ifLoop=False,endPoint=None,loopStartPoint=None):
         VideoObject.__init__(self,moviePath,ifLoop,endPoint,loopStartPoint)
-        self._video.set(cv2.CAP_PROP_BUFFERSIZE,3)
-        self.musicPath = musicPath
+        loadAudioAsMusic(moviePath)
         self.musicPlayed = False
         self.__clock = pygame.time.Clock()
-        pygame.mixer.music.unload()
+        self.calibrationNum = 0
     def display(self,screen):
-        super().display(screen)
-        if self.musicPlayed == False:
-            pygame.mixer.music.load(self.musicPath)
+        if not self.musicPlayed:
+            pygame.mixer.stop()
             pygame.mixer.music.play()
             self.musicPlayed = True
         elif pygame.mixer.music.get_busy() == False and self.ifLoop == True:
-            pygame.mixer.music.load(self.musicPath)
             pygame.mixer.music.play()
         self.__clock.tick(self._fps)
+        CurrentFrame = int(pygame.mixer.music.get_pos()/1000*self._fps)
+        if CurrentFrame - self.getFrame() > 10:
+            self.setFrame(CurrentFrame)
+            self.calibrationNum +=1
+        return super().display(screen)
         #framePlayed = self.getFrameNum()
         #print(int(pygame.mixer.music.get_pos()/1000))
         #if framePlayed %5 == 0 and framePlayed :
