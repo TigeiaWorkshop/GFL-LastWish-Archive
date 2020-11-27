@@ -7,6 +7,7 @@ import os
 def getAudioFromVideo(moviePath):
     #把视频载入到流中
     input_container = av.open(moviePath)
+    input_container.streams.video[0].thread_type = 'AUTO'
     input_stream = input_container.streams.get(audio=0)[0]
     #获取路径
     filePath = os.path.split(moviePath)[0]
@@ -22,6 +23,8 @@ def getAudioFromVideo(moviePath):
         frame.pts = None
         for packet in output_stream.encode(frame):
             output_container.mux(packet)
+
+    input_container.close()
 
     for packet in output_stream.encode(None):
         output_container.mux(packet)
@@ -40,7 +43,22 @@ def loadAudioAsMusic(moviePath):
     pygame.mixer.music.unload()
     path = getAudioFromVideo(moviePath)
     pygame.mixer.music.load(path)
-    
+
+#视频捕捉系统
+class VideoObjectPyAv:
+    def __init__(self,path,ifLoop=False,endPoint=None,loopStartPoint=None):
+        self._video = av.open(path)
+        self.ifLoop = ifLoop
+        self.endPoint = endPoint if endPoint != None and endPoint > 1 else self.getFrameNum()
+        self.loopStartPoint = loopStartPoint if loopStartPoint != None and loopStartPoint > 1 else 1
+        self._fps = self._video.streams.video[0].framerate
+    def getFrameNum(self):
+        return self._video.streams.video[0].frames
+    def getFrameRate(self):
+        return self._video.streams.video[0].framerate
+    def getFileName(self):
+        return None
+
 
 #视频捕捉系统
 class VideoObject:
