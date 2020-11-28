@@ -44,21 +44,6 @@ def loadAudioAsMusic(moviePath):
     path = getAudioFromVideo(moviePath)
     pygame.mixer.music.load(path)
 
-#视频捕捉系统
-class VideoObjectPyAv:
-    def __init__(self,path,ifLoop=False,endPoint=None,loopStartPoint=None):
-        self._video = av.open(path)
-        self.ifLoop = ifLoop
-        self.endPoint = endPoint if endPoint != None and endPoint > 1 else self.getFrameNum()
-        self.loopStartPoint = loopStartPoint if loopStartPoint != None and loopStartPoint > 1 else 1
-        self._fps = self._video.streams.video[0].framerate
-    def getFrameNum(self):
-        return self._video.streams.video[0].frames
-    def getFrameRate(self):
-        return self._video.streams.video[0].framerate
-    def getFileName(self):
-        return None
-
 
 #视频捕捉系统
 class VideoObject:
@@ -111,9 +96,6 @@ class VideoObjectWithMusic(VideoObject):
             self.setFrame(CurrentFrame)
             self.calibrationNum +=1
         return super().display(screen)
-        #framePlayed = self.getFrameNum()
-        #print(int(pygame.mixer.music.get_pos()/1000))
-        #if framePlayed %5 == 0 and framePlayed :
 
 #过场动画
 def cutscene(screen,videoPath,bgmPath=None):
