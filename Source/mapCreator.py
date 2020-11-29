@@ -1,7 +1,7 @@
 # cython: language_level=3
 from Source.init import *
 
-def mapCreator(chapterName,screen,setting):
+def mapCreator(chapterName,screen):
     #屏幕尺寸
     window_x,window_y = screen.get_size()
     #窗口标题

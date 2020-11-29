@@ -2,28 +2,21 @@
 from Source.scene import *
 from Source.mapCreator import *
 
-def mainMenu(screen,setting):
+def mainMenu(screen):
     #获取屏幕的尺寸
     window_x,window_y = screen.get_size()
     #设置引擎的标准文字大小
     Zero.set_standard_font_size(int(window_x/38),"medium")
     #修改控制台的位置
     Zero.console.set_pos(window_x*0.1,window_y*0.8)
-    #加载主菜单文字
-    try:
-        with open("Lang/"+setting['Language']+".yaml", "r", encoding='utf-8') as f:
-            loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-    except BaseException:
-        raise Exception('Error: Current language is not supported, please check the "setting.yaml" file in Save folder!')
-    game_title = loadData['GameTitle']
-    main_menu_txt = loadData['MainMenu']
-    chapter_select = loadData['Chapter']
+    game_title = Zero.get_lang('GameTitle')
+    main_menu_txt = Zero.get_lang('MainMenu')
+    chapter_select = Zero.get_lang('Chapter')
     #选项模块
-    settingUI = Zero.SettingContoller(window_x,window_y,setting,loadData["SettingUI"])
+    settingUI = Zero.SettingContoller(window_x,window_y,Zero.get_lang("SettingUI"))
     #健康游戏忠告
-    if "HealthyGamingAdvice" in loadData:
-        HealthyGamingAdvice = loadData["HealthyGamingAdvice"]
-    else:
+    HealthyGamingAdvice = Zero.get_lang("HealthyGamingAdvice")
+    if HealthyGamingAdvice == None:
         HealthyGamingAdvice = []
     #当前可用的菜单选项
     enabled_option = ["text0_start","text1_setting","text3_exit","text1_chooseChapter","text4_mapCreator","text5_dialogCreator","text7_back"]
@@ -70,7 +63,7 @@ def mainMenu(screen,setting):
     pygame.display.set_caption(game_title) #窗口标题
     
     #加载主菜单背景
-    videoCapture = Zero.VideoObjectWithMusic("Assets/movie/SquadAR.mp4","Assets/music/LoadOut.mp3",True,3105,935)
+    videoCapture = Zero.VedioFrame("Assets/movie/SquadAR.mp4",window_x,window_y,True,True,(3105,935))
     pygame.mixer.music.set_volume(Zero.get_setting("Sound","background_music")/100.0)
     #数值初始化
     cover_alpha = 0
@@ -79,15 +72,15 @@ def mainMenu(screen,setting):
     cover_img = Zero.loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
     #音效
     click_button_sound = pygame.mixer.Sound("Assets/sound/ui/main_menu_click_button.ogg")
-    click_button_sound.set_volume(setting["Sound"]["sound_effects"]/100.0)
+    click_button_sound.set_volume(Zero.get_setting("Sound","sound_effects")/100.0)
     hover_on_button_sound = pygame.mixer.Sound("Assets/sound/ui/main_menu_hover_on_button.ogg")
-    hover_on_button_sound.set_volume(setting["Sound"]["sound_effects"]/100.0)
+    hover_on_button_sound.set_volume(Zero.get_setting("Sound","sound_effects")/100.0)
     hover_sound_play_on = None
     last_hover_sound_play_on = None
 
     the_black = Zero.get_SingleColorSurface("black")
-    t1 = Zero.fontRender(loadData["title1"],"white",window_x/64)
-    t2 = Zero.fontRender(loadData["title2"],"white",window_x/64)
+    t1 = Zero.fontRender(Zero.get_lang("title1"),"white",window_x/64)
+    t2 = Zero.fontRender(Zero.get_lang("title2"),"white",window_x/64)
     for i in range(len(HealthyGamingAdvice)):
         HealthyGamingAdvice[i] = Zero.fontRender(HealthyGamingAdvice[i],"white",window_x/64)
 
@@ -113,6 +106,8 @@ def mainMenu(screen,setting):
             HealthyGamingAdvice[a].set_alpha(i)
             Zero.drawImg(HealthyGamingAdvice[a],(window_x-window_x/32-HealthyGamingAdvice[a].get_width(),window_y*0.9-window_x/64*a*1.5),screen)
         Zero.display.flip(True)
+
+    videoCapture.start()
 
     # 游戏主循环
     while True:
@@ -170,6 +165,7 @@ def mainMenu(screen,setting):
                 elif Zero.ifHover(main_menu_txt["menu_0"]["text2_developer_team"]):
                     pass
                 elif Zero.ifHover(main_menu_txt["menu_0"]["text3_exit"]):
+                    videoCapture.stop()
                     Zero.display.quit()
             elif menu_type == 1:
                 if Zero.ifHover(main_menu_txt["menu_1"]["text0_continue"]):
@@ -179,8 +175,9 @@ def mainMenu(screen,setting):
                         if SAVE["type"] == "battle":
                             SAVE["id"] = "head"
                             SAVE["dialog_options"] = {}
+                        videoCapture.stop()
                         scene(SAVE["chapterType"],SAVE["chapterName"],screen,SAVE["type"],SAVE["id"],SAVE["dialog_options"])
-                        videoCapture.setFrame(1)
+                        videoCapture.start()
                         #是否可以继续游戏了（save文件是否被创建）
                         if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:
                             main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
@@ -194,7 +191,7 @@ def mainMenu(screen,setting):
                 if Zero.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"]):
                     menu_type = 2
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
-                    mapCreator("chapter1",screen,setting)
+                    mapCreator("chapter1",screen)
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text5_dialogCreator"]):
                     dialogCreator("main_chapter","chapter1",screen,"dialog_before_battle")
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text7_back"]):
@@ -205,8 +202,9 @@ def mainMenu(screen,setting):
                         menu_type = 1
                     #章节选择
                     elif Zero.ifHover(chapter_select[i]) and i==0:
+                        videoCapture.stop()
                         scene("main_chapter","chapter"+str(i+1),screen)
-                        videoCapture.setFrame(1)
+                        videoCapture.start()
                         #是否可以继续游戏了（save文件是否被创建）
                         if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:
                             main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))

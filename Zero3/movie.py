@@ -1,42 +1,46 @@
 # cython: language_level=3
-import cv2
 import pygame
 import av
 import os
+import threading, queue
+from math import ceil
 
-def getAudioFromVideo(moviePath):
-    #把视频载入到流中
+def getAudioFromVideo(moviePath,audioType="mp3"):
+    #如果没有Temp文件夹，则创建一个
+    if not os.path.exists("Temp"):
+        os.makedirs("Temp")
+    #获取路径
+    filePath,fileName = os.path.split(moviePath)
+    fileName.replace(".","")
+    outPutPath = "Temp/{0}.{1}".format(fileName.replace(".",""),audioType)
+    if os.path.exists(outPutPath):
+        return outPutPath
+    #把视频载入到流容器中
     input_container = av.open(moviePath)
     input_container.streams.video[0].thread_type = 'AUTO'
     input_stream = input_container.streams.get(audio=0)[0]
-    #获取路径
-    filePath = os.path.split(moviePath)[0]
-
-    i = 0
-    while os.path.exists(filePath+"Tmp"+str(i)):
-        i+=1
-    outPutPath = filePath+"Tmp"+str(i)+".mp3"
+    #创建输出的容器
     output_container = av.open(outPutPath, 'w')
-    output_stream = output_container.add_stream('mp3')
-
+    output_stream = output_container.add_stream(audioType)
+    #把input容器中的音乐片段载入到输出容器中
     for frame in input_container.decode(input_stream):
         frame.pts = None
         for packet in output_stream.encode(frame):
             output_container.mux(packet)
-
+    #关闭input容器
     input_container.close()
-
+    #解码输出容器
     for packet in output_stream.encode(None):
         output_container.mux(packet)
-
+    #写入工作完成，关闭输出容器
     output_container.close()
-
+    #读取完成，返回音乐文件的对应目录
     return outPutPath
 
 def loadAudioAsSound(moviePath):
     path = getAudioFromVideo(moviePath)
     PygameAudio = pygame.mixer.Sound(path)
-    os.remove(path)
+    #os.remove(path)
     return PygameAudio
 
 def loadAudioAsMusic(moviePath):
@@ -44,63 +48,97 @@ def loadAudioAsMusic(moviePath):
     path = getAudioFromVideo(moviePath)
     pygame.mixer.music.load(path)
 
-
-#视频捕捉系统
-class VideoObject:
-    def __init__(self,path,ifLoop=False,endPoint=None,loopStartPoint=None):
-        self._video = cv2.VideoCapture(path)
-        self.ifLoop = ifLoop
-        self.endPoint = endPoint if endPoint != None and endPoint > 1 else self.getFrameNum()
-        self.loopStartPoint = loopStartPoint if loopStartPoint != None and loopStartPoint > 1 else 1
-        self._fps = self._video.get(cv2.CAP_PROP_FPS)
-    def getFPS(self):
-        return self._fps
-    def getFrameNum(self):
-        return self._video.get(7)
-    def getFrame(self):
-        return self._video.get(1)
-    def setFrame(self,num):
-        self._video.set(1,num)
+#视频模块接口，不能实例化
+class VedioInterface(threading.Thread):
+    def __init__(self,path,width,height):
+        threading.Thread.__init__(self)
+        self._video_container = av.open(path,mode='r')
+        self._video_stream = self._video_container.streams.video[0]
+        self._video_stream.thread_type = 'AUTO'
+        self._frameNum = self._video_stream.frames
+        self._frameRate = ceil(self._video_stream.average_rate)
+        self.__frameIndex = 0
+        self._frameQueue = queue.Queue(maxsize=self._frameRate)
+        self._stopped = False
+        self._clock = pygame.time.Clock()
+        self.width = width
+        self.height = height
+    def get_frameNum(self):
+        return self._frameNum
+    def get_frameRate(self):
+        return self._frameRate
+    def get_frameIndex(self):
+        return self.__frameIndex
+    def set_frameIndex(self,index):
+        self.__frameIndex = index
+        self._video_container.seek(round(self.get_pos()/self._video_stream.time_base),stream=self._video_stream)
+    def get_pos(self):
+        return self.__frameIndex/self._frameRate
+    def get_percentagePlayed(self):
+        return self.__frameIndex/self._frameNum
+    def stop(self):
+        self._stopped = True
+    def _processFrame(self,frame):
+        while self._frameQueue.full():
+            pass
+        array = frame.to_ndarray(width=self.width,height=self.height,format='rgb24')
+        array = array.swapaxes(0,1)
+        self._frameQueue.put(array)
+        self.__frameIndex += 1
     def display(self,screen):
-        if self.getFrame() >= self.endPoint:
-            if self.ifLoop == True:
-                self.setFrame(self.loopStartPoint)
-            else:
-                return True
-        #获取帧
-        ret,frame = self._video.read()
-        if frame.shape[0] != screen.get_width() or frame.shape[1] != screen.get_height():
-            frame = cv2.resize(frame,(screen.get_width(),screen.get_height()))
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = frame.swapaxes(0,1)
-        pygame.surfarray.blit_array(screen, frame)
+        pygame.surfarray.blit_array(screen, self._frameQueue.get())
 
-#视频捕捉系统
-class VideoObjectWithMusic(VideoObject):
-    def __init__(self,moviePath,ifLoop=False,endPoint=None,loopStartPoint=None):
-        VideoObject.__init__(self,moviePath,ifLoop,endPoint,loopStartPoint)
-        loadAudioAsMusic(moviePath)
-        self.musicPlayed = False
-        self.__clock = pygame.time.Clock()
-        self.calibrationNum = 0
+#视频片段展示模块--灵活，但不能保证帧数和音乐同步
+class VedioFrame(VedioInterface):
+    def __init__(self,path,width,height,loop=True,with_music=False,play_range=None):
+        VedioInterface.__init__(self,path,width,height)
+        self.loop = loop
+        self.looped = False
+        self.bgm = loadAudioAsSound(path) if with_music else None
+        self.bgm_channel = pygame.mixer.find_channel()
+        self.start_point = play_range[0] if play_range != None else None
+        self.end_point = play_range[0] if play_range != None else None
+    def run(self):
+        for frame in self._video_container.decode(self._video_stream):
+            if self._stopped:
+                break
+            self._processFrame(frame)
+            if self.end_point != None and self.get_frameIndex() == self.end_point:
+                self.looped += 1
+                if self.loop != -1 and self.looped > self.loop:
+                    return
+                else:
+                    self.set_frameIndex(self.start_point)
+            self._clock.tick(self._frameRate)
     def display(self,screen):
-        if not self.musicPlayed:
-            pygame.mixer.stop()
-            pygame.mixer.music.play()
-            self.musicPlayed = True
-        elif pygame.mixer.music.get_busy() == False and self.ifLoop == True:
-            pygame.mixer.music.play()
-        self.__clock.tick(self._fps)
-        CurrentFrame = int(pygame.mixer.music.get_pos()/1000*self._fps)
-        if CurrentFrame - self.getFrame() > 10:
-            self.setFrame(CurrentFrame)
-            self.calibrationNum +=1
-        return super().display(screen)
+        super().display(screen)
+        if self.bgm != None and not self.bgm_channel.get_busy():
+            if self.looped == False or self.loop == True:
+                self.bgm_channel.play(self.bgm)
+
+#视频播放系统模块--强制帧数和音乐同步，但不灵活
+class VedioPlayer(VedioInterface):
+    def __init__(self,path,width,height):
+        VedioInterface.__init__(self,path,width,height)
+        self.__allowFrameDelay = 10
+        loadAudioAsMusic(path)
+    def run(self):
+        pygame.mixer.music.play()
+        for frame in self._video_container.decode(self._video_stream):
+            if self._stopped:
+                break
+            self._processFrame(frame)
+            if not int(pygame.mixer.music.get_pos()/1000*self._frameRate)-self.get_frameIndex() >= self.__allowFrameDelay:
+                self._clock.tick(self._frameRate)
+        pygame.mixer.music.unload()
+    def set_frameIndex(self,index):
+        super().set_frameIndex(index)
+        pygame.mixer.music.set_pos(round(self.get_pos()))
 
 #过场动画
-def cutscene(screen,videoPath,bgmPath=None):
-    thevideo = VideoObjectWithMusic(videoPath,bgmPath)
+def cutscene(screen,videoPath):
     width,height = screen.get_size()
+    VIDEO = VedioPlayer(videoPath,width,height)
     black_bg = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
     pygame.draw.rect(black_bg,(0,0,0),(0,0,width,height))
     black_bg.set_alpha(0)
@@ -111,26 +149,34 @@ def cutscene(screen,videoPath,bgmPath=None):
     skip_button_x_end = skip_button_x+skip_button_width
     skip_button_y_end = skip_button_y+skip_button_height
     skip_button = pygame.transform.scale(pygame.image.load("Assets/image/UI/dialog_skip.png").convert_alpha(), (skip_button_width,skip_button_height))
-    ifSkip = False
-    while True:
-        if thevideo.display(screen) == True:
+    is_skip = False
+    is_playing = True
+    white_progress_bar = (255,255,255)
+    white_progress_bar_height = 10
+    VIDEO.start()
+    VIDEO.set_frameIndex(8000)
+    while is_playing:
+        if VIDEO.is_alive():
+            VIDEO.display(screen)
+            screen.blit(skip_button,(skip_button_x,skip_button_y))
+            pygame.draw.rect(screen,white_progress_bar,(white_progress_bar_height,height-white_progress_bar_height*2,(width-white_progress_bar_height*2)*VIDEO.get_percentagePlayed(),white_progress_bar_height))
+            events_of_mouse_click = pygame.event.get(pygame.MOUSEBUTTONDOWN)
+            if len(events_of_mouse_click) > 0:
+                for event in events_of_mouse_click:
+                    if event.button == 1:
+                        mouse_x,mouse_y = pygame.mouse.get_pos()
+                        if skip_button_x<mouse_x<skip_button_x_end and skip_button_y<mouse_y<skip_button_y_end and is_skip == False:
+                            is_skip = True
+                            pygame.mixer.music.fadeout(5000)
+                        break
+            if is_skip:
+                temp_alpha = black_bg.get_alpha()
+                if temp_alpha < 255:
+                    black_bg.set_alpha(temp_alpha+5)
+                else:
+                    is_playing = False
+                    VIDEO.stop()
+                screen.blit(black_bg,(0,0))
+            pygame.display.flip()
+        else:
             break
-        screen.blit(skip_button,(skip_button_x,skip_button_y))
-        events_of_mouse_click = pygame.event.get(pygame.MOUSEBUTTONDOWN)
-        if len(events_of_mouse_click) > 0:
-            for event in events_of_mouse_click:
-                if event.button == 1:
-                    mouse_x,mouse_y = pygame.mouse.get_pos()
-                    if skip_button_x<mouse_x<skip_button_x_end and skip_button_y<mouse_y<skip_button_y_end and ifSkip == False:
-                        ifSkip = True
-                        pygame.mixer.music.fadeout(5000)
-                    break
-        if ifSkip == True:
-            temp_alpha = black_bg.get_alpha()
-            if temp_alpha < 255:
-                black_bg.set_alpha(temp_alpha+5)
-            else:
-                break
-            screen.blit(black_bg,(0,0))
-        pygame.display.flip()
-    pygame.mixer.music.stop()

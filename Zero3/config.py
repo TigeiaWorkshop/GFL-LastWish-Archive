@@ -1,5 +1,10 @@
-import yaml
+# cython: language_level=3
 import os
+import pygame
+import yaml
+from pygame.locals import *
+#初始化pygame
+pygame.init()
 
 #加载设置配置文件
 ZERO_DATA = None
@@ -57,10 +62,17 @@ def get_lang(key=None):
     if key == None:
         return ZERO_LANG
     else:
-        return ZERO_LANG[key]
+        if key in ZERO_LANG:
+            return ZERO_LANG[key]
+        else:
+            return None
 
 #重新加载语言配置文件
 def reload_lang():
     global ZERO_LANG
     with open("Lang/{}.yaml".format(ZERO_DATA["Language"]), "r", encoding='utf-8') as f:
         ZERO_LANG = yaml.load(f.read(),Loader=yaml.FullLoader)
+
+#初始化屏幕
+def screen_init(flags):
+    return pygame.display.set_mode((ZERO_DATA["Screen_size_x"], ZERO_DATA["Screen_size_y"]),flags)

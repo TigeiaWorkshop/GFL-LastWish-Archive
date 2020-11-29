@@ -1,6 +1,6 @@
 # cython: language_level=3
 from Zero3.basic import *
-from Zero3.movie import cutscene,VideoObject
+from Zero3.movie import cutscene,VedioFrame
 
 #视觉小说系统模块
 class DialogSystem:
@@ -921,7 +921,7 @@ class DialogBackground:
                 #如果在背景图片的文件夹里找不到对应的图片，则查看是否是视频文件
                 elif os.path.exists("Assets/movie/"+self.backgroundImgName):
                     try:
-                        self.backgroundImgSurface = VideoObject("Assets/movie/"+self.backgroundImgName,True)
+                        self.backgroundImgSurface = VedioFrame("Assets/movie/"+self.backgroundImgName,display.get_width(),display.get_height(),True)
                     except BaseException:
                         raise Exception('ZeroEngine-Error: Cannot run movie module')
                 else:

@@ -156,7 +156,7 @@ class Snow:
 
 #设置UI
 class SettingContoller:
-    def __init__(self,window_x,window_y,settingData,langTxt):
+    def __init__(self,window_x,window_y,langTxt):
         self.ifDisplay = False
         self.baseImgWidth = round(window_x/3)
         self.baseImgHeight = round(window_x/3)
@@ -175,9 +175,9 @@ class SettingContoller:
         self.bar_y2 = self.baseImgY + self.baseImgHeight*0.6
         self.bar_y3 = self.baseImgY + self.baseImgHeight*0.8
         #音量数值
-        self.soundVolume_background_music = settingData["Sound"]["background_music"]
-        self.soundVolume_sound_effects = settingData["Sound"]["sound_effects"]
-        self.soundVolume_sound_environment = settingData["Sound"]["sound_environment"]
+        self.soundVolume_background_music = get_setting("Sound","background_music")
+        self.soundVolume_sound_effects = get_setting("Sound","sound_effects")
+        self.soundVolume_sound_environment = get_setting("Sound","sound_environment")
         #设置UI中的文字
         self.FONTSIZE = round(window_x/50)
         self.fontSizeBig = round(window_x/50*1.5)
