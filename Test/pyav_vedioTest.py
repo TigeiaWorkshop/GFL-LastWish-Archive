@@ -45,87 +45,76 @@ def loadAudioAsSound(moviePath):
     os.remove(path)
     return PygameAudio
 
-class VedioFrame(threading.Thread):
-    def __init__(self,path,loop=0,with_music=False):
-        threading.Thread.__init__(self)
-        self._video_container = av.open(path,mode='r')
-        self._video_stream = self._video_container.streams.video[0]
-        self._video_stream.thread_type = 'AUTO'
-        self.frameNum = self._video_container.streams.video[0].frames
-        self.frameRate = math.ceil(self._video_container.streams.video[0].average_rate)
-        self.frameIndex = 0
-        self.frameQueue = queue.Queue()
-        self.__stopped = False
-        self.__clock = pygame.time.Clock()
-        self.__allowFrameDelay = 10
-        self.loop = loop
-        self.looped = -1
-        self.bgm = loadAudioAsSound() if with_music else None
-        self.bgm_channel = pygame.mixer.find_channel()
-    def getFrameNum(self):
-        return self.frameNum
-    def getFrameRate(self):
-        return self.frameRate
-    def run(self):
-        for frame in self._video_container.decode(self._video_stream):
-            if self.__stopped:
-                break
-            while self.frameQueue.qsize() > self.frameRate*3:
-                pass
-            array = frame.to_ndarray(width=1920,height=1080,format='rgb24')
-            array = array.swapaxes(0,1)
-            self.frameQueue.put(array)
-            self.frameIndex += 1
-            if not int(pygame.mixer.music.get_pos()/1000*self.frameRate)-self.frameIndex >= self.__allowFrameDelay:
-                self.__clock.tick(self.frameRate)
-    def display(self,screen):
-        pygame.surfarray.blit_array(screen, self.frameQueue.get())
-        if self.bgm != None and not self.bgm_channel.get_busy() and self.looped < self.loop:
-            self.bgm_channel.play(self.bgm)
-    def stop(self):
-        self.__stopped = True
-
-#视频捕捉系统
-class VedioPlayer(threading.Thread):
+class VedioInterface(threading.Thread):
     def __init__(self,path):
         threading.Thread.__init__(self)
         self._video_container = av.open(path,mode='r')
         self._video_stream = self._video_container.streams.video[0]
         self._video_stream.thread_type = 'AUTO'
-        self.frameNum = self._video_container.streams.video[0].frames
-        self.frameRate = math.ceil(self._video_container.streams.video[0].average_rate)
-        self.frameIndex = 0
-        self.frameQueue = queue.Queue()
-        self.__stopped = False
-        self.__clock = pygame.time.Clock()
+        self._frameNum = self._video_stream.frames
+        self._frameRate = math.ceil(self._video_stream.average_rate)
+        self.__frameIndex = 0
+        self._frameQueue = queue.Queue()
+        self._stopped = False
+        self._clock = pygame.time.Clock()
+    def get_frameNum(self):
+        return self._frameNum
+    def get_frameRate(self):
+        return self._frameRate
+    def get_frameIndex(self):
+        return self.__frameIndex
+    def set_frameIndex(self,index):
+        self.__frameIndex = index
+        timeOffset = int(self.__frameIndex/self._frameRate/self._video_stream.time_base)
+        self._video_container.seek(timeOffset,stream=self._video_stream)
+    def get_percentagePlayed(self):
+        return self.__frameIndex/self._frameNum
+    def stop(self):
+        self._stopped = True
+    def _processFrame(self,frame):
+        while self._frameQueue.qsize() > self._frameRate*3:
+            pass
+        array = frame.to_ndarray(width=1920,height=1080,format='rgb24')
+        array = array.swapaxes(0,1)
+        self._frameQueue.put(array)
+        self.__frameIndex += 1
+    def display(self,screen):
+        pygame.surfarray.blit_array(screen, self._frameQueue.get())
+
+class VedioFrame(VedioInterface):
+    def __init__(self,path,loop=0,with_music=False):
+        VedioInterface.__init__(self,path)
+        self.loop = loop
+        self.looped = -1
+        self.bgm = loadAudioAsSound() if with_music else None
+        self.bgm_channel = pygame.mixer.find_channel()
+    def run(self):
+        for frame in self._video_container.decode(self._video_stream):
+            if self._stopped:
+                break
+            self._processFrame(frame)
+            self._clock.tick(self._frameRate)
+    def display(self,screen):
+        super().display(screen)
+        if self.bgm != None and not self.bgm_channel.get_busy() and self.looped < self.loop:
+            self.bgm_channel.play(self.bgm)
+
+#视频捕捉系统
+class VedioPlayer(VedioInterface):
+    def __init__(self,path):
+        VedioInterface.__init__(self,path)
         self.__allowFrameDelay = 10
         loadAudioAsMusic(path)
-    def getFrameNum(self):
-        return self.frameNum
-    def getFrameRate(self):
-        return self.frameRate
     def run(self):
         pygame.mixer.music.play()
         for frame in self._video_container.decode(self._video_stream):
-            if self.__stopped:
+            if self._stopped:
                 break
-            while self.frameQueue.qsize() > self.frameRate*3:
-                pass
-            array = frame.to_ndarray(width=1920,height=1080,format='rgb24')
-            array = array.swapaxes(0,1)
-            self.frameQueue.put(array)
-            self.frameIndex += 1
-            if not int(pygame.mixer.music.get_pos()/1000*self.frameRate)-self.frameIndex >= self.__allowFrameDelay:
-                self.__clock.tick(self.frameRate)
-    def display(self,screen):
-        pygame.surfarray.blit_array(screen, self.frameQueue.get())
-    def stop(self):
-        self.__stopped = True
+            self._processFrame(frame)
+            if not int(pygame.mixer.music.get_pos()/1000*self._frameRate)-self.get_frameIndex() >= self.__allowFrameDelay:
+                self._clock.tick(self._frameRate)
 
-
-mediaTmp = VedioPlayer('..\Assets\movie\WhatAmIFightingFor.mp4')
-
-
+mediaTmp = VedioFrame('..\Assets\movie\WhatAmIFightingFor.mp4')
 
 width = 1920
 height = 1080
@@ -135,6 +124,7 @@ playMovie = True
 
 white_bar = (255,255,255)
 white_bar_height = 10
+mediaTmp.set_frameIndex(1000)
 mediaTmp.start()
 
 while True:
@@ -148,7 +138,7 @@ while True:
         break
     
     mediaTmp.display(screen)
-    pygame.draw.rect(screen,white_bar,(10,height-white_bar_height*2,(width-10*2)*mediaTmp.frameIndex/mediaTmp.frameNum,white_bar_height))
+    pygame.draw.rect(screen,white_bar,(10,height-white_bar_height*2,(width-10*2)*mediaTmp.get_percentagePlayed(),white_bar_height))
 
 
     pygame.display.flip()
