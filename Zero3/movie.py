@@ -4,15 +4,16 @@ import av
 import os
 import threading, queue
 from math import ceil
+from Zero3.config import get_setting
 
 def getAudioFromVideo(moviePath,audioType="mp3"):
-    #如果没有Temp文件夹，则创建一个
-    if not os.path.exists("Temp"):
-        os.makedirs("Temp")
+    #如果没有Cache文件夹，则创建一个
+    if not os.path.exists("Cache"):
+        os.makedirs("Cache")
     #获取路径
     filePath,fileName = os.path.split(moviePath)
     fileName.replace(".","")
-    outPutPath = "Temp/{0}.{1}".format(fileName.replace(".",""),audioType)
+    outPutPath = "Cache/{0}.{1}".format(fileName.replace(".",""),audioType)
     if os.path.exists(outPutPath):
         return outPutPath
     #把视频载入到流容器中
@@ -40,13 +41,16 @@ def getAudioFromVideo(moviePath,audioType="mp3"):
 def loadAudioAsSound(moviePath):
     path = getAudioFromVideo(moviePath)
     PygameAudio = pygame.mixer.Sound(path)
-    #os.remove(path)
+    if not get_setting("KeepVedioCache"):
+        os.remove(path)
     return PygameAudio
 
 def loadAudioAsMusic(moviePath):
     pygame.mixer.music.unload()
     path = getAudioFromVideo(moviePath)
     pygame.mixer.music.load(path)
+    if not get_setting("KeepVedioCache"):
+        os.remove(path)
 
 #视频模块接口，不能实例化
 class VedioInterface(threading.Thread):
@@ -55,6 +59,8 @@ class VedioInterface(threading.Thread):
         self._video_container = av.open(path,mode='r')
         self._video_stream = self._video_container.streams.video[0]
         self._video_stream.thread_type = 'AUTO'
+        self._audio_stream = self._video_container.streams.audio[0]
+        self._audio_stream.thread_type = 'AUTO'
         self._frameNum = self._video_stream.frames
         self._frameRate = ceil(self._video_stream.average_rate)
         self.__frameIndex = 0
@@ -63,6 +69,7 @@ class VedioInterface(threading.Thread):
         self._clock = pygame.time.Clock()
         self.width = width
         self.height = height
+        self.pts = 0
     def get_frameNum(self):
         return self._frameNum
     def get_frameRate(self):
@@ -72,6 +79,13 @@ class VedioInterface(threading.Thread):
     def set_frameIndex(self,index):
         self.__frameIndex = index
         self._video_container.seek(round(self.get_pos()/self._video_stream.time_base),stream=self._video_stream)
+    def _set_pos(self,time):
+        self._video_container.seek(int(time/self._video_stream.time_base),stream=self._video_stream)
+        self._frameQueue.queue.clear()
+        while self._frameQueue.empty():
+            pass
+        #self.__frameIndex = int(self.pts*self._video_stream.time_base*self._frameRate)
+        return self.pts*self._video_stream.time_base
     def get_pos(self):
         return self.__frameIndex/self._frameRate
     def get_percentagePlayed(self):
@@ -81,6 +95,7 @@ class VedioInterface(threading.Thread):
     def _processFrame(self,frame):
         while self._frameQueue.full():
             pass
+        self.pts = frame.pts
         array = frame.to_ndarray(width=self.width,height=self.height,format='rgb24')
         array = array.swapaxes(0,1)
         self._frameQueue.put(array)
@@ -131,9 +146,16 @@ class VedioPlayer(VedioInterface):
             if not int(pygame.mixer.music.get_pos()/1000*self._frameRate)-self.get_frameIndex() >= self.__allowFrameDelay:
                 self._clock.tick(self._frameRate)
         pygame.mixer.music.unload()
+    """
     def set_frameIndex(self,index):
         super().set_frameIndex(index)
         pygame.mixer.music.set_pos(round(self.get_pos()))
+    def set_pos(self,time):
+        print(time)
+        time = super()._set_pos(time)
+        print(time)
+        pygame.mixer.music.set_pos(time)
+    """
 
 #过场动画
 def cutscene(screen,videoPath):
@@ -154,7 +176,6 @@ def cutscene(screen,videoPath):
     white_progress_bar = (255,255,255)
     white_progress_bar_height = 10
     VIDEO.start()
-    VIDEO.set_frameIndex(8000)
     while is_playing:
         if VIDEO.is_alive():
             VIDEO.display(screen)

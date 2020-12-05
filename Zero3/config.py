@@ -21,6 +21,7 @@ else:
         "FPS": 60,
         "Font": "MicrosoftYaHei-2",
         "FontType": "custom",
+        "KeepVedioCache": True,
         "Language": locale.getdefaultlocale(),
         "MouseIconWidth": 18,
         "MouseMoveSpeed": 30,
