@@ -1,0 +1,364 @@
+# cython: language_level=3
+from Zero3.battleSystemInterface import *
+
+class mapCreator(BattleSystemInterface):
+    def __init__(self):
+        BattleSystemInterface.__init__(self)
+        display.set_caption("Girls frontline-Last Wish: MapCreator")
+        unloadBackgroundMusic()
+    def initialize(self,screen,chapterType,chapterName):
+        #屏幕尺寸
+        self.window_x,self.window_y = screen.get_size()
+        self.chapterName = chapterName
+        self.chapterType = chapterType
+        del chapterName,chapterType
+        with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
+            self.blocks_setting = yaml.load(f.read(),Loader=yaml.FullLoader)["blocks"]
+        with open("Data/decorations.yaml", "r", encoding='utf-8') as f:
+            self.decorations_setting = yaml.load(f.read(),Loader=yaml.FullLoader)["decorations"]
+        with open("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName), "r", encoding='utf-8') as f:
+            loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+            #初始化角色信息
+            characterDataThread = initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],"dev")
+            #加载角色信息
+            characterDataThread.start()
+            characterDataThread.join()
+            self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
+            #加载所有角色的数据
+            self.DATABASE = characterDataThread.DATABASE
+            #初始化地图
+            self.MAP = loadData["map"]
+            if self.MAP == None or len(self.MAP) == 0:
+                SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
+                block_y = 50
+                block_x = 50
+                default_map = []
+                for i in range(block_y):
+                    map_per_line = []
+                    for a in range(block_x):
+                        map_per_line.append(SnowEnvImg[randomInt(0,5)])
+                    default_map.append(map_per_line)
+                with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "w", encoding='utf-8') as f:
+                    loadData["map"] = default_map
+                    yaml.dump(loadData, f)
+            else:
+                block_y = len(loadData["map"])
+                block_x = len(loadData["map"][0])
+                #加载地图
+        self.MAP = MapObject(loadData,int(self.window_x/10))
+        self.MAP.darkMode = False
+        #加载背景图片
+        self.envImgDict={}
+        for imgPath in glob.glob(r'Assets/image/environment/block/*.png'):
+            img_name = imgPath.replace(".","").replace("Assets","").replace("block","").replace("image","").replace("environment","").replace("png","").replace("\\","").replace("/","")
+            self.envImgDict[img_name] = loadImg(imgPath,int(self.MAP.perBlockWidth/3))
+        #加载所有友方的角色的图片文件
+        self.charactersImgDict={}
+        for imgPath in glob.glob(r'Assets/image/character/*'):
+            img_name = imgPath.replace(".","").replace("Assets","").replace("image","").replace("character","").replace("\\","").replace("/","")
+            self.charactersImgDict[img_name] = loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",self.MAP.perBlockWidth)
+        #加载所有敌对角色的图片文件
+        self.sangvisFerrisImgDict={}
+        for imgPath in glob.glob(r'Assets/image/sangvisFerri/*'):
+            img_name = imgPath.replace(".","").replace("Assets","").replace("image","").replace("sangvisFerri","").replace("\\","").replace("/","")
+            self.sangvisFerrisImgDict[img_name] = loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",self.MAP.perBlockWidth)
+        #加载所有的装饰品
+        self.decorationsImgDict = {}
+        for imgPath in glob.glob(r'Assets/image/environment/decoration/*'):
+            img_name = imgPath.replace(".png","").replace(".","").replace("Assets","").replace("image","").replace("environment","").replace("decoration","").replace("\\","").replace("/","")
+            self.decorationsImgDict[img_name] = loadImg(imgPath,self.MAP.perBlockWidth/5)
+        #绿色方块/方块标准
+        self.greenBlock = loadImg("Assets/image/UI/green.png",int(self.MAP.perBlockWidth*0.8))
+        self.greenBlock.set_alpha(150)
+        self.redBlock = loadImg("Assets/image/UI/red.png",int(self.MAP.perBlockWidth*0.8))
+        self.redBlock.set_alpha(150)
+        self.deleteMode = False
+        self.object_to_put_down = None
+        #加载容器图片
+        self.UIContainer = loadDynamicImage("Assets/image/UI/container.png",(0,self.window_y),(0,self.window_y*0.75),(0,self.window_y*0.25/10),int(self.window_x*0.8), int(self.window_y*0.25))
+        self.UIContainerButton = loadImage("Assets/image/UI/container_button.png",(self.window_x*0.33,-self.window_y*0.05),int(self.window_x*0.14),int(self.window_y*0.06))
+        widthTmp = int(self.window_x*0.2)
+        self.UIContainerRight = loadDynamicImage("Assets/image/UI/container.png",(self.window_x*0.8+widthTmp,0),(self.window_x*0.8,0),(widthTmp/10,0),widthTmp,self.window_y)
+        self.UIContainerRightButton = loadImage("Assets/image/UI/container_button.png",(-self.window_x*0.03,self.window_y*0.4),int(self.window_x*0.04),int(self.window_y*0.2))
+        self.UIContainerRight.rotate(90)
+        self.UIContainerRightButton.rotate(90)
+        #UI按钮
+        self.UIButton = {}
+        UI_x = self.MAP.perBlockWidth*0.5
+        UI_y = int(self.window_y*0.02)
+        UI_height = int(self.MAP.perBlockWidth*0.3)
+        self.UIButton["save"] = ButtonWithFadeInOut("Assets/image/UI/menu.png",get_lang("MapCreator","save"),"black",100,UI_x,UI_y,UI_height)
+        UI_x += self.UIButton["save"].get_width()+UI_height
+        self.UIButton["back"] = ButtonWithFadeInOut("Assets/image/UI/menu.png",get_lang("MapCreator","back"),"black",100,UI_x,UI_y,UI_height)
+        UI_x += self.UIButton["back"].get_width()+UI_height
+        self.UIButton["delete"] = ButtonWithFadeInOut("Assets/image/UI/menu.png",get_lang("MapCreator","delete"),"black",100,UI_x,UI_y,UI_height)
+        UI_x += self.UIButton["delete"].get_width()+UI_height
+        self.UIButton["reload"] = ButtonWithFadeInOut("Assets/image/UI/menu.png",get_lang("MapCreator","reload"),"black",100,UI_x,UI_y,UI_height)
+        #数据控制器
+        self.data_to_edit = None
+        #其他函数
+        self.UI_local_x = 0
+        self.UI_local_y = 0
+        self.isPlaying = True
+        #读取地图原始文件
+        with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
+            self.originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
+    def display(self,screen):
+        super()._display(screen)
+        mouse_x,mouse_y = controller.get_pos()
+        block_get_click = self.MAP.calBlockInMap(self.greenBlock,mouse_x,mouse_y)
+        for event in self._get_event():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.object_to_put_down = None
+                    self.data_to_edit = None
+                    self.deleteMode = False
+                self._check_key_down(event)
+            elif event.type == pygame.KEYUP:
+                self._check_key_up(event)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                #上下滚轮-放大和缩小地图
+                if ifHover(self.UIContainerRight) and event.button == 4 and self.UI_local_y<0:
+                    self.UI_local_y += self.window_y*0.1
+                elif ifHover(self.UIContainerRight) and event.button == 5:
+                    self.UI_local_y -= self.window_y*0.1
+                elif ifHover(self.UIContainerRightButton,None,self.UIContainerRight.x):
+                    self.UIContainerRight.switch()
+                    self.UIContainerRightButton.flip(True,False)
+                elif ifHover(self.UIContainerButton,None,0,self.UIContainer.y):
+                    self.UIContainer.switch()
+                    self.UIContainerButton.flip(False,True)
+                elif ifHover(self.UIContainer):
+                    #上下滚轮-放大和缩小地图
+                    if event.button == 4 and self.UI_local_x<0:
+                        self.UI_local_x += self.window_x*0.05
+                    elif event.button == 5:
+                        self.UI_local_x -= self.window_x*0.05
+                elif self.deleteMode == True and block_get_click != None:
+                    any_dec_replace_name = None
+                    any_dec_replace_type = None
+                    for key,value in self.MAP.facilityData.items():
+                        for key2,value2 in value.items():
+                            if value2["x"] == block_get_click["x"] and value2["y"] == block_get_click["y"]:
+                                any_dec_replace_name = key2
+                                any_dec_replace_type = key
+                                break
+                    #如果发现有冲突的装饰物
+                    if any_dec_replace_name != None:
+                        self.originalData["facility"][any_dec_replace_type].pop(any_dec_replace_name)
+                        self.MAP.facilityData[any_dec_replace_type].pop(any_dec_replace_name)
+                    else:
+                        any_chara_replace = None
+                        for key,value in dicMerge(self.characters_data,self.sangvisFerris_data).items():
+                            if value.x == block_get_click["x"] and value.y == block_get_click["y"]:
+                                any_chara_replace = key
+                                break
+                        if any_chara_replace != None:
+                            if any_chara_replace in self.characters_data:
+                                self.characters_data.pop(any_chara_replace)
+                                self.originalData["character"].pop(any_chara_replace)
+                            elif any_chara_replace in self.sangvisFerris_data:
+                                self.sangvisFerris_data.pop(any_chara_replace)
+                                self.originalData["sangvisFerri"].pop(any_chara_replace)
+                elif ifHover(self.UIButton["save"]) and self.object_to_put_down == None and self.deleteMode == False:
+                    with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "w", encoding='utf-8') as f:
+                        yaml.dump(self.originalData, f)
+                elif ifHover(self.UIButton["back"]) and self.object_to_put_down == None and self.deleteMode == False:
+                    self.isPlaying = False
+                    break
+                elif ifHover(self.UIButton["delete"]) and self.object_to_put_down == None and self.deleteMode == False:
+                    self.object_to_put_down = None
+                    self.data_to_edit = None
+                    self.deleteMode = True
+                elif ifHover(self.UIButton["reload"]) and self.object_to_put_down == None and self.deleteMode == False:
+                    tempLocal_x,tempLocal_y = self.MAP.getPos()
+                    #读取地图
+                    with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
+                        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+                        #初始化角色信息
+                        self.characters_data = {}
+                        for each_character in loadData["character"]:
+                            self.characters_data[each_character] = CharacterDataManager(loadData["character"][each_character],self.DATABASE[loadData["character"][each_character]["type"]],self.window_y,"dev")
+                        self.sangvisFerris_data = {}
+                        for each_character in loadData["sangvisFerri"]:
+                            self.sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],self.DATABASE[loadData["sangvisFerri"][each_character]["type"]],"dev")
+                    #加载地图
+                    self.MAP = MapObject(loadData,int(self.window_x/10))
+                    self.MAP.setPos(tempLocal_x,tempLocal_y)
+                    self.MAP.darkMode = False
+                    #读取地图
+                    with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
+                        self.originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
+                else:
+                    if pygame.mouse.get_pressed()[0] and block_get_click != None:
+                        if self.object_to_put_down != None:
+                            if self.object_to_put_down["type"] == "block":
+                                self.originalData["map"][block_get_click["y"]][block_get_click["x"]] = self.object_to_put_down["id"]
+                                self.MAP.mapData[block_get_click["y"]][block_get_click["x"]] = BlockObject(self.object_to_put_down["id"],False)
+                                self.MAP.process_map(self.window_x,self.window_y)
+                            elif self.object_to_put_down["type"] == "decoration":
+                                #查看当前位置是否有物品
+                                any_dec_replace_name = None
+                                any_dec_replace_type = None
+                                for key,value in self.MAP.facilityData.items():
+                                    for key2,value2 in value.items():
+                                        if value2["x"] == block_get_click["x"] and value2["y"] == block_get_click["y"]:
+                                            any_dec_replace_name = key2
+                                            any_dec_replace_type = key
+                                            break
+                                #如果发现有冲突的装饰物
+                                if any_dec_replace_name != None:
+                                    self.originalData["facility"][any_dec_replace_type].pop(any_dec_replace_name)
+                                    self.MAP.facilityData[any_dec_replace_type].pop(any_dec_replace_name)
+                                decorationType = self.decorations_setting[self.object_to_put_down["id"]]
+                                if decorationType not in self.originalData["facility"]:
+                                    self.originalData["facility"][decorationType] = {}
+                                    self.MAP.facilityData[decorationType] = {}
+                                the_id = 0
+                                while self.object_to_put_down["id"]+"_"+str(the_id) in self.originalData["facility"][decorationType]:
+                                    the_id+=1
+                                nameTemp = self.object_to_put_down["id"]+"_"+str(the_id)
+                                self.originalData["facility"][decorationType][nameTemp] = {"image": self.object_to_put_down["id"],"x": block_get_click["x"],"y": block_get_click["y"]}
+                                self.MAP.facilityData[decorationType][nameTemp] = {"image": self.object_to_put_down["id"],"x": block_get_click["x"],"y": block_get_click["y"]}
+                            elif self.object_to_put_down["type"] == "character" or self.object_to_put_down["type"] == "sangvisFerri":
+                                any_chara_replace = None
+                                for key,value in dicMerge(self.characters_data,self.sangvisFerris_data).items():
+                                    if value.x == block_get_click["x"] and value.y == block_get_click["y"]:
+                                        any_chara_replace = key
+                                        break
+                                if any_chara_replace != None:
+                                    if any_chara_replace in self.characters_data:
+                                        self.characters_data.pop(any_chara_replace)
+                                        self.originalData["character"].pop(any_chara_replace)
+                                    elif any_chara_replace in self.sangvisFerris_data:
+                                        self.sangvisFerris_data.pop(any_chara_replace)
+                                        self.originalData["sangvisFerri"].pop(any_chara_replace)
+                                the_id = 0
+                                if self.object_to_put_down["type"] == "character":
+                                    while self.object_to_put_down["id"]+"_"+str(the_id) in self.characters_data:
+                                        the_id+=1
+                                    nameTemp = self.object_to_put_down["id"]+"_"+str(the_id)
+                                    self.originalData["character"][nameTemp] = {
+                                        "bullets_carried": 100,
+                                        "type": self.object_to_put_down["id"],
+                                        "x": block_get_click["x"],
+                                        "y": block_get_click["y"]
+                                    }
+                                    self.characters_data[nameTemp] = CharacterDataManager(self.originalData["character"][nameTemp],self.DATABASE[self.originalData["character"][nameTemp]["type"]],self.window_y,"dev")
+                                elif self.object_to_put_down["type"] == "sangvisFerri":
+                                    while self.object_to_put_down["id"]+"_"+str(the_id) in self.sangvisFerris_data:
+                                        the_id+=1
+                                    nameTemp = self.object_to_put_down["id"]+"_"+str(the_id)
+                                    self.originalData["sangvisFerri"][nameTemp] = {
+                                        "type": self.object_to_put_down["id"],
+                                        "x": block_get_click["x"],
+                                        "y": block_get_click["y"]
+                                    }
+                                    self.sangvisFerris_data[nameTemp] = SangvisFerriDataManager(self.originalData["sangvisFerri"][nameTemp],self.DATABASE[self.originalData["sangvisFerri"][nameTemp]["type"]],"dev")
+        #其他移动的检查
+        self._check_right_click_move(mouse_x,mouse_y)
+        self._check_jostick_events()
+
+        #画出地图
+        self._display_map(screen)
+
+        if block_get_click != None and ifHover(self.UIContainerRight)==False and ifHover(self.UIContainer)==False:
+            if self.deleteMode == True:
+                xTemp,yTemp = self.MAP.calPosInMap(block_get_click["x"],block_get_click["y"])
+                drawImg(self.redBlock,(xTemp+self.MAP.perBlockWidth*0.1,yTemp),screen)
+            elif self.object_to_put_down != None:
+                xTemp,yTemp = self.MAP.calPosInMap(block_get_click["x"],block_get_click["y"])
+                drawImg(self.greenBlock,(xTemp+self.MAP.perBlockWidth*0.1,yTemp),screen)
+
+        #角色动画
+        for every_chara in self.characters_data:
+            self.characters_data[every_chara].draw("wait",screen,self.MAP)
+            if self.object_to_put_down == None and pygame.mouse.get_pressed()[0] and self.characters_data[every_chara].x == int(mouse_x/self.greenBlock.get_width()) and self.characters_data[every_chara].y == int(mouse_y/self.greenBlock.get_height()):
+                self.data_to_edit = self.characters_data[every_chara]
+        for enemies in self.sangvisFerris_data:
+            self.sangvisFerris_data[enemies].draw("wait",screen,self.MAP)
+            if self.object_to_put_down == None and pygame.mouse.get_pressed()[0] and self.sangvisFerris_data[enemies].x == int(mouse_x/self.greenBlock.get_width()) and self.sangvisFerris_data[enemies].y == int(mouse_y/self.greenBlock.get_height()):
+                self.data_to_edit = self.sangvisFerris_data[enemies]
+
+        #展示设施
+        self.MAP.display_facility(screen,self.characters_data,self.sangvisFerris_data)
+
+        #画出UI
+        self.UIContainerButton.draw(screen,0,self.UIContainer.y)
+        self.UIContainer.draw(screen)
+        self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
+        self.UIContainerRight.draw(screen)
+        for Image in self.UIButton:
+            ifHover(self.UIButton[Image])
+            self.UIButton[Image].display(screen)
+
+        #显示所有可放置的友方角色
+        i=0
+        for every_chara in self.charactersImgDict:
+            tempX = self.UIContainer.x+self.MAP.perBlockWidth*i*0.6+self.UI_local_x
+            if 0 <= tempX <= self.UIContainer.width*0.9:
+                tempY = self.UIContainer.y-self.MAP.perBlockWidth*0.25
+                drawImg(self.charactersImgDict[every_chara],(tempX,tempY),screen)
+                if pygame.mouse.get_pressed()[0] and ifHover(self.charactersImgDict[every_chara],(tempX,tempY)):
+                    self.object_to_put_down = {"type":"character","id":every_chara}
+            elif tempX > self.UIContainer.width*0.9:
+                break
+            i+=1
+        i=0
+        #显示所有可放置的敌方角色
+        for enemies in self.sangvisFerrisImgDict:
+            tempX = self.UIContainer.x+self.MAP.perBlockWidth*i*0.6+self.UI_local_x
+            if 0 <= tempX <= self.UIContainer.width*0.9:
+                tempY = self.UIContainer.y+self.MAP.perBlockWidth*0.25
+                drawImg(self.sangvisFerrisImgDict[enemies],(tempX,tempY),screen)
+                if pygame.mouse.get_pressed()[0] and ifHover(self.sangvisFerrisImgDict[enemies],(tempX,tempY)):
+                    self.object_to_put_down = {"type":"sangvisFerri","id":enemies}
+            elif tempX > self.UIContainer.width*0.9:
+                break
+            i+=1
+        
+        #显示所有可放置的环境方块
+        i=0
+        for img_name in self.envImgDict:
+            posY = self.UIContainerRight.y+self.MAP.perBlockWidth*5*int(i/4)+self.UI_local_y
+            if self.window_y*0.05<posY<self.window_y*0.9:
+                posX = self.UIContainerRight.x+self.MAP.perBlockWidth/6+self.MAP.perBlockWidth/2.3*(i%4)
+                drawImg(self.envImgDict[img_name],(posX,posY),screen)
+                if pygame.mouse.get_pressed()[0] and ifHover(self.envImgDict[img_name],(posX,posY)):
+                    self.object_to_put_down = {"type":"block","id":img_name}
+            i+=1
+        for img_name in self.decorationsImgDict:
+            posY = self.UIContainerRight.y+self.MAP.perBlockWidth*5*int(i/4)+self.UI_local_y
+            if self.window_y*0.05<posY<self.window_y*0.9:
+                posX = self.UIContainerRight.x+self.MAP.perBlockWidth/6+self.MAP.perBlockWidth/2.3*(i%4)
+                drawImg(self.decorationsImgDict[img_name],(posX,posY),screen)
+                if pygame.mouse.get_pressed()[0] and ifHover(self.decorationsImgDict[img_name],(posX,posY)):
+                    self.object_to_put_down = {"type":"decoration","id":img_name}
+            i+=1
+        
+        #跟随鼠标显示即将被放下的物品
+        if self.object_to_put_down != None:
+            if self.object_to_put_down["type"] == "block":
+                drawImg(self.envImgDict[self.object_to_put_down["id"]],(mouse_x,mouse_y),screen)
+            elif self.object_to_put_down["type"] == "decoration":
+                drawImg(self.decorationsImgDict[self.object_to_put_down["id"]],(mouse_x,mouse_y),screen)
+            elif self.object_to_put_down["type"] == "character":
+                drawImg(self.charactersImgDict[self.object_to_put_down["id"]],(mouse_x-self.MAP.perBlockWidth/2,mouse_y-self.MAP.perBlockWidth/2.1),screen)
+            elif self.object_to_put_down["type"] == "sangvisFerri":
+                drawImg(self.sangvisFerrisImgDict[self.object_to_put_down["id"]],(mouse_x-self.MAP.perBlockWidth/2,mouse_y-self.MAP.perBlockWidth/2.1),screen)
+        
+        #显示即将被编辑的数据
+        object_edit_id = 0
+        if self.data_to_edit != None:
+            drawImg(fontRender("action points: "+str(self.data_to_edit.max_action_point),"black",15),(self.window_x*0.91,self.window_y*0.8),screen)
+            drawImg(fontRender("attack range: "+str(self.data_to_edit.attack_range),"black",15),(self.window_x*0.91,self.window_y*0.8+20),screen)
+            drawImg(fontRender("current bullets: "+str(self.data_to_edit.current_bullets),"black",15),(self.window_x*0.91,self.window_y*0.8+20*2),screen)
+            drawImg(fontRender("magazine capacity: "+str(self.data_to_edit.magazine_capacity),"black",15),(self.window_x*0.91,self.window_y*0.8+20*3),screen)
+            drawImg(fontRender("max hp: "+str(self.data_to_edit.max_hp),"black",15),(self.window_x*0.91,self.window_y*0.8+20*4),screen)
+            drawImg(fontRender("effective range: "+str(self.data_to_edit.effective_range),"black",15),(self.window_x*0.91,self.window_y*0.8+20*5),screen)
+            drawImg(fontRender("max damage: "+str(self.data_to_edit.max_damage),"black",15),(self.window_x*0.91,self.window_y*0.8+20*6),screen)
+            drawImg(fontRender("min damage: "+str(self.data_to_edit.min_damage),"black",15),(self.window_x*0.91,self.window_y*0.8+20*7),screen)
+            drawImg(fontRender("x: "+str(self.data_to_edit.x),"black",15),(self.window_x*0.91,self.window_y*0.8+20*8),screen)
+            drawImg(fontRender("y: "+str(self.data_to_edit.y),"black",15),(self.window_x*0.91,self.window_y*0.8+20*9),screen)
+
+        display.flip()

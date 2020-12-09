@@ -106,11 +106,12 @@ class EnvImagesManagement:
 
 #地图模块
 class MapObject:
-    def  __init__(self,mapDataDic,perBlockWidth,local_x=0,local_y=0):
+    def  __init__(self,mapDataDic,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
         #加载地图设置
         blocks_setting = loadYaml("Data/blocks.yaml")["blocks"]
         self.darkMode = mapDataDic["darkMode"]
         self.perBlockWidth = perBlockWidth
+        self.perBlockHeight = perBlockHeight
         mapData = mapDataDic["map"]
         self.row = len(mapData)
         self.column = len(mapData[0])

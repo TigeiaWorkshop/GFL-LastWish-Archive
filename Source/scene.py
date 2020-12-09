@@ -72,5 +72,16 @@ def battle(chapterType,chapter_name,screen):
     while BATTLE.isPlaying == True:
         BATTLE.display(screen)
     #暂停声效 - 尤其是环境声
-    pygame.mixer.stop()
+    Zero.unloadBackgroundMusic()
     return BATTLE.resultInfo
+
+def mapCreator(chapterType,chapter_name,screen):
+    #卸载音乐
+    Zero.unloadBackgroundMusic()
+    MAPCREATOR = Zero.mapCreator()
+    MAPCREATOR.initialize(screen,chapterType,chapter_name)
+    #战斗系统主要loop
+    while MAPCREATOR.isPlaying == True:
+        MAPCREATOR.display(screen)
+    #暂停声效 - 尤其是环境声
+    Zero.unloadBackgroundMusic()

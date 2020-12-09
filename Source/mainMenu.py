@@ -1,6 +1,5 @@
 # cython: language_level=3
 from Source.scene import *
-from Source.mapCreator import *
 
 def mainMenu(screen):
     #获取屏幕的尺寸
@@ -191,7 +190,7 @@ def mainMenu(screen):
                 if Zero.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"]):
                     menu_type = 2
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
-                    mapCreator("chapter1",screen)
+                    mapCreator("main_chapter","chapter1",screen)
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text5_dialogCreator"]):
                     dialogCreator("main_chapter","chapter1",screen,"dialog_before_battle")
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text7_back"]):

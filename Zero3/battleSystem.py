@@ -1,101 +1,9 @@
-from Zero3.characterDataManager import *
-from Zero3.map import *
-from Zero3.battleUI import *
-from Zero3.AI import *
-from Zero3.skill import *
+# cython: language_level=3
+from Zero3.battleSystemInterface import *
 
-class BattleSystem:
+class BattleSystem(BattleSystemInterface):
     def __init__(self):
-        #-----需要储存的参数-----#
-        #被选中的角色
-        self.characterGetClick = None
-        self.enemiesGetAttack = {}
-        self.action_choice = None
-        #是否不要画出用于表示范围的方块
-        self.NotDrawRangeBlocks = True
-        self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-        #是否在战斗状态-战斗loop
-        self.battleMode = False
-        #是否在等待
-        self.isWaiting = True
-        #谁的回合
-        self.whose_round = "sangvisFerrisToPlayer"
-        #用于判断是否移动屏幕的参数
-        self.mouse_move_temp_x = -1
-        self.mouse_move_temp_y = -1
-        self.screen_to_move_x = None
-        self.screen_to_move_y = None
-        #是否是死亡的那个
-        self.the_dead_one = {}
-        #用于检测是否有方向键被按到的字典
-        self.pressKeyToMove = {"up":False,"down":False,"left":False,"right":False}
-        self.rightClickCharacterAlpha = None
-        #战斗系统主循环判定参数
-        self.isPlaying = True
-        #技能对象
-        self.skill_target = None
-        #被按到的按键
-        self.buttonGetHover = None
-        #被救助的那个角色
-        self.friendGetHelp = None
-        #AI系统正在操控的地方角色ID
-        self.enemy_in_control = None
-        self.enemies_in_control_id = None
-        #所有敌对角色的名字列表
-        self.sangvisFerris_name_list = None
-        #战斗状态数据
-        self.resultInfo = {
-            "total_rounds" : 1,
-            "total_kills" : 0,
-            "total_time" : time.time(),
-            "times_characters_down" : 0
-        }
-        #储存角色受到伤害的文字surface
-        self.damage_do_to_characters = {}
-        self.txt_alpha = None
-        self.stayingTime = 0
-        # 移动路径
-        self.the_route = []
-        #上个回合因为暴露被敌人发现的角色
-        #格式：角色：[x,y]
-        self.the_characters_detected_last_round = {}
-        #敌人的状态
-        self.enemy_action = None
-        #战斗系统进行时的输入事件
-        self.__pygame_events = None
-        self.right_click = False
-        #角色数据
-        self.characters_data = None
-        self.sangvisFerris_data = None
-        #地图数据
-        self.theMap = None
-        #对话数据
-        self.dialogData = None
-        #对话-动作是否被设置
-        self.dialog_ifPathSet = False
-        #是否从存档中加载的数据-默认否
-        self.loadFromSave = False
-        #积分栏的UI模块
-        self.ResultBoardUI = None
-    #检测手柄事件
-    def __check_jostick_events(self):
-        if controller.joystick.get_init() == True:
-            if round(controller.joystick.get_axis(4)) == -1:
-                self.pressKeyToMove["up"]=True
-            else:
-                self.pressKeyToMove["up"]=False
-            if round(controller.joystick.get_axis(4)) == 1:
-                self.pressKeyToMove["down"]=True
-            else:
-                self.pressKeyToMove["down"]=False
-            if round(controller.joystick.get_axis(3)) == 1:
-                self.pressKeyToMove["right"]=True
-            else:
-                self.pressKeyToMove["right"]=False
-            if round(controller.joystick.get_axis(3)) == -1:
-                self.pressKeyToMove["left"]=True
-            else:
-                self.pressKeyToMove["left"]=False
+        BattleSystemInterface.__init__(self)
     #储存章节信息
     def __save_data(self):
         if pause_menu.ifSave == True:
@@ -106,7 +14,7 @@ class BattleSystem:
             DataTmp["chapterName"] = self.chapterName
             DataTmp["characters_data"] = self.characters_data
             DataTmp["sangvisFerris_data"] = self.sangvisFerris_data
-            DataTmp["theMap"] = self.theMap
+            DataTmp["MAP"] = self.MAP
             DataTmp["dialogKey"] = self.dialogKey
             DataTmp["dialogData"] = self.dialogData
             DataTmp["resultInfo"] = self.resultInfo
@@ -126,7 +34,7 @@ class BattleSystem:
                 self.chapterName = DataTmp["chapterName"]
                 self.characters_data = DataTmp["characters_data"]
                 self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
-                self.theMap = DataTmp["theMap"]
+                self.MAP = DataTmp["MAP"]
                 self.dialogKey = DataTmp["dialogKey"]
                 self.dialogData = DataTmp["dialogData"]
                 self.resultInfo = DataTmp["resultInfo"]
@@ -196,7 +104,6 @@ class BattleSystem:
         elif self.zoomIn > 400:
             self.zoomIn = 400
         self.zoomIntoBe = self.zoomIn
-        self.perBlockHeight = round(self.window_y/10)
         #加载角色信息
         characterDataThread.start()
         while characterDataThread.isAlive():
@@ -209,13 +116,13 @@ class BattleSystem:
             #获取角色数据
             self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
             #初始化地图模块
-            self.theMap = MapObject(DataTmp,round(self.window_x/10),DataTmp["local_x"],DataTmp["local_y"])
+            self.MAP = MapObject(DataTmp,round(self.window_x/10),round(self.window_y/10),DataTmp["local_x"],DataTmp["local_y"])
         else:
             #因为地图模块已被加载，只需加载图片即可
-            self.theMap.load_env_img()
+            self.MAP.load_env_img()
         del characterDataThread
         #计算光亮区域 并初始化地图
-        self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+        self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
         #开始加载关卡设定
         self.infoToDisplayDuringLoading.display(screen)
         now_loading = self.FONT.render(loading_info["now_loading_level"],get_fontMode(),(255,255,255))
@@ -226,8 +133,8 @@ class BattleSystem:
         #加载结束回合的图片
         self.end_round_button = loadImage("Assets/image/UI/endRound.png",(self.window_x*0.8,self.window_y*0.7),self.window_x/10, self.window_y/10)
         #加载子弹图片
-        #bullet_img = loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, self.perBlockHeight/12)
-        #加载血条,各色方块等UI图片 size:perBlockWidth, self.perBlockHeight/5
+        #bullet_img = loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, self.MAP.perBlockHeight/12)
+        #加载血条,各色方块等UI图片 size:perBlockWidth, self.MAP.perBlockHeight/5
         self.original_UI_img = {
             "hp_empty" : loadImg("Assets/image/UI/hp_empty.png"),
             "hp_red" : loadImg("Assets/image/UI/hp_red.png"),
@@ -245,11 +152,11 @@ class BattleSystem:
         }
         #UI - 变形后
         self.UI_img = {
-            "green" : resizeImg(self.original_UI_img["green"], (self.theMap.perBlockWidth*0.8, None)),
-            "red" : resizeImg(self.original_UI_img["red"], (self.theMap.perBlockWidth*0.8, None)),
-            "yellow" : resizeImg(self.original_UI_img["yellow"], (self.theMap.perBlockWidth*0.8, None)),
-            "blue" : resizeImg(self.original_UI_img["blue"], (self.theMap.perBlockWidth*0.8, None)),
-            "orange": resizeImg(self.original_UI_img["orange"], (self.theMap.perBlockWidth*0.8, None))
+            "green" : resizeImg(self.original_UI_img["green"], (self.MAP.perBlockWidth*0.8, None)),
+            "red" : resizeImg(self.original_UI_img["red"], (self.MAP.perBlockWidth*0.8, None)),
+            "yellow" : resizeImg(self.original_UI_img["yellow"], (self.MAP.perBlockWidth*0.8, None)),
+            "blue" : resizeImg(self.original_UI_img["blue"], (self.MAP.perBlockWidth*0.8, None)),
+            "orange": resizeImg(self.original_UI_img["orange"], (self.MAP.perBlockWidth*0.8, None))
         }
         #角色信息UI管理
         self.characterInfoBoardUI = CharacterInfoBoard(self.window_x,self.window_y)
@@ -283,8 +190,7 @@ class BattleSystem:
             display.flip(True)
     #把战斗系统的画面画到screen上
     def display(self,screen):
-        #更新游戏事件
-        self.__pygame_events = pygame.event.get()
+        super()._display(screen)
         #环境声音-频道1
         self.environment_sound.play()
         #在战斗状态
@@ -312,18 +218,18 @@ class BattleSystem:
     #对话模块
     def __play_dialog(self,screen):
         #画出地图
-        self.theMap.display_map(screen)
+        self.MAP.display_map(screen)
         #角色动画
         for every_chara in self.characters_data:
-            self.characters_data[every_chara].draw(screen,self.theMap)
+            self.characters_data[every_chara].draw(screen,self.MAP)
         for enemies in self.sangvisFerris_data:
-            if self.theMap.inLightArea(self.sangvisFerris_data[enemies]):
-                self.sangvisFerris_data[enemies].draw(screen,self.theMap)
+            if self.MAP.inLightArea(self.sangvisFerris_data[enemies]):
+                self.sangvisFerris_data[enemies].draw(screen,self.MAP)
         #展示设施
-        self.theMap.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
+        self.MAP.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
         #加载雪花
         if self.weatherController != None:
-            self.weatherController.display(screen,self.theMap.perBlockWidth,self.perBlockHeight)
+            self.weatherController.display(screen,self.MAP.perBlockWidth,self.MAP.perBlockHeight)
         #如果战斗有对话
         if self.dialogKey != None:
             #设定初始化
@@ -343,13 +249,13 @@ class BattleSystem:
                     if self.dialog_ifPathSet == False:
                         for key,pos in currentDialog["move"].items():
                             if key in self.characters_data:
-                                routeTmp = self.theMap.findPath(self.characters_data[key],pos,self.characters_data,self.sangvisFerris_data)
+                                routeTmp = self.MAP.findPath(self.characters_data[key],pos,self.characters_data,self.sangvisFerris_data)
                                 if len(routeTmp)>0:
                                     self.characters_data[key].move_follow(routeTmp)
                                 else:
                                     raise Exception('ZeroEngine-Error: Character {} cannot find a valid path!'.format(key))
                             elif key in self.sangvisFerris_data:
-                                routeTmp = self.theMap.findPath(self.sangvisFerris_data[key],pos,self.sangvisFerris_data,self.characters_data)
+                                routeTmp = self.MAP.findPath(self.sangvisFerris_data[key],pos,self.sangvisFerris_data,self.characters_data)
                                 if len(routeTmp)>0:
                                     self.sangvisFerris_data[key].move_follow(routeTmp)
                                 else:
@@ -374,7 +280,7 @@ class BattleSystem:
                         else:
                             raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
                     if reProcessMap:
-                        self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                        self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
                     if allGetToTargetPos:
                         #脚步停止
                         self.footstep_sounds.stop()
@@ -447,18 +353,18 @@ class BattleSystem:
                     if self.screen_to_move_y == None and "y" in currentDialog["changePos"]:
                         self.screen_to_move_y = currentDialog["changePos"]["y"]
                     if self.screen_to_move_x != None and self.screen_to_move_x != 0:
-                        temp_value = int(self.theMap.getPos_x() + self.screen_to_move_x*0.2)
-                        if self.window_x-self.theMap.surface_width<=temp_value<=0:
-                            self.theMap.setPos_x(temp_value)
+                        temp_value = int(self.MAP.getPos_x() + self.screen_to_move_x*0.2)
+                        if self.window_x-self.MAP.surface_width<=temp_value<=0:
+                            self.MAP.setPos_x(temp_value)
                             self.screen_to_move_x*=0.8
                             if int(self.screen_to_move_x) == 0:
                                 self.screen_to_move_x = 0
                         else:
                             self.screen_to_move_x = 0
                     if self.screen_to_move_y != None and self.screen_to_move_y !=0:
-                        temp_value = int(self.theMap.getPos_y() + self.screen_to_move_y*0.2)
-                        if self.window_y-self.theMap.surface_height<=temp_value<=0:
-                            self.theMap.setPos_y(temp_value)
+                        temp_value = int(self.MAP.getPos_y() + self.screen_to_move_y*0.2)
+                        if self.window_y-self.MAP.surface_height<=temp_value<=0:
+                            self.MAP.setPos_y(temp_value)
                             self.screen_to_move_y*=0.8
                             if int(self.screen_to_move_y) == 0:
                                 self.screen_to_move_y = 0
@@ -469,7 +375,7 @@ class BattleSystem:
                         self.screen_to_move_y = None
                         self.dialogData["dialogId"] += 1
                 #玩家输入按键判定
-                for event in self.__pygame_events:
+                for event in self._get_event():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
                             pause_menu.display(screen)
@@ -517,10 +423,10 @@ class BattleSystem:
         elif self.dialogKey == None:
             #角色UI
             for every_chara in self.characters_data:
-                self.characters_data[every_chara].drawUI(screen,self.original_UI_img,self.theMap)
+                self.characters_data[every_chara].drawUI(screen,self.original_UI_img,self.MAP)
             for enemies in self.sangvisFerris_data:
-                if self.theMap.inLightArea(self.sangvisFerris_data[enemies]):
-                    self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.theMap)
+                if self.MAP.inLightArea(self.sangvisFerris_data[enemies]):
+                    self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.MAP)
             if self.txt_alpha == 0:
                 self.battleMode = True
     #战斗模块
@@ -534,7 +440,7 @@ class BattleSystem:
         skill_range = None
         friendsCanSave = []
         thingsCanReact = []
-        for event in self.__pygame_events:
+        for event in self._get_event():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE and self.characterGetClick == None:
                     show_pause_menu = True
@@ -545,25 +451,11 @@ class BattleSystem:
                     attacking_range = None
                     skill_range = None
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-                if event.key == pygame.K_w:
-                    self.pressKeyToMove["up"]=True
-                if event.key == pygame.K_s:
-                    self.pressKeyToMove["down"]=True
-                if event.key == pygame.K_a:
-                    self.pressKeyToMove["left"]=True
-                if event.key == pygame.K_d:
-                    self.pressKeyToMove["right"]=True
+                self._check_key_down(event)
                 if event.key == pygame.K_m:
                     display.quit()
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_w:
-                    self.pressKeyToMove["up"]=False
-                if event.key == pygame.K_s:
-                    self.pressKeyToMove["down"]=False
-                if event.key == pygame.K_a:
-                    self.pressKeyToMove["left"]=False
-                if event.key == pygame.K_d:
-                    self.pressKeyToMove["right"]=False
+                self._check_key_up(event)
             #鼠标点击
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 #右键
@@ -574,23 +466,9 @@ class BattleSystem:
                     self.zoomIntoBe += 20
                 elif event.button == 5 and self.zoomIntoBe > 200:
                     self.zoomIntoBe -= 20
-        self.__check_jostick_events()
-        #移动屏幕
-        if pygame.mouse.get_pressed()[2]:
-            if self.mouse_move_temp_x == -1 and self.mouse_move_temp_y == -1:
-                self.mouse_move_temp_x = mouse_x
-                self.mouse_move_temp_y = mouse_y
-            else:
-                if self.mouse_move_temp_x != mouse_x or self.mouse_move_temp_y != mouse_y:
-                    if self.mouse_move_temp_x != mouse_x:
-                        self.theMap.addPos_x(self.mouse_move_temp_x-mouse_x)
-                    if self.mouse_move_temp_y != mouse_y:
-                        self.theMap.addPos_y(self.mouse_move_temp_y-mouse_y)
-                    self.mouse_move_temp_x = mouse_x
-                    self.mouse_move_temp_y = mouse_y
-        else:
-            self.mouse_move_temp_x = -1
-            self.mouse_move_temp_y = -1
+        #其他移动的检查
+        self._check_right_click_move(mouse_x,mouse_y)
+        self._check_jostick_events()
 
         #根据self.zoomIntoBe调整self.zoomIn大小
         if self.zoomIntoBe != self.zoomIn:
@@ -598,77 +476,34 @@ class BattleSystem:
                 self.zoomIn -= 5
             elif self.zoomIntoBe > self.zoomIn:
                 self.zoomIn += 5
-            newPerBlockWidth = round(self.window_x/self.theMap.column*self.zoomIn/100)
-            newPerBlockHeight = round(self.window_y/self.theMap.row*self.zoomIn/100)
-            self.theMap.addPos_x((self.theMap.perBlockWidth-newPerBlockWidth)*self.theMap.column/2)
-            self.theMap.addPos_y((self.perBlockHeight-newPerBlockHeight)*self.theMap.row/2)
-            self.theMap.perBlockWidth = newPerBlockWidth
-            self.perBlockHeight = newPerBlockHeight
+            newPerBlockWidth = round(self.window_x/self.MAP.column*self.zoomIn/100)
+            newPerBlockHeight = round(self.window_y/self.MAP.row*self.zoomIn/100)
+            self.MAP.addPos_x((self.MAP.perBlockWidth-newPerBlockWidth)*self.MAP.column/2)
+            self.MAP.addPos_y((self.MAP.perBlockHeight-newPerBlockHeight)*self.MAP.row/2)
+            self.MAP.perBlockWidth = newPerBlockWidth
+            self.MAP.perBlockHeight = newPerBlockHeight
             #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
-            self.UI_img["green"] = resizeImg(self.original_UI_img["green"], (self.theMap.perBlockWidth*0.8, None))
-            self.UI_img["red"] = resizeImg(self.original_UI_img["red"], (self.theMap.perBlockWidth*0.8, None))
-            self.UI_img["yellow"] = resizeImg(self.original_UI_img["yellow"], (self.theMap.perBlockWidth*0.8, None))
-            self.UI_img["blue"] = resizeImg(self.original_UI_img["blue"], (self.theMap.perBlockWidth*0.8, None))
-            self.UI_img["orange"] = resizeImg(self.original_UI_img["orange"], (self.theMap.perBlockWidth*0.8, None))
-            self.theMap.changePerBlockSize(self.theMap.perBlockWidth,self.window_x,self.window_y)
+            self.UI_img["green"] = resizeImg(self.original_UI_img["green"], (self.MAP.perBlockWidth*0.8, None))
+            self.UI_img["red"] = resizeImg(self.original_UI_img["red"], (self.MAP.perBlockWidth*0.8, None))
+            self.UI_img["yellow"] = resizeImg(self.original_UI_img["yellow"], (self.MAP.perBlockWidth*0.8, None))
+            self.UI_img["blue"] = resizeImg(self.original_UI_img["blue"], (self.MAP.perBlockWidth*0.8, None))
+            self.UI_img["orange"] = resizeImg(self.original_UI_img["orange"], (self.MAP.perBlockWidth*0.8, None))
+            self.MAP.changePerBlockSize(self.MAP.perBlockWidth,self.window_x,self.window_y)
             self.selectMenuUI.allButton = None
         else:
             self.zoomIn = self.zoomIntoBe
-
-        #根据按键情况设定要移动的数值
-        if self.pressKeyToMove["up"] == True:
-            if self.screen_to_move_y == None:
-                self.screen_to_move_y = self.perBlockHeight/4
-            else:
-                self.screen_to_move_y += self.perBlockHeight/4
-        if self.pressKeyToMove["down"] == True:
-            if self.screen_to_move_y == None:
-                self.screen_to_move_y = -self.perBlockHeight/4
-            else:
-                self.screen_to_move_y -= self.perBlockHeight/4
-        if self.pressKeyToMove["left"] == True:
-            if self.screen_to_move_x == None:
-                self.screen_to_move_x = self.theMap.perBlockWidth/4
-            else:
-                self.screen_to_move_x += self.theMap.perBlockWidth/4
-        if self.pressKeyToMove["right"] == True:
-            if self.screen_to_move_x == None:
-                self.screen_to_move_x = -self.theMap.perBlockWidth/4
-            else:
-                self.screen_to_move_x -= self.theMap.perBlockWidth/4
-
-        #如果需要移动屏幕
-        if self.screen_to_move_x != None and self.screen_to_move_x != 0:
-            temp_value = int(self.theMap.getPos_x() + self.screen_to_move_x*0.2)
-            if self.window_x-self.theMap.surface_width<=temp_value<=0:
-                self.theMap.setPos_x(temp_value)
-                self.screen_to_move_x*=0.8
-                if int(self.screen_to_move_x) == 0:
-                    self.screen_to_move_x = 0
-            else:
-                self.screen_to_move_x = 0
-        if self.screen_to_move_y != None and self.screen_to_move_y !=0:
-            temp_value = int(self.theMap.getPos_y() + self.screen_to_move_y*0.2)
-            if self.window_y-self.theMap.surface_height<=temp_value<=0:
-                self.theMap.setPos_y(temp_value)
-                self.screen_to_move_y*=0.8
-                if int(self.screen_to_move_y) == 0:
-                    self.screen_to_move_y = 0
-            else:
-                self.screen_to_move_y = 0
-
         #画出地图
-        self.screen_to_move_x,self.screen_to_move_y = self.theMap.display_map(screen,self.screen_to_move_x,self.screen_to_move_y)
+        self._display_map(screen)
         #画出用彩色方块表示的范围
         for area in self.areaDrawColorBlock:
             for position in self.areaDrawColorBlock[area]:
-                xTemp,yTemp = self.theMap.calPosInMap(position[0],position[1])
-                drawImg(self.UI_img[area],(xTemp+self.theMap.perBlockWidth*0.1,yTemp),screen)
+                xTemp,yTemp = self.MAP.calPosInMap(position[0],position[1])
+                drawImg(self.UI_img[area],(xTemp+self.MAP.perBlockWidth*0.1,yTemp),screen)
 
         #玩家回合
         if self.whose_round == "player":
             if self.right_click == True:
-                block_get_click = self.theMap.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                 #如果点击了回合结束的按钮
                 if ifHover(self.end_round_button) and self.isWaiting == True:
                     self.whose_round = "playerToSangvisFerris"
@@ -758,8 +593,8 @@ class BattleSystem:
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 elif self.action_choice == "interact" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.ornamentationGetClick != None:
                     self.characters_data[self.characterGetClick].reduce_action_point(2)
-                    self.theMap.ornamentationData[self.ornamentationGetClick].triggered = not self.theMap.ornamentationData[self.ornamentationGetClick].triggered
-                    self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                    self.MAP.ornamentationData[self.ornamentationGetClick].triggered = not self.MAP.ornamentationData[self.ornamentationGetClick].triggered
+                    self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
                     self.characterGetClick = None
                     self.action_choice = None
                     self.isWaiting = True
@@ -784,28 +619,28 @@ class BattleSystem:
                             for key2 in self.characters_data:
                                 if self.characters_data[key2].dying != False and self.characters_data[key].near(self.characters_data[key2].dying):
                                     friendsCanSave.append(key2)
-                            for i in range(len(self.theMap.ornamentationData)):
-                                if self.theMap.ornamentationData[i].type == "campfire" and self.characters_data[key].near(self.theMap.ornamentationData[i]):
+                            for i in range(len(self.MAP.ornamentationData)):
+                                if self.MAP.ornamentationData[i].type == "campfire" and self.characters_data[key].near(self.MAP.ornamentationData[i]):
                                     thingsCanReact.append(i)
                             self.NotDrawRangeBlocks = "SelectMenu"
                             break
             #选择菜单的判定，显示功能在角色动画之后
             if self.NotDrawRangeBlocks == "SelectMenu":
                 #移动画面以使得被点击的角色可以被更好的操作
-                tempX,tempY = self.theMap.calPosInMap(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y)
+                tempX,tempY = self.MAP.calPosInMap(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y)
                 if self.screen_to_move_x == None:
-                    if tempX < self.window_x*0.2 and self.theMap.getPos_x()<=0:
+                    if tempX < self.window_x*0.2 and self.MAP.getPos_x()<=0:
                         self.screen_to_move_x = self.window_x*0.2-tempX
-                    elif tempX > self.window_x*0.8 and self.theMap.getPos_x()>=self.theMap.column*self.theMap.perBlockWidth*-1:
+                    elif tempX > self.window_x*0.8 and self.MAP.getPos_x()>=self.MAP.column*self.MAP.perBlockWidth*-1:
                         self.screen_to_move_x = self.window_x*0.8-tempX
                 if self.screen_to_move_y == None:
-                    if tempY < self.window_y*0.2 and self.theMap.getPos_y()<=0:
+                    if tempY < self.window_y*0.2 and self.MAP.getPos_y()<=0:
                         self.screen_to_move_y = self.window_y*0.2-tempY
-                    elif tempY > self.window_y*0.8 and self.theMap.getPos_y()>=self.theMap.row*self.perBlockHeight*-1:
+                    elif tempY > self.window_y*0.8 and self.MAP.getPos_y()>=self.MAP.row*self.MAP.perBlockHeight*-1:
                         self.screen_to_move_y = self.window_y*0.8-tempY
             #显示攻击/移动/技能范围
             if self.NotDrawRangeBlocks == False and self.characterGetClick != None:
-                block_get_click = self.theMap.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                 #显示移动范围
                 if self.action_choice == "move":
                     self.areaDrawColorBlock["green"] = []
@@ -813,17 +648,17 @@ class BattleSystem:
                         #根据行动值计算最远可以移动的距离
                         max_blocks_can_move = int(self.characters_data[self.characterGetClick].get_action_point()/2)
                         if 0<abs(block_get_click["x"]-self.characters_data[self.characterGetClick].x)+abs(block_get_click["y"]-self.characters_data[self.characterGetClick].y)<=max_blocks_can_move:
-                            self.the_route = self.theMap.findPath(self.characters_data[self.characterGetClick],block_get_click,self.characters_data,self.sangvisFerris_data,max_blocks_can_move)
+                            self.the_route = self.MAP.findPath(self.characters_data[self.characterGetClick],block_get_click,self.characters_data,self.sangvisFerris_data,max_blocks_can_move)
                             if len(self.the_route)>0:
                                 #显示路径
                                 self.areaDrawColorBlock["green"] = self.the_route
-                                xTemp,yTemp = self.theMap.calPosInMap(self.the_route[-1][0],self.the_route[-1][1])
+                                xTemp,yTemp = self.MAP.calPosInMap(self.the_route[-1][0],self.the_route[-1][1])
                                 screen.blit(self.FONT.render(str(len(self.the_route)*2),get_fontMode(),(255,255,255)),(xTemp+self.FONTSIZE*2,yTemp+self.FONTSIZE))
-                                self.characters_data[self.characterGetClick].draw_custom("move",(xTemp,yTemp),screen,self.theMap)
+                                self.characters_data[self.characterGetClick].draw_custom("move",(xTemp,yTemp),screen,self.MAP)
                 #显示攻击范围        
                 elif self.action_choice == "attack":
                     if attacking_range == None:
-                        attacking_range = self.characters_data[self.characterGetClick].getAttackRange(self.theMap)
+                        attacking_range = self.characters_data[self.characterGetClick].getAttackRange(self.MAP)
                     any_character_in_attack_range = False
                     for enemies in self.sangvisFerris_data:
                         if self.sangvisFerris_data[enemies].current_hp > 0:
@@ -841,11 +676,11 @@ class BattleSystem:
                                     for y in range(block_get_click["y"]-self.characters_data[self.characterGetClick].attack_range+1,block_get_click["y"]+self.characters_data[self.characterGetClick].attack_range):
                                         if y < block_get_click["y"]:
                                             for x in range(block_get_click["x"]-self.characters_data[self.characterGetClick].attack_range-(y-block_get_click["y"])+1,block_get_click["x"]+self.characters_data[self.characterGetClick].attack_range+(y-block_get_click["y"])):
-                                                if self.theMap.mapData[y][x].canPassThrough == True:
+                                                if self.MAP.mapData[y][x].canPassThrough == True:
                                                     the_attacking_range_area.append([x,y])
                                         else:
                                             for x in range(block_get_click["x"]-self.characters_data[self.characterGetClick].attack_range+(y-block_get_click["y"])+1,block_get_click["x"]+self.characters_data[self.characterGetClick].attack_range-(y-block_get_click["y"])):
-                                                if self.theMap.mapData[y][x].canPassThrough == True:
+                                                if self.MAP.mapData[y][x].canPassThrough == True:
                                                     the_attacking_range_area.append([x,y])
                                     break
                             self.enemiesGetAttack = {}
@@ -872,7 +707,7 @@ class BattleSystem:
                             for y in range(self.characters_data[self.characterGetClick].y-self.characters_data[self.characterGetClick].max_skill_range,self.characters_data[self.characterGetClick].y+self.characters_data[self.characterGetClick].max_skill_range+1):
                                 if y < self.characters_data[self.characterGetClick].y:
                                     for x in range(self.characters_data[self.characterGetClick].x-self.characters_data[self.characterGetClick].max_skill_range-(y-self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].x+self.characters_data[self.characterGetClick].max_skill_range+(y-self.characters_data[self.characterGetClick].y)+1):
-                                        if len(self.theMap.mapData)>y>=0 and len(self.theMap.mapData[y])>x>=0:
+                                        if len(self.MAP.mapData)>y>=0 and len(self.MAP.mapData[y])>x>=0:
                                             if "far" in self.characters_data[self.characterGetClick].skill_effective_range and self.characters_data[self.characterGetClick].skill_effective_range["far"] != None and self.characters_data[self.characterGetClick].skill_effective_range["far"][0] <= abs(x-self.characters_data[self.characterGetClick].x)+abs(y-self.characters_data[self.characterGetClick].y) <= self.characters_data[self.characterGetClick].skill_effective_range["far"][1]:
                                                 skill_range["far"].append([x,y])
                                             elif "middle" in self.characters_data[self.characterGetClick].skill_effective_range and self.characters_data[self.characterGetClick].skill_effective_range["middle"] != None and self.characters_data[self.characterGetClick].skill_effective_range["middle"][0] <= abs(x-self.characters_data[self.characterGetClick].x)+abs(y-self.characters_data[self.characterGetClick].y) <= self.characters_data[self.characterGetClick].skill_effective_range["middle"][1]:
@@ -883,7 +718,7 @@ class BattleSystem:
                                     for x in range(self.characters_data[self.characterGetClick].x-self.characters_data[self.characterGetClick].max_skill_range+(y-self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].x+self.characters_data[self.characterGetClick].max_skill_range-(y-self.characters_data[self.characterGetClick].y)+1):
                                         if x == self.characters_data[self.characterGetClick].x and y == self.characters_data[self.characterGetClick].y:
                                             pass
-                                        elif len(self.theMap.mapData)>y>=0 and len(self.theMap.mapData[y])>x>=0:
+                                        elif len(self.MAP.mapData)>y>=0 and len(self.MAP.mapData[y])>x>=0:
                                             if "far" in self.characters_data[self.characterGetClick].skill_effective_range and self.characters_data[self.characterGetClick].skill_effective_range["far"] != None and self.characters_data[self.characterGetClick].skill_effective_range["far"][0] <= abs(x-self.characters_data[self.characterGetClick].x)+abs(y-self.characters_data[self.characterGetClick].y) <= self.characters_data[self.characterGetClick].skill_effective_range["far"][1]:
                                                 skill_range["far"].append([x,y])
                                             elif "middle" in self.characters_data[self.characterGetClick].skill_effective_range and self.characters_data[self.characterGetClick].skill_effective_range["middle"] != None and self.characters_data[self.characterGetClick].skill_effective_range["middle"][0] <= abs(x-self.characters_data[self.characterGetClick].x)+abs(y-self.characters_data[self.characterGetClick].y) <= self.characters_data[self.characterGetClick].skill_effective_range["middle"][1]:
@@ -893,7 +728,7 @@ class BattleSystem:
                         self.areaDrawColorBlock["green"] = skill_range["near"]
                         self.areaDrawColorBlock["blue"] = skill_range["middle"]
                         self.areaDrawColorBlock["yellow"] = skill_range["far"]
-                        block_get_click = self.theMap.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                        block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                         if block_get_click != None:
                             the_skill_cover_area = []
                             for area in skill_range:
@@ -901,11 +736,11 @@ class BattleSystem:
                                     for y in range(block_get_click["y"]-self.characters_data[self.characterGetClick].skill_cover_range,block_get_click["y"]+self.characters_data[self.characterGetClick].skill_cover_range):
                                         if y < block_get_click["y"]:
                                             for x in range(block_get_click["x"]-self.characters_data[self.characterGetClick].skill_cover_range-(y-block_get_click["y"])+1,block_get_click["x"]+self.characters_data[self.characterGetClick].skill_cover_range+(y-block_get_click["y"])):
-                                                if len(self.theMap.mapData)>y>=0 and len(self.theMap.mapData[y])>x>=0 and self.theMap.mapData[y][x].canPassThrough == True:
+                                                if len(self.MAP.mapData)>y>=0 and len(self.MAP.mapData[y])>x>=0 and self.MAP.mapData[y][x].canPassThrough == True:
                                                     the_skill_cover_area.append([x,y])
                                         else:
                                             for x in range(block_get_click["x"]-self.characters_data[self.characterGetClick].skill_cover_range+(y-block_get_click["y"])+1,block_get_click["x"]+self.characters_data[self.characterGetClick].skill_cover_range-(y-block_get_click["y"])):
-                                                if len(self.theMap.mapData)>y>=0 and len(self.theMap.mapData[y])>x>=0 and self.theMap.mapData[y][x].canPassThrough == True:
+                                                if len(self.MAP.mapData)>y>=0 and len(self.MAP.mapData[y])>x>=0 and self.MAP.mapData[y][x].canPassThrough == True:
                                                     the_skill_cover_area.append([x,y])
                                     self.areaDrawColorBlock["orange"] = the_skill_cover_area
                                     self.skill_target = skill(self.characterGetClick,{"x":block_get_click["x"],"y":block_get_click["y"]},the_skill_cover_area,self.sangvisFerris_data,self.characters_data)
@@ -957,11 +792,11 @@ class BattleSystem:
                     self.areaDrawColorBlock["orange"] = []
                     self.ornamentationGetClick = None
                     for ornamentationId in thingsCanReact:
-                        if block_get_click != None and block_get_click["x"] == self.theMap.ornamentationData[ornamentationId].x and block_get_click["y"] == self.theMap.ornamentationData[ornamentationId].y:
+                        if block_get_click != None and block_get_click["x"] == self.MAP.ornamentationData[ornamentationId].x and block_get_click["y"] == self.MAP.ornamentationData[ornamentationId].y:
                             self.areaDrawColorBlock["orange"] = [(block_get_click["x"],block_get_click["y"])]
                             self.ornamentationGetClick = ornamentationId
                         else:
-                            self.areaDrawColorBlock["green"].append((self.theMap.ornamentationData[ornamentationId].x,self.theMap.ornamentationData[ornamentationId].y))
+                            self.areaDrawColorBlock["green"].append((self.MAP.ornamentationData[ornamentationId].x,self.MAP.ornamentationData[ornamentationId].y))
 
             #当有角色被点击时
             if self.characterGetClick != None and self.isWaiting == False:
@@ -974,17 +809,17 @@ class BattleSystem:
                         #是否需要更新
                         if self.characters_data[self.characterGetClick].needUpdateMap():
                             for key in self.sangvisFerris_data:
-                                if self.sangvisFerris_data[key].isInAttackRange(self.characters_data[self.characterGetClick],self.theMap):
+                                if self.sangvisFerris_data[key].isInAttackRange(self.characters_data[self.characterGetClick],self.MAP):
                                     self.characters_data[self.characterGetClick].noticed()
                                     break
-                            self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                            self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
                     else:
                         self.footstep_sounds.stop()
                         #检测是不是站在补给上
-                        for i in range(len(self.theMap.ornamentationData)-1,-1,-1):
-                            if self.theMap.ornamentationData[i].type == "chest" and self.theMap.ornamentationData[i].get_pos() == self.characters_data[self.characterGetClick].get_pos():
+                        for i in range(len(self.MAP.ornamentationData)-1,-1,-1):
+                            if self.MAP.ornamentationData[i].type == "chest" and self.MAP.ornamentationData[i].get_pos() == self.characters_data[self.characterGetClick].get_pos():
                                 self.original_UI_img["supplyBoard"].items = []
-                                for key2,value2 in self.theMap.ornamentationData[i].items.items():
+                                for key2,value2 in self.MAP.ornamentationData[i].items.items():
                                     if key2 == "bullet":
                                         self.characters_data[self.characterGetClick].bullets_carried += value2
                                         self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(value2),get_fontMode(),(255,255,255)))
@@ -993,7 +828,7 @@ class BattleSystem:
                                         self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(value2),get_fontMode(),(255,255,255)))
                                 if len(self.original_UI_img["supplyBoard"].items)>0:
                                     self.original_UI_img["supplyBoard"].yTogo = 10
-                                del self.theMap.ornamentationData[i]
+                                del self.MAP.ornamentationData[i]
                                 break
                         keyTemp = str(self.characters_data[self.characterGetClick].x)+"-"+str(self.characters_data[self.characterGetClick].y) 
                         #检测是否角色有set的动画
@@ -1006,7 +841,7 @@ class BattleSystem:
                 elif self.action_choice == "attack":
                     #根据敌我坐标判断是否需要反转角色
                     if self.characters_data[self.characterGetClick].get_imgId("attack") == 0:
-                        block_get_click = self.theMap.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                        block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                         if block_get_click != None:
                             self.characters_data[self.characterGetClick].setFlipBasedPos(block_get_click)
                         self.characters_data[self.characterGetClick].playSound("attack")
@@ -1028,7 +863,7 @@ class BattleSystem:
                         self.characterGetClick = None
                         self.action_choice = None
                 elif self.action_choice == "skill":
-                    self.characters_data[self.characterGetClick].draw(screen,self.theMap,False)
+                    self.characters_data[self.characterGetClick].draw(screen,self.MAP,False)
                     if self.characters_data[self.characterGetClick].get_imgId("skill") == self.characters_data[self.characterGetClick].get_imgNum("skill")-2:
                         temp_dic = skill(self.characterGetClick,None,None,self.sangvisFerris_data,self.characters_data,"react",self.skill_target,self.damage_do_to_characters)
                         self.characters_data = temp_dic["characters_data"]
@@ -1037,18 +872,18 @@ class BattleSystem:
                         del temp_dic
                     elif self.characters_data[self.characterGetClick].get_imgId("skill") == self.characters_data[self.characterGetClick].get_imgNum("skill")-1:
                         self.characters_data[self.characterGetClick].reset_imgId("skill")
-                        self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                        self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
                         self.isWaiting =True
                         self.characterGetClick = None
                         self.action_choice = None
             elif self.characterGetClick != None and self.isWaiting == True:
-                self.characters_data[self.characterGetClick].draw(screen,self.theMap)
+                self.characters_data[self.characterGetClick].draw(screen,self.MAP)
 
         #敌方回合
         if self.whose_round == "sangvisFerris":
             self.enemy_in_control = self.sangvisFerris_name_list[self.enemies_in_control_id]
             if self.enemy_action == None:
-                self.enemy_action = AI(self.enemy_in_control,self.theMap,self.characters_data,self.sangvisFerris_data,self.the_characters_detected_last_round)
+                self.enemy_action = AI(self.enemy_in_control,self.MAP,self.characters_data,self.sangvisFerris_data,self.the_characters_detected_last_round)
                 if self.enemy_action["action"] == "move" or self.enemy_action["action"] == "move&attack":
                     self.sangvisFerris_data[self.enemy_in_control].move_follow(self.enemy_action["route"])
                 elif self.enemy_action["action"] == "attack":
@@ -1073,7 +908,7 @@ class BattleSystem:
                     temp_value = random.randint(0,100)
                     if self.enemy_action["target_area"] == "near" and temp_value <= 95 or self.enemy_action["target_area"] == "middle" and temp_value <= 80 or self.enemy_action["target_area"] == "far" and temp_value <= 65:
                         the_damage = self.characters_data[self.enemy_action["target"]].attackBy(self.sangvisFerris_data[self.enemy_in_control],self.resultInfo)
-                        self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                        self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
                         self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
                     else:
                         self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
@@ -1106,9 +941,9 @@ class BattleSystem:
         rightClickCharacterAlphaDeduct = True
         for key,value in dicMerge(self.characters_data,self.sangvisFerris_data).items():
             #如果天亮的双方都可以看见/天黑，但是是友方角色/天黑，但是是敌方角色在可观测的范围内 -- 则画出角色
-            if value.faction == "character" or value.faction == "sangvisFerri" and self.theMap.inLightArea(value):
+            if value.faction == "character" or value.faction == "sangvisFerri" and self.MAP.inLightArea(value):
                 if self.NotDrawRangeBlocks == True and pygame.mouse.get_pressed()[2]:
-                    block_get_click = self.theMap.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                    block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                     if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
                         rightClickCharacterAlphaDeduct = False
                         if self.rightClickCharacterAlpha == None:
@@ -1118,11 +953,11 @@ class BattleSystem:
                             self.UI_img["yellow"].set_alpha(self.rightClickCharacterAlpha)
                             self.UI_img["blue"].set_alpha(self.rightClickCharacterAlpha)
                             self.UI_img["green"].set_alpha(self.rightClickCharacterAlpha)
-                        rangeCanAttack =  value.getAttackRange(self.theMap)
+                        rangeCanAttack =  value.getAttackRange(self.MAP)
                         self.areaDrawColorBlock["yellow"] = rangeCanAttack["far"]
                         self.areaDrawColorBlock["blue"] =  rangeCanAttack["middle"]
                         self.areaDrawColorBlock["green"] = rangeCanAttack["near"]
-                value.draw(screen,self.theMap)
+                value.draw(screen,self.MAP)
             #是否有在播放死亡角色的动画（而不是倒地状态）
             if value.current_hp<=0 and key not in self.the_dead_one:
                 if value.kind == "HOC" or value.faction == "sangvisFerri":
@@ -1131,9 +966,9 @@ class BattleSystem:
             if key in self.damage_do_to_characters:
                 the_alpha_to_check = self.damage_do_to_characters[key].get_alpha()
                 if the_alpha_to_check > 0:
-                    xTemp,yTemp = self.theMap.calPosInMap(value.x,value.y)
-                    xTemp+=self.theMap.perBlockWidth*0.05
-                    yTemp-=self.theMap.perBlockWidth*0.05
+                    xTemp,yTemp = self.MAP.calPosInMap(value.x,value.y)
+                    xTemp+=self.MAP.perBlockWidth*0.05
+                    yTemp-=self.MAP.perBlockWidth*0.05
                     displayInCenter(self.damage_do_to_characters[key],self.UI_img["green"],xTemp,yTemp,screen)
                     self.damage_do_to_characters[key].set_alpha(the_alpha_to_check-5)
                 else:
@@ -1160,7 +995,7 @@ class BattleSystem:
                             the_dead_one_remove.append(key)
                             del self.characters_data[key]
                             self.resultInfo["times_characters_down"]+=1
-                            self.theMap.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                            self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
             for key in the_dead_one_remove:
                 del self.the_dead_one[key]
         """↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑"""
@@ -1180,27 +1015,27 @@ class BattleSystem:
                 self.UI_img["green"].set_alpha(255)
                 self.rightClickCharacterAlpha = None
         #展示设施
-        self.theMap.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
+        self.MAP.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
         #展示所有角色Ui
         for every_chara in self.characters_data:
-            self.characters_data[every_chara].drawUI(screen,self.original_UI_img,self.theMap)
-        if self.theMap.darkMode == True:
+            self.characters_data[every_chara].drawUI(screen,self.original_UI_img,self.MAP)
+        if self.MAP.darkMode == True:
             for enemies in self.sangvisFerris_data:
-                if (int(self.sangvisFerris_data[enemies].x),int(self.sangvisFerris_data[enemies].y)) in self.theMap.lightArea:
-                    self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.theMap)
+                if (int(self.sangvisFerris_data[enemies].x),int(self.sangvisFerris_data[enemies].y)) in self.MAP.lightArea:
+                    self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.MAP)
         else:
             for enemies in self.sangvisFerris_data:
-                self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.theMap)
+                self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.MAP)
 
         #显示选择菜单
         if self.NotDrawRangeBlocks == "SelectMenu":
             #左下角的角色信息
             self.characterInfoBoardUI.display(screen,self.characters_data[self.characterGetClick],self.original_UI_img)
             #----选择菜单----
-            self.buttonGetHover = self.selectMenuUI.display(screen,round(self.theMap.perBlockWidth/10),self.theMap.getBlockExactLocation(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].kind,friendsCanSave,thingsCanReact)
+            self.buttonGetHover = self.selectMenuUI.display(screen,round(self.MAP.perBlockWidth/10),self.MAP.getBlockExactLocation(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].kind,friendsCanSave,thingsCanReact)
         #加载雪花
         if self.weatherController != None:
-            self.weatherController.display(screen,self.theMap.perBlockWidth,self.perBlockHeight)
+            self.weatherController.display(screen,self.MAP.perBlockWidth,self.MAP.perBlockHeight)
         
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if self.whose_round == "playerToSangvisFerris" or self.whose_round == "sangvisFerrisToPlayer":
@@ -1271,7 +1106,7 @@ class BattleSystem:
             if self.ResultBoardUI == None:
                 self.resultInfo["total_time"] = time.localtime(time.time()-self.resultInfo["total_time"])
                 self.ResultBoardUI = ResultBoard(self.resultInfo,self.window_x,self.window_y)
-            for event in self.__pygame_events:
+            for event in self._get_event():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         self.battleMode = False

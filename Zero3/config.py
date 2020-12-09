@@ -59,14 +59,16 @@ with open("Lang/{}.yaml".format(ZERO_DATA["Language"]), "r", encoding='utf-8') a
     ZERO_LANG = yaml.load(f.read(),Loader=yaml.FullLoader)
 
 #获取语言配置文件
-def get_lang(key=None):
+def get_lang(key=None,key2=None):
     if key == None:
         return ZERO_LANG
-    else:
+    elif key2 == None:
         if key in ZERO_LANG:
             return ZERO_LANG[key]
         else:
             return None
+    else:
+        ZERO_LANG[key][key2]
 
 #重新加载语言配置文件
 def reload_lang():
