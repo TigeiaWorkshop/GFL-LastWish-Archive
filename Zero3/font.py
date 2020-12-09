@@ -31,9 +31,9 @@ class FontGenerator:
             raise Exception('ZeroEngine-Error: Standard font is not initialized!')
 
 #初始化字体的配置文件
-ZERO_FONT = ZERO_DATA["Font"]
-ZERO_FONTTYPE = ZERO_DATA["FontType"]
-ZERO_MODE = ZERO_DATA["Antialias"]
+ZERO_FONT = get_setting("Font")
+ZERO_FONTTYPE = get_setting("FontType")
+ZERO_MODE = get_setting("Antialias")
 #引擎标准文件渲染器
 ZERO_STANDARD_SMALL_FONT = FontGenerator()
 ZERO_STANDARD_MEDIUM_FONT = FontGenerator()
@@ -83,15 +83,13 @@ def standard_font_render(fonType,txt,color):
 
 #重新获取设置信息
 def reload_setting():
-    global ZERO_DATA
+    reload_DATA()
     global ZERO_FONT
     global ZERO_FONTTYPE
     global ZERO_MODE
-    with open("Save/setting.yaml", "r", encoding='utf-8') as f:
-        ZERO_DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
-        ZERO_FONT = ZERO_DATA["Font"]
-        ZERO_FONTTYPE = ZERO_DATA["FontType"]
-        ZERO_MODE = ZERO_DATA["Antialias"]
+    ZERO_FONT = get_setting("Font")
+    ZERO_FONTTYPE = get_setting("FontType")
+    ZERO_MODE = get_setting("Antialias")
 
 #创建字体
 def createFont(size,ifBold=False,ifItalic=False):

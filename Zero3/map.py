@@ -378,7 +378,7 @@ class MapObject:
         "yEnd": yStart + self.perBlockWidth*0.5
         }
     #计算光亮区域
-    def calculate_darkness(self,characters_data,window_x,window_y):
+    def calculate_darkness(self,characters_data):
         self.lightArea = []
         for each_chara in characters_data:
             the_character_effective_range = 2

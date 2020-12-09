@@ -3,79 +3,85 @@ import os
 import pygame
 import yaml
 from pygame.locals import *
+from copy import deepcopy
 #初始化pygame
 pygame.init()
 
-#加载设置配置文件
-ZERO_DATA = None
-#如果配置文件setting.yaml存在
-if os.path.exists("Save/setting.yaml"):
-    with open("Save/setting.yaml", "r", encoding='utf-8') as f:
-        ZERO_DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
-#如果不存在就创建一个
-else:
-    #导入local,查看默认语言
-    import locale
-    ZERO_DATA = {
-        "Antialias": True,
-        "FPS": 60,
-        "Font": "MicrosoftYaHei-2",
-        "FontType": "custom",
-        "KeepVedioCache": True,
-        "Language": locale.getdefaultlocale(),
-        "MouseIconWidth": 18,
-        "MouseMoveSpeed": 30,
-        "ReadingSpeed": 0.5,
-        "Screen_size_x": 1920,
-        "Screen_size_y": 1080,
-        "Sound":{
-            "background_music": 100,
-            "sound_effects": 100,
-            "sound_environment": 100,
-        }
-    }
-    if ZERO_DATA["Language"][0] == "zh_CN":
-        ZERO_DATA["Language"] = "SimplifiedChinese"
-    else:
-        ZERO_DATA["Language"] = "English"
-    #别忘了看看Save文件夹是不是都不存在
-    if not os.path.exists("Save"):
-        os.makedirs("Save")
-    with open("Save/setting.yaml", "w", encoding='utf-8') as f:
-        yaml.dump(ZERO_DATA, f, allow_unicode=True)
+#初始化储存设置配置文件的变量
+__ZERO_DATA = None
 
 #获取设置配置文件
 def get_setting(key=None,key2=None):
     if key == None:
-        return ZERO_DATA
+        return deepcopy(__ZERO_DATA)
     elif key2 == None:
-        return ZERO_DATA[key]
+        return deepcopy(__ZERO_DATA[key])
     else:
-        return ZERO_DATA[key][key2]
+        return deepcopy(__ZERO_DATA[key][key2])
+
+#重新加载设置配置文件，请勿在引擎外调用，重置配置文件请用reload_setting()
+def reload_DATA():
+    global __ZERO_DATA
+    #如果配置文件setting.yaml存在
+    if os.path.exists("Save/setting.yaml"):
+        with open("Save/setting.yaml", "r", encoding='utf-8') as f:
+            __ZERO_DATA = yaml.load(f.read(),Loader=yaml.FullLoader)
+    #如果不存在就创建一个
+    else:
+        #导入local,查看默认语言
+        import locale
+        __ZERO_DATA = {
+            "Antialias": True,
+            "FPS": 60,
+            "Font": "MicrosoftYaHei-2",
+            "FontType": "custom",
+            "KeepVedioCache": True,
+            "Language": locale.getdefaultlocale(),
+            "MouseIconWidth": 18,
+            "MouseMoveSpeed": 30,
+            "ReadingSpeed": 0.5,
+            "Screen_size_x": 1920,
+            "Screen_size_y": 1080,
+            "Sound":{
+                "background_music": 100,
+                "sound_effects": 100,
+                "sound_environment": 100,
+            }
+        }
+        if __ZERO_DATA["Language"][0] == "zh_CN":
+            __ZERO_DATA["Language"] = "SimplifiedChinese"
+        else:
+            __ZERO_DATA["Language"] = "English"
+        #别忘了看看Save文件夹是不是都不存在
+        if not os.path.exists("Save"):
+            os.makedirs("Save")
+        with open("Save/setting.yaml", "w", encoding='utf-8') as f:
+            yaml.dump(__ZERO_DATA, f, allow_unicode=True)
+
+#加载设置配置文件
+reload_DATA()
 
 #语言配置文件
-ZERO_LANG = None
-with open("Lang/{}.yaml".format(ZERO_DATA["Language"]), "r", encoding='utf-8') as f:
-    ZERO_LANG = yaml.load(f.read(),Loader=yaml.FullLoader)
+__ZERO_LANG = None
+with open("Lang/{}.yaml".format(__ZERO_DATA["Language"]), "r", encoding='utf-8') as f:
+    __ZERO_LANG = yaml.load(f.read(),Loader=yaml.FullLoader)
 
 #获取语言配置文件
-def get_lang(key=None,key2=None):
-    if key == None:
-        return ZERO_LANG
-    elif key2 == None:
-        if key in ZERO_LANG:
-            return ZERO_LANG[key]
+def get_lang(key,key2=None):
+    if key2 == None:
+        if key in __ZERO_LANG:
+            return deepcopy(__ZERO_LANG[key])
         else:
             return None
     else:
-        ZERO_LANG[key][key2]
+        return deepcopy(__ZERO_LANG[key][key2])
 
 #重新加载语言配置文件
 def reload_lang():
-    global ZERO_LANG
-    with open("Lang/{}.yaml".format(ZERO_DATA["Language"]), "r", encoding='utf-8') as f:
-        ZERO_LANG = yaml.load(f.read(),Loader=yaml.FullLoader)
+    global __ZERO_LANG
+    with open("Lang/{}.yaml".format(__ZERO_DATA["Language"]), "r", encoding='utf-8') as f:
+        __ZERO_LANG = yaml.load(f.read(),Loader=yaml.FullLoader)
 
 #初始化屏幕
 def screen_init(flags):
-    return pygame.display.set_mode((ZERO_DATA["Screen_size_x"], ZERO_DATA["Screen_size_y"]),flags)
+    return pygame.display.set_mode((__ZERO_DATA["Screen_size_x"], __ZERO_DATA["Screen_size_y"]),flags)

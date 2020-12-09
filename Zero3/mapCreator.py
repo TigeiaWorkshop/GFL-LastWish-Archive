@@ -271,14 +271,14 @@ class mapCreator(BattleSystemInterface):
                 drawImg(self.greenBlock,(xTemp+self.MAP.perBlockWidth*0.1,yTemp),screen)
 
         #角色动画
-        for every_chara in self.characters_data:
-            self.characters_data[every_chara].draw("wait",screen,self.MAP)
-            if self.object_to_put_down == None and pygame.mouse.get_pressed()[0] and self.characters_data[every_chara].x == int(mouse_x/self.greenBlock.get_width()) and self.characters_data[every_chara].y == int(mouse_y/self.greenBlock.get_height()):
-                self.data_to_edit = self.characters_data[every_chara]
-        for enemies in self.sangvisFerris_data:
-            self.sangvisFerris_data[enemies].draw("wait",screen,self.MAP)
-            if self.object_to_put_down == None and pygame.mouse.get_pressed()[0] and self.sangvisFerris_data[enemies].x == int(mouse_x/self.greenBlock.get_width()) and self.sangvisFerris_data[enemies].y == int(mouse_y/self.greenBlock.get_height()):
-                self.data_to_edit = self.sangvisFerris_data[enemies]
+        for key in self.characters_data:
+            self.characters_data[key].draw("wait",screen,self.MAP)
+            if self.object_to_put_down == None and pygame.mouse.get_pressed()[0] and self.characters_data[key].x == int(mouse_x/self.greenBlock.get_width()) and self.characters_data[key].y == int(mouse_y/self.greenBlock.get_height()):
+                self.data_to_edit = self.characters_data[key]
+        for key in self.sangvisFerris_data:
+            self.sangvisFerris_data[key].draw("wait",screen,self.MAP)
+            if self.object_to_put_down == None and pygame.mouse.get_pressed()[0] and self.sangvisFerris_data[key].x == int(mouse_x/self.greenBlock.get_width()) and self.sangvisFerris_data[key].y == int(mouse_y/self.greenBlock.get_height()):
+                self.data_to_edit = self.sangvisFerris_data[key]
 
         #展示设施
         self.MAP.display_facility(screen,self.characters_data,self.sangvisFerris_data)
@@ -294,25 +294,25 @@ class mapCreator(BattleSystemInterface):
 
         #显示所有可放置的友方角色
         i=0
-        for every_chara in self.charactersImgDict:
+        for key in self.charactersImgDict:
             tempX = self.UIContainer.x+self.MAP.perBlockWidth*i*0.6+self.UI_local_x
             if 0 <= tempX <= self.UIContainer.width*0.9:
                 tempY = self.UIContainer.y-self.MAP.perBlockWidth*0.25
-                drawImg(self.charactersImgDict[every_chara],(tempX,tempY),screen)
-                if pygame.mouse.get_pressed()[0] and ifHover(self.charactersImgDict[every_chara],(tempX,tempY)):
-                    self.object_to_put_down = {"type":"character","id":every_chara}
+                drawImg(self.charactersImgDict[key],(tempX,tempY),screen)
+                if pygame.mouse.get_pressed()[0] and ifHover(self.charactersImgDict[key],(tempX,tempY)):
+                    self.object_to_put_down = {"type":"character","id":key}
             elif tempX > self.UIContainer.width*0.9:
                 break
             i+=1
         i=0
         #显示所有可放置的敌方角色
-        for enemies in self.sangvisFerrisImgDict:
+        for key in self.sangvisFerrisImgDict:
             tempX = self.UIContainer.x+self.MAP.perBlockWidth*i*0.6+self.UI_local_x
             if 0 <= tempX <= self.UIContainer.width*0.9:
                 tempY = self.UIContainer.y+self.MAP.perBlockWidth*0.25
-                drawImg(self.sangvisFerrisImgDict[enemies],(tempX,tempY),screen)
-                if pygame.mouse.get_pressed()[0] and ifHover(self.sangvisFerrisImgDict[enemies],(tempX,tempY)):
-                    self.object_to_put_down = {"type":"sangvisFerri","id":enemies}
+                drawImg(self.sangvisFerrisImgDict[key],(tempX,tempY),screen)
+                if pygame.mouse.get_pressed()[0] and ifHover(self.sangvisFerrisImgDict[key],(tempX,tempY)):
+                    self.object_to_put_down = {"type":"sangvisFerri","id":key}
             elif tempX > self.UIContainer.width*0.9:
                 break
             i+=1
@@ -348,7 +348,6 @@ class mapCreator(BattleSystemInterface):
                 drawImg(self.sangvisFerrisImgDict[self.object_to_put_down["id"]],(mouse_x-self.MAP.perBlockWidth/2,mouse_y-self.MAP.perBlockWidth/2.1),screen)
         
         #显示即将被编辑的数据
-        object_edit_id = 0
         if self.data_to_edit != None:
             drawImg(fontRender("action points: "+str(self.data_to_edit.max_action_point),"black",15),(self.window_x*0.91,self.window_y*0.8),screen)
             drawImg(fontRender("attack range: "+str(self.data_to_edit.attack_range),"black",15),(self.window_x*0.91,self.window_y*0.8+20),screen)

@@ -970,10 +970,10 @@ class PauseMenu:
         pygame.draw.rect(surfaceTmp,(0,0,0),(0,0,width,height))
         self.white_bg = ImageSurface(surfaceTmp,0,0,width,height)
         self.white_bg.set_alpha(50)
-        self.button_resume = fontRenderPro(get_lang("MainMenu")["menu_1"]["text0_continue"],"white",(screen.get_width()*0.1,screen.get_height()*0.4,screen.get_width()/38))
+        self.button_resume = fontRenderPro(get_lang("MainMenu","menu_1")["text0_continue"],"white",(screen.get_width()*0.1,screen.get_height()*0.4,screen.get_width()/38))
         self.button_save = fontRenderPro(get_lang("SaveGame"),"white",(screen.get_width()*0.1,screen.get_height()*0.5,screen.get_width()/38))
-        self.button_setting = fontRenderPro(get_lang("MainMenu")["menu_0"]["text1_setting"],"gray",(screen.get_width()*0.1,screen.get_height()*0.6,screen.get_width()/38))
-        self.button_back = fontRenderPro(get_lang("DialogCreator")["back"],"white",(screen.get_width()*0.1,screen.get_height()*0.7,screen.get_width()/38))
+        self.button_setting = fontRenderPro(get_lang("MainMenu","menu_0")["text1_setting"],"gray",(screen.get_width()*0.1,screen.get_height()*0.6,screen.get_width()/38))
+        self.button_back = fontRenderPro(get_lang("DialogCreator","back"),"white",(screen.get_width()*0.1,screen.get_height()*0.7,screen.get_width()/38))
     def checkIfBackToMainMenu(self):
         if self.ifBackToMainMenu == False:
             return False

@@ -122,7 +122,7 @@ class BattleSystem(BattleSystemInterface):
             self.MAP.load_env_img()
         del characterDataThread
         #计算光亮区域 并初始化地图
-        self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+        self.MAP.calculate_darkness(self.characters_data)
         #开始加载关卡设定
         self.infoToDisplayDuringLoading.display(screen)
         now_loading = self.FONT.render(loading_info["now_loading_level"],get_fontMode(),(255,255,255))
@@ -190,7 +190,7 @@ class BattleSystem(BattleSystemInterface):
             display.flip(True)
     #把战斗系统的画面画到screen上
     def display(self,screen):
-        super()._display(screen)
+        super()._display()
         #环境声音-频道1
         self.environment_sound.play()
         #在战斗状态
@@ -280,7 +280,7 @@ class BattleSystem(BattleSystemInterface):
                         else:
                             raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
                     if reProcessMap:
-                        self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                        self.MAP.calculate_darkness(self.characters_data)
                     if allGetToTargetPos:
                         #脚步停止
                         self.footstep_sounds.stop()
@@ -594,7 +594,7 @@ class BattleSystem(BattleSystemInterface):
                 elif self.action_choice == "interact" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.ornamentationGetClick != None:
                     self.characters_data[self.characterGetClick].reduce_action_point(2)
                     self.MAP.ornamentationData[self.ornamentationGetClick].triggered = not self.MAP.ornamentationData[self.ornamentationGetClick].triggered
-                    self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                    self.MAP.calculate_darkness(self.characters_data)
                     self.characterGetClick = None
                     self.action_choice = None
                     self.isWaiting = True
@@ -812,7 +812,7 @@ class BattleSystem(BattleSystemInterface):
                                 if self.sangvisFerris_data[key].isInAttackRange(self.characters_data[self.characterGetClick],self.MAP):
                                     self.characters_data[self.characterGetClick].noticed()
                                     break
-                            self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                            self.MAP.calculate_darkness(self.characters_data)
                     else:
                         self.footstep_sounds.stop()
                         #检测是不是站在补给上
@@ -872,7 +872,7 @@ class BattleSystem(BattleSystemInterface):
                         del temp_dic
                     elif self.characters_data[self.characterGetClick].get_imgId("skill") == self.characters_data[self.characterGetClick].get_imgNum("skill")-1:
                         self.characters_data[self.characterGetClick].reset_imgId("skill")
-                        self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                        self.MAP.calculate_darkness(self.characters_data)
                         self.isWaiting =True
                         self.characterGetClick = None
                         self.action_choice = None
@@ -908,7 +908,7 @@ class BattleSystem(BattleSystemInterface):
                     temp_value = random.randint(0,100)
                     if self.enemy_action["target_area"] == "near" and temp_value <= 95 or self.enemy_action["target_area"] == "middle" and temp_value <= 80 or self.enemy_action["target_area"] == "far" and temp_value <= 65:
                         the_damage = self.characters_data[self.enemy_action["target"]].attackBy(self.sangvisFerris_data[self.enemy_in_control],self.resultInfo)
-                        self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                        self.MAP.calculate_darkness(self.characters_data)
                         self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
                     else:
                         self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
@@ -995,7 +995,7 @@ class BattleSystem(BattleSystemInterface):
                             the_dead_one_remove.append(key)
                             del self.characters_data[key]
                             self.resultInfo["times_characters_down"]+=1
-                            self.MAP.calculate_darkness(self.characters_data,self.window_x,self.window_y)
+                            self.MAP.calculate_darkness(self.characters_data)
             for key in the_dead_one_remove:
                 del self.the_dead_one[key]
         """↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑"""
