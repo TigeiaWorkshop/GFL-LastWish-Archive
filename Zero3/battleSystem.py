@@ -1021,7 +1021,7 @@ class BattleSystem(BattleSystemInterface):
             self.characters_data[every_chara].drawUI(screen,self.original_UI_img,self.MAP)
         if self.MAP.darkMode == True:
             for enemies in self.sangvisFerris_data:
-                if (int(self.sangvisFerris_data[enemies].x),int(self.sangvisFerris_data[enemies].y)) in self.MAP.lightArea:
+                if self.MAP.isPosInLightArea(int(self.sangvisFerris_data[enemies].x),int(self.sangvisFerris_data[enemies].y)):
                     self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.MAP)
         else:
             for enemies in self.sangvisFerris_data:

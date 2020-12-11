@@ -65,7 +65,7 @@ class EnvImagesManagement:
         if self.__ENV_IMAGE_DICT_ORIGINAL_DARK != None:
             for key in self.__ENV_IMAGE_DICT_DARK:
                 self.__ENV_IMAGE_DICT_DARK[key] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL_DARK[key],(newWidth,None))
-    def get_env_image(self,key,darkMode,darkness=150):
+    def get_env_image(self,key,darkMode):
         try:
             if darkMode == True:
                 return self.__ENV_IMAGE_DICT_DARK[key]
@@ -93,6 +93,7 @@ class EnvImagesManagement:
             self.__ORNAMENTATION_IMAGE_DICT[ornamentationType][key] = imgTmp
             if self.__ORNAMENTATION_IMAGE_DICT_DARK != None:
                 self.__ORNAMENTATION_IMAGE_DICT_DARK[ornamentationType][key] = addDarkness(imgTmp,darkness)
+    #获取当前装饰物种类的数量
     def get_ornamentation_num(self,ornamentationType):
         return len(self.__ORNAMENTATION_IMAGE_DICT[ornamentationType])
     def get_new_background_image(self,width,height):
@@ -156,7 +157,7 @@ class MapObject:
             self.surface_width = window_x
         if self.surface_height < window_y:
             self.surface_height = window_y
-        self.process_map(window_x,window_y)
+        self.__process_map(window_x,window_y)
     #获取local坐标
     def getPos(self):
         return self.__local_x,self.__local_y
@@ -206,17 +207,17 @@ class MapObject:
             screen_to_move_y = 0
         if self.ifProcessMap == True:
             self.ifProcessMap = False
-            self.process_map(screen.get_width(),screen.get_height())
+            self.__process_map(screen.get_width(),screen.get_height())
         screen.blit(_MAP_ENV_IMAGE.get_background_image(),(0,0))
         return (screen_to_move_x,screen_to_move_y)
     #画上设施
     def display_ornamentation(self,screen,characters_data,sangvisFerris_data):
-        charatcersPos = None
+        charactersPos = None
         for item in self.ornamentationData:
             imgToBlit = None
             xTemp,yTemp = self.calPosInMap(item.x,item.y)
             if -self.perBlockWidth<=xTemp<screen.get_width() and -self.perBlockWidth<=yTemp<screen.get_height():
-                if self.darkMode == True and item.get_pos() not in self.lightArea:
+                if self.darkMode == True and not self.inLightArea(item):
                     keyWordTemp = True
                 else:
                     keyWordTemp = False
@@ -254,13 +255,13 @@ class MapObject:
                     xTemp -= self.perBlockWidth*0.125
                     yTemp -= self.perBlockWidth*0.25
                     #如果的确有树需要被画出
-                    if charatcersPos == None:
-                        charatcersPos = []
+                    if charactersPos == None:
+                        charactersPos = []
                         for name,dataDic in dicMerge(characters_data,sangvisFerris_data).items():
-                            charatcersPos.append((int(dataDic.x),int(dataDic.y)))
-                            charatcersPos.append((int(dataDic.x)+1,int(dataDic.y)+1))
-                    if item.get_pos() in charatcersPos:
-                        if self.darkMode == False or item.get_pos() in self.lightArea:
+                            charactersPos.append((int(dataDic.x),int(dataDic.y)))
+                            charactersPos.append((int(dataDic.x)+1,int(dataDic.y)+1))
+                    if item.get_pos() in charactersPos:
+                        if self.darkMode == False or self.inLightArea(item):
                             imgToBlit.set_alpha(100)
                 elif item.type == "decoration" or item.type == "obstacle" or item.type == "chest":
                     imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image(item.type,item.image,keyWordTemp),(round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
@@ -335,23 +336,30 @@ class MapObject:
                 the_route.append((startX,startY))
         return the_route
     #重新绘制地图
-    def process_map(self,window_x,window_y):
+    def __process_map(self,int window_x,int window_y):
         mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_x,window_y)
+        cdef unsigned int y
+        cdef (int, int) posTupleTemp
+        cdef unsigned int yRange = len(self.mapData)
+        cdef unsigned int x
+        cdef unsigned int xRange
+        cdef unsigned int anyBlockBlitThisLine
+        cdef int screen_min = -self.perBlockWidth
         #画出地图
-        for y in range(len(self.mapData)):
-            anyBlockPrint = False
-            yTemp = 0
-            for x in range(len(self.mapData[y])):
-                xTemp,yTemp = self.calPosInMap(x,y)
-                if -self.perBlockWidth<=xTemp<window_x and -self.perBlockWidth<=yTemp<window_y:
-                    anyBlockPrint = True
-                    if self.darkMode == True and (x,y) not in self.lightArea:
-                        mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,True),(xTemp,yTemp))
+        for y in range(yRange):
+            anyBlockBlitThisLine = 0
+            xRange = len(self.mapData[y])
+            for x in range(xRange):
+                posTupleTemp = self.calPosInMap(x,y)
+                if screen_min<=posTupleTemp[0]<window_x and screen_min<=posTupleTemp[1]<window_y:
+                    anyBlockBlitThisLine = 1
+                    if not self.isPosInLightArea(x,y):
+                        mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,True),(posTupleTemp[0],posTupleTemp[1]))
                     else:
-                        mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,False),(xTemp,yTemp))
-                elif xTemp>=window_x or yTemp>=window_y:
+                        mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,False),(posTupleTemp[0],posTupleTemp[1]))
+                elif posTupleTemp[0]>=window_x or posTupleTemp[1]>=window_y:
                     break
-            if anyBlockPrint == False and yTemp>=window_y:
+            if anyBlockBlitThisLine == 0 and posTupleTemp[1]>=window_y:
                 break
     #计算在地图中的方块
     def calBlockInMap(self,block,mouse_x,mouse_y):
@@ -379,7 +387,7 @@ class MapObject:
         }
     #计算光亮区域
     def calculate_darkness(self,characters_data):
-        self.lightArea = []
+        cdef list lightArea = []
         for each_chara in characters_data:
             the_character_effective_range = 2
             if characters_data[each_chara].current_hp > 0 :
@@ -392,37 +400,43 @@ class MapObject:
             for y in range(int(characters_data[each_chara].y-the_character_effective_range),int(characters_data[each_chara].y+the_character_effective_range)):
                 if y < characters_data[each_chara].y:
                     for x in range(int(characters_data[each_chara].x-the_character_effective_range-(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range+(y-characters_data[each_chara].y))):
-                        if (x,y) not in self.lightArea:
-                            self.lightArea.append((x,y))
+                        if [x,y] not in lightArea:
+                            lightArea.append([x,y])
                 else:
                     for x in range(int(characters_data[each_chara].x-the_character_effective_range+(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range-(y-characters_data[each_chara].y))):
-                        if (x,y) not in self.lightArea:
-                            self.lightArea.append((x,y))
+                        if [x,y] not in lightArea:
+                            lightArea.append([x,y])
         for item in self.ornamentationData:
             if item.type == "campfire" and item.triggered == True:
                 for y in range(int(item.y-item.range),int(item.y+item.range)):
                     if y < item.y:
                         for x in range(int(item.x-item.range-(y-item.y)+1),int(item.x+item.range+(y-item.y))):
-                            if (x,y) not in self.lightArea:
-                                self.lightArea.append((x,y))
+                            if [x,y] not in lightArea:
+                                lightArea.append([x,y])
                     else:
                         for x in range(int(item.x-item.range+(y-item.y)+1),int(item.x+item.range-(y-item.y))):
-                            if (x,y) not in self.lightArea:
-                                self.lightArea.append((x,y))
+                            if [x,y] not in lightArea:
+                                lightArea.append([x,y])
+        self.lightArea = numpy.asarray(lightArea,dtype=numpy.int)
         self.ifProcessMap = True
     #计算在地图中的位置
     def calPosInMap(self,x,y):
         return round((x-y)*self.perBlockWidth*0.43+self.__local_x+self.row*self.perBlockWidth*0.43,1),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4,1)
     #查看角色是否在光亮范围内
     def inLightArea(self,doll):
+        return self.isPosInLightArea(doll.x,doll.y)
+    def isPosInLightArea(self,int x,int y):
         if self.darkMode == False:
             return True
         else:
-            return (doll.x,doll.y) in self.lightArea
+            return numpy.any(numpy.equal(self.lightArea,[x,y]).all(1))
 
 #方块类
 class BlockObject:
-    def  __init__(self,name,canPassThrough):
+    def __init__(self,name,canPassThrough):
+        self.name = name
+        self.canPassThrough = canPassThrough
+    def update(self,name,canPassThrough):
         self.name = name
         self.canPassThrough = canPassThrough
 
@@ -485,7 +499,7 @@ class AStar:
 
     def getMinNode(self):
         """
-        获得openlist中F值最小的节点
+        获得OpenList中F值最小的节点
         :return: Node
         """
         currentNode = self.openList[0]
@@ -536,7 +550,7 @@ class AStar:
             step = 10
         else:
             step = 14
-        # 如果不再openList中，就把它加入openlist
+        # 如果不再openList中，就把它加入OpenList
         currentNode = self.pointInOpenList(currentPoint)
         if not currentNode:
             currentNode = AStar.Node(currentPoint, self.endPoint, g=minF.g + step)
