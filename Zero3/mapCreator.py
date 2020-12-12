@@ -44,8 +44,8 @@ class mapCreator(BattleSystemInterface):
             else:
                 block_y = len(loadData["map"])
                 block_x = len(loadData["map"][0])
-                #加载地图
-        self.MAP = MapObject(loadData,int(self.window_x/10))
+        #加载地图
+        self.create_map(loadData)
         self.MAP.darkMode = False
         #加载背景图片
         self.envImgDict={}
@@ -183,7 +183,7 @@ class mapCreator(BattleSystemInterface):
                         for each_character in loadData["sangvisFerri"]:
                             self.sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],self.DATABASE[loadData["sangvisFerri"][each_character]["type"]],"dev")
                     #加载地图
-                    self.MAP = MapObject(loadData,int(self.window_x/10))
+                    self.create_map(loadData)
                     self.MAP.setPos(tempLocal_x,tempLocal_y)
                     self.MAP.darkMode = False
                     #读取地图

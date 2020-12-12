@@ -116,7 +116,7 @@ class BattleSystem(BattleSystemInterface):
             #获取角色数据
             self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
             #初始化地图模块
-            self.MAP = MapObject(DataTmp,round(self.window_x/10),round(self.window_y/10),DataTmp["local_x"],DataTmp["local_y"])
+            self.create_map(DataTmp)
         else:
             #因为地图模块已被加载，只需加载图片即可
             self.MAP.load_env_img()

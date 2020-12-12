@@ -12,7 +12,7 @@ compile_py_files_in_Source = False
 
 #生成Zero引擎的c和pyd文件
 for path in glob.glob(r'Zero3/*.pyx'):
-    setup(ext_modules=cythonize(path))
+    setup(ext_modules=cythonize(path,show_all_warnings=True))
     #删除Zero引擎的c文件
     os.remove(path.replace(".pyx",".c"))
 #生成游戏本体源代码的c和pyd文件

@@ -56,7 +56,8 @@ def loadAudioAsMusic(moviePath):
 class VedioInterface(threading.Thread):
     def __init__(self,path,width,height):
         threading.Thread.__init__(self)
-        self._video_container = av.open(path,mode='r')
+        self._path = path
+        self._video_container = av.open(self._path,mode='r')
         self._video_stream = self._video_container.streams.video[0]
         self._video_stream.thread_type = 'AUTO'
         self._audio_stream = self._video_container.streams.audio[0]
@@ -67,8 +68,8 @@ class VedioInterface(threading.Thread):
         self._frameQueue = queue.Queue(maxsize=self._frameRate)
         self._stopped = False
         self._clock = pygame.time.Clock()
-        self.width = width
-        self.height = height
+        self._width = width
+        self._height = height
         self.pts = 0
     def get_frameNum(self):
         return self._frameNum
@@ -96,7 +97,7 @@ class VedioInterface(threading.Thread):
         while self._frameQueue.full():
             pass
         self.pts = frame.pts
-        array = frame.to_ndarray(width=self.width,height=self.height,format='rgb24')
+        array = frame.to_ndarray(width=self._width,height=self._height,format='rgb24')
         array = array.swapaxes(0,1)
         self._frameQueue.put(array)
         self.__frameIndex += 1
@@ -130,6 +131,12 @@ class VedioFrame(VedioInterface):
         if self.bgm != None and not self.bgm_channel.get_busy():
             if self.looped == False or self.loop == True:
                 self.bgm_channel.play(self.bgm)
+    def clone(self):
+        if self.bgm != None:
+            with_music = True
+        else:
+            with_music = False
+        return VedioFrame(self._path,self._width,self._height,self.loop,with_music,(self.start_point,self.end_point))
 
 #视频播放系统模块--强制帧数和音乐同步，但不灵活
 class VedioPlayer(VedioInterface):
@@ -159,43 +166,49 @@ class VedioPlayer(VedioInterface):
 
 #过场动画
 def cutscene(screen,videoPath):
-    width,height = screen.get_size()
-    VIDEO = VedioPlayer(videoPath,width,height)
-    black_bg = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
-    pygame.draw.rect(black_bg,(0,0,0),(0,0,width,height))
-    black_bg.set_alpha(0)
-    skip_button_x = int(screen.get_width()*0.92)
-    skip_button_y = int(screen.get_height()*0.05)
-    skip_button_width = int(screen.get_width()*0.055)
-    skip_button_height = int(screen.get_height()*0.06)
-    skip_button_x_end = skip_button_x+skip_button_width
-    skip_button_y_end = skip_button_y+skip_button_height
+    #初始化部分参数
+    cdef (unsigned int, unsigned int) screen_size = screen.get_size()
+    cdef unsigned int is_skip = 0
+    cdef unsigned int is_playing = 0
+    cdef unsigned int white_progress_bar_height = 10
+    cdef (unsigned int, unsigned int, unsigned int) white_progress_bar = (255,255,255)
+    cdef unsigned int temp_alpha
+    #初始化跳过按钮的参数
+    cdef unsigned int skip_button_x = int(screen.get_width()*0.92)
+    cdef unsigned int skip_button_y = int(screen.get_height()*0.05)
+    cdef unsigned int skip_button_width = int(screen.get_width()*0.055)
+    cdef unsigned int skip_button_height = int(screen.get_height()*0.06)
+    cdef unsigned int skip_button_x_end = skip_button_x+skip_button_width
+    cdef unsigned int skip_button_y_end = skip_button_y+skip_button_height
     skip_button = pygame.transform.scale(pygame.image.load("Assets/image/UI/dialog_skip.png").convert_alpha(), (skip_button_width,skip_button_height))
-    is_skip = False
-    is_playing = True
-    white_progress_bar = (255,255,255)
-    white_progress_bar_height = 10
+    #生成黑色帘幕
+    black_bg = pygame.Surface((screen_size[0],screen_size[1]),flags=pygame.SRCALPHA).convert_alpha()
+    pygame.draw.rect(black_bg,(0,0,0),(0,0,screen_size[0],screen_size[1]))
+    black_bg.set_alpha(0)
+    #创建视频文件
+    VIDEO = VedioPlayer(videoPath,screen_size[0],screen_size[1])
     VIDEO.start()
-    while is_playing:
+    #播放主循环
+    while is_playing == 0:
         if VIDEO.is_alive():
             VIDEO.display(screen)
             screen.blit(skip_button,(skip_button_x,skip_button_y))
-            pygame.draw.rect(screen,white_progress_bar,(white_progress_bar_height,height-white_progress_bar_height*2,(width-white_progress_bar_height*2)*VIDEO.get_percentagePlayed(),white_progress_bar_height))
+            pygame.draw.rect(screen,white_progress_bar,(white_progress_bar_height,screen_size[1]-white_progress_bar_height*2,(screen_size[0]-white_progress_bar_height*2)*VIDEO.get_percentagePlayed(),white_progress_bar_height))
             events_of_mouse_click = pygame.event.get(pygame.MOUSEBUTTONDOWN)
             if len(events_of_mouse_click) > 0:
                 for event in events_of_mouse_click:
                     if event.button == 1:
                         mouse_x,mouse_y = pygame.mouse.get_pos()
-                        if skip_button_x<mouse_x<skip_button_x_end and skip_button_y<mouse_y<skip_button_y_end and is_skip == False:
-                            is_skip = True
+                        if skip_button_x<mouse_x<skip_button_x_end and skip_button_y<mouse_y<skip_button_y_end and is_skip == 0:
+                            is_skip = 1
                             pygame.mixer.music.fadeout(5000)
                         break
-            if is_skip:
+            if is_skip == 1:
                 temp_alpha = black_bg.get_alpha()
                 if temp_alpha < 255:
                     black_bg.set_alpha(temp_alpha+5)
                 else:
-                    is_playing = False
+                    is_playing = 1
                     VIDEO.stop()
                 screen.blit(black_bg,(0,0))
             pygame.display.flip()

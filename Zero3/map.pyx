@@ -43,7 +43,7 @@ class EnvImagesManagement:
             elif ornamentation.image not in self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type]:
                 self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type][ornamentation.image] = loadImg("Assets/image/environment/decoration/"+ornamentation.image+".png")
         #如果是夜战模式
-        if darkMode==True:
+        if darkMode == True:
             self.__ENV_IMAGE_DICT_ORIGINAL_DARK = {}
             for img,value in self.__ENV_IMAGE_DICT_ORIGINAL.items():
                 self.__ENV_IMAGE_DICT_ORIGINAL_DARK[img] = addDarkness(value,darkness)
@@ -107,7 +107,7 @@ class EnvImagesManagement:
 
 #地图模块
 class MapObject:
-    def  __init__(self,mapDataDic,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
+    def  __init__(self,mapDataDic,perBlockWidth,perBlockHeight):
         #加载地图设置
         blocks_setting = loadYaml("Data/blocks.yaml")["blocks"]
         self.darkMode = mapDataDic["darkMode"]
@@ -140,8 +140,8 @@ class MapObject:
         self.lightArea = []
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
-        self.__local_x = local_x
-        self.__local_y = local_y
+        self.__local_x = mapDataDic["local_x"]
+        self.__local_y = mapDataDic["local_y"]
         self.ifProcessMap = True
         self.load_env_img()
     def load_env_img(self):
@@ -363,16 +363,17 @@ class MapObject:
                 break
     #计算在地图中的方块
     def calBlockInMap(self,block,mouse_x,mouse_y):
-        guess_x = int(((mouse_x-self.__local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.__local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
-        guess_y = int((mouse_y-self.__local_y-self.perBlockWidth*0.4)/self.perBlockWidth/0.22) - guess_x
+        cdef int guess_x = int(((mouse_x-self.__local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.__local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
+        cdef int guess_y = int((mouse_y-self.__local_y-self.perBlockWidth*0.4)/self.perBlockWidth/0.22) - guess_x
+        cdef int x
+        cdef int y
+        cdef (int, int) posTupleTemp
         block_get_click = None
-        lenUnitH = block.get_height()/4
         lenUnitW = block.get_width()/4
         for y in range(guess_y-1,guess_y+4):
             for x in range(guess_x-1,guess_x+4):
-                xTemp,yTemp = self.calPosInMap(x,y)
-                xTemp+=self.perBlockWidth*0.05
-                if xTemp+lenUnitW<mouse_x<xTemp+lenUnitW*3 and yTemp<mouse_y<yTemp+lenUnitH*4:
+                posTupleTemp = self.calPosInMap(x,y)
+                if lenUnitW<mouse_x-posTupleTemp[0]-self.perBlockWidth*0.05<+lenUnitW*3 and 0<mouse_y-posTupleTemp[1]<block.get_height():
                     block_get_click = {"x":x,"y":y}
                     break
         return block_get_click

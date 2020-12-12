@@ -61,9 +61,6 @@ def mainMenu(screen):
     pygame.display.set_icon(icon_img)
     pygame.display.set_caption(game_title) #窗口标题
     
-    #加载主菜单背景
-    videoCapture = Zero.VedioFrame("Assets/movie/SquadAR.mp4",window_x,window_y,True,True,(3105,935))
-    pygame.mixer.music.set_volume(Zero.get_setting("Sound","background_music")/100.0)
     #数值初始化
     cover_alpha = 0
     menu_type = 0
@@ -95,6 +92,10 @@ def mainMenu(screen):
             Zero.drawImg(HealthyGamingAdvice[a],(window_x-window_x/32-HealthyGamingAdvice[a].get_width(),window_y*0.9-window_x/64*a*1.5),screen)
         Zero.display.flip(True)
     
+    #加载主菜单背景
+    videoCapture = Zero.VedioFrame("Assets/movie/SquadAR.mp4",window_x,window_y,True,True,(3105,935))
+    pygame.mixer.music.set_volume(Zero.get_setting("Sound","background_music")/100.0)
+
     for i in range(250,0,-2):
         the_black.draw(screen)
         t1.set_alpha(i)
@@ -176,6 +177,7 @@ def mainMenu(screen):
                             SAVE["dialog_options"] = {}
                         videoCapture.stop()
                         scene(SAVE["chapterType"],SAVE["chapterName"],screen,SAVE["type"],SAVE["id"],SAVE["dialog_options"])
+                        videoCapture = videoCapture.clone()
                         videoCapture.start()
                         #是否可以继续游戏了（save文件是否被创建）
                         if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:
@@ -203,6 +205,7 @@ def mainMenu(screen):
                     elif Zero.ifHover(chapter_select[i]) and i==0:
                         videoCapture.stop()
                         scene("main_chapter","chapter"+str(i+1),screen)
+                        videoCapture = videoCapture.clone()
                         videoCapture.start()
                         #是否可以继续游戏了（save文件是否被创建）
                         if os.path.exists("Save/save.yaml") and continueButtonIsOn == False:

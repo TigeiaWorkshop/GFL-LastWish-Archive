@@ -1,6 +1,6 @@
 # cython: language_level=3
 from Zero3.characterDataManager import *
-from Zero3.map import *
+from Zero3.map import MapObject
 from Zero3.battleUI import *
 from Zero3.AI import *
 from Zero3.skill import *
@@ -79,8 +79,8 @@ class BattleSystemInterface:
         self.loadFromSave = False
         #积分栏的UI模块
         self.ResultBoardUI = None
-        #用于for循环的Index
-        self._i = 0
+    def create_map(self,MapData):
+        self.MAP = MapObject(MapData,round(self.window_x/10),round(self.window_y/10))
     #检测手柄事件
     def _check_jostick_events(self):
         if controller.joystick.get_init() == True:
