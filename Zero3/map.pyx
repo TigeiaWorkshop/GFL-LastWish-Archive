@@ -17,7 +17,7 @@ class EnvImagesManagement:
         self.__ORNAMENTATION_IMAGE_DICT_DARK = None
         self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert() if bgImgName != None else None
         self.__MAP_SURFACE = None
-        all_images_needed = []
+        cdef list all_images_needed = []
         for i in range(len(theMap)):
             for a in range(len(theMap[i])):
                 if theMap[i][a].name not in all_images_needed:

@@ -193,12 +193,12 @@ class BattleSystem(BattleSystemInterface):
         super()._display()
         #环境声音-频道1
         self.environment_sound.play()
-        #在战斗状态
-        if not self.battleMode:
-            self.__play_dialog(screen)
         # 游戏主循环
         if self.battleMode:
             self.__play_battle(screen)
+        #在战斗状态
+        else:
+            self.__play_dialog(screen)
         #渐变效果：一次性的
         if self.txt_alpha == None:
             self.txt_alpha = 250
@@ -314,14 +314,12 @@ class BattleSystem(BattleSystemInterface):
                     self.dialogData["dialogId"] += 1
                 #开始对话
                 elif "dialoguebox_up" in currentDialog or "dialoguebox_down" in currentDialog:
-                    #对话框的移动
-                    if self.dialoguebox_up.x > self.window_x/2+self.dialoguebox_up.get_width()*0.4:
-                        self.dialoguebox_up.x -= self.dialoguebox_up.get_width()*0.134
-                    if self.dialoguebox_down.x < self.window_x/2-self.dialoguebox_down.get_width()*1.4:
-                        self.dialoguebox_down.x += self.dialoguebox_down.get_width()*0.134
                     #上方对话框
                     if currentDialog["dialoguebox_up"] != None:
-                        if self.dialoguebox_up.updated == False:
+                        #对话框的移动
+                        if self.dialoguebox_up.x > self.window_x/2+self.dialoguebox_up.get_width()*0.4:
+                            self.dialoguebox_up.x -= self.dialoguebox_up.get_width()*0.134
+                        elif self.dialoguebox_up.updated == False:
                             currentTmp = currentDialog["dialoguebox_up"]
                             self.dialoguebox_up.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
                             del currentTmp
@@ -329,7 +327,10 @@ class BattleSystem(BattleSystemInterface):
                         self.dialoguebox_up.display(screen,self.characterInfoBoardUI)
                     #下方对话框
                     if currentDialog["dialoguebox_down"] != None:
-                        if self.dialoguebox_down.updated == False:
+                        #对话框的移动
+                        if self.dialoguebox_down.x < self.window_x/2-self.dialoguebox_down.get_width()*1.4:
+                            self.dialoguebox_down.x += self.dialoguebox_down.get_width()*0.134
+                        elif self.dialoguebox_down.updated == False:
                             currentTmp = currentDialog["dialoguebox_down"]
                             self.dialoguebox_down.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
                             del currentTmp
@@ -392,28 +393,22 @@ class BattleSystem(BattleSystemInterface):
                             if "dialoguebox_up" in currentDialog:
                                 #检测上方对话框
                                 if currentDialog["dialoguebox_up"] == None or "dialoguebox_up" not in lastDialog or lastDialog["dialoguebox_up"] == None or currentDialog["dialoguebox_up"]["speaker"] != lastDialog["dialoguebox_up"]["speaker"]:
-                                    self.dialoguebox_up.reset_pos()
-                                    self.dialoguebox_up.updated = False
+                                    self.dialoguebox_up.reset()
                                 elif currentDialog["dialoguebox_up"]["content"] != lastDialog["dialoguebox_up"]["content"]:
                                     self.dialoguebox_up.updated = False
                             else:
-                                self.dialoguebox_up.reset_pos()
-                                self.dialoguebox_up.updated = False
+                                self.dialoguebox_up.reset()
                             if "dialoguebox_down" in currentDialog:
                                 #检测下方对话框    
                                 if currentDialog["dialoguebox_down"] == None or "dialoguebox_down" not in lastDialog or lastDialog["dialoguebox_down"] == None or currentDialog["dialoguebox_down"]["speaker"] != lastDialog["dialoguebox_down"]["speaker"]:
-                                    self.dialoguebox_down.reset_pos()
-                                    self.dialoguebox_down.updated = False
+                                    self.dialoguebox_down.reset()
                                 elif currentDialog["dialoguebox_down"]["content"] != lastDialog["dialoguebox_down"]["content"]:
                                     self.dialoguebox_down.updated = False
                             else:
-                                self.dialoguebox_down.reset_pos()
-                                self.dialoguebox_down.updated = False
+                                self.dialoguebox_down.reset()
                         else:
-                            self.dialoguebox_up.reset_pos()
-                            self.dialoguebox_up.updated = False
-                            self.dialoguebox_down.reset_pos()
-                            self.dialoguebox_down.updated = False
+                            self.dialoguebox_up.reset()
+                            self.dialoguebox_down.reset()
                         break
             else:
                 self.dialogData = None

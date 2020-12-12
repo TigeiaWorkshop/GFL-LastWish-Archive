@@ -459,6 +459,7 @@ class DialogBox(DialogInterface):
     def set_size(self,width,height):
         self.dialoguebox = pygame.transform.scale(self.dialoguebox,(int(width),int(height)))
     def display(self,screen,characterInfoBoardUI=None):
+        #如果对话框需要继续更新
         if self.drew == False:
             self.__surface = self.dialoguebox.copy()
             if self.__flipped == True:
@@ -482,29 +483,34 @@ class DialogBox(DialogInterface):
                 else:
                     x = self.txt_x
             y = self.txt_y
-            #已经播放的行
-            for i in range(self.displayedLine):
-                self.__surface.blit(self.FONT.render(self.content[i],get_fontMode(),(255,255,255)),(x,y))
-                y += self.FONTSIZE*1.2
-            #正在播放的行
-            content = self.FONT.render(self.content[self.displayedLine][:self.textIndex],get_fontMode(),(255,255,255))
-            self.__surface.blit(content,(x,y))
-            if self.textIndex < len(self.content[self.displayedLine]):
-                self.textIndex += 1
-            elif self.displayedLine < len(self.content)-1:
-                self.displayedLine += 1
-                self.textIndex = 0
-            elif self.textIndex >= len(self.content[self.displayedLine]):
-                self.drew = True
+            if len(self.content)>0:
+                #已经播放的行
+                for i in range(self.displayedLine):
+                    self.__surface.blit(self.FONT.render(self.content[i],get_fontMode(),(255,255,255)),(x,y))
+                    y += self.FONTSIZE*1.2
+                #正在播放的行
+                content = self.FONT.render(self.content[self.displayedLine][:self.textIndex],get_fontMode(),(255,255,255))
+                self.__surface.blit(content,(x,y))
+                if self.textIndex < len(self.content[self.displayedLine]):
+                    self.textIndex += 1
+                elif self.displayedLine < len(self.content)-1:
+                    self.displayedLine += 1
+                    self.textIndex = 0
+                elif self.textIndex >= len(self.content[self.displayedLine]):
+                    self.drew = True
         screen.blit(self.__surface,(self.x,self.y))
     def update(self,txt,narrator,narrator_icon=None):
         super().update(txt,narrator)
         self.updated = True
         self.drew = False
         self.narrator_icon = narrator_icon
-    def reset_pos(self):
+    def reset(self):
         self.x = self.deafult_x
         self.y = self.deafult_y
+        self.updated = False
+        #刷新对话框surface防止上一段的对话还残留在surface上
+        self.content = []
+        self.__surface = self.dialoguebox.copy()
     def flip(self):
         self.dialoguebox = pygame.transform.flip(self.dialoguebox,True,False)
         self.__flipped = not self.__flipped
