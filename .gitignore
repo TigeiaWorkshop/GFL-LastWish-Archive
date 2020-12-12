@@ -3,5 +3,6 @@ main_pyd.py
 __pycache__/
 build/
 Zero3/*.pyd
+Zero3/*.c
 Save/
 Cache/

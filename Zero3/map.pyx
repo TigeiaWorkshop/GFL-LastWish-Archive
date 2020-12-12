@@ -107,7 +107,7 @@ class EnvImagesManagement:
 
 #地图模块
 class MapObject:
-    def  __init__(self,mapDataDic,perBlockWidth,perBlockHeight):
+    def  __init__(self,mapDataDic,int perBlockWidth,int perBlockHeight):
         #加载地图设置
         blocks_setting = loadYaml("Data/blocks.yaml")["blocks"]
         self.darkMode = mapDataDic["darkMode"]
@@ -119,7 +119,7 @@ class MapObject:
         #初始化地图数据
         self.mapData = mapData
         self.backgroundImageName = mapDataDic["backgroundImage"]
-        for y in range(len(mapData)):
+        for y in range(self.row):
             for x in range(len(mapData[y])):
                 self.mapData[y][x] = BlockObject(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
         self.ornamentationData = []
@@ -213,10 +213,11 @@ class MapObject:
     #画上设施
     def display_ornamentation(self,screen,characters_data,sangvisFerris_data):
         charactersPos = None
+        cdef (int,int) thePosInMap
         for item in self.ornamentationData:
             imgToBlit = None
-            xTemp,yTemp = self.calPosInMap(item.x,item.y)
-            if -self.perBlockWidth<=xTemp<screen.get_width() and -self.perBlockWidth<=yTemp<screen.get_height():
+            thePosInMap = self.calPosInMap(item.x,item.y)
+            if -self.perBlockWidth<=thePosInMap[0]<screen.get_width() and -self.perBlockWidth<=thePosInMap[1]<screen.get_height():
                 if self.darkMode == True and not self.inLightArea(item):
                     keyWordTemp = True
                 else:
@@ -242,7 +243,7 @@ class MapObject:
                             imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire","campfire",True), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     else:
                         imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-                        screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+                        screen.blit(imgToBlit,(thePosInMap[0]+round(self.perBlockWidth/4),thePosInMap[1]-round(self.perBlockWidth/8)))
                         imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                         imgToBlit.set_alpha(item.alpha)
                         if item.imgId >= _MAP_ENV_IMAGE.get_ornamentation_num("campfire")-2:
@@ -252,8 +253,7 @@ class MapObject:
                 # 画上树
                 elif item.type == "tree":
                     imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("tree",item.image,keyWordTemp),(round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
-                    xTemp -= self.perBlockWidth*0.125
-                    yTemp -= self.perBlockWidth*0.25
+                    thePosInMap = (int(thePosInMap[0]-self.perBlockWidth*0.125),int(thePosInMap[1]-self.perBlockWidth*0.25))
                     #如果的确有树需要被画出
                     if charactersPos == None:
                         charactersPos = []
@@ -266,9 +266,10 @@ class MapObject:
                 elif item.type == "decoration" or item.type == "obstacle" or item.type == "chest":
                     imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image(item.type,item.image,keyWordTemp),(round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                 if imgToBlit != None:
-                    screen.blit(imgToBlit,(xTemp+round(self.perBlockWidth/4),yTemp-round(self.perBlockWidth/8)))
+                    screen.blit(imgToBlit,(thePosInMap[0]+round(self.perBlockWidth/4),thePosInMap[1]-round(self.perBlockWidth/8)))
     #寻路功能
     def findPath(self,startPosition,endPosition,friend_data_dict,enemies_data_dict,routeLen=None,ignoreEnemyCharacters=[]):
+        cdef unsigned int startX,startY,endX,endY
         #检测起点
         if isinstance(startPosition,(list,tuple)):
             startX = startPosition[0]
@@ -290,7 +291,7 @@ class MapObject:
             endX = endPosition.x
             endY = endPosition.y
         #建立地图
-        map2d=numpy.zeros((self.column,self.row), dtype=numpy.int8)
+        map2d = numpy.zeros((self.column,self.row), dtype=numpy.int8)
         #历遍地图，设置障碍方块
         """
         for y in range(theMap.row):
@@ -315,10 +316,10 @@ class MapObject:
             return []
         aStar=AStar(map2d,Point(startX,startY),Point(endX,endY))
         #开始寻路
-        pathList=aStar.start()
+        cdef list pathList = aStar.start()
+        cdef list the_route = []
         #遍历路径点,讲指定数量的点放到路径列表中
-        the_route = []
-        if pathList != None:
+        if len(pathList) > 0:
             if routeLen != None and len(pathList) < routeLen or routeLen == None:
                 routeLen = len(pathList)
             for i in range(routeLen):
@@ -340,7 +341,7 @@ class MapObject:
         mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_x,window_y)
         cdef unsigned int y
         cdef (int, int) posTupleTemp
-        cdef unsigned int yRange = len(self.mapData)
+        cdef unsigned int yRange = int(len(self.mapData))
         cdef unsigned int x
         cdef unsigned int xRange
         cdef unsigned int anyBlockBlitThisLine
@@ -348,7 +349,7 @@ class MapObject:
         #画出地图
         for y in range(yRange):
             anyBlockBlitThisLine = 0
-            xRange = len(self.mapData[y])
+            xRange = int(len(self.mapData[y]))
             for x in range(xRange):
                 posTupleTemp = self.calPosInMap(x,y)
                 if screen_min<=posTupleTemp[0]<window_x and screen_min<=posTupleTemp[1]<window_y:
@@ -362,7 +363,7 @@ class MapObject:
             if anyBlockBlitThisLine == 0 and posTupleTemp[1]>=window_y:
                 break
     #计算在地图中的方块
-    def calBlockInMap(self,block,mouse_x,mouse_y):
+    def calBlockInMap(self,block,int mouse_x,int mouse_y):
         cdef int guess_x = int(((mouse_x-self.__local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.__local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
         cdef int guess_y = int((mouse_y-self.__local_y-self.perBlockWidth*0.4)/self.perBlockWidth/0.22) - guess_x
         cdef int x
@@ -389,6 +390,8 @@ class MapObject:
     #计算光亮区域
     def calculate_darkness(self,characters_data):
         cdef list lightArea = []
+        cdef int x
+        cdef int y
         for each_chara in characters_data:
             the_character_effective_range = 2
             if characters_data[each_chara].current_hp > 0 :
@@ -443,10 +446,10 @@ class BlockObject:
 
 #管理场景装饰物的类
 class OrnamentationObject:
-    def  __init__(self,x,y,type,image):
+    def  __init__(self,x,y,itemType,image):
         self.x = x
         self.y = y
-        self.type = type
+        self.type = itemType
         self.image = image
         self.alpha = None
     def __lt__(self,other):
@@ -570,7 +573,7 @@ class AStar:
         # 判断寻路终点是否是障碍
         mapRow,mapCol = self.map2d.shape
         if self.endPoint.y < 0 or self.endPoint.y >= mapRow or self.endPoint.x < 0 or self.endPoint.x >= mapCol or self.map2d[self.endPoint.x][self.endPoint.y] != self.passTag:
-            return None
+            return []
         # 1.将起点放入开启列表
         startNode = AStar.Node(self.startPoint, self.endPoint)
         self.openList.append(startNode)
@@ -602,4 +605,4 @@ class AStar:
                         # print(pathList.reverse())
                         return list(reversed(pathList))
             if len(self.openList) == 0:
-                return None
+                return []
