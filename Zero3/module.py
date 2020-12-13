@@ -3,24 +3,28 @@ import glob
 import math
 import random
 from sys import exit
-import threading
 import platform
 from Zero3.font import *
 import time
 from tkinter import Tk
 from PIL import Image
 
-#高级图形类
-class ImageSurface:
-    def __init__(self,img,x,y,width=None,height=None,description="Default"):
+#图形接口
+class ImageInterface:
+    def __init__(self,img,x,y,width,height):
         self.img = img
         self.x = x
         self.y = y
+        self.width = width
+        self.height = height
+
+#高级图形类
+class ImageSurface(ImageInterface):
+    def __init__(self,img,x,y,width=None,height=None,description="Default"):
+        ImageInterface.__init__(self,img,x,y,width,height)
         self.xTogo = x
         self.yTogo = y
         self.items = []
-        self.width = width
-        self.height = height
         self.description = description
         if self.width == None and self.height == None:
             self.width,self.height = self.img.get_size()
@@ -28,10 +32,10 @@ class ImageSurface:
             self.width = self.height/self.img.get_height()*self.img.get_width()
         elif self.width != None and self.height == None:
             self.height = self.width/self.img.get_width()*self.img.get_height()
-    def draw(self,screen,local_x=0,local_y=0):
-        screen.blit(pygame.transform.scale(self.img, (round(self.width),round(self.height))),(self.x+local_x,self.y+local_y))
+    def draw(self,screen):
+        screen.blit(pygame.transform.scale(self.img,(round(self.width),round(self.height))),(self.x,self.y))
     def display(self,screen,local_x=0,local_y=0):
-        self.draw(screen,local_x,local_y)
+        screen.blit(pygame.transform.scale(self.img, (round(self.width),round(self.height))),(self.x+local_x,self.y+local_y))
     def set_alpha(self,value):
         self.img.set_alpha(value)
     def get_alpha(self):
@@ -76,8 +80,6 @@ class DynamicImageSurface(ImageSurface):
                 self.y -= self.moveSpeed_y
             elif self.default_y > self.target_y and self.y < self.default_y:
                 self.y += self.moveSpeed_y
-    def display(self,screen,local_x=0,local_y=0):
-        self.draw(screen,local_x,local_y)
     def switch(self):
         self.__towardTargetPos = not self.__towardTargetPos
     def ifToward(self):
@@ -1038,3 +1040,12 @@ class SoundManagement:
     def set_volume(self,volume):
         for i in range(len(self.__sounds_list)):
             self.__sounds_list[i].set_volume(volume)
+
+#进度条
+class ProgressBar(ImageInterface):
+    def __init__(self,x,y,max_width,height,color):
+        ImageInterface.__init__(self,None,x,y,max_width,height)
+        self.percentage = 0
+        self.color = findColorRGBA(color)
+    def draw(self,screen):
+        pygame.draw.rect(screen,self.color,(self.x,self.y,self.width*self.percentage,self.height))

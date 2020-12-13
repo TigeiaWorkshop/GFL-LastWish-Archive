@@ -139,14 +139,14 @@ class BattleSystemInterface:
         #根据按键情况设定要移动的数值
         if self.__pressKeyToMove["up"] == True:
             if self.screen_to_move_y == None:
-                self.screen_to_move_y = self.perBlockHeight/4
+                self.screen_to_move_y = self.MAP.perBlockHeight/4
             else:
-                self.screen_to_move_y += self.perBlockHeight/4
+                self.screen_to_move_y += self.MAP.perBlockHeight/4
         if self.__pressKeyToMove["down"] == True:
             if self.screen_to_move_y == None:
-                self.screen_to_move_y = -self.perBlockHeight/4
+                self.screen_to_move_y = -self.MAP.perBlockHeight/4
             else:
-                self.screen_to_move_y -= self.perBlockHeight/4
+                self.screen_to_move_y -= self.MAP.perBlockHeight/4
         if self.__pressKeyToMove["left"] == True:
             if self.screen_to_move_x == None:
                 self.screen_to_move_x = self.MAP.perBlockWidth/4
@@ -181,6 +181,9 @@ class BattleSystemInterface:
     def _display_map(self,screen):
         self.__move_screen()
         self.screen_to_move_x,self.screen_to_move_y = self.MAP.display_map(screen,self.screen_to_move_x,self.screen_to_move_y)
+    def _display_weather(self,screen):
+        if self.weatherController != None:
+            self.weatherController.display(screen,self.MAP.perBlockWidth,self.MAP.perBlockHeight)
     def _display(self):
         #更新游戏事件
         self.__events = pygame.event.get()

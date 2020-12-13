@@ -23,8 +23,7 @@ def drawImg(img,position,screen,local_x=0,local_y=0):
     screen.blit(img,(position[0]+local_x,position[1]+local_y))
 
 #重新编辑尺寸
-def resizeImg(imgOriginal,imgSize=(None,None)):
-    img = imgOriginal.copy()
+def resizeImg(img,imgSize=(None,None)):
     if imgSize[1]!= None and imgSize[1] >= 0 and imgSize[0] == None:
         img = pygame.transform.scale(img,(round(imgSize[1]/img.get_height()*img.get_width()), round(imgSize[1])))
     elif imgSize[1] == None and imgSize[0]!= None and imgSize[0] >= 0:

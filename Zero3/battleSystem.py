@@ -228,8 +228,7 @@ class BattleSystem(BattleSystemInterface):
         #展示设施
         self.MAP.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
         #加载雪花
-        if self.weatherController != None:
-            self.weatherController.display(screen,self.MAP.perBlockWidth,self.MAP.perBlockHeight)
+        self._display_weather(screen)
         #如果战斗有对话
         if self.dialogKey != None:
             #设定初始化
@@ -471,19 +470,10 @@ class BattleSystem(BattleSystemInterface):
                 self.zoomIn -= 5
             elif self.zoomIntoBe > self.zoomIn:
                 self.zoomIn += 5
-            newPerBlockWidth = round(self.window_x/self.MAP.column*self.zoomIn/100)
-            newPerBlockHeight = round(self.window_y/self.MAP.row*self.zoomIn/100)
-            self.MAP.addPos_x((self.MAP.perBlockWidth-newPerBlockWidth)*self.MAP.column/2)
-            self.MAP.addPos_y((self.MAP.perBlockHeight-newPerBlockHeight)*self.MAP.row/2)
-            self.MAP.perBlockWidth = newPerBlockWidth
-            self.MAP.perBlockHeight = newPerBlockHeight
+            self.MAP.changePerBlockSize(self.window_x/self.MAP.column*self.zoomIn/100,self.window_y/self.MAP.row*self.zoomIn/100,self.window_x,self.window_y)
             #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
-            self.UI_img["green"] = resizeImg(self.original_UI_img["green"], (self.MAP.perBlockWidth*0.8, None))
-            self.UI_img["red"] = resizeImg(self.original_UI_img["red"], (self.MAP.perBlockWidth*0.8, None))
-            self.UI_img["yellow"] = resizeImg(self.original_UI_img["yellow"], (self.MAP.perBlockWidth*0.8, None))
-            self.UI_img["blue"] = resizeImg(self.original_UI_img["blue"], (self.MAP.perBlockWidth*0.8, None))
-            self.UI_img["orange"] = resizeImg(self.original_UI_img["orange"], (self.MAP.perBlockWidth*0.8, None))
-            self.MAP.changePerBlockSize(self.MAP.perBlockWidth,self.window_x,self.window_y)
+            for key in self.UI_img:
+                self.UI_img[key] = resizeImg(self.original_UI_img[key], (self.MAP.perBlockWidth*0.8, None))
             self.selectMenuUI.allButton = None
         else:
             self.zoomIn = self.zoomIntoBe
@@ -997,7 +987,7 @@ class BattleSystem(BattleSystemInterface):
         #调整范围方块的透明度
         if rightClickCharacterAlphaDeduct == True and self.rightClickCharacterAlpha != None:
             if self.rightClickCharacterAlpha>0:
-                self.rightClickCharacterAlpha-=10
+                self.rightClickCharacterAlpha-=17
                 self.UI_img["yellow"].set_alpha(self.rightClickCharacterAlpha)
                 self.UI_img["blue"].set_alpha(self.rightClickCharacterAlpha)
                 self.UI_img["green"].set_alpha(self.rightClickCharacterAlpha)
@@ -1029,8 +1019,7 @@ class BattleSystem(BattleSystemInterface):
             #----选择菜单----
             self.buttonGetHover = self.selectMenuUI.display(screen,round(self.MAP.perBlockWidth/10),self.MAP.getBlockExactLocation(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].kind,friendsCanSave,thingsCanReact)
         #加载雪花
-        if self.weatherController != None:
-            self.weatherController.display(screen,self.MAP.perBlockWidth,self.MAP.perBlockHeight)
+        self._display_weather(screen)
         
         #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
         if self.whose_round == "playerToSangvisFerris" or self.whose_round == "sangvisFerrisToPlayer":
@@ -1117,4 +1106,3 @@ class BattleSystem(BattleSystemInterface):
             if pause_menu.ifBackToMainMenu == True:
                 unloadBackgroundMusic()
                 self.isPlaying = False
-

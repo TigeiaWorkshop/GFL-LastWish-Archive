@@ -23,12 +23,12 @@ class EnvImagesManagement:
                 if theMap[i][a].name not in all_images_needed:
                     all_images_needed.append(theMap[i][a].name)
         #加载背景图片
-        for i in range(len(all_images_needed)):
+        for fileName in all_images_needed:
             try:
-                self.__ENV_IMAGE_DICT_ORIGINAL[all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png")
-                self.__ENV_IMAGE_DICT[all_images_needed[i]] = loadImg("Assets/image/environment/block/"+all_images_needed[i]+".png",theWidth,None)
+                self.__ENV_IMAGE_DICT_ORIGINAL[fileName] = loadImg("Assets/image/environment/block/"+fileName+".png")
+                self.__ENV_IMAGE_DICT[fileName] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL[fileName],(theWidth,None))
             except BaseException:
-                raise Exception('ZeroEngine-Error: An map-block called '+all_images_needed[i]+' cannot find its image in the folder.')
+                raise Exception('ZeroEngine-Error: An map-block called '+fileName+' cannot find its image in the folder.')
         #加载场地设施的图片
         for ornamentation in ornamentationData:
             #--篝火--
@@ -137,7 +137,7 @@ class MapObject:
                 else:
                     self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,itemData["image"]))
         self.ornamentationData.sort()
-        self.lightArea = []
+        self.__lightArea = []
         self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
         self.__local_x = mapDataDic["local_x"]
@@ -148,11 +148,14 @@ class MapObject:
         global _MAP_ENV_IMAGE
         _MAP_ENV_IMAGE = EnvImagesManagement(self.mapData,self.ornamentationData,self.backgroundImageName,self.perBlockWidth,self.darkMode)
     #控制地图放大缩小
-    def changePerBlockSize(self,newPerBlockWidth,window_x,window_y):
-        self.perBlockWidth = newPerBlockWidth
+    def changePerBlockSize(self,newPerBlockWidth,newPerBlockHeight,window_x,window_y):
+        self.addPos_x((self.perBlockWidth-newPerBlockWidth)*self.column/2)
+        self.addPos_y((self.perBlockHeight-newPerBlockHeight)*self.row/2)
+        self.surface_width = round(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
+        self.surface_height = round(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
+        self.perBlockWidth = round(newPerBlockWidth)
+        self.newPerBlockHeight = round(newPerBlockHeight)
         _MAP_ENV_IMAGE.resize(self.perBlockWidth)
-        self.surface_width = int(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
-        self.surface_height = int(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
         if self.surface_width < window_x:
             self.surface_width = window_x
         if self.surface_height < window_y:
@@ -421,11 +424,12 @@ class MapObject:
                         for x in range(int(item.x-item.range+(y-item.y)+1),int(item.x+item.range-(y-item.y))):
                             if [x,y] not in lightArea:
                                 lightArea.append([x,y])
-        self.lightArea = numpy.asarray(lightArea,dtype=numpy.int)
+        self.__lightArea = numpy.asarray(lightArea,dtype=numpy.int)
         self.ifProcessMap = True
     #计算在地图中的位置
     def calPosInMap(self,x,y):
-        return round((x-y)*self.perBlockWidth*0.43+self.__local_x+self.row*self.perBlockWidth*0.43,1),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4,1)
+        cdef float width = self.perBlockWidth*0.43
+        return round((x-y)*width+self.__local_x+self.row*width),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4)
     #查看角色是否在光亮范围内
     def inLightArea(self,doll):
         return self.isPosInLightArea(doll.x,doll.y)
@@ -433,7 +437,7 @@ class MapObject:
         if self.darkMode == False:
             return True
         else:
-            return numpy.any(numpy.equal(self.lightArea,[x,y]).all(1))
+            return numpy.any(numpy.equal(self.__lightArea,[x,y]).all(1))
 
 #方块类
 class BlockObject:

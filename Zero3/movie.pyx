@@ -4,7 +4,7 @@ import av
 import os
 import threading, queue
 from math import ceil
-from Zero3.config import get_setting
+from Zero3.module import get_setting,ProgressBar
 
 def getAudioFromVideo(moviePath,audioType="mp3"):
     #如果没有Cache文件夹，则创建一个
@@ -170,8 +170,6 @@ def cutscene(screen,videoPath):
     cdef (unsigned int, unsigned int) screen_size = screen.get_size()
     cdef unsigned int is_skip = 0
     cdef unsigned int is_playing = 0
-    cdef unsigned int white_progress_bar_height = 10
-    cdef (unsigned int, unsigned int, unsigned int) white_progress_bar = (255,255,255)
     cdef unsigned int temp_alpha
     #初始化跳过按钮的参数
     cdef unsigned int skip_button_x = int(screen.get_width()*0.92)
@@ -185,6 +183,9 @@ def cutscene(screen,videoPath):
     black_bg = pygame.Surface((screen_size[0],screen_size[1]),flags=pygame.SRCALPHA).convert_alpha()
     pygame.draw.rect(black_bg,(0,0,0),(0,0,screen_size[0],screen_size[1]))
     black_bg.set_alpha(0)
+    #进度条
+    cdef unsigned int bar_height = 10
+    white_progress_bar = ProgressBar(bar_height,screen_size[1]-bar_height*2,screen_size[0]-bar_height*2,bar_height,"white")
     #创建视频文件
     VIDEO = VedioPlayer(videoPath,screen_size[0],screen_size[1])
     VIDEO.start()
@@ -193,7 +194,8 @@ def cutscene(screen,videoPath):
         if VIDEO.is_alive():
             VIDEO.display(screen)
             screen.blit(skip_button,(skip_button_x,skip_button_y))
-            pygame.draw.rect(screen,white_progress_bar,(white_progress_bar_height,screen_size[1]-white_progress_bar_height*2,(screen_size[0]-white_progress_bar_height*2)*VIDEO.get_percentagePlayed(),white_progress_bar_height))
+            white_progress_bar.percentage = VIDEO.get_percentagePlayed()
+            white_progress_bar.draw(screen)
             events_of_mouse_click = pygame.event.get(pygame.MOUSEBUTTONDOWN)
             if len(events_of_mouse_click) > 0:
                 for event in events_of_mouse_click:

@@ -1,4 +1,5 @@
 # cython: language_level=3
+import threading
 from Zero3.basic import *
 
 #储存角色图片的常量
