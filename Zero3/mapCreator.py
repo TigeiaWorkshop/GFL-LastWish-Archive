@@ -45,7 +45,7 @@ class mapCreator(BattleSystemInterface):
                 block_y = len(loadData["map"])
                 block_x = len(loadData["map"][0])
         #加载地图
-        self.create_map(loadData)
+        self._create_map(loadData)
         self.MAP.darkMode = False
         #加载背景图片
         self.envImgDict={}
@@ -104,7 +104,8 @@ class mapCreator(BattleSystemInterface):
         with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
             self.originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
     def display(self,screen):
-        super()._display(screen)
+        #更新输入事件
+        self._update_event()
         mouse_x,mouse_y = controller.get_pos()
         block_get_click = self.MAP.calBlockInMap(self.greenBlock,mouse_x,mouse_y)
         for event in self._get_event():
@@ -183,7 +184,7 @@ class mapCreator(BattleSystemInterface):
                         for each_character in loadData["sangvisFerri"]:
                             self.sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],self.DATABASE[loadData["sangvisFerri"][each_character]["type"]],"dev")
                     #加载地图
-                    self.create_map(loadData)
+                    self._create_map(loadData)
                     self.MAP.setPos(tempLocal_x,tempLocal_y)
                     self.MAP.darkMode = False
                     #读取地图
@@ -272,11 +273,11 @@ class mapCreator(BattleSystemInterface):
 
         #角色动画
         for key in self.characters_data:
-            self.characters_data[key].draw("wait",screen,self.MAP)
+            self.characters_data[key].draw(screen,self.MAP)
             if self.object_to_put_down == None and pygame.mouse.get_pressed()[0] and self.characters_data[key].x == int(mouse_x/self.greenBlock.get_width()) and self.characters_data[key].y == int(mouse_y/self.greenBlock.get_height()):
                 self.data_to_edit = self.characters_data[key]
         for key in self.sangvisFerris_data:
-            self.sangvisFerris_data[key].draw("wait",screen,self.MAP)
+            self.sangvisFerris_data[key].draw(screen,self.MAP)
             if self.object_to_put_down == None and pygame.mouse.get_pressed()[0] and self.sangvisFerris_data[key].x == int(mouse_x/self.greenBlock.get_width()) and self.sangvisFerris_data[key].y == int(mouse_y/self.greenBlock.get_height()):
                 self.data_to_edit = self.sangvisFerris_data[key]
 

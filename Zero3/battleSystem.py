@@ -4,6 +4,53 @@ from Zero3.battleSystemInterface import *
 class BattleSystem(BattleSystemInterface):
     def __init__(self):
         BattleSystemInterface.__init__(self)
+        #被选中的角色
+        self.characterGetClick = None
+        self.enemiesGetAttack = {}
+        self.action_choice = None
+        #是否不要画出用于表示范围的方块
+        self.NotDrawRangeBlocks = True
+        self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
+        #是否在战斗状态-战斗loop
+        self.battleMode = False
+        #是否在等待
+        self.isWaiting = True
+        #谁的回合
+        self.whose_round = "sangvisFerrisToPlayer"
+        self.rightClickCharacterAlpha = None
+        #技能对象
+        self.skill_target = None
+        #被按到的按键
+        self.buttonGetHover = None
+        #被救助的那个角色
+        self.friendGetHelp = None
+        #AI系统正在操控的地方角色ID
+        self.enemy_in_control = None
+        self.enemies_in_control_id = None
+        #所有敌对角色的名字列表
+        self.sangvisFerris_name_list = None
+        #战斗状态数据
+        self.resultInfo = {
+            "total_rounds" : 1,
+            "total_kills" : 0,
+            "total_time" : time.time(),
+            "times_characters_down" : 0
+        }
+        #储存角色受到伤害的文字surface
+        self.damage_do_to_characters = {}
+        self.txt_alpha = None
+        self.stayingTime = 0
+        # 移动路径
+        self.the_route = []
+        #上个回合因为暴露被敌人发现的角色
+        #格式：角色：[x,y]
+        self.the_characters_detected_last_round = {}
+        #敌人的状态
+        self.enemy_action = None
+        #积分栏的UI模块
+        self.ResultBoardUI = None
+        #对话-动作是否被设置
+        self.dialog_ifPathSet = False
     #储存章节信息
     def __save_data(self):
         if pause_menu.ifSave == True:
@@ -116,7 +163,7 @@ class BattleSystem(BattleSystemInterface):
             #获取角色数据
             self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
             #初始化地图模块
-            self.create_map(DataTmp)
+            self._create_map(DataTmp)
         else:
             #因为地图模块已被加载，只需加载图片即可
             self.MAP.load_env_img()
@@ -190,7 +237,8 @@ class BattleSystem(BattleSystemInterface):
             display.flip(True)
     #把战斗系统的画面画到screen上
     def display(self,screen):
-        super()._display()
+        #更新输入事件
+        self._update_event()
         #环境声音-频道1
         self.environment_sound.play()
         # 游戏主循环
@@ -352,24 +400,7 @@ class BattleSystem(BattleSystemInterface):
                         self.screen_to_move_x = currentDialog["changePos"]["x"]
                     if self.screen_to_move_y == None and "y" in currentDialog["changePos"]:
                         self.screen_to_move_y = currentDialog["changePos"]["y"]
-                    if self.screen_to_move_x != None and self.screen_to_move_x != 0:
-                        temp_value = int(self.MAP.getPos_x() + self.screen_to_move_x*0.2)
-                        if self.window_x-self.MAP.surface_width<=temp_value<=0:
-                            self.MAP.setPos_x(temp_value)
-                            self.screen_to_move_x*=0.8
-                            if int(self.screen_to_move_x) == 0:
-                                self.screen_to_move_x = 0
-                        else:
-                            self.screen_to_move_x = 0
-                    if self.screen_to_move_y != None and self.screen_to_move_y !=0:
-                        temp_value = int(self.MAP.getPos_y() + self.screen_to_move_y*0.2)
-                        if self.window_y-self.MAP.surface_height<=temp_value<=0:
-                            self.MAP.setPos_y(temp_value)
-                            self.screen_to_move_y*=0.8
-                            if int(self.screen_to_move_y) == 0:
-                                self.screen_to_move_y = 0
-                        else:
-                            self.screen_to_move_y = 0
+                    self._move_screen()
                     if self.screen_to_move_x == 0 and self.screen_to_move_y == 0 or self.screen_to_move_x == None and self.screen_to_move_y == None:
                         self.screen_to_move_x = None
                         self.screen_to_move_y = None
@@ -425,7 +456,7 @@ class BattleSystem(BattleSystemInterface):
                 self.battleMode = True
     #战斗模块
     def __play_battle(self,screen):
-        self.right_click = False
+        right_click = False
         show_pause_menu = False
         #获取鼠标坐标
         mouse_x,mouse_y = controller.get_pos()
@@ -454,7 +485,7 @@ class BattleSystem(BattleSystemInterface):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 #右键
                 if event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
-                    self.right_click = True
+                    right_click = True
                 #上下滚轮-放大和缩小地图
                 elif event.button == 4 and self.zoomIntoBe < 400:
                     self.zoomIntoBe += 20
@@ -487,7 +518,7 @@ class BattleSystem(BattleSystemInterface):
 
         #玩家回合
         if self.whose_round == "player":
-            if self.right_click == True:
+            if right_click == True:
                 block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
                 #如果点击了回合结束的按钮
                 if ifHover(self.end_round_button) and self.isWaiting == True:
