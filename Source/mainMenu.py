@@ -1,5 +1,7 @@
 # cython: language_level=3
 from Source.scene import *
+import pygame
+import os
 
 def mainMenu(screen):
     #获取屏幕的尺寸
@@ -170,8 +172,7 @@ def mainMenu(screen):
             elif menu_type == 1:
                 if Zero.ifHover(main_menu_txt["menu_1"]["text0_continue"]):
                     if os.path.exists("Save/save.yaml"):
-                        with open("Save/save.yaml", "r", encoding='utf-8') as f:
-                            SAVE = yaml.load(f.read(),Loader=yaml.FullLoader)
+                        SAVE = Zero.loadConfig("Save/save.yaml")
                         if SAVE["type"] == "battle":
                             SAVE["id"] = "head"
                             SAVE["dialog_options"] = {}

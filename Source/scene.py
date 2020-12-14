@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Source.init import *
+import Zero3 as Zero
 
 def scene(chapterType,chapterName,screen,startPoint="dialog_before_battle",dialogId="head",dialog_options={}):
     if startPoint == "dialog_before_battle":

@@ -65,8 +65,7 @@ class BattleSystem(BattleSystemInterface):
             DataTmp["dialogKey"] = self.dialogKey
             DataTmp["dialogData"] = self.dialogData
             DataTmp["resultInfo"] = self.resultInfo
-            with open("Save/save.yaml", "w", encoding='utf-8') as f:
-                yaml.dump(DataTmp, f, allow_unicode=True)
+            saveConfig("Save/save.yaml",DataTmp)
     #重新加载游戏进程
     def initialize(self,screen,chapterType,chapterName):
         self.chapterType = chapterType
@@ -74,19 +73,18 @@ class BattleSystem(BattleSystemInterface):
         self.process_data(screen)
     #从存档中加载游戏进程
     def load(self,screen):
-        with open("Save/save.yaml", "r", encoding='utf-8') as f:
-            DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
-            if DataTmp["type"] == "battle":
-                self.chapterType = DataTmp["chapterType"]
-                self.chapterName = DataTmp["chapterName"]
-                self.characters_data = DataTmp["characters_data"]
-                self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
-                self.MAP = DataTmp["MAP"]
-                self.dialogKey = DataTmp["dialogKey"]
-                self.dialogData = DataTmp["dialogData"]
-                self.resultInfo = DataTmp["resultInfo"]
-            else:
-                raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
+        DataTmp = loadConfig("Save/save.yaml")
+        if DataTmp["type"] == "battle":
+            self.chapterType = DataTmp["chapterType"]
+            self.chapterName = DataTmp["chapterName"]
+            self.characters_data = DataTmp["characters_data"]
+            self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
+            self.MAP = DataTmp["MAP"]
+            self.dialogKey = DataTmp["dialogKey"]
+            self.dialogData = DataTmp["dialogData"]
+            self.resultInfo = DataTmp["resultInfo"]
+        else:
+            raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
         self.loadFromSave = True
         self.process_data(screen)
     def process_data(self,screen):
@@ -101,12 +99,11 @@ class BattleSystem(BattleSystemInterface):
         self.warnings_to_display = WarningSystem()
         loading_info = get_lang("LoadingTxt")
         #加载剧情
-        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,get_setting('Language')), "r", encoding='utf-8') as f:
-            DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
-            #章节标题显示
-            self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleModeUiTxt["numChapter"],self.chapterName,DataTmp["title"],DataTmp["description"])
-            self.battleMode_info = DataTmp["battle_info"]
-            self.dialog_during_battle = DataTmp["dialog_during_battle"]
+        DataTmp = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,get_setting('Language')))
+        #章节标题显示
+        self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleModeUiTxt["numChapter"],self.chapterName,DataTmp["title"],DataTmp["description"])
+        self.battleMode_info = DataTmp["battle_info"]
+        self.dialog_during_battle = DataTmp["dialog_during_battle"]
         #正在加载的gif动态图标
         nowLoadingIcon = loadRealGif("Assets/image/UI/sv98_walking.gif",(self.window_x*0.7,self.window_y*0.83),(self.window_x*0.003*15,self.window_x*0.003*21))
         #渐入效果
@@ -120,31 +117,30 @@ class BattleSystem(BattleSystemInterface):
         nowLoadingIcon.draw(screen)
         display.flip(True)
         #读取并初始化章节信息
-        with open("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName), "r", encoding='utf-8') as f:
-            DataTmp = yaml.load(f.read(),Loader=yaml.FullLoader)
-            self.zoomIn = DataTmp["zoomIn"]*100
-            #储存对话数据key的字典
-            self.dialogInfo = DataTmp["dialogs"]
-            if self.loadFromSave == True:
-                #加载对应角色所需的图片
-                characterDataThread = loadCharacterDataFromSaveThread(self.characters_data,self.sangvisFerris_data)
+        DataTmp = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
+        self.zoomIn = DataTmp["zoomIn"]*100
+        #储存对话数据key的字典
+        self.dialogInfo = DataTmp["dialogs"]
+        if self.loadFromSave == True:
+            #加载对应角色所需的图片
+            characterDataThread = loadCharacterDataFromSaveThread(self.characters_data,self.sangvisFerris_data)
+        else:
+            #初始化角色信息
+            characterDataThread = initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
+            #查看是否有战斗开始前的对话
+            if self.dialogInfo["initial"] == None:
+                self.dialogKey = None
             else:
-                #初始化角色信息
-                characterDataThread = initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
-                #查看是否有战斗开始前的对话
-                if self.dialogInfo["initial"] == None:
-                    self.dialogKey = None
-                else:
-                    self.dialogKey = self.dialogInfo["initial"]
-                self.dialogData = None
-            self.bg_music = DataTmp["background_music"] 
-            #初始化天气和环境的音效 -- 频道1
-            self.environment_sound = SoundManagement(1)
-            self.weatherController = None
-            if DataTmp["weather"] != None:
-                self.environment_sound.add("Assets/sound/environment/{}.ogg".format(DataTmp["weather"]))
-                self.environment_sound.set_volume(get_setting("Sound","sound_environment")/100.0)
-                self.weatherController = WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
+                self.dialogKey = self.dialogInfo["initial"]
+            self.dialogData = None
+        self.bg_music = DataTmp["background_music"] 
+        #初始化天气和环境的音效 -- 频道1
+        self.environment_sound = SoundManagement(1)
+        self.weatherController = None
+        if DataTmp["weather"] != None:
+            self.environment_sound.add("Assets/sound/environment/{}.ogg".format(DataTmp["weather"]))
+            self.environment_sound.set_volume(get_setting("Sound","sound_environment")/100.0)
+            self.weatherController = WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
         #检测self.zoomIn参数是否越界
         if self.zoomIn < 200:
             self.zoomIn = 200

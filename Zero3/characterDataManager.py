@@ -664,8 +664,7 @@ def autoMkdirForCharacterSounds():
 
 #加载并更新更新位于Data中的角色数据配置文件-character_data.yaml
 def loadCharacterData():
-    with open("Data/character_data.yaml", "r", encoding='utf-8') as f:
-        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
+    loadData = loadConfig("Data/character_data.yaml")
     ifAnythingChange = False
     for path in glob.glob(r'Assets/image/character/*'):
         name = path.replace("Assets/image/character\\","")
@@ -708,8 +707,7 @@ def loadCharacterData():
             ifAnythingChange = True
             print("ZeroEngine-Notice:A new character call {} has been updated to the data file.".format(name))
     if ifAnythingChange == True:
-        with open("Data/character_data.yaml", "w", encoding='utf-8') as f:
-            yaml.dump(loadData, f, allow_unicode=True)
+        saveConfig("Data/character_data.yaml",loadData)
     autoMkdirForCharacterSounds()
     return loadData
 

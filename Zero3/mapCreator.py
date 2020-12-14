@@ -12,40 +12,38 @@ class mapCreator(BattleSystemInterface):
         self.chapterName = chapterName
         self.chapterType = chapterType
         del chapterName,chapterType
-        with open("Data/blocks.yaml", "r", encoding='utf-8') as f:
-            self.blocks_setting = yaml.load(f.read(),Loader=yaml.FullLoader)["blocks"]
-        with open("Data/decorations.yaml", "r", encoding='utf-8') as f:
-            self.decorations_setting = yaml.load(f.read(),Loader=yaml.FullLoader)["decorations"]
-        with open("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName), "r", encoding='utf-8') as f:
-            loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-            #初始化角色信息
-            characterDataThread = initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],"dev")
-            #加载角色信息
-            characterDataThread.start()
-            characterDataThread.join()
-            self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
-            #加载所有角色的数据
-            self.DATABASE = characterDataThread.DATABASE
-            #初始化地图
-            self.MAP = loadData["map"]
-            if self.MAP == None or len(self.MAP) == 0:
-                SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
-                block_y = 50
-                block_x = 50
-                default_map = []
-                for i in range(block_y):
-                    map_per_line = []
-                    for a in range(block_x):
-                        map_per_line.append(SnowEnvImg[randomInt(0,5)])
-                    default_map.append(map_per_line)
-                with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "w", encoding='utf-8') as f:
-                    loadData["map"] = default_map
-                    yaml.dump(loadData, f)
-            else:
-                block_y = len(loadData["map"])
-                block_x = len(loadData["map"][0])
+        self.blocks_setting = loadConfig("Data/blocks.yaml","blocks")
+        self.decorations_setting = loadConfig("Data/decorations.yaml","decorations")
+        #载入地图数据
+        loadData = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
+        #初始化角色信息
+        characterDataThread = initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],"dev")
+        #加载角色信息
+        characterDataThread.start()
+        characterDataThread.join()
+        self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
+        #加载所有角色的数据
+        self.DATABASE = characterDataThread.DATABASE
+        #初始化地图
+        self.MAP = loadData["map"]
+        if self.MAP == None or len(self.MAP) == 0:
+            SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
+            block_y = 50
+            block_x = 50
+            default_map = []
+            for i in range(block_y):
+                map_per_line = []
+                for a in range(block_x):
+                    map_per_line.append(SnowEnvImg[randomInt(0,5)])
+                default_map.append(map_per_line)
+            loadData["map"] = default_map
+            saveConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName),loadData)
+        else:
+            block_y = len(loadData["map"])
+            block_x = len(loadData["map"][0])
         #加载地图
         self._create_map(loadData)
+        del loadData
         self.MAP.darkMode = False
         #加载背景图片
         self.envImgDict={}
@@ -101,8 +99,7 @@ class mapCreator(BattleSystemInterface):
         self.UI_local_y = 0
         self.isPlaying = True
         #读取地图原始文件
-        with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
-            self.originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        self.originalData = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
     def display(self,screen):
         #更新输入事件
         self._update_event()
@@ -162,8 +159,7 @@ class mapCreator(BattleSystemInterface):
                                 self.sangvisFerris_data.pop(any_chara_replace)
                                 self.originalData["sangvisFerri"].pop(any_chara_replace)
                 elif ifHover(self.UIButton["save"]) and self.object_to_put_down == None and self.deleteMode == False:
-                    with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "w", encoding='utf-8') as f:
-                        yaml.dump(self.originalData, f)
+                    saveConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName),self.originalData)
                 elif ifHover(self.UIButton["back"]) and self.object_to_put_down == None and self.deleteMode == False:
                     self.isPlaying = False
                     break
@@ -173,23 +169,22 @@ class mapCreator(BattleSystemInterface):
                     self.deleteMode = True
                 elif ifHover(self.UIButton["reload"]) and self.object_to_put_down == None and self.deleteMode == False:
                     tempLocal_x,tempLocal_y = self.MAP.getPos()
-                    #读取地图
-                    with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
-                        loadData = yaml.load(f.read(),Loader=yaml.FullLoader)
-                        #初始化角色信息
-                        self.characters_data = {}
-                        for each_character in loadData["character"]:
-                            self.characters_data[each_character] = CharacterDataManager(loadData["character"][each_character],self.DATABASE[loadData["character"][each_character]["type"]],self.window_y,"dev")
-                        self.sangvisFerris_data = {}
-                        for each_character in loadData["sangvisFerri"]:
-                            self.sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],self.DATABASE[loadData["sangvisFerri"][each_character]["type"]],"dev")
+                    #读取地图数据
+                    loadData = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
+                    #初始化角色信息
+                    self.characters_data = {}
+                    for each_character in loadData["character"]:
+                        self.characters_data[each_character] = CharacterDataManager(loadData["character"][each_character],self.DATABASE[loadData["character"][each_character]["type"]],self.window_y,"dev")
+                    self.sangvisFerris_data = {}
+                    for each_character in loadData["sangvisFerri"]:
+                        self.sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],self.DATABASE[loadData["sangvisFerri"][each_character]["type"]],"dev")
                     #加载地图
                     self._create_map(loadData)
+                    del loadData
                     self.MAP.setPos(tempLocal_x,tempLocal_y)
                     self.MAP.darkMode = False
                     #读取地图
-                    with open("Data/main_chapter/"+self.chapterName+"_map.yaml", "r", encoding='utf-8') as f:
-                        self.originalData = yaml.load(f.read(),Loader=yaml.FullLoader)
+                    self.originalData = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
                 else:
                     if pygame.mouse.get_pressed()[0] and block_get_click != None:
                         if self.object_to_put_down != None:

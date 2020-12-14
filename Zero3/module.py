@@ -237,11 +237,9 @@ class SettingContoller:
             if self.buttons_x1<mouse_x<self.buttons_x1+self.cancelTxt_n.get_width() and self.buttons_y<mouse_y<self.buttons_y+self.cancelTxt_n.get_height():
                 screen.blit(self.cancelTxt_b,(self.buttons_x1,self.buttons_y))
                 if controller.get_event() == "comfirm":
-                    with open("Save/setting.yaml", "r", encoding='utf-8') as f:
-                        settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
-                        self.soundVolume_background_music = settingData["Sound"]["background_music"]
-                        self.soundVolume_sound_effects = settingData["Sound"]["sound_effects"]
-                        self.soundVolume_sound_environment = settingData["Sound"]["sound_environment"]
+                    self.soundVolume_background_music = get_setting("Sound","background_music")
+                    self.soundVolume_sound_effects = get_setting("Sound","sound_effects")
+                    self.soundVolume_sound_environment = get_setting("Sound","sound_environment")
                     self.ifDisplay = False
             else:
                 screen.blit(self.cancelTxt_n,(self.buttons_x1,self.buttons_y))
@@ -249,15 +247,11 @@ class SettingContoller:
             if self.buttons_x2<mouse_x<self.buttons_x2+self.confirmTxt_n.get_width() and self.buttons_y<mouse_y<self.buttons_y+self.confirmTxt_n.get_height():
                 screen.blit(self.confirmTxt_b,(self.buttons_x2,self.buttons_y))
                 if controller.get_event() == "comfirm":
-                    with open("Save/setting.yaml", "r", encoding='utf-8') as f:
-                        settingData = yaml.load(f.read(),Loader=yaml.FullLoader)
-                        settingData["Sound"]["background_music"] = self.soundVolume_background_music
-                        settingData["Sound"]["sound_effects"] = self.soundVolume_sound_effects
-                        settingData["Sound"]["sound_environment"] = self.soundVolume_sound_environment
-                    with open("Save/setting.yaml", "w", encoding='utf-8') as f:
-                        yaml.dump(settingData, f)
-                    reload_setting()
-                    pygame.mixer.music.set_volume(settingData["Sound"]["background_music"]/100.0)
+                    set_setting("Sound","background_music",self.soundVolume_background_music)
+                    set_setting("Sound","sound_effects",self.soundVolume_sound_effects)
+                    set_setting("Sound","sound_environment",self.soundVolume_sound_environment)
+                    save_setting()
+                    pygame.mixer.music.set_volume(self.soundVolume_background_music/100.0)
                     self.ifDisplay = False
                     return True
             else:

@@ -6,11 +6,9 @@ from Zero3.movie import cutscene,VedioFrame
 class DialogSystem:
     def __init__(self,chapterType,chapterName,part,dialogId,dialog_options):
         #读取章节信息
-        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(chapterType,chapterName,get_setting("Language")),"r",encoding='utf-8') as f:
-            self.dialogData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        self.dialogData = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(chapterType,chapterName,get_setting("Language")))
         if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
-            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(chapterType,chapterName,self.dialogData["default_lang"]),"r",encoding='utf-8') as f:
-                self.dialog_content = yaml.load(f.read(),Loader=yaml.FullLoader)[part]
+            self.dialog_content = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(chapterType,chapterName,self.dialogData["default_lang"]),part)
             for key,currentDialog in self.dialogData[part].items():
                 if key in self.dialog_content:
                     for key2,dataNeedReplace in currentDialog.items():
@@ -78,13 +76,11 @@ class DialogSystem:
         if not os.path.exists("Save"):
             os.makedirs("Save")
         #存档数据
-        with open("Save/save.yaml", "w", encoding='utf-8') as f:
-            yaml.dump(DataTmp, f, allow_unicode=True)
+        saveConfig("Save/save.yaml",DataTmp)
         #检查global.yaml配置文件
         if not os.path.exists("Save/global.yaml"):
             DataTmp = {"chapter_unlocked":1}
-            with open("Save/global.yaml", "w", encoding='utf-8') as f:
-                yaml.dump(DataTmp, f, allow_unicode=True)
+            saveConfig("Save/global.yaml",DataTmp)
     def get_event(self):
         return self.__events
     def __update_scene(self,theNextDialogId):
@@ -160,6 +156,7 @@ class DialogSystem:
             optionBox_y_base = (self.window_y*3/4-(len(self.dialog_content[self.dialogId]["next_dialog_id"]["target"]))*2*self.window_x*0.03)/4
             optionBox_height = int(self.window_x*0.05)
             nextDialogId = None
+            i=0
             for i in range(len(self.dialog_content[self.dialogId]["next_dialog_id"]["target"])):
                 option_txt = self.dialogTxtSystem.fontRender(self.dialog_content[self.dialogId]["next_dialog_id"]["target"][i]["txt"],(255, 255, 255))
                 optionBox_width = int(option_txt.get_width()+self.window_x*0.05) 
@@ -329,8 +326,7 @@ class DialogSystemDev:
         self.dialogData[self.part][self.dialogId]["narrator"] = self.narrator.get_text()
         self.dialogData[self.part][self.dialogId]["content"] = self.content.get_text()
         if self.isDefault == True:
-            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),"w",encoding='utf-8') as f:
-                yaml.dump(self.dialogData, f, allow_unicode=True)
+            saveConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),self.dialogData)
         else:
             #移除掉相似的内容
             for key,currentDialog in self.dialogData_default["dialog_before_battle"].items():
@@ -347,13 +343,11 @@ class DialogSystemDev:
                             del self.dialogData["dialog_after_battle"][key][key2]
                     if len(self.dialogData["dialog_after_battle"][key])==0:
                         del self.dialogData["dialog_after_battle"][key]
-            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),"w",encoding='utf-8') as f:
-                yaml.dump(self.dialogData, f, allow_unicode=True)
+            saveConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),self.dialogData)
             self.__loadDialogData()
     #读取章节信息
     def __loadDialogData(self):
-        with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),"r",encoding='utf-8') as f:
-            self.dialogData = yaml.load(f.read(),Loader=yaml.FullLoader)
+        self.dialogData = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang))
         #初始化文件的数据
         if "dialog_before_battle" not in self.dialogData:
             self.dialogData["dialog_before_battle"] = {}
@@ -366,8 +360,7 @@ class DialogSystemDev:
         #如果不是默认主语言
         if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
             self.isDefault = False
-            with open("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.dialogData["default_lang"]),"r",encoding='utf-8') as f:
-                self.dialogData_default = yaml.load(f.read(),Loader=yaml.FullLoader)
+            self.dialogData_default = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.dialogData["default_lang"]))
             for key,currentDialog in self.dialogData_default["dialog_before_battle"].items():
                 if key in self.dialogData["dialog_before_battle"]:
                     for key2,dataNeedReplace in currentDialog.items():
@@ -1056,8 +1049,7 @@ class DialogButtons:
 #立绘配置信息数据库
 class NpcImageDatabase:
     def __init__(self):
-        with open("Data/npcImageDatabase.yaml","r",encoding='utf-8') as f:
-            self.__DATA = yaml.load(f.read(),Loader=yaml.FullLoader)["Data"]
+        self.__DATA = loadConfig("Data/npcImageDatabase.yaml","Data")
     def get_kind(self,fileName):
         for key in self.__DATA:
             if fileName in self.__DATA[key]:

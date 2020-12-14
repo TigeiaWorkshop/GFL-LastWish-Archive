@@ -109,7 +109,7 @@ class EnvImagesManagement:
 class MapObject:
     def  __init__(self,mapDataDic,int perBlockWidth,int perBlockHeight):
         #加载地图设置
-        blocks_setting = loadYaml("Data/blocks.yaml")["blocks"]
+        blocks_setting = loadConfig("Data/blocks.yaml","blocks")
         self.darkMode = mapDataDic["darkMode"]
         self.perBlockWidth = perBlockWidth
         self.perBlockHeight = perBlockHeight
