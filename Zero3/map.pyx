@@ -366,23 +366,24 @@ class MapObject:
             if anyBlockBlitThisLine == 0 and posTupleTemp[1]>=window_y:
                 break
     #计算在地图中的方块
-    def calBlockInMap(self,block,int mouse_x,int mouse_y):
+    def calBlockInMap(self,int mouse_x,int mouse_y):
         cdef int guess_x = int(((mouse_x-self.__local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.__local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
         cdef int guess_y = int((mouse_y-self.__local_y-self.perBlockWidth*0.4)/self.perBlockWidth/0.22) - guess_x
         cdef int x
         cdef int y
         cdef (int, int) posTupleTemp
+        cdef float lenUnitW = self.perBlockWidth/5
+        cdef float lenUnitH = self.perBlockWidth*0.8/393*214
         block_get_click = None
-        lenUnitW = block.get_width()/4
         for y in range(guess_y-1,guess_y+4):
             for x in range(guess_x-1,guess_x+4):
                 posTupleTemp = self.calPosInMap(x,y)
-                if lenUnitW<mouse_x-posTupleTemp[0]-self.perBlockWidth*0.05<+lenUnitW*3 and 0<mouse_y-posTupleTemp[1]<block.get_height():
+                if lenUnitW<mouse_x-posTupleTemp[0]-self.perBlockWidth*0.05<lenUnitW*3 and 0<mouse_y-posTupleTemp[1]<lenUnitH:
                     block_get_click = {"x":x,"y":y}
                     break
         return block_get_click
     #计算方块被画出的位置
-    def getBlockExactLocation(self,x,y):
+    def getBlockExactLocation(self,int x,int y):
         xStart,yStart = self.calPosInMap(x,y)
         return {
         "xStart": xStart,
@@ -427,7 +428,7 @@ class MapObject:
         self.__lightArea = numpy.asarray(lightArea,dtype=numpy.int)
         self.ifProcessMap = True
     #计算在地图中的位置
-    def calPosInMap(self,x,y):
+    def calPosInMap(self,int x,int y):
         cdef float width = self.perBlockWidth*0.43
         return round((x-y)*width+self.__local_x+self.row*width),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4)
     #查看角色是否在光亮范围内

@@ -107,7 +107,7 @@ class mapCreator(BattleSystemInterface):
         #更新输入事件
         self._update_event()
         mouse_x,mouse_y = controller.get_pos()
-        block_get_click = self.MAP.calBlockInMap(self.greenBlock,mouse_x,mouse_y)
+        block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
         for event in self._get_event():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:

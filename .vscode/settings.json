@@ -62,5 +62,5 @@
         "spine cython"
     ],
     "cmake.configureOnOpen": false,
-    "python.pythonPath": "c:\\python3\\python.exe"
+    "python.pythonPath": "C:\\Python\\python.exe"
 }

@@ -519,7 +519,7 @@ class BattleSystem(BattleSystemInterface):
         #玩家回合
         if self.whose_round == "player":
             if right_click == True:
-                block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                 #如果点击了回合结束的按钮
                 if ifHover(self.end_round_button) and self.isWaiting == True:
                     self.whose_round = "playerToSangvisFerris"
@@ -656,7 +656,7 @@ class BattleSystem(BattleSystemInterface):
                         self.screen_to_move_y = self.window_y*0.8-tempY
             #显示攻击/移动/技能范围
             if self.NotDrawRangeBlocks == False and self.characterGetClick != None:
-                block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                 #显示移动范围
                 if self.action_choice == "move":
                     self.areaDrawColorBlock["green"] = []
@@ -744,7 +744,7 @@ class BattleSystem(BattleSystemInterface):
                         self.areaDrawColorBlock["green"] = skill_range["near"]
                         self.areaDrawColorBlock["blue"] = skill_range["middle"]
                         self.areaDrawColorBlock["yellow"] = skill_range["far"]
-                        block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                        block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                         if block_get_click != None:
                             the_skill_cover_area = []
                             for area in skill_range:
@@ -857,7 +857,7 @@ class BattleSystem(BattleSystemInterface):
                 elif self.action_choice == "attack":
                     #根据敌我坐标判断是否需要反转角色
                     if self.characters_data[self.characterGetClick].get_imgId("attack") == 0:
-                        block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                        block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                         if block_get_click != None:
                             self.characters_data[self.characterGetClick].setFlipBasedPos(block_get_click)
                         self.characters_data[self.characterGetClick].playSound("attack")
@@ -959,7 +959,7 @@ class BattleSystem(BattleSystemInterface):
             #如果天亮的双方都可以看见/天黑，但是是友方角色/天黑，但是是敌方角色在可观测的范围内 -- 则画出角色
             if value.faction == "character" or value.faction == "sangvisFerri" and self.MAP.inLightArea(value):
                 if self.NotDrawRangeBlocks == True and pygame.mouse.get_pressed()[2]:
-                    block_get_click = self.MAP.calBlockInMap(self.UI_img["green"],mouse_x,mouse_y)
+                    block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                     if block_get_click != None and block_get_click["x"] == value.x and block_get_click["y"]  == value.y:
                         rightClickCharacterAlphaDeduct = False
                         if self.rightClickCharacterAlpha == None:
