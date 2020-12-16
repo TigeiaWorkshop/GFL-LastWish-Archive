@@ -143,10 +143,7 @@ def ifHover(imgObject,objectPos=(0,0),local_x=0,local_y=0):
             return False
     #如果是zero引擎的Image类
     elif isinstance(imgObject,ImageSurface):
-        if imgObject.x<mouse_x-local_x<imgObject.x+imgObject.width and imgObject.y<mouse_y-local_y<imgObject.y+imgObject.height:
-            return True
-        else:
-            return False
+        return imgObject.ifHover(mouse_x-local_x,mouse_y-local_y)
     #如果是zero引擎的Button类
     elif isinstance(imgObject,Button):
         if imgObject.x<=mouse_x-local_x<=imgObject.x+imgObject.img.get_width() and imgObject.y<=mouse_y-local_y<=imgObject.y+imgObject.img.get_height():

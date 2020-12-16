@@ -48,6 +48,11 @@ class ImageSurface(ImageInterface):
         self.img = pygame.transform.rotate(self.img,angle)
     def flip(self,vertical=False,horizontal=False):
         self.img = pygame.transform.flip(self.img,vertical,horizontal)
+    def ifHover(self,mouse_x,mouse_y):
+        if 0<mouse_x-self.x<self.width and 0<mouse_y-self.y<self.height:
+            return True
+        else:
+            return False
 
 #需要移动的动态图片
 class DynamicImageSurface(ImageSurface):

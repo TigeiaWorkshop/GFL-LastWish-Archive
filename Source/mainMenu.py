@@ -95,8 +95,8 @@ def mainMenu(screen):
         Zero.display.flip(True)
     
     #加载主菜单背景
-    videoCapture = Zero.VedioFrame("Assets/movie/SquadAR.mp4",window_x,window_y,True,True,(3105,935))
-    pygame.mixer.music.set_volume(Zero.get_setting("Sound","background_music")/100.0)
+    videoCapture = Zero.VedioFrame("Assets/movie/SquadAR.mp4",window_x,window_y,True,True,(32,103))
+    videoCapture.set_volume(Zero.get_setting("Sound","background_music")/100.0)
 
     for i in range(250,0,-2):
         the_black.draw(screen)
@@ -149,8 +149,9 @@ def mainMenu(screen):
 
         #展示设置UI
         if settingUI.display(screen) == True:
-            click_button_sound.set_volume(settingUI.soundVolume_sound_effects/100.0)
-            hover_on_button_sound.set_volume(settingUI.soundVolume_sound_effects/100.0)
+            click_button_sound.set_volume(Zero.get_setting("Sound","sound_effects")/100.0)
+            hover_on_button_sound.set_volume(Zero.get_setting("Sound","sound_effects")/100.0)
+            videoCapture.set_volume(Zero.get_setting("Sound","background_music")/100.0)
         
         events = pygame.event.get()
         #展示控制台

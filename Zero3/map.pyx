@@ -2,7 +2,7 @@
 import numpy
 import pygame
 import os
-from Zero3.basic import addDarkness, dicMerge, loadImg, loadYaml, randomInt, resizeImg
+from Zero3.basic import addDarkness, loadImg, randomInt, resizeImg, loadConfig
 
 _MAP_ENV_IMAGE = None
 
@@ -260,7 +260,7 @@ class MapObject:
                     #如果的确有树需要被画出
                     if charactersPos == None:
                         charactersPos = []
-                        for name,dataDic in dicMerge(characters_data,sangvisFerris_data).items():
+                        for name,dataDic in {**characters_data, **sangvisFerris_data}.items():
                             charactersPos.append((int(dataDic.x),int(dataDic.y)))
                             charactersPos.append((int(dataDic.x)+1,int(dataDic.y)+1))
                     if item.get_pos() in charactersPos:
@@ -428,7 +428,7 @@ class MapObject:
         self.__lightArea = numpy.asarray(lightArea,dtype=numpy.int)
         self.ifProcessMap = True
     #计算在地图中的位置
-    def calPosInMap(self,int x,int y):
+    def calPosInMap(self,float x,float y):
         cdef float width = self.perBlockWidth*0.43
         return round((x-y)*width+self.__local_x+self.row*width),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4)
     #查看角色是否在光亮范围内
