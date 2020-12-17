@@ -168,13 +168,14 @@ class BattleSystem(BattleSystemInterface):
         self.MAP.calculate_darkness(self.characters_data)
         #开始加载关卡设定
         self.infoToDisplayDuringLoading.display(screen)
-        now_loading = self.FONT.render(loading_info["now_loading_level"],get_fontMode(),(255,255,255))
+        now_loading = self.FONT.render(loading_info["now_loading_level"],get_fontMode(),findColorRGBA("white"))
         drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
         display.flip(True)
         #加载UI:
         #加载结束回合的图片
-        self.end_round_button = loadImage("Assets/image/UI/endRound.png",(self.window_x*0.8,self.window_y*0.7),self.window_x/10, self.window_y/10)
+        self.end_round_txt = self.FONT.render(get_lang("Battle_UI","endRound"),get_fontMode(),findColorRGBA("white"))
+        self.end_round_button = loadImage("Assets/image/UI/end_round_button.png",(self.window_x*0.8,self.window_y*0.7),self.end_round_txt.get_width()*2,self.end_round_txt.get_height()*2.5)
         #加载子弹图片
         #bullet_img = loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, self.MAP.perBlockHeight/12)
         #加载血条,各色方块等UI图片 size:perBlockWidth, self.MAP.perBlockHeight/5
@@ -863,8 +864,7 @@ class BattleSystem(BattleSystemInterface):
                     if self.characters_data[self.characterGetClick].get_imgId("attack") == self.characters_data[self.characterGetClick].get_imgNum("attack")-2:
                         for each_enemy in self.enemiesGetAttack:
                             if self.enemiesGetAttack[each_enemy] == "near" and random.randint(1,100) <= 95 or self.enemiesGetAttack[each_enemy] == "middle" and random.randint(1,100) <= 80 or self.enemiesGetAttack[each_enemy] == "far" and random.randint(1,100) <= 65:
-                                the_damage = random.randint(self.characters_data[self.characterGetClick].min_damage,self.characters_data[self.characterGetClick].max_damage)
-                                self.sangvisFerris_data[each_enemy].decreaseHp(the_damage)
+                                the_damage = self.sangvisFerris_data[each_enemy].attackBy(self.characters_data[self.characterGetClick])
                                 self.damage_do_to_characters[each_enemy] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
                             else:
                                 self.damage_do_to_characters[each_enemy] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
@@ -1102,6 +1102,7 @@ class BattleSystem(BattleSystemInterface):
         if self.whose_round == "player":
             #加载结束回合的按钮
             self.end_round_button.draw(screen)
+            screen.blit(self.end_round_txt,(self.end_round_button.x+self.end_round_button.width-self.end_round_txt.get_width()-self.FONTSIZE,self.end_round_button.y+(self.end_round_button.height-self.FONTSIZE)/2.3))
 
         #显示警告
         self.warnings_to_display.display(screen)

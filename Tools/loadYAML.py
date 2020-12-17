@@ -6,8 +6,10 @@ filesToRead = []
 #读取文件
 for path in glob.glob(r'../Lang/*.yaml'):
     filesToRead.append(path)
+"""
 for path in glob.glob(r'../Save/*.yaml'):
     filesToRead.append(path)
+"""
 for path in glob.glob(r'../Data/*.yaml'):
     filesToRead.append(path)
 for path in glob.glob(r'../Data/main_chapter/*.yaml'):

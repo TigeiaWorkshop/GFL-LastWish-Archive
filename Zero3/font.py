@@ -98,13 +98,13 @@ def createFont(size,ifBold=False,ifItalic=False):
             return pygame.font.SysFont(ZERO_FONT,int(size),ifBold,ifItalic)
         except BaseException:
             pygame.font.init()
-            normal_font = pygame.font.Font("Assets/font/{}.ttf".format(ZERO_FONT),int(size))
+            normal_font = pygame.font.SysFont(ZERO_FONT,int(size),ifBold,ifItalic)
     elif ZERO_FONTTYPE == "custom":
         try:
             normal_font = pygame.font.Font("Assets/font/{}.ttf".format(ZERO_FONT),int(size))
         #如果文字没有初始化
         except BaseException:
-            pygame.ZERO_FONT.init()
+            pygame.font.init()
             normal_font = pygame.font.Font("Assets/font/{}.ttf".format(ZERO_FONT),int(size))
         if ifBold:
             normal_font.set_bold(ifBold)

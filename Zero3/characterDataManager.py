@@ -245,9 +245,9 @@ class Doll:
         _load_sound_to_CHARACTERS_SOUND_DICT(self.type)
         if self.faction == "character":
             _add_CHARACTERS_GET_HURT_IMAGE(self.type)
-    def attackBy(self,attacker,resultInfo=None):
+    def attackBy(self,attacker):
         damage = random.randint(attacker.min_damage,attacker.max_damage)
-        self.decreaseHp(damage,self.resultInfo)
+        self.decreaseHp(damage)
         return damage
     def decreaseHp(self,damage):
         damage = abs(damage)
@@ -474,15 +474,20 @@ class CharacterDataManager(Doll):
                 print('警告：角色 {} 没有对应的破衣动画'.format(defaultData["type"]))
                 if not os.path.exists("Assets/image/npc_icon/{}.png".format(defaultData["type"])):
                     print("而且你也忘了加入对应的头像")
-    def decreaseHp(self,damage,result_of_round=None):
+    def attackBy(self,attacker,result_of_round):
+        damage = random.randint(attacker.min_damage,attacker.max_damage)
+        self.decreaseHp(damage,result_of_round)
+        return damage
+    def decreaseHp(self,damage,result_of_round):
         super().decreaseHp(damage)
-        if self.dying == False and self.kind != "HOC":
-            self.dying = 3
-            if self.ImageGetHurt != None:
-                self.ImageGetHurt.x = -self.ImageGetHurt.width
-                self.ImageGetHurt.alpha = 255
-                self.ImageGetHurt.yToGo = 255
-                self.playSound("injured")
+        if self.current_hp <= 0 and self.dying == False:
+            if self.kind != "HOC":
+                self.dying = 3
+                if self.ImageGetHurt != None:
+                    self.ImageGetHurt.x = -self.ImageGetHurt.width
+                    self.ImageGetHurt.alpha = 255
+                    self.ImageGetHurt.yToGo = 255
+                    self.playSound("injured")
             result_of_round["times_characters_down"] += 1
     def heal(self,hpHealed):
         super().heal(hpHealed)

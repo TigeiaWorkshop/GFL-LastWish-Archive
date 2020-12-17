@@ -1,4 +1,5 @@
 Battle_UI:
+  endRound: Round Ends
   enemyRound: Enemy Round
   getBullets: Get Bullets
   getHealth: Gain Health
