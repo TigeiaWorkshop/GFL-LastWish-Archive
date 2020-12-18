@@ -194,9 +194,15 @@ def mainMenu(screen):
                 if Zero.ifHover(main_menu_txt["menu_1"]["text1_chooseChapter"]):
                     menu_type = 2
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text4_mapCreator"]):
+                    videoCapture.stop()
                     mapCreator("main_chapter","chapter1",screen)
+                    videoCapture = videoCapture.clone()
+                    videoCapture.start()
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text5_dialogCreator"]):
+                    videoCapture.stop()
                     dialogCreator("main_chapter","chapter1",screen,"dialog_before_battle")
+                    videoCapture = videoCapture.clone()
+                    videoCapture.start()
                 elif Zero.ifHover(main_menu_txt["menu_1"]["text7_back"]):
                     menu_type = 0
             elif menu_type == 2:

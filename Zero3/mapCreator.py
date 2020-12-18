@@ -2,16 +2,13 @@
 from Zero3.battleSystemInterface import *
 
 class mapCreator(BattleSystemInterface):
-    def __init__(self):
-        BattleSystemInterface.__init__(self)
+    def __init__(self,chapterType,chapterName):
+        BattleSystemInterface.__init__(self,chapterType,chapterName)
         display.set_caption("Girls frontline-Last Wish: MapCreator")
         unloadBackgroundMusic()
-    def initialize(self,screen,chapterType,chapterName):
+    def initialize(self,screen):
         #屏幕尺寸
         self.window_x,self.window_y = screen.get_size()
-        self.chapterName = chapterName
-        self.chapterType = chapterType
-        del chapterName,chapterType
         self.blocks_setting = loadConfig("Data/blocks.yaml","blocks")
         self.decorations_setting = loadConfig("Data/decorations.yaml","decorations")
         #载入地图数据
@@ -66,9 +63,9 @@ class mapCreator(BattleSystemInterface):
             img_name = imgPath.replace(".png","").replace(".","").replace("Assets","").replace("image","").replace("environment","").replace("decoration","").replace("\\","").replace("/","")
             self.decorationsImgDict[img_name] = loadImg(imgPath,self.MAP.perBlockWidth/5)
         #绿色方块/方块标准
-        self.greenBlock = loadImg("Assets/image/UI/green.png",int(self.MAP.perBlockWidth*0.8))
+        self.greenBlock = loadImg("Assets/image/UI/range/green.png",int(self.MAP.perBlockWidth*0.8))
         self.greenBlock.set_alpha(150)
-        self.redBlock = loadImg("Assets/image/UI/red.png",int(self.MAP.perBlockWidth*0.8))
+        self.redBlock = loadImg("Assets/image/UI/range/red.png",int(self.MAP.perBlockWidth*0.8))
         self.redBlock.set_alpha(150)
         self.deleteMode = False
         self.object_to_put_down = None
@@ -277,12 +274,12 @@ class mapCreator(BattleSystemInterface):
                 self.data_to_edit = self.sangvisFerris_data[key]
 
         #展示设施
-        self.MAP.display_facility(screen,self.characters_data,self.sangvisFerris_data)
+        self.MAP.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
 
         #画出UI
-        self.UIContainerButton.draw(screen,0,self.UIContainer.y)
+        self.UIContainerButton.display(screen,0,self.UIContainer.y)
         self.UIContainer.draw(screen)
-        self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
+        self.UIContainerRightButton.display(screen,self.UIContainerRight.x)
         self.UIContainerRight.draw(screen)
         for Image in self.UIButton:
             ifHover(self.UIButton[Image])

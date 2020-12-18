@@ -5,6 +5,8 @@ import os
 from Zero3.basic import addDarkness, loadImg, randomInt, resizeImg, loadConfig
 
 _MAP_ENV_IMAGE = None
+#方块数据
+_BLOCKS_DATABASE = loadConfig("Data/blocks.yaml","blocks")
 
 #地图场景模块
 class EnvImagesManagement:
@@ -15,8 +17,12 @@ class EnvImagesManagement:
         self.__ENV_IMAGE_DICT_DARK = None
         self.__ORNAMENTATION_IMAGE_DICT = {}
         self.__ORNAMENTATION_IMAGE_DICT_DARK = None
-        self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert() if bgImgName != None else None
+        if bgImgName != None:
+            self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert()
+        else:
+            self.__BACKGROUND_IMAGE = pygame.Surface((1920,1080)).convert()
         self.__MAP_SURFACE = None
+        self.__MAP_DREW_AREA = None
         cdef list all_images_needed = []
         for i in range(len(theMap)):
             for a in range(len(theMap[i])):
@@ -97,19 +103,18 @@ class EnvImagesManagement:
     def get_ornamentation_num(self,ornamentationType):
         return len(self.__ORNAMENTATION_IMAGE_DICT[ornamentationType])
     def get_new_background_image(self,width,height):
-        if self.__BACKGROUND_IMAGE != None:
-            self.__MAP_SURFACE = pygame.transform.scale(self.__BACKGROUND_IMAGE,(width,height))
-        else:
-            self.__MAP_SURFACE = pygame.surface.Surface((width,height)).convert()
+        self.__MAP_SURFACE = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
         return self.__MAP_SURFACE
-    def get_background_image(self):
-        return self.__MAP_SURFACE
+    def set_map_drew_area(self,array):
+        self.__MAP_DREW_AREA = array
+    def display_background_surface(self,screen):
+        screen.blit(resizeImg(self.__BACKGROUND_IMAGE,screen.get_size()),(0,0))
+        screen.blit(self.__MAP_SURFACE,(0,0))
 
 #地图模块
 class MapObject:
     def  __init__(self,mapDataDic,int perBlockWidth,int perBlockHeight):
         #加载地图设置
-        blocks_setting = loadConfig("Data/blocks.yaml","blocks")
         self.darkMode = mapDataDic["darkMode"]
         self.perBlockWidth = perBlockWidth
         self.perBlockHeight = perBlockHeight
@@ -121,7 +126,7 @@ class MapObject:
         self.backgroundImageName = mapDataDic["backgroundImage"]
         for y in range(self.row):
             for x in range(len(mapData[y])):
-                self.mapData[y][x] = BlockObject(mapData[y][x],blocks_setting[mapData[y][x]]["canPassThrough"])
+                self.mapData[y][x] = BlockObject(mapData[y][x],_BLOCKS_DATABASE[mapData[y][x]]["canPassThrough"])
         self.ornamentationData = []
         for ornamentationType,itemsThatType in mapDataDic["ornamentation"].items():
             for itemKey,itemData in itemsThatType.items():
@@ -211,7 +216,7 @@ class MapObject:
         if self.ifProcessMap == True:
             self.ifProcessMap = False
             self.__process_map(screen.get_width(),screen.get_height())
-        screen.blit(_MAP_ENV_IMAGE.get_background_image(),(0,0))
+        _MAP_ENV_IMAGE.display_background_surface(screen)
         return (screen_to_move_x,screen_to_move_y)
     #画上设施
     def display_ornamentation(self,screen,characters_data,sangvisFerris_data):
@@ -341,22 +346,26 @@ class MapObject:
         return the_route
     #重新绘制地图
     def __process_map(self,int window_x,int window_y):
-        mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_x,window_y)
-        cdef unsigned int y
-        cdef (int, int) posTupleTemp
-        cdef unsigned int yRange = int(len(self.mapData))
-        cdef unsigned int x
-        cdef unsigned int xRange
-        cdef unsigned int anyBlockBlitThisLine
+        map_drew_area = []
         cdef int screen_min = -self.perBlockWidth
+        mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_x,window_y)
+        cdef (int, int) posTupleTemp
+        cdef unsigned int y
+        cdef unsigned int yRange = self.row
+        cdef unsigned int x
+        cdef unsigned int xRange = self.column
+        cdef unsigned int anyBlockBlitThisLine
+        #快速定位需要开始展示画面的y轴
+        cdef unsigned int y_start = 0
+        cdef unsigned int x_start = 0
         #画出地图
-        for y in range(yRange):
+        for y in range(y_start,yRange):
             anyBlockBlitThisLine = 0
-            xRange = int(len(self.mapData[y]))
-            for x in range(xRange):
+            for x in range(x_start,xRange):
                 posTupleTemp = self.calPosInMap(x,y)
                 if screen_min<=posTupleTemp[0]<window_x and screen_min<=posTupleTemp[1]<window_y:
                     anyBlockBlitThisLine = 1
+                    map_drew_area.append([x,y])
                     if not self.isPosInLightArea(x,y):
                         mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,True),(posTupleTemp[0],posTupleTemp[1]))
                     else:
@@ -365,6 +374,7 @@ class MapObject:
                     break
             if anyBlockBlitThisLine == 0 and posTupleTemp[1]>=window_y:
                 break
+        _MAP_ENV_IMAGE.set_map_drew_area(numpy.asarray(map_drew_area,dtype=numpy.int8))
     #计算在地图中的方块
     def calBlockInMap(self,int mouse_x,int mouse_y):
         cdef int guess_x = int(((mouse_x-self.__local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.__local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
@@ -425,7 +435,7 @@ class MapObject:
                         for x in range(int(item.x-item.range+(y-item.y)+1),int(item.x+item.range-(y-item.y))):
                             if [x,y] not in lightArea:
                                 lightArea.append([x,y])
-        self.__lightArea = numpy.asarray(lightArea,dtype=numpy.int)
+        self.__lightArea = numpy.asarray(lightArea,dtype=numpy.int8)
         self.ifProcessMap = True
     #计算在地图中的位置
     def calPosInMap(self,float x,float y):

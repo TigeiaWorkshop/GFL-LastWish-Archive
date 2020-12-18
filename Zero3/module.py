@@ -65,8 +65,8 @@ class DynamicImageSurface(ImageSurface):
         self.moveSpeed_x = moveSpeed_x
         self.moveSpeed_y = moveSpeed_y
         self.__towardTargetPos = False
-    def draw(self,screen,local_x=0,local_y=0):
-        super().draw(screen,local_x,local_y)
+    def display(self,screen,local_x=0,local_y=0):
+        super().display(screen,local_x,local_y)
         if self.__towardTargetPos == True:
             if self.default_x < self.target_x and self.x < self.target_x:
                 self.x += self.moveSpeed_x
@@ -85,6 +85,8 @@ class DynamicImageSurface(ImageSurface):
                 self.y -= self.moveSpeed_y
             elif self.default_y > self.target_y and self.y < self.default_y:
                 self.y += self.moveSpeed_y
+    def draw(self,screen):
+        self.display(screen)
     def switch(self):
         self.__towardTargetPos = not self.__towardTargetPos
     def ifToward(self):

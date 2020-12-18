@@ -2,8 +2,8 @@
 from Zero3.battleSystemInterface import *
 
 class BattleSystem(BattleSystemInterface):
-    def __init__(self):
-        BattleSystemInterface.__init__(self)
+    def __init__(self,chapterType=None,chapterName=None):
+        BattleSystemInterface.__init__(self,chapterType,chapterName)
         #被选中的角色
         self.characterGetClick = None
         self.enemiesGetAttack = {}
@@ -66,11 +66,6 @@ class BattleSystem(BattleSystemInterface):
             DataTmp["dialogData"] = self.dialogData
             DataTmp["resultInfo"] = self.resultInfo
             saveConfig("Save/save.yaml",DataTmp)
-    #重新加载游戏进程
-    def initialize(self,screen,chapterType,chapterName):
-        self.chapterType = chapterType
-        self.chapterName = chapterName
-        self.process_data(screen)
     #从存档中加载游戏进程
     def load(self,screen):
         DataTmp = loadConfig("Save/save.yaml")
@@ -86,8 +81,9 @@ class BattleSystem(BattleSystemInterface):
         else:
             raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
         self.loadFromSave = True
-        self.process_data(screen)
-    def process_data(self,screen):
+        self.initialize(screen)
+    #加载游戏进程
+    def initialize(self,screen):
         #获取屏幕的尺寸
         self.window_x,self.window_y = screen.get_size()
         #生成标准文字渲染器

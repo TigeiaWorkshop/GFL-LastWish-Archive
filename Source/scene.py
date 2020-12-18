@@ -63,9 +63,9 @@ def dialogCreator(chapterType,chapterName,screen,part):
 def battle(chapterType,chapter_name,screen):
     #卸载音乐
     Zero.unloadBackgroundMusic()
-    BATTLE = Zero.BattleSystem()
+    BATTLE = Zero.BattleSystem(chapterType,chapter_name)
     if chapter_name != None:
-        BATTLE.initialize(screen,chapterType,chapter_name)
+        BATTLE.initialize(screen)
     else:
         BATTLE.load(screen)
     #战斗系统主要loop
@@ -78,8 +78,8 @@ def battle(chapterType,chapter_name,screen):
 def mapCreator(chapterType,chapter_name,screen):
     #卸载音乐
     Zero.unloadBackgroundMusic()
-    MAPCREATOR = Zero.mapCreator()
-    MAPCREATOR.initialize(screen,chapterType,chapter_name)
+    MAPCREATOR = Zero.mapCreator(chapterType,chapter_name)
+    MAPCREATOR.initialize(screen)
     #战斗系统主要loop
     while MAPCREATOR.isPlaying == True:
         MAPCREATOR.display(screen)

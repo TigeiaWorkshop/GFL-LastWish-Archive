@@ -7,7 +7,7 @@ from Zero3.skill import *
 
 #战斗系统接口，请勿实例化
 class BattleSystemInterface:
-    def __init__(self):
+    def __init__(self,chapterType,chapterName):
         #用于判断是否移动屏幕的参数
         self.__mouse_move_temp_x = -1
         self.__mouse_move_temp_y = -1
@@ -30,6 +30,9 @@ class BattleSystemInterface:
         self.dialogData = None
         #是否从存档中加载的数据-默认否
         self.loadFromSave = False
+        #章节名和种类
+        self.chapterName = chapterName
+        self.chapterType = chapterType
     def _create_map(self,MapData):
         self.MAP = MapObject(MapData,round(self.window_x/10),round(self.window_y/10))
     #检测手柄事件

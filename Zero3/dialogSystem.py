@@ -565,7 +565,7 @@ class DialogSystemDev:
                 elif self.UIContainerRight_kind == "background":
                     self.background_image_local_y -= 10
         #画上右侧的菜单选项
-        self.UIContainerRightButton.draw(screen,self.UIContainerRight.x)
+        self.UIContainerRightButton.display(screen,self.UIContainerRight.x)
         self.UIContainerRight.draw(screen)
         if self.UIContainerRight.x<self.window_x:
             #检测按钮
