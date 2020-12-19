@@ -17,12 +17,8 @@ class EnvImagesManagement:
         self.__ENV_IMAGE_DICT_DARK = None
         self.__ORNAMENTATION_IMAGE_DICT = {}
         self.__ORNAMENTATION_IMAGE_DICT_DARK = None
-        if bgImgName != None:
-            self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert()
-        else:
-            self.__BACKGROUND_IMAGE = pygame.Surface((1920,1080)).convert()
+        self.__BACKGROUND_IMAGE = pygame.image.load(os.path.join("Assets/image/dialog_background/",bgImgName)).convert() if bgImgName != None else None
         self.__MAP_SURFACE = None
-        self.__MAP_DREW_AREA = None
         cdef list all_images_needed = []
         for i in range(len(theMap)):
             for a in range(len(theMap[i])):
@@ -102,13 +98,13 @@ class EnvImagesManagement:
     #获取当前装饰物种类的数量
     def get_ornamentation_num(self,ornamentationType):
         return len(self.__ORNAMENTATION_IMAGE_DICT[ornamentationType])
-    def get_new_background_image(self,width,height):
-        self.__MAP_SURFACE = pygame.Surface((width,height),flags=pygame.SRCALPHA).convert_alpha()
+    def get_new_background_image(self,size):
+        if self.__BACKGROUND_IMAGE != None:
+            self.__MAP_SURFACE = resizeImg(self.__BACKGROUND_IMAGE,size)
+        else:
+            self.__MAP_SURFACE = pygame.Surface(size).convert()
         return self.__MAP_SURFACE
-    def set_map_drew_area(self,array):
-        self.__MAP_DREW_AREA = array
     def display_background_surface(self,screen):
-        screen.blit(resizeImg(self.__BACKGROUND_IMAGE,screen.get_size()),(0,0))
         screen.blit(self.__MAP_SURFACE,(0,0))
 
 #地图模块
@@ -127,6 +123,7 @@ class MapObject:
         for y in range(self.row):
             for x in range(len(mapData[y])):
                 self.mapData[y][x] = BlockObject(mapData[y][x],_BLOCKS_DATABASE[mapData[y][x]]["canPassThrough"])
+        self.mapData = numpy.asarray(self.mapData)
         self.ornamentationData = []
         for ornamentationType,itemsThatType in mapDataDic["ornamentation"].items():
             for itemKey,itemData in itemsThatType.items():
@@ -143,8 +140,8 @@ class MapObject:
                     self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,itemData["image"]))
         self.ornamentationData.sort()
         self.__lightArea = []
-        self.surface_width = int(perBlockWidth*0.9*((len(mapData)+len(mapData[0])+1)/2))
-        self.surface_height = int(perBlockWidth*0.45*((len(mapData)+len(mapData[0])+1)/2)+perBlockWidth)
+        self.surface_width = int(perBlockWidth*0.9*((self.row+self.column+1)/2))
+        self.surface_height = int(perBlockWidth*0.45*((self.row+self.column+1)/2)+perBlockWidth)
         self.__local_x = mapDataDic["local_x"]
         self.__local_y = mapDataDic["local_y"]
         self.ifProcessMap = True
@@ -156,8 +153,8 @@ class MapObject:
     def changePerBlockSize(self,newPerBlockWidth,newPerBlockHeight,window_x,window_y):
         self.addPos_x((self.perBlockWidth-newPerBlockWidth)*self.column/2)
         self.addPos_y((self.perBlockHeight-newPerBlockHeight)*self.row/2)
-        self.surface_width = round(newPerBlockWidth*0.9*((len(self.mapData)+len(self.mapData[0])+1)/2))
-        self.surface_height = round(newPerBlockWidth*0.45*((len(self.mapData)+len(self.mapData[0])+1)/2)+newPerBlockWidth)
+        self.surface_width = int(newPerBlockWidth*0.9*((self.row+self.column+1)/2))
+        self.surface_height = int(newPerBlockWidth*0.45*((self.row+self.column+1)/2)+newPerBlockWidth)
         self.perBlockWidth = round(newPerBlockWidth)
         self.newPerBlockHeight = round(newPerBlockHeight)
         _MAP_ENV_IMAGE.resize(self.perBlockWidth)
@@ -165,7 +162,7 @@ class MapObject:
             self.surface_width = window_x
         if self.surface_height < window_y:
             self.surface_height = window_y
-        self.__process_map(window_x,window_y)
+        self.__process_map((window_x,window_y))
     #获取local坐标
     def getPos(self):
         return self.__local_x,self.__local_y
@@ -215,7 +212,7 @@ class MapObject:
             screen_to_move_y = 0
         if self.ifProcessMap == True:
             self.ifProcessMap = False
-            self.__process_map(screen.get_width(),screen.get_height())
+            self.__process_map(screen.get_size())
         _MAP_ENV_IMAGE.display_background_surface(screen)
         return (screen_to_move_x,screen_to_move_y)
     #画上设施
@@ -345,36 +342,32 @@ class MapObject:
                 the_route.append((startX,startY))
         return the_route
     #重新绘制地图
-    def __process_map(self,int window_x,int window_y):
-        map_drew_area = []
+    def __process_map(self,window_size):
+        mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_size)
+        cdef int window_x = window_size[0]
+        cdef int window_y = window_size[1]
         cdef int screen_min = -self.perBlockWidth
-        mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_x,window_y)
         cdef (int, int) posTupleTemp
         cdef unsigned int y
         cdef unsigned int yRange = self.row
         cdef unsigned int x
         cdef unsigned int xRange = self.column
         cdef unsigned int anyBlockBlitThisLine
-        #快速定位需要开始展示画面的y轴
-        cdef unsigned int y_start = 0
-        cdef unsigned int x_start = 0
         #画出地图
-        for y in range(y_start,yRange):
+        for y in range(yRange):
             anyBlockBlitThisLine = 0
-            for x in range(x_start,xRange):
+            for x in range(xRange):
                 posTupleTemp = self.calPosInMap(x,y)
                 if screen_min<=posTupleTemp[0]<window_x and screen_min<=posTupleTemp[1]<window_y:
                     anyBlockBlitThisLine = 1
-                    map_drew_area.append([x,y])
                     if not self.isPosInLightArea(x,y):
                         mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,True),(posTupleTemp[0],posTupleTemp[1]))
                     else:
                         mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,False),(posTupleTemp[0],posTupleTemp[1]))
-                elif posTupleTemp[0]>=window_x or posTupleTemp[1]>=window_y:
+                elif posTupleTemp[0] >= window_x or posTupleTemp[1] >= window_y:
                     break
             if anyBlockBlitThisLine == 0 and posTupleTemp[1]>=window_y:
                 break
-        _MAP_ENV_IMAGE.set_map_drew_area(numpy.asarray(map_drew_area,dtype=numpy.int8))
     #计算在地图中的方块
     def calBlockInMap(self,int mouse_x,int mouse_y):
         cdef int guess_x = int(((mouse_x-self.__local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.__local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
@@ -403,7 +396,7 @@ class MapObject:
         }
     #计算光亮区域
     def calculate_darkness(self,characters_data):
-        cdef list lightArea = []
+        cpdef list lightArea = []
         cdef int x
         cdef int y
         for each_chara in characters_data:

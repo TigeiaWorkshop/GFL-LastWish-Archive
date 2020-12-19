@@ -97,11 +97,14 @@ class VedioInterface(threading.Thread):
 
 #视频片段展示模块--灵活，但不能保证帧数和音乐同步
 class VedioFrame(VedioInterface):
-    def __init__(self,path,unsigned int width,unsigned int height,loop=True,with_music=False,play_range=None):
+    def __init__(self,path,unsigned int width,unsigned int height,loop=True,with_music=False,play_range=None,volume=1):
         VedioInterface.__init__(self,path,width,height)
         self.loop = loop
         self.looped_times = 0
         self.bgm = loadAudioAsSound(path) if with_music else None
+        self.volume = volume
+        if self.volume != 1 and self.bgm != None:
+            self.bgm.set_volume(self.volume)
         self.bgm_channel = pygame.mixer.find_channel() if with_music else None
         self.start_point = play_range[0] if play_range != None else None
         self.end_point = play_range[1] if play_range != None else None
@@ -129,9 +132,10 @@ class VedioFrame(VedioInterface):
             with_music = True
         else:
             with_music = False
-        return VedioFrame(self._path,self._width,self._height,self.loop,with_music,(self.start_point,self.end_point))
+        return VedioFrame(self._path,self._width,self._height,self.loop,with_music,(self.start_point,self.end_point),self.volume)
     def set_volume(self,float value):
         if self.bgm != None:
+            self.volume = value
             self.bgm.set_volume(value)
 
 #视频播放系统模块--强制帧数和音乐同步，但不灵活

@@ -95,8 +95,7 @@ def mainMenu(screen):
         Zero.display.flip(True)
     
     #加载主菜单背景
-    videoCapture = Zero.VedioFrame("Assets/movie/SquadAR.mp4",window_x,window_y,True,True,(32,103))
-    videoCapture.set_volume(Zero.get_setting("Sound","background_music")/100.0)
+    videoCapture = Zero.VedioFrame("Assets/movie/SquadAR.mp4",window_x,window_y,True,True,(32,103),Zero.get_setting("Sound","background_music")/100.0)
 
     for i in range(250,0,-2):
         the_black.draw(screen)
