@@ -187,8 +187,7 @@ class mapCreator(BattleSystemInterface):
                         if self.object_to_put_down != None:
                             if self.object_to_put_down["type"] == "block":
                                 self.originalData["map"][block_get_click["y"]][block_get_click["x"]] = self.object_to_put_down["id"]
-                                self.MAP.mapData[block_get_click["y"]][block_get_click["x"]].update(self.object_to_put_down["id"],False)
-                                self.MAP.ifProcessMap = True
+                                self.MAP.update_block(block_get_click,self.object_to_put_down["id"])
                             elif self.object_to_put_down["type"] == "decoration":
                                 #查看当前位置是否有物品
                                 any_dec_replace_name = None

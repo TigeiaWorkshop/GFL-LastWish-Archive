@@ -10,7 +10,12 @@ import shutil
 #是否编译Source中的游戏本体
 compile_py_files_in_Source = False
 debug_c = False
+remove_old_pyd = True
 
+#删除旧的pyd文件
+if remove_old_pyd:
+    for path in glob.glob(r'Zero3/*.pyd'):
+        os.remove(path)
 #生成Zero引擎的c和pyd文件
 for path in glob.glob(r'Zero3/*.pyx'):
     setup(ext_modules=cythonize(path,show_all_warnings=True))
