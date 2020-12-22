@@ -11,6 +11,7 @@ import shutil
 compile_py_files_in_Source = False
 debug_c = False
 remove_old_pyd = True
+produce_html_files = False
 
 #删除旧的pyd文件
 if remove_old_pyd:
@@ -18,7 +19,7 @@ if remove_old_pyd:
         os.remove(path)
 #生成Zero引擎的c和pyd文件
 for path in glob.glob(r'Zero3/*.pyx'):
-    setup(ext_modules=cythonize(path,show_all_warnings=True))
+    setup(ext_modules=cythonize(path,show_all_warnings=True,annotate=produce_html_files))
     #删除Zero引擎的c文件
     if not debug_c:
         os.remove(path.replace(".pyx",".c"))

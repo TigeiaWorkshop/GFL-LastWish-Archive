@@ -432,7 +432,7 @@ class Doll:
         for y in range(self.y-self.max_effective_range,self.y+self.max_effective_range+1):
             if y < self.y:
                 for x in range(self.x-self.max_effective_range-(y-self.y),self.x+self.max_effective_range+(y-self.y)+1):
-                    if len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
+                    if theMap.row>y>=0 and theMap.column>x>=0:
                         if "far" in self.effective_range and self.effective_range["far"] != None and self.effective_range["far"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["far"][1]:
                             attacking_range["far"].append((x,y))
                         elif "middle" in self.effective_range and self.effective_range["middle"] != None and self.effective_range["middle"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["middle"][1]:
@@ -443,7 +443,7 @@ class Doll:
                 for x in range(self.x-self.max_effective_range+(y-self.y),self.x+self.max_effective_range-(y-self.y)+1):
                     if x == self.x and y == self.y:
                         pass
-                    elif len(theMap.mapData)>y>=0 and len(theMap.mapData[y])>x>=0:
+                    elif theMap.row>y>=0 and theMap.column>x>=0:
                         if "far" in self.effective_range and self.effective_range["far"] != None and self.effective_range["far"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["far"][1]:
                             attacking_range["far"].append((x,y))
                         elif "middle" in self.effective_range and self.effective_range["middle"] != None and self.effective_range["middle"][0] <= abs(x-self.x)+abs(y-self.y) <= self.effective_range["middle"][1]:

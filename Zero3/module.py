@@ -114,6 +114,8 @@ class DisplayController:
             pygame.display.update(rectangle)
     def set_caption(self,title):
         pygame.display.set_caption(title)
+    def set_icon(self,path):
+        pygame.display.set_icon(pygame.image.load(os.path.join(path)))
     def get_width(self):
         return get_setting("Screen_size_x")
     def get_height(self):
@@ -352,38 +354,6 @@ class ButtonWithFadeInOut(Button):
         self.img2 = self.img.copy()
         self.img.set_alpha(alphaWhenNotHovered)
 
-#输入管理组件
-class GameController:
-    def __init__(self,mouse_icon_width,speed,custom=False):
-        self.joystick = SingleJoystick()
-        if custom == True:
-            pygame.mouse.set_visible(False)
-            self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(mouse_icon_width),int(mouse_icon_width*1.3)))
-        else:
-            self.iconImg = None
-        self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
-        self.movingSpeed = speed
-    def display(self,screen=None):
-        self.joystick.update_device()
-        self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
-        if self.joystick.inputController != None:
-            if self.joystick.get_axis(0)>0.1 or self.joystick.get_axis(0)<-0.1:
-                self.mouse_x += int(self.movingSpeed*round(self.joystick.get_axis(0),1))
-            if self.joystick.get_axis(1)>0.1 or self.joystick.get_axis(1)<-0.1:
-                self.mouse_y += int(self.movingSpeed*round(self.joystick.get_axis(1),1))
-            pygame.mouse.set_pos((self.mouse_x,self.mouse_y))
-        if self.iconImg != None and screen != None:
-            screen.blit(self.iconImg,(self.mouse_x,self.mouse_y))
-    def get_event(self,pygame_events=None):
-        if pygame_events == None:
-            pygame_events = pygame.event.get()
-        for event in pygame_events:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and self.joystick.get_button(0) == 1:
-                return "comfirm"
-        return None
-    def get_pos(self):
-        return self.mouse_x,self.mouse_y
-
 #手柄控制组件
 class SingleJoystick:
     def __init__(self):
@@ -418,6 +388,38 @@ class SingleJoystick:
             return self.inputController.get_axis(buttonId)
         else:
             return 0
+
+#输入管理组件
+class GameController:
+    def __init__(self,mouse_icon_width,speed,custom=False):
+        self.joystick = SingleJoystick()
+        if custom == True:
+            pygame.mouse.set_visible(False)
+            self.iconImg = pygame.transform.scale(pygame.image.load(os.path.join("Assets/image/UI/","mouse_icon.png")).convert_alpha(),(int(mouse_icon_width),int(mouse_icon_width*1.3)))
+        else:
+            self.iconImg = None
+        self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
+        self.movingSpeed = speed
+    def display(self,screen=None):
+        self.joystick.update_device()
+        self.mouse_x,self.mouse_y = pygame.mouse.get_pos()
+        if self.joystick.inputController != None:
+            if self.joystick.get_axis(0)>0.1 or self.joystick.get_axis(0)<-0.1:
+                self.mouse_x += int(self.movingSpeed*round(self.joystick.get_axis(0),1))
+            if self.joystick.get_axis(1)>0.1 or self.joystick.get_axis(1)<-0.1:
+                self.mouse_y += int(self.movingSpeed*round(self.joystick.get_axis(1),1))
+            pygame.mouse.set_pos((self.mouse_x,self.mouse_y))
+        if self.iconImg != None and screen != None:
+            screen.blit(self.iconImg,(self.mouse_x,self.mouse_y))
+    def get_event(self,pygame_events=None):
+        if pygame_events == None:
+            pygame_events = pygame.event.get()
+        for event in pygame_events:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and self.joystick.get_button(0) == 1:
+                return "comfirm"
+        return None
+    def get_pos(self):
+        return self.mouse_x,self.mouse_y
 
 #控制器输入组件初始化
 controller = GameController(get_setting("MouseIconWidth"),get_setting("MouseMoveSpeed"))

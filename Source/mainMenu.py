@@ -1,6 +1,5 @@
 # cython: language_level=3
 from Source.scene import *
-import pygame
 import os
 
 def mainMenu(screen):
@@ -10,7 +9,6 @@ def mainMenu(screen):
     Zero.set_standard_font_size(int(window_x/38),"medium")
     #修改控制台的位置
     Zero.console.set_pos(window_x*0.1,window_y*0.8)
-    game_title = Zero.get_lang('GameTitle')
     main_menu_txt = Zero.get_lang('MainMenu')
     chapter_select = Zero.get_lang('Chapter')
     #选项模块
@@ -59,9 +57,8 @@ def mainMenu(screen):
     del txt_location,font_size2,main_menu_txt_start_height0,main_menu_txt_start_height1,chapter_select_txt_start_height,enabled_option
 
     # 创建窗口
-    icon_img = Zero.loadImg("Assets/image/UI/icon.png")
-    pygame.display.set_icon(icon_img)
-    pygame.display.set_caption(game_title) #窗口标题
+    Zero.display.set_icon("Assets/image/UI/icon.png")
+    Zero.display.set_caption(Zero.get_lang('GameTitle')) #窗口标题
     
     #数值初始化
     cover_alpha = 0
@@ -69,10 +66,8 @@ def mainMenu(screen):
     #关卡选择的封面
     cover_img = Zero.loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
     #音效
-    click_button_sound = pygame.mixer.Sound("Assets/sound/ui/main_menu_click_button.ogg")
-    click_button_sound.set_volume(Zero.get_setting("Sound","sound_effects")/100.0)
-    hover_on_button_sound = pygame.mixer.Sound("Assets/sound/ui/main_menu_hover_on_button.ogg")
-    hover_on_button_sound.set_volume(Zero.get_setting("Sound","sound_effects")/100.0)
+    click_button_sound = Zero.loadSound("Assets/sound/ui/main_menu_click_button.ogg",Zero.get_setting("Sound","sound_effects")/100.0)
+    hover_on_button_sound = Zero.loadSound("Assets/sound/ui/main_menu_hover_on_button.ogg",Zero.get_setting("Sound","sound_effects")/100.0)
     hover_sound_play_on = None
     last_hover_sound_play_on = None
 
@@ -152,7 +147,7 @@ def mainMenu(screen):
             hover_on_button_sound.set_volume(Zero.get_setting("Sound","sound_effects")/100.0)
             videoCapture.set_volume(Zero.get_setting("Sound","background_music")/100.0)
         
-        events = pygame.event.get()
+        events = Zero.get_pygame_events()
         #展示控制台
         Zero.console.display(screen,events)
 

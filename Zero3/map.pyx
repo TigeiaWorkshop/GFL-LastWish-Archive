@@ -21,10 +21,10 @@ class EnvImagesManagement:
         self.__BACKGROUND_SURFACE = None
         self.__MAP_BUFFER_SURFACE = None
         cdef list all_images_needed = []
-        for i in range(len(theMap)):
-            for a in range(len(theMap[i])):
-                if theMap[i][a].name not in all_images_needed:
-                    all_images_needed.append(theMap[i][a].name)
+        for y in range(len(theMap)):
+            for x in range(len(theMap[y])):
+                if theMap[y][x].name not in all_images_needed:
+                    all_images_needed.append(theMap[y][x].name)
         #加载背景图片
         for fileName in all_images_needed:
             try:
@@ -117,16 +117,16 @@ class MapObject:
         self.darkMode = mapDataDic["darkMode"]
         self.perBlockWidth = perBlockWidth
         self.perBlockHeight = perBlockHeight
-        mapData = mapDataDic["map"]
-        self.row = len(mapData)
-        self.column = len(mapData[0])
         #初始化地图数据
-        self.mapData = mapData
+        self.__MapData = mapDataDic["map"]
         self.backgroundImageName = mapDataDic["backgroundImage"]
-        for y in range(self.row):
-            for x in range(len(mapData[y])):
-                self.mapData[y][x] = BlockObject(mapData[y][x],_BLOCKS_DATABASE[mapData[y][x]]["canPassThrough"])
-        self.mapData = numpy.asarray(self.mapData)
+        for y in range(len(self.__MapData)):
+            for x in range(len(self.__MapData[y])):
+                item = self.__MapData[y][x]
+                self.__MapData[y][x] = BlockObject(item,_BLOCKS_DATABASE[item]["canPassThrough"])
+        self.__MapData = numpy.asarray(self.__MapData)
+        self.row,self.column = self.__MapData.shape
+        #使用numpy的shape决定self.row和self.column
         self.ornamentationData = []
         for ornamentationType,itemsThatType in mapDataDic["ornamentation"].items():
             for itemKey,itemData in itemsThatType.items():
@@ -152,7 +152,7 @@ class MapObject:
         self.load_env_img()
     def load_env_img(self):
         global _MAP_ENV_IMAGE
-        _MAP_ENV_IMAGE = EnvImagesManagement(self.mapData,self.ornamentationData,self.backgroundImageName,self.perBlockWidth,self.darkMode)
+        _MAP_ENV_IMAGE = EnvImagesManagement(self.__MapData,self.ornamentationData,self.backgroundImageName,self.perBlockWidth,self.darkMode)
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,newPerBlockHeight,window_x,window_y):
         self.addPos_x((self.perBlockWidth-newPerBlockWidth)*self.column/2)
@@ -237,9 +237,9 @@ class MapObject:
                     if screen_min<=posTupleTemp[0]<window_x and screen_min<=posTupleTemp[1]<window_y:
                         anyBlockBlitThisLine = 1
                         if not self.isPosInLightArea(x,y):
-                            mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,True),(posTupleTemp[0],posTupleTemp[1]))
+                            mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.__MapData[y][x].name,True),(posTupleTemp[0],posTupleTemp[1]))
                         else:
-                            mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,False),(posTupleTemp[0],posTupleTemp[1]))
+                            mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.__MapData[y][x].name,False),(posTupleTemp[0],posTupleTemp[1]))
                     elif posTupleTemp[0] >= window_x or posTupleTemp[1] >= window_y:
                         break
                 if anyBlockBlitThisLine == 0 and posTupleTemp[1] >= window_y:
@@ -250,7 +250,7 @@ class MapObject:
             for y in range(yRange):
                 for x in range(xRange):
                     posTupleTemp = self.calPosInMap(x,y)
-                    mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.mapData[y][x].name,False),(posTupleTemp[0]-self.__local_x,posTupleTemp[1]-self.__local_y))
+                    mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.__MapData[y][x].name,False),(posTupleTemp[0]-self.__local_x,posTupleTemp[1]-self.__local_y))
     #把装饰物画到屏幕上
     def display_ornamentation(self,screen,characters_data,sangvisFerris_data):
         cdef (int,int) thePosInMap
@@ -320,77 +320,11 @@ class MapObject:
                     screen.blit(imgToBlit,(thePosInMap[0]+offSetX,thePosInMap[1]-offSetY))
     #更新方块
     def update_block(self,pos,name):
-        self.mapData[pos["y"]][pos["x"]].update(name,_BLOCKS_DATABASE[name]["canPassThrough"])
+        self.__MapData[pos["y"]][pos["x"]].update(name,_BLOCKS_DATABASE[name]["canPassThrough"])
         self.__needUpdateMapSurface = True
-    #寻路功能
-    def findPath(self,startPosition,endPosition,friend_data_dict,enemies_data_dict,routeLen=None,ignoreEnemyCharacters=[]):
-        cdef unsigned int startX,startY,endX,endY
-        #检测起点
-        if isinstance(startPosition,(list,tuple)):
-            startX = startPosition[0]
-            startY = startPosition[1]
-        elif isinstance(startPosition,dict):
-            startX = startPosition["x"]
-            startY = startPosition["y"]
-        else:
-            startX = startPosition.x
-            startY = startPosition.y
-        #检测终点
-        if isinstance(endPosition,(list,tuple)):
-            endX = endPosition[0]
-            endY = endPosition[1]
-        elif isinstance(endPosition,dict):
-            endX = endPosition["x"]
-            endY = endPosition["y"]
-        else:
-            endX = endPosition.x
-            endY = endPosition.y
-        #建立地图
-        map2d = numpy.zeros((self.column,self.row), dtype=numpy.int8)
-        #历遍地图，设置障碍方块
-        """
-        for y in range(theMap.row):
-            for x in range(theMap.column):
-                if theMap.mapData[y][x].canPassThrough == False:
-                    map2d[x][y]=1
-        """
-        #历遍设施，设置障碍方块
-        for item in self.ornamentationData:
-            if item.type == "obstacle" or item.type == "campfire":
-                map2d[item.x][item.y]=1
-        #如果终点有我方角色，则不允许
-        for key,value in friend_data_dict.items():
-            if value.x == endX and value.y == endY:
-                return []
-        #历遍所有角色，将角色的坐标点设置为障碍方块
-        for key,value in enemies_data_dict.items():
-            if key != ignoreEnemyCharacters:
-                map2d[value.x][value.y] = 1
-        #如果终点是障碍物
-        if map2d[endX][endY] != 0:
-            return []
-        aStar=AStar(map2d,Point(startX,startY),Point(endX,endY))
-        #开始寻路
-        cdef list pathList = aStar.start()
-        cdef list the_route = []
-        #遍历路径点,讲指定数量的点放到路径列表中
-        if len(pathList) > 0:
-            if routeLen != None and len(pathList) < routeLen or routeLen == None:
-                routeLen = len(pathList)
-            for i in range(routeLen):
-                if Point(startX+1,startY) in pathList and (startX+1,startY) not in the_route:
-                    startX+=1
-                elif Point(startX-1,startY) in pathList and (startX-1,startY) not in the_route:
-                    startX-=1
-                elif Point(startX,startY+1) in pathList and (startX,startY+1) not in the_route:
-                    startY+=1
-                elif Point(startX,startY-1) in pathList and (startX,startY-1) not in the_route:
-                    startY-=1
-                else:
-                    #快速跳出
-                    break
-                the_route.append((startX,startY))
-        return the_route
+    #是否角色能通过该方块
+    def ifBlockCanPassThrough(self,pos):
+        return self.__MapData[pos["y"]][pos["x"]].canPassThrough
     #计算在地图中的方块
     def calBlockInMap(self,int mouse_x,int mouse_y):
         cdef int guess_x = int(((mouse_x-self.__local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.__local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
@@ -465,6 +399,184 @@ class MapObject:
             return True
         else:
             return numpy.any(numpy.equal(self.__lightArea,[x,y]).all(1))
+    #以下是A星寻路功能
+    def findPath(self,startPosition,endPosition,friend_data_dict,enemies_data_dict,routeLen=None,ignoreEnemyCharacters=[]):
+        cdef unsigned int startX,startY,endX,endY
+        #检测起点
+        if isinstance(startPosition,(list,tuple)):
+            startX = startPosition[0]
+            startY = startPosition[1]
+        elif isinstance(startPosition,dict):
+            startX = startPosition["x"]
+            startY = startPosition["y"]
+        else:
+            startX = startPosition.x
+            startY = startPosition.y
+        #检测终点
+        if isinstance(endPosition,(list,tuple)):
+            endX = endPosition[0]
+            endY = endPosition[1]
+        elif isinstance(endPosition,dict):
+            endX = endPosition["x"]
+            endY = endPosition["y"]
+        else:
+            endX = endPosition.x
+            endY = endPosition.y
+        #建立寻路地图
+        self.map2d = numpy.zeros((self.column,self.row), dtype=numpy.int8)
+        #历遍地图，设置障碍方块
+        """
+        for y in range(theMap.row):
+            for x in range(theMap.column):
+                if theMap.mapData[y][x].canPassThrough == False:
+                    self.map2d[x][y]=1
+        """
+        #历遍设施，设置障碍方块
+        for item in self.ornamentationData:
+            if item.type == "obstacle" or item.type == "campfire":
+                self.map2d[item.x][item.y]=1
+        #如果终点有我方角色，则不允许
+        for key,value in friend_data_dict.items():
+            if value.x == endX and value.y == endY:
+                return []
+        #历遍所有角色，将角色的坐标点设置为障碍方块
+        for key,value in enemies_data_dict.items():
+            if key != ignoreEnemyCharacters:
+                self.map2d[value.x][value.y] = 1
+        #如果终点是障碍物
+        if self.map2d[endX][endY] != 0:
+            return []
+        # 开启表
+        self.openList = []
+        # 关闭表
+        self.closeList = []
+        # 起点终点
+        self.startPoint = Point(startX,startY)
+        self.endPoint = Point(endX,endY)
+        # 可行走标记
+        self.passTag = 0
+        #开始寻路
+        cdef list pathList = self.__startFindingPath()
+        cdef list the_route = []
+        #遍历路径点,讲指定数量的点放到路径列表中
+        if len(pathList) > 0:
+            if routeLen != None and len(pathList) < routeLen or routeLen == None:
+                routeLen = len(pathList)
+            for i in range(routeLen):
+                if Point(startX+1,startY) in pathList and (startX+1,startY) not in the_route:
+                    startX+=1
+                elif Point(startX-1,startY) in pathList and (startX-1,startY) not in the_route:
+                    startX-=1
+                elif Point(startX,startY+1) in pathList and (startX,startY+1) not in the_route:
+                    startY+=1
+                elif Point(startX,startY-1) in pathList and (startX,startY-1) not in the_route:
+                    startY-=1
+                else:
+                    #快速跳出
+                    break
+                the_route.append((startX,startY))
+        return the_route
+    def __getMinNode(self):
+        """
+        获得OpenList中F值最小的节点
+        :return: Node
+        """
+        currentNode = self.openList[0]
+        for node in self.openList:
+            if node.g + node.h < currentNode.g + currentNode.h:
+                currentNode = node
+        return currentNode
+    def __pointInCloseList(self, point):
+        for node in self.closeList:
+            if node.point == point:
+                return True
+        return False
+    def __pointInOpenList(self, point):
+        for node in self.openList:
+            if node.point == point:
+                return node
+        return None
+    def __endPointInCloseList(self):
+        for node in self.openList:
+            if node.point == self.endPoint:
+                return node
+        return None
+    def __searchNear(self, minF, offSetX, offSetY):
+        """
+        搜索节点周围的点
+        :param minF:F值最小的节点
+        :param offSetX:坐标偏移量
+        :param offSetY:
+        :return:
+        """
+        # 越界检测
+        mapRow,mapCol = self.map2d.shape
+        if minF.point.x + offSetX < 0 or minF.point.x + offSetX > mapCol - 1 or minF.point.y + offSetY < 0 or minF.point.y + offSetY > mapRow - 1:
+            return
+        # 如果是障碍，就忽略
+        if self.map2d[minF.point.x + offSetX][minF.point.y + offSetY] != self.passTag:
+            return
+        # 如果在关闭表中，就忽略
+        currentPoint = Point(minF.point.x + offSetX, minF.point.y + offSetY)
+        if self.__pointInCloseList(currentPoint):
+            return
+        # 设置单位花费
+        if offSetX == 0 or offSetY == 0:
+            step = 10
+        else:
+            step = 14
+        # 如果不再openList中，就把它加入OpenList
+        currentNode = self.__pointInOpenList(currentPoint)
+        if not currentNode:
+            currentNode = Node(currentPoint, self.endPoint, g=minF.g + step)
+            currentNode.father = minF
+            self.openList.append(currentNode)
+            return
+        # 如果在openList中，判断minF到当前点的G是否更小
+        if minF.g + step < currentNode.g:  # 如果更小，就重新计算g值，并且改变father
+            currentNode.g = minF.g + step
+            currentNode.father = minF
+    def __startFindingPath(self):
+        """
+        开始寻路
+        :return: None或Point列表（路径）
+        """
+        # 判断寻路终点是否是障碍
+        mapRow,mapCol = self.map2d.shape
+        if self.endPoint.y < 0 or self.endPoint.y >= mapRow or self.endPoint.x < 0 or self.endPoint.x >= mapCol or self.map2d[self.endPoint.x][self.endPoint.y] != self.passTag:
+            return []
+        # 1.将起点放入开启列表
+        startNode = Node(self.startPoint, self.endPoint)
+        self.openList.append(startNode)
+        # 2.主循环逻辑
+        while True:
+            # 找到F值最小的点
+            minF = self.__getMinNode()
+            # 把这个点加入closeList中，并且在openList中删除它
+            self.closeList.append(minF)
+            self.openList.remove(minF)
+            # 判断这个节点的上下左右节点
+            self.__searchNear(minF, 0, -1)
+            self.__searchNear(minF, 0, 1)
+            self.__searchNear(minF, -1, 0)
+            self.__searchNear(minF, 1, 0)
+            # 判断是否终止
+            point = self.__endPointInCloseList()
+            if point:  # 如果终点在关闭表中，就返回结果
+                # print("关闭表中")
+                cPoint = point
+                pathList = []
+                while True:
+                    if cPoint.father:
+                        pathList.append(cPoint.point)
+                        cPoint = cPoint.father
+                    else:
+                        # print(pathList)
+                        # print(list(reversed(pathList)))
+                        # print(pathList.reverse())
+                        return list(reversed(pathList))
+            if len(self.openList) == 0:
+                return []
 
 #方块类
 class BlockObject:
@@ -488,6 +600,7 @@ class OrnamentationObject:
     def get_pos(self):
         return self.x,self.y
 
+#点
 class Point:
     """
     表示一个点
@@ -500,140 +613,10 @@ class Point:
             return True
         return False
 
-class AStar:
-    class Node:  # 描述AStar算法中的节点数据
-        def __init__(self, point, endPoint, g=0):
-            self.point = point  # 自己的坐标
-            self.father = None  # 父节点
-            self.g = g  # g值，g值在用到的时候会重新算
-            self.h = (abs(endPoint.x - point.x) + abs(endPoint.y - point.y)) * 10  # 计算h值
-    def __init__(self, map2d, startPoint, endPoint, passTag=0):
-        """
-        构造AStar算法的启动条件
-        :param map2d: Array2D类型的寻路数组
-        :param startPoint: Point或二元组类型的寻路起点
-        :param endPoint: Point或二元组类型的寻路终点
-        :param passTag: int类型的可行走标记（若地图数据!=passTag即为障碍）
-        """
-        # 开启表
-        self.openList = []
-        # 关闭表
-        self.closeList = []
-        # 寻路地图
-        self.map2d = map2d
-        # 起点终点
-        if isinstance(startPoint, Point) and isinstance(endPoint, Point):
-            self.startPoint = startPoint
-            self.endPoint = endPoint
-        else:
-            self.startPoint = Point(*startPoint)
-            self.endPoint = Point(*endPoint)
-
-        # 可行走标记
-        self.passTag = passTag
-
-    def getMinNode(self):
-        """
-        获得OpenList中F值最小的节点
-        :return: Node
-        """
-        currentNode = self.openList[0]
-        for node in self.openList:
-            if node.g + node.h < currentNode.g + currentNode.h:
-                currentNode = node
-        return currentNode
-
-    def pointInCloseList(self, point):
-        for node in self.closeList:
-            if node.point == point:
-                return True
-        return False
-
-    def pointInOpenList(self, point):
-        for node in self.openList:
-            if node.point == point:
-                return node
-        return None
-
-    def endPointInCloseList(self):
-        for node in self.openList:
-            if node.point == self.endPoint:
-                return node
-        return None
-
-    def searchNear(self, minF, offSetX, offSetY):
-        """
-        搜索节点周围的点
-        :param minF:F值最小的节点
-        :param offSetX:坐标偏移量
-        :param offSetY:
-        :return:
-        """
-        # 越界检测
-        mapRow,mapCol = self.map2d.shape
-        if minF.point.x + offSetX < 0 or minF.point.x + offSetX > mapCol - 1 or minF.point.y + offSetY < 0 or minF.point.y + offSetY > mapRow - 1:
-            return
-        # 如果是障碍，就忽略
-        if self.map2d[minF.point.x + offSetX][minF.point.y + offSetY] != self.passTag:
-            return
-        # 如果在关闭表中，就忽略
-        currentPoint = Point(minF.point.x + offSetX, minF.point.y + offSetY)
-        if self.pointInCloseList(currentPoint):
-            return
-        # 设置单位花费
-        if offSetX == 0 or offSetY == 0:
-            step = 10
-        else:
-            step = 14
-        # 如果不再openList中，就把它加入OpenList
-        currentNode = self.pointInOpenList(currentPoint)
-        if not currentNode:
-            currentNode = AStar.Node(currentPoint, self.endPoint, g=minF.g + step)
-            currentNode.father = minF
-            self.openList.append(currentNode)
-            return
-        # 如果在openList中，判断minF到当前点的G是否更小
-        if minF.g + step < currentNode.g:  # 如果更小，就重新计算g值，并且改变father
-            currentNode.g = minF.g + step
-            currentNode.father = minF
-    def start(self):
-        """
-        开始寻路
-        :return: None或Point列表（路径）
-        """
-        # 判断寻路终点是否是障碍
-        mapRow,mapCol = self.map2d.shape
-        if self.endPoint.y < 0 or self.endPoint.y >= mapRow or self.endPoint.x < 0 or self.endPoint.x >= mapCol or self.map2d[self.endPoint.x][self.endPoint.y] != self.passTag:
-            return []
-        # 1.将起点放入开启列表
-        startNode = AStar.Node(self.startPoint, self.endPoint)
-        self.openList.append(startNode)
-        # 2.主循环逻辑
-        while True:
-            # 找到F值最小的点
-            minF = self.getMinNode()
-            # 把这个点加入closeList中，并且在openList中删除它
-            self.closeList.append(minF)
-            self.openList.remove(minF)
-            # 判断这个节点的上下左右节点
-            self.searchNear(minF, 0, -1)
-            self.searchNear(minF, 0, 1)
-            self.searchNear(minF, -1, 0)
-            self.searchNear(minF, 1, 0)
-            # 判断是否终止
-            point = self.endPointInCloseList()
-            if point:  # 如果终点在关闭表中，就返回结果
-                # print("关闭表中")
-                cPoint = point
-                pathList = []
-                while True:
-                    if cPoint.father:
-                        pathList.append(cPoint.point)
-                        cPoint = cPoint.father
-                    else:
-                        # print(pathList)
-                        # print(list(reversed(pathList)))
-                        # print(pathList.reverse())
-                        return list(reversed(pathList))
-            if len(self.openList) == 0:
-                return []
+# 描述AStar算法中的节点数据
+class Node:
+    def __init__(self, point, endPoint, g=0):
+        self.point = point  # 自己的坐标
+        self.father = None  # 父节点
+        self.g = g  # g值，g值在用到的时候会重新算
+        self.h = (abs(endPoint.x - point.x) + abs(endPoint.y - point.y)) * 10  # 计算h值

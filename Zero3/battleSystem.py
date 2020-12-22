@@ -685,11 +685,11 @@ class BattleSystem(BattleSystemInterface):
                                     for y in range(block_get_click["y"]-self.characters_data[self.characterGetClick].attack_range+1,block_get_click["y"]+self.characters_data[self.characterGetClick].attack_range):
                                         if y < block_get_click["y"]:
                                             for x in range(block_get_click["x"]-self.characters_data[self.characterGetClick].attack_range-(y-block_get_click["y"])+1,block_get_click["x"]+self.characters_data[self.characterGetClick].attack_range+(y-block_get_click["y"])):
-                                                if self.MAP.mapData[y][x].canPassThrough == True:
+                                                if self.MAP.ifBlockCanPassThrough({"x":x,"y":y}):
                                                     the_attacking_range_area.append([x,y])
                                         else:
                                             for x in range(block_get_click["x"]-self.characters_data[self.characterGetClick].attack_range+(y-block_get_click["y"])+1,block_get_click["x"]+self.characters_data[self.characterGetClick].attack_range-(y-block_get_click["y"])):
-                                                if self.MAP.mapData[y][x].canPassThrough == True:
+                                                if self.MAP.ifBlockCanPassThrough({"x":x,"y":y}):
                                                     the_attacking_range_area.append([x,y])
                                     break
                             self.enemiesGetAttack = {}
@@ -716,7 +716,7 @@ class BattleSystem(BattleSystemInterface):
                             for y in range(self.characters_data[self.characterGetClick].y-self.characters_data[self.characterGetClick].max_skill_range,self.characters_data[self.characterGetClick].y+self.characters_data[self.characterGetClick].max_skill_range+1):
                                 if y < self.characters_data[self.characterGetClick].y:
                                     for x in range(self.characters_data[self.characterGetClick].x-self.characters_data[self.characterGetClick].max_skill_range-(y-self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].x+self.characters_data[self.characterGetClick].max_skill_range+(y-self.characters_data[self.characterGetClick].y)+1):
-                                        if len(self.MAP.mapData)>y>=0 and len(self.MAP.mapData[y])>x>=0:
+                                        if self.MAP.row>y>=0 and self.MAP.column>x>=0:
                                             if "far" in self.characters_data[self.characterGetClick].skill_effective_range and self.characters_data[self.characterGetClick].skill_effective_range["far"] != None and self.characters_data[self.characterGetClick].skill_effective_range["far"][0] <= abs(x-self.characters_data[self.characterGetClick].x)+abs(y-self.characters_data[self.characterGetClick].y) <= self.characters_data[self.characterGetClick].skill_effective_range["far"][1]:
                                                 skill_range["far"].append([x,y])
                                             elif "middle" in self.characters_data[self.characterGetClick].skill_effective_range and self.characters_data[self.characterGetClick].skill_effective_range["middle"] != None and self.characters_data[self.characterGetClick].skill_effective_range["middle"][0] <= abs(x-self.characters_data[self.characterGetClick].x)+abs(y-self.characters_data[self.characterGetClick].y) <= self.characters_data[self.characterGetClick].skill_effective_range["middle"][1]:
@@ -727,7 +727,7 @@ class BattleSystem(BattleSystemInterface):
                                     for x in range(self.characters_data[self.characterGetClick].x-self.characters_data[self.characterGetClick].max_skill_range+(y-self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].x+self.characters_data[self.characterGetClick].max_skill_range-(y-self.characters_data[self.characterGetClick].y)+1):
                                         if x == self.characters_data[self.characterGetClick].x and y == self.characters_data[self.characterGetClick].y:
                                             pass
-                                        elif len(self.MAP.mapData)>y>=0 and len(self.MAP.mapData[y])>x>=0:
+                                        elif self.MAP.row>y>=0 and self.MAP.column>x>=0:
                                             if "far" in self.characters_data[self.characterGetClick].skill_effective_range and self.characters_data[self.characterGetClick].skill_effective_range["far"] != None and self.characters_data[self.characterGetClick].skill_effective_range["far"][0] <= abs(x-self.characters_data[self.characterGetClick].x)+abs(y-self.characters_data[self.characterGetClick].y) <= self.characters_data[self.characterGetClick].skill_effective_range["far"][1]:
                                                 skill_range["far"].append([x,y])
                                             elif "middle" in self.characters_data[self.characterGetClick].skill_effective_range and self.characters_data[self.characterGetClick].skill_effective_range["middle"] != None and self.characters_data[self.characterGetClick].skill_effective_range["middle"][0] <= abs(x-self.characters_data[self.characterGetClick].x)+abs(y-self.characters_data[self.characterGetClick].y) <= self.characters_data[self.characterGetClick].skill_effective_range["middle"][1]:
@@ -745,11 +745,11 @@ class BattleSystem(BattleSystemInterface):
                                     for y in range(block_get_click["y"]-self.characters_data[self.characterGetClick].skill_cover_range,block_get_click["y"]+self.characters_data[self.characterGetClick].skill_cover_range):
                                         if y < block_get_click["y"]:
                                             for x in range(block_get_click["x"]-self.characters_data[self.characterGetClick].skill_cover_range-(y-block_get_click["y"])+1,block_get_click["x"]+self.characters_data[self.characterGetClick].skill_cover_range+(y-block_get_click["y"])):
-                                                if len(self.MAP.mapData)>y>=0 and len(self.MAP.mapData[y])>x>=0 and self.MAP.mapData[y][x].canPassThrough == True:
+                                                if self.MAP.row>y>=0 and self.MAP.column>x>=0 and self.MAP.ifBlockCanPassThrough({"x":x,"y":y}):
                                                     the_skill_cover_area.append([x,y])
                                         else:
                                             for x in range(block_get_click["x"]-self.characters_data[self.characterGetClick].skill_cover_range+(y-block_get_click["y"])+1,block_get_click["x"]+self.characters_data[self.characterGetClick].skill_cover_range-(y-block_get_click["y"])):
-                                                if len(self.MAP.mapData)>y>=0 and len(self.MAP.mapData[y])>x>=0 and self.MAP.mapData[y][x].canPassThrough == True:
+                                                if self.MAP.row>y>=0 and self.MAP.column>x>=0 and self.MAP.ifBlockCanPassThrough({"x":x,"y":y}):
                                                     the_skill_cover_area.append([x,y])
                                     self.areaDrawColorBlock["orange"] = the_skill_cover_area
                                     self.skill_target = skill(self.characterGetClick,{"x":block_get_click["x"],"y":block_get_click["y"]},the_skill_cover_area,self.sangvisFerris_data,self.characters_data)
