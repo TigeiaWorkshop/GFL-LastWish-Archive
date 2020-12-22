@@ -1,20 +1,24 @@
 # cython: language_level=3
 import glob
-import math
 import random
 from sys import exit
-import platform
 from Zero3.font import *
 import time
 from tkinter import Tk
-from PIL import Image
 
-#图形接口
-class ImageInterface:
-    def __init__(self,img,x,y,width,height):
+#游戏对象接口
+class GameObject:
+    def __init__(self,img,x,y):
         self.img = img
         self.x = x
         self.y = y
+    def get_pos(self):
+        return self.x,self.y
+
+#图形接口
+class ImageInterface(GameObject):
+    def __init__(self,img,x,y,width,height):
+        GameObject.__init__(self,img,x,y)
         self.width = width
         self.height = height
 
@@ -294,13 +298,12 @@ class ApSystem:
             self.coolDown += 1
 
 #按钮
-class Button:
+class Button(GameObject):
     def __init__(self,path,x,y):
+        GameObject.__init__(self,None,x,y)
         self.img = pygame.image.load(os.path.join(path)).convert_alpha() if isinstance(path,str) else path
         self.img2 = None
         self.hoverEventTriggered = False
-        self.x = x
-        self.y = y
     def setHoverImg(self,img):
         self.img2 = img
     def display(self,screen,local_x=0,local_y=0):

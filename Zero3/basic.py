@@ -1,5 +1,6 @@
 # cython: language_level=3
 from Zero3.module import *
+from PIL import Image
 
 #图片加载模块：接收图片路径,长,高,返回对应图片
 def loadImg(path,width=None,height=None,setAlpha=None,ifConvertAlpha=True):

@@ -9,7 +9,6 @@ class mapCreator(BattleSystemInterface):
     def initialize(self,screen):
         #屏幕尺寸
         self.window_x,self.window_y = screen.get_size()
-        self.blocks_setting = loadConfig("Data/blocks.yaml","blocks")
         self.decorations_setting = loadConfig("Data/decorations.yaml","decorations")
         #载入地图数据
         loadData = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))

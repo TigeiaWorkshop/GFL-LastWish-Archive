@@ -4,6 +4,7 @@ from Zero3.dialogSystem import *
 from Zero3.battleSystem import *
 from Zero3.mapCreator import *
 from Zero3.movie import *
+import platform
 
 print("Zero Engine 3 (pygame {}, python {})".format(pygame.version.ver,platform.python_version()))
 print("Hello from the zero engine community. http://tjygf.com/forum.php")
