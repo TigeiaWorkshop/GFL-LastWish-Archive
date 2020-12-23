@@ -26,8 +26,4 @@ def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,ch
             the_damage = randomInt(characters_data[characterName].min_damage,characters_data[characterName].max_damage)
             sangvisFerris_data[skill_target].decreaseHp(the_damage)
             damage_do_to_character[skill_target] = fontRender("-"+str(the_damage),"red",25)
-        return {
-            "characters_data":characters_data,
-            "sangvisFerris_data":sangvisFerris_data,
-            "damage_do_to_character":damage_do_to_character
-        }
+        return damage_do_to_character

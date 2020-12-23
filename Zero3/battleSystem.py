@@ -586,6 +586,7 @@ class BattleSystem(BattleSystemInterface):
                         self.characters_data[self.characterGetClick].setFlipBasedPos(self.sangvisFerris_data[self.skill_target])
                     self.characters_data[self.characterGetClick].reduce_action_point(8)
                     self.characters_data[self.characterGetClick].playSound("skill")
+                    self.characters_data[self.characterGetClick].set_action("skill",False)
                     self.isWaiting = False
                     self.NotDrawRangeBlocks = True
                     skill_range = None
@@ -865,27 +866,18 @@ class BattleSystem(BattleSystemInterface):
                             else:
                                 self.damage_do_to_characters[each_enemy] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
                     elif self.characters_data[self.characterGetClick].get_imgId("attack") == self.characters_data[self.characterGetClick].get_imgNum("attack")-1:
-                        self.characters_data[self.characterGetClick].reset_imgId("attack")
                         self.characters_data[self.characterGetClick].current_bullets -= 1
                         self.isWaiting = True
                         self.characterGetClick = None
                         self.action_choice = None
                 elif self.action_choice == "skill":
-                    self.characters_data[self.characterGetClick].draw(screen,self.MAP,False)
                     if self.characters_data[self.characterGetClick].get_imgId("skill") == self.characters_data[self.characterGetClick].get_imgNum("skill")-2:
-                        temp_dic = skill(self.characterGetClick,None,None,self.sangvisFerris_data,self.characters_data,"react",self.skill_target,self.damage_do_to_characters)
-                        self.characters_data = temp_dic["characters_data"]
-                        self.sangvisFerris_data = temp_dic["sangvisFerris_data"]
-                        self.damage_do_to_characters = temp_dic["damage_do_to_characters"]
-                        del temp_dic
+                        self.damage_do_to_characters = skill(self.characterGetClick,None,None,self.sangvisFerris_data,self.characters_data,"react",self.skill_target,self.damage_do_to_characters)
                     elif self.characters_data[self.characterGetClick].get_imgId("skill") == self.characters_data[self.characterGetClick].get_imgNum("skill")-1:
-                        self.characters_data[self.characterGetClick].reset_imgId("skill")
                         self.MAP.calculate_darkness(self.characters_data)
                         self.isWaiting =True
                         self.characterGetClick = None
                         self.action_choice = None
-            elif self.characterGetClick != None and self.isWaiting == True:
-                self.characters_data[self.characterGetClick].draw(screen,self.MAP)
 
         #敌方回合
         if self.whose_round == "sangvisFerris":
@@ -898,17 +890,18 @@ class BattleSystem(BattleSystemInterface):
                     self.sangvisFerris_data[self.enemy_in_control].set_action("attack")
                     self.sangvisFerris_data[self.enemy_in_control].setFlipBasedPos(self.characters_data[self.enemy_action["target"]])
                 print(self.enemy_in_control+" choses "+self.enemy_action["action"])
-            if self.enemy_action["action"] == "move":
+            #根据选择调整动画
+            if self.enemy_action["action"] == "move" or  self.enemy_action["action"] == "move&attack":
                 if self.sangvisFerris_data[self.enemy_in_control].is_idle():
                     self.footstep_sounds.play()
                 else:
                     self.footstep_sounds.stop()
-                    self.enemies_in_control_id +=1
-                    if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
-                        self.whose_round = "sangvisFerrisToPlayer"
-                        self.resultInfo["total_rounds"] += 1
-                    self.enemy_action = None
-                    self.enemy_in_control = None
+                    if self.enemy_action["action"] == "move&attack":
+                        self.enemy_action["action"] = "attack"
+                        self.sangvisFerris_data[self.enemy_in_control].set_action("attack")
+                        self.sangvisFerris_data[self.enemy_in_control].setFlipBasedPos(self.characters_data[self.enemy_action["target"]])
+                    else:
+                        self.enemy_action["action"] = "stay"
             elif self.enemy_action["action"] == "attack":
                 if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == 3:
                     self.attackingSounds.play(self.sangvisFerris_data[self.enemy_in_control].kind)
@@ -920,22 +913,10 @@ class BattleSystem(BattleSystemInterface):
                         self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
                     else:
                         self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
-                    self.sangvisFerris_data[self.enemy_in_control].reset_imgId("attack")
-                    self.enemies_in_control_id +=1
-                    if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
-                        self.whose_round = "sangvisFerrisToPlayer"
-                        self.resultInfo["total_rounds"] += 1
-                    self.enemy_action = None
-                    self.enemy_in_control = None
-            elif self.enemy_action["action"] == "move&attack":
-                if self.sangvisFerris_data[self.enemy_in_control].get_action("move"):
-                    self.footstep_sounds.play()
-                else:
-                    self.footstep_sounds.stop()
-                    self.enemy_action["action"] = "attack"
-                    self.sangvisFerris_data[self.enemy_in_control].set_action("attack")
-                    self.sangvisFerris_data[self.enemy_in_control].setFlipBasedPos(self.characters_data[self.enemy_action["target"]])
+                    self.enemy_action["action"] = "stay"
+            #最终的idle状态
             elif self.enemy_action["action"] == "stay":
+                self.sangvisFerris_data[self.enemy_in_control].set_action()
                 self.enemies_in_control_id +=1
                 if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
                     self.whose_round = "sangvisFerrisToPlayer"
@@ -1027,12 +1008,8 @@ class BattleSystem(BattleSystemInterface):
         #展示所有角色Ui
         for every_chara in self.characters_data:
             self.characters_data[every_chara].drawUI(screen,self.original_UI_img,self.MAP)
-        if self.MAP.darkMode == True:
-            for enemies in self.sangvisFerris_data:
-                if self.MAP.isPosInLightArea(int(self.sangvisFerris_data[enemies].x),int(self.sangvisFerris_data[enemies].y)):
-                    self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.MAP)
-        else:
-            for enemies in self.sangvisFerris_data:
+        for enemies in self.sangvisFerris_data:
+            if self.MAP.isPosInLightArea(int(self.sangvisFerris_data[enemies].x),int(self.sangvisFerris_data[enemies].y)):
                 self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.MAP)
 
         #显示选择菜单

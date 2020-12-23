@@ -33,8 +33,8 @@ class BattleSystemInterface:
         #章节名和种类
         self.chapterName = chapterName
         self.chapterType = chapterType
-    def _create_map(self,MapData):
-        self.MAP = MapObject(MapData,round(self.window_x/10),round(self.window_y/10))
+    def _create_map(self,MapData,darkMode=None):
+        self.MAP = MapObject(MapData,round(self.window_x/10),round(self.window_y/10),darkMode)
     #检测手柄事件
     def _check_jostick_events(self):
         if controller.joystick.get_init() == True:

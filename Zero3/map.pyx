@@ -9,9 +9,9 @@ _BLOCKS_DATABASE = loadConfig("Data/blocks.yaml","blocks")
 
 #地图模块
 class MapObject:
-    def  __init__(self,mapDataDic,int perBlockWidth,int perBlockHeight):
+    def  __init__(self,mapDataDic,int perBlockWidth,int perBlockHeight,darkMode=None):
         #加载地图设置
-        self.darkMode = mapDataDic["darkMode"]
+        self.__darkMode = mapDataDic["darkMode"] if darkMode==None else darkMode
         self.perBlockWidth = perBlockWidth
         self.perBlockHeight = perBlockHeight
         #初始化地图数据
@@ -49,7 +49,7 @@ class MapObject:
         self.load_env_img()
     def load_env_img(self):
         global _MAP_ENV_IMAGE
-        _MAP_ENV_IMAGE = EnvImagesManagement(self.__MapData,self.ornamentationData,self.backgroundImageName,self.perBlockWidth,self.darkMode)
+        _MAP_ENV_IMAGE = EnvImagesManagement(self.__MapData,self.ornamentationData,self.backgroundImageName,self.perBlockWidth,self.__darkMode)
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,newPerBlockHeight,window_x,window_y):
         self.addPos_x((self.perBlockWidth-newPerBlockWidth)*self.column/2)
@@ -71,6 +71,8 @@ class MapObject:
         return self.__local_x
     def getPos_y(self):
         return self.__local_y
+    def isAtNight(self):
+        return self.__darkMode
     #设置local坐标
     def setPos(self,int x, int y):
         self.setPos_x(x)
@@ -78,12 +80,12 @@ class MapObject:
     def setPos_x(self,int value):
         if self.__local_x != value:
             self.__local_x = value
-            if self.darkMode == True:
+            if self.__darkMode == True:
                 self.__needUpdateMapSurface = True
     def setPos_y(self,int value):
         if self.__local_y != value:
             self.__local_y = value
-            if self.darkMode == True:
+            if self.__darkMode == True:
                 self.__needUpdateMapSurface = True
     #增加local坐标
     def addPos_x(self,value):
@@ -108,7 +110,7 @@ class MapObject:
         if self.__needUpdateMapSurface:
             self.__needUpdateMapSurface = False
             self.__update_map_surface(screen.get_size())
-        if self.darkMode:
+        if self.__darkMode:
             _MAP_ENV_IMAGE.display_background_surface(screen,(0,0))
         else:
             _MAP_ENV_IMAGE.display_background_surface(screen,self.getPos())
@@ -124,7 +126,7 @@ class MapObject:
         cdef unsigned int anyBlockBlitThisLine
         cdef int window_x = window_size[0]
         cdef int window_y = window_size[1]
-        if self.darkMode == True:
+        if self.__darkMode == True:
             mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_size,window_size)
             #画出地图
             for y in range(yRange):
@@ -170,7 +172,7 @@ class MapObject:
             imgToBlit = None
             thePosInMap = self.calPosInMap(item.x,item.y)
             if screen_min<=thePosInMap[0]<screen_width and screen_min<=thePosInMap[1]<screen_height:
-                if self.darkMode == True and not self.inLightArea(item):
+                if self.__darkMode == True and not self.inLightArea(item):
                     keyWordTemp = True
                 else:
                     keyWordTemp = False
@@ -207,7 +209,7 @@ class MapObject:
                     imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("tree",item.image,keyWordTemp),(round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
                     thePosInMap = (thePosInMap[0]-offSetX_tree,thePosInMap[1]-offSetY_tree)
                     if item.get_pos() in charactersPos:
-                        if self.darkMode == False or self.inLightArea(item):
+                        if self.__darkMode == False or self.inLightArea(item):
                             imgToBlit.set_alpha(100)
                 #其他装饰物
                 elif item.type == "decoration" or item.type == "obstacle" or item.type == "chest":
@@ -292,7 +294,7 @@ class MapObject:
     def inLightArea(self,doll):
         return self.isPosInLightArea(doll.x,doll.y)
     def isPosInLightArea(self,int x,int y):
-        if self.darkMode == False:
+        if self.__darkMode == False:
             return True
         else:
             return numpy.any(numpy.equal(self.__lightArea,[x,y]).all(1))
@@ -321,6 +323,8 @@ class MapObject:
             endY = endPosition.y
         #建立寻路地图
         self.map2d = numpy.zeros((self.column,self.row), dtype=numpy.int8)
+        # 可行走标记
+        self.passTag = 0
         #历遍地图，设置障碍方块
         """
         for y in range(theMap.row):
@@ -331,7 +335,7 @@ class MapObject:
         #历遍设施，设置障碍方块
         for item in self.ornamentationData:
             if item.type == "obstacle" or item.type == "campfire":
-                self.map2d[item.x][item.y]=1
+                self.map2d[item.x][item.y] = 1
         #如果终点有我方角色，则不允许
         for key,value in friend_data_dict.items():
             if value.x == endX and value.y == endY:
@@ -341,7 +345,7 @@ class MapObject:
             if key != ignoreEnemyCharacters:
                 self.map2d[value.x][value.y] = 1
         #如果终点是障碍物
-        if self.map2d[endX][endY] != 0:
+        if self.map2d[endX][endY] != self.passTag:
             return []
         # 开启表
         self.openList = []
@@ -350,29 +354,18 @@ class MapObject:
         # 起点终点
         self.startPoint = Point(startX,startY)
         self.endPoint = Point(endX,endY)
-        # 可行走标记
-        self.passTag = 0
         #开始寻路
         cdef list pathList = self.__startFindingPath()
-        cdef list the_route = []
         #遍历路径点,讲指定数量的点放到路径列表中
         if len(pathList) > 0:
             if routeLen != None and len(pathList) < routeLen or routeLen == None:
                 routeLen = len(pathList)
+            the_route = []
             for i in range(routeLen):
-                if Point(startX+1,startY) in pathList and (startX+1,startY) not in the_route:
-                    startX+=1
-                elif Point(startX-1,startY) in pathList and (startX-1,startY) not in the_route:
-                    startX-=1
-                elif Point(startX,startY+1) in pathList and (startX,startY+1) not in the_route:
-                    startY+=1
-                elif Point(startX,startY-1) in pathList and (startX,startY-1) not in the_route:
-                    startY-=1
-                else:
-                    #快速跳出
-                    break
-                the_route.append((startX,startY))
-        return the_route
+                the_route.append(pathList[i].get_pos())
+            return the_route
+        else:
+            return []
     def __getMinNode(self):
         """
         获得OpenList中F值最小的节点
@@ -468,9 +461,6 @@ class MapObject:
                         pathList.append(cPoint.point)
                         cPoint = cPoint.father
                     else:
-                        # print(pathList)
-                        # print(list(reversed(pathList)))
-                        # print(pathList.reverse())
                         return list(reversed(pathList))
             if len(self.openList) == 0:
                 return []

@@ -163,7 +163,7 @@ class Doll:
                 if self.x >= self.__movingPath[0][0]:
                     self.x = self.__movingPath[0][0]
                     self.__movingPath.pop(0)
-                    if theMapClass.darkMode:
+                    if theMapClass.isAtNight():
                         self.__reProcessMap = True
             elif self.x > self.__movingPath[0][0]:
                 self.x-=0.05
@@ -171,7 +171,7 @@ class Doll:
                 if self.x <= self.__movingPath[0][0]:
                     self.x = self.__movingPath[0][0]
                     self.__movingPath.pop(0)
-                    if theMapClass.darkMode:
+                    if theMapClass.isAtNight():
                         self.__reProcessMap = True
             elif self.y < self.__movingPath[0][1]:
                 self.y+=0.05
@@ -179,7 +179,7 @@ class Doll:
                 if self.y >= self.__movingPath[0][1]:
                     self.y = self.__movingPath[0][1]
                     self.__movingPath.pop(0)
-                    if theMapClass.darkMode:
+                    if theMapClass.isAtNight():
                         self.__reProcessMap = True
             elif self.y > self.__movingPath[0][1]:
                 self.y-=0.05
