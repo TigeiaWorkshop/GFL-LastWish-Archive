@@ -15,7 +15,6 @@ Chapter:
 - Chapter 6
 - Chapter 7
 - Chapter 8
-- Back
 Dialog:
   auto: Auto
   choice: Choice
@@ -40,20 +39,22 @@ LoadingTxt:
   now_loading_level: Loading level data...
   now_loading_map: Loading map data...
 MainMenu:
-  menu_0:
-    text0_start: Start
-    text1_setting: Setting
-    text2_developer_team: Development Team
-    text3_exit: Exit
-  menu_1:
-    text0_continue: Continue
-    text1_chooseChapter: Select Chapter
-    text2_dlc: DLC
-    text3_workshop: Workshop
-    text4_mapCreator: Map Creator
-    text5_dialogCreator: Dialog Creator
-    text6_collection: Collection
-    text7_back: Back
+  menu_main:
+    0_continue: Continue
+    1_chooseChapter: Select Chapter
+    2_dlc: DLC
+    3_workshop: Workshop
+    4_collection: Collection
+    5_setting: Setting
+    6_developer_team: Development Team
+    7_exit: Exit
+  menu_workshop_choice:
+    0_play: Play
+    1_mapCreator: Map Creator
+    2_dialogCreator: Dialog Creator
+  other:
+    back: Back
+    new: New
 MapCreator:
   back: Back
   delete: Delete

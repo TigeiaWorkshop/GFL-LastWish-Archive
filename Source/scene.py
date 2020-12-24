@@ -85,3 +85,28 @@ def mapCreator(chapterType,chapter_name,screen):
         MAPCREATOR.display(screen)
     #暂停声效 - 尤其是环境声
     Zero.unloadBackgroundMusic()
+
+#blit载入页面
+def dispaly_loading_screen(screen,start,end,value):
+    window_x,window_y = screen.get_size()
+    #获取健康游戏忠告
+    HealthyGamingAdvice = Zero.get_lang("HealthyGamingAdvice")
+    if HealthyGamingAdvice == None:
+        HealthyGamingAdvice = []
+    else:
+        for i in range(len(HealthyGamingAdvice)):
+            HealthyGamingAdvice[i] = Zero.fontRender(HealthyGamingAdvice[i],"white",window_x/64)
+    #其他载入页面需要的数据
+    text1 = Zero.fontRender(Zero.get_lang("title1"),"white",window_x/64)
+    text2 = Zero.fontRender(Zero.get_lang("title2"),"white",window_x/64)
+    #主循环
+    for i in range(start,end,value):
+        screen.fill(Zero.findColorRGBA("black"))
+        text1.set_alpha(i)
+        Zero.drawImg(text1,(window_x/64,window_y*0.9),screen)
+        text2.set_alpha(i)
+        Zero.drawImg(text2,(window_x/64,window_y*0.9-window_x/32),screen)
+        for a in range(len(HealthyGamingAdvice)):
+            HealthyGamingAdvice[a].set_alpha(i)
+            Zero.drawImg(HealthyGamingAdvice[a],(window_x-window_x/32-HealthyGamingAdvice[a].get_width(),window_y*0.9-window_x/64*a*1.5),screen)
+        Zero.display.flip(True)
