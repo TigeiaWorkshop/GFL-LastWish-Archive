@@ -6,15 +6,6 @@ Battle_UI:
   numChapter: Chapter {}
   numRound: Round {}
   yourRound: Your Round
-Chapter:
-- Chapter 1
-- Chapter 2
-- Chapter 3
-- Chapter 4
-- Chapter 5
-- Chapter 6
-- Chapter 7
-- Chapter 8
 Dialog:
   auto: Auto
   choice: Choice
@@ -60,6 +51,18 @@ MapCreator:
   delete: Delete
   reload: Reload
   save: Save
+Numbers:
+- Zero
+- One
+- Two
+- Three
+- Four
+- Five
+- Six
+- Seven
+- Eight
+- Nine
+- Ten
 ResultBoard:
   characters_down: Friendly character down
   pressKeyContinue: Press space to continue

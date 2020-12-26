@@ -6,15 +6,6 @@ Battle_UI:
   numChapter: 第{}章
   numRound: 第{}回合
   yourRound: 你的回合
-Chapter:
-- 第一章
-- 第二章
-- 第三章
-- 第四章
-- 第五章
-- 第六章
-- 第七章
-- 第八章
 Dialog:
   auto: 自动
   choice: 选项
@@ -65,6 +56,18 @@ MapCreator:
   delete: 删除
   reload: 重新加载
   save: 保存
+Numbers:
+- 零
+- 一
+- 二
+- 三
+- 四
+- 五
+- 六
+- 七
+- 八
+- 九
+- 十
 ResultBoard:
   characters_down: 友方角色被击倒
   pressKeyContinue: 按空格继续
