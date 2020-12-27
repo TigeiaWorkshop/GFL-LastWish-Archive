@@ -50,7 +50,8 @@ MainMenu:
     2_dialogCreator: 对话编辑器
   other:
     back: 返回
-    new: 新建
+    new_chapter: 新建章节
+    new_collection: 新建合集
 MapCreator:
   back: 返回
   delete: 删除

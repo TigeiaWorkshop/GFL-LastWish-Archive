@@ -49,6 +49,7 @@ class MainMenu:
         self.cover_alpha = 0
         self.menu_type = 0
         self.chapter_select = []
+        self.workshop_files_text = []
         #关卡选择的封面
         self.cover_img = Zero.loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
         #音效
@@ -63,10 +64,13 @@ class MainMenu:
     #当前在Data/workshop文件夹中可以读取的文件夹的名字（font的形式）
     def __reload_workshop_files_list(self,screen_size,createMode=False):
         self.workshop_files = []
+        self.workshop_files_text = []
         if createMode:
-            self.workshop_files.append(self.main_menu_txt["other"]["new"])
+            self.workshop_files.append(self.main_menu_txt["other"]["new_collection"])
         for path in glob.glob("Data/workshop/*"):
             data = Zero.loadConfig(path+"/info.yaml")
+            filePath,fileName = os.path.split(path)
+            self.workshop_files_text.append(fileName)
             self.workshop_files.append(data["title"][Zero.get_setting("Language")])
         self.workshop_files.append(self.main_menu_txt["other"]["back"])
         txt_location = int(screen_size[0]*2/3)
@@ -76,13 +80,16 @@ class MainMenu:
             self.workshop_files[i] = Zero.fontRenderPro(self.workshop_files[i],"enable",(txt_location,txt_y),Zero.get_standard_font_size("medium"))
             txt_y += font_size
     #重新加载章节选择菜单的选项
-    def __reload_main_chapter_files_list(self,screen_size):
+    def __reload_chapter_select_list(self,screen_size,chapterType="main_chapter",collectionName=None,createMode=False):
         self.chapter_select = []
+        if createMode:
+            self.chapter_select.append(self.main_menu_txt["other"]["new_chapter"])
         chapterTitle = Zero.get_lang("Battle_UI","numChapter")
         i = 0
-        for path in glob.glob("Data/main_chapter/*_dialogs_{}.yaml".format(Zero.get_setting("Language"))):
+        fileLocation = "Data/{0}/*_dialogs_{1}.yaml".format(chapterType,Zero.get_setting("Language")) if chapterType == "main_chapter" else "Data/{0}/{1}/*_dialogs_{2}.yaml".format(chapterType,collectionName,Zero.get_setting("Language"))
+        for path in glob.glob(fileLocation):
             titleName = Zero.loadConfig(path,"title")
-            if i == 0:
+            if i == 0 and "0" in path:#id部分有待修复
                 if Zero.console.get_events("dev"):
                     self.chapter_select.append(chapterTitle.format(Zero.get_lang("Numbers")[i])+": "+titleName)
             elif i < 11:
@@ -102,23 +109,33 @@ class MainMenu:
             txt_y += Zero.get_standard_font_size("medium")*2
     def __draw_buttons(self,screen):
         i=0
+        #主菜单
         if self.menu_type == 0:
             for key in self.main_menu_txt["menu_main"]:
                 if self.main_menu_txt["menu_main"][key].display(screen):
                     self.hover_sound_play_on = i
                 i+=1
+        #选择主线的章节
         elif self.menu_type == 1:
             for button in self.chapter_select:
                 if button.display(screen):
                     self.hover_sound_play_on = i
                 i+=1
+        #创意工坊选择菜单
         elif self.menu_type == 2:
             for key in self.main_menu_txt["menu_workshop_choice"]:
                 if self.main_menu_txt["menu_workshop_choice"][key].display(screen):
                     self.hover_sound_play_on = i
                 i+=1
-        elif self.menu_type >= 3:
+        #展示合集 （3-游玩，4-地图编辑器，5-对话编辑器）
+        elif 5 >= self.menu_type >= 3:
             for button in self.workshop_files:
+                if button.display(screen):
+                    self.hover_sound_play_on = i
+                i+=1
+        #选择章节（6-游玩，7-地图编辑器，8-对话编辑器）
+        elif 8 >= self.menu_type >= 6:
+            for button in self.chapter_select:
                 if button.display(screen):
                     self.hover_sound_play_on = i
                 i+=1
@@ -205,7 +222,7 @@ class MainMenu:
                     #选择章节
                     elif Zero.ifHover(self.main_menu_txt["menu_main"]["1_chooseChapter"]):
                         #加载菜单章节选择页面的文字
-                        self.__reload_main_chapter_files_list(screen.get_size())
+                        self.__reload_chapter_select_list(screen.get_size())
                         self.menu_type = 1
                     #dlc
                     elif Zero.ifHover(self.main_menu_txt["menu_main"]["2_dlc"]):
@@ -228,23 +245,24 @@ class MainMenu:
                         Zero.display.quit()
                 #选择主线章节
                 elif self.menu_type == 1:
-                    for i in range(len(self.chapter_select)):
-                        if i == len(self.chapter_select)-1 and Zero.ifHover(self.chapter_select[-1]):
-                            self.menu_type = 0
-                        #章节选择
-                        elif Zero.ifHover(self.chapter_select[i]) and i==0:
-                            self.videoCapture.stop()
-                            scene("main_chapter","chapter"+str(i+1),screen)
-                            self.videoCapture = self.videoCapture.clone()
-                            self.videoCapture.start()
-                            #是否可以继续游戏了（save文件是否被创建）
-                            if os.path.exists("Save/save.yaml") and self.continueButtonIsOn == False:
-                                self.main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",self.main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
-                                self.continueButtonIsOn = True
-                            elif not os.path.exists("Save/save.yaml") and self.continueButtonIsOn == True:
-                                self.main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",self.main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
-                                self.continueButtonIsOn = False
-                            break
+                    if Zero.ifHover(self.chapter_select[-1]):
+                        self.menu_type = 0
+                    else:
+                        for i in range(len(self.chapter_select)-1):
+                            #章节选择
+                            if Zero.ifHover(self.chapter_select[i]):
+                                self.videoCapture.stop()
+                                scene("main_chapter","chapter"+str(i+1),screen)
+                                self.videoCapture = self.videoCapture.clone()
+                                self.videoCapture.start()
+                                #是否可以继续游戏了（save文件是否被创建）
+                                if os.path.exists("Save/save.yaml") and self.continueButtonIsOn == False:
+                                    self.main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",self.main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
+                                    self.continueButtonIsOn = True
+                                elif not os.path.exists("Save/save.yaml") and self.continueButtonIsOn == True:
+                                    self.main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",self.main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
+                                    self.continueButtonIsOn = False
+                                break
                 #选择创意工坊选项
                 elif self.menu_type == 2:
                     if Zero.ifHover(self.main_menu_txt["menu_workshop_choice"]["0_play"]):
@@ -270,19 +288,55 @@ class MainMenu:
                         """
                     elif Zero.ifHover(self.main_menu_txt["menu_workshop_choice"]["back"]):
                         self.menu_type = 0
+                #创意工坊-选择合集
                 elif self.menu_type == 3:
                     if Zero.ifHover(self.workshop_files[-1]):
                         self.menu_type = 2
+                    else:
+                        for i in range(len(self.workshop_files)-1):
+                            #章节选择
+                            if Zero.ifHover(self.workshop_files[i]):
+                                self.__reload_chapter_select_list(screen.get_size(),"workshop",self.workshop_files_text[i])
+                                self.menu_type = 6
+                                break
                 elif self.menu_type == 4:
+                    #新建合集
                     if Zero.ifHover(self.workshop_files[0]):
                         self.__create_new_file()
                         self.__reload_workshop_files_list(screen.get_size(),True)
+                    #返回创意工坊选项菜单
                     elif Zero.ifHover(self.workshop_files[-1]):
                         self.menu_type = 2
+                    else:
+                        for i in range(1,len(self.workshop_files)-1):
+                            #章节选择
+                            if Zero.ifHover(self.workshop_files[i]):
+                                self.__reload_chapter_select_list(screen.get_size(),"workshop",self.workshop_files_text[i-1],True)
+                                self.menu_type = 7
+                                break
                 elif self.menu_type == 5:
+                    #新建合集
                     if Zero.ifHover(self.workshop_files[0]):
                         self.__create_new_file()
                         self.__reload_workshop_files_list(screen.get_size(),True)
+                    #返回创意工坊选项菜单
                     elif Zero.ifHover(self.workshop_files[-1]):
                         self.menu_type = 2
+                    else:
+                        for i in range(1,len(self.workshop_files)-1):
+                            #章节选择
+                            if Zero.ifHover(self.workshop_files[i]):
+                                self.__reload_chapter_select_list(screen.get_size(),"workshop",self.workshop_files_text[i-1],True)
+                                self.menu_type = 8
+                                break
+                #创意工坊-选择关卡
+                elif self.menu_type == 6:
+                    if Zero.ifHover(self.chapter_select[-1]):
+                        self.menu_type = 3
+                elif self.menu_type == 7:
+                    if Zero.ifHover(self.chapter_select[-1]):
+                        self.menu_type = 4
+                elif self.menu_type == 8:
+                    if Zero.ifHover(self.chapter_select[-1]):
+                        self.menu_type = 5
             Zero.display.flip()

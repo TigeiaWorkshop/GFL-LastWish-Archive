@@ -45,7 +45,8 @@ MainMenu:
     2_dialogCreator: Dialog Creator
   other:
     back: Back
-    new: New
+    new_chapter: Create New Chapter
+    new_collection: Create New Collection
 MapCreator:
   back: Back
   delete: Delete
