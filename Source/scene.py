@@ -1,23 +1,24 @@
 # cython: language_level=3
 import Zero3 as Zero
 
-def scene(chapterType,chapterName,screen,startPoint="dialog_before_battle",dialogId="head",dialog_options={}):
+def scene(chapterType,chapterId,screen,startPoint,dialogId,dialog_options,collectionName=None):
     if startPoint == "dialog_before_battle":
-        dialog(chapterType,chapterName,screen,"dialog_before_battle",dialogId,dialog_options)
+        dialog(chapterType,chapterId,screen,"dialog_before_battle",dialogId,dialog_options)
         if Zero.pause_menu.checkIfBackToMainMenu() == False:
-            battle(chapterType,chapterName,screen)
+            battle(chapterType,chapterId,screen)
         else:
             return
         if Zero.pause_menu.checkIfBackToMainMenu() == False:
-            dialog(chapterType,chapterName,screen,"dialog_after_battle")
+            dialog(chapterType,chapterId,screen,"dialog_after_battle")
     elif startPoint == "battle":
         battle(chapterType,None,screen)
         if Zero.pause_menu.checkIfBackToMainMenu() == False:
-            dialog(chapterType,chapterName,screen,"dialog_after_battle")
+            dialog(chapterType,chapterId,screen,"dialog_after_battle")
     elif startPoint == "dialog_after_battle":
-        dialog(chapterType,chapterName,screen,"dialog_after_battle",dialogId,dialog_options)
+        dialog(chapterType,chapterId,screen,"dialog_after_battle",dialogId,dialog_options)
 
-def dialog(chapterType,chapterName,screen,part,dialogId="head",dialog_options={}):
+#对话系统
+def dialog(chapterType,chapterId,screen,part,dialogId="head",dialog_options={}):
     #加载闸门动画的图片素材
     LoadingImgAbove = Zero.loadImg("Assets/image/UI/LoadingImgAbove.png",screen.get_width()+8,screen.get_height()/1.7)
     LoadingImgBelow = Zero.loadImg("Assets/image/UI/LoadingImgBelow.png",screen.get_width()+8,screen.get_height()/2.05)
@@ -29,7 +30,7 @@ def dialog(chapterType,chapterName,screen,part,dialogId="head",dialog_options={}
     #卸载音乐
     Zero.unloadBackgroundMusic()
     #初始化对话系统模块
-    DIALOG = Zero.DialogSystem(chapterType,chapterName,part,dialogId,dialog_options)
+    DIALOG = Zero.DialogSystem(chapterType,chapterId,part,dialogId,dialog_options)
     #加载完成-闸门开启的效果
     for i in range(100,-1,-1):
         DIALOG.backgroundContent.display(screen)
@@ -48,23 +49,12 @@ def dialog(chapterType,chapterName,screen,part,dialogId="head",dialog_options={}
     #返回玩家做出的选项
     return DIALOG.dialog_options
 
-def dialogCreator(chapterType,chapterName,screen,part):
+#战斗系统
+def battle(chapterType,chapterId,screen):
     #卸载音乐
     Zero.unloadBackgroundMusic()
-    #加载对话
-    DIALOG = Zero.DialogSystemDev(chapterType,chapterName,part)
-    #主循环
-    while True:
-        if not DIALOG.display(screen):
-            Zero.display.flip()
-        else:
-            break
-
-def battle(chapterType,chapter_name,screen):
-    #卸载音乐
-    Zero.unloadBackgroundMusic()
-    BATTLE = Zero.BattleSystem(chapterType,chapter_name)
-    if chapter_name != None:
+    BATTLE = Zero.BattleSystem(chapterType,chapterId)
+    if chapterId != None:
         BATTLE.initialize(screen)
     else:
         BATTLE.load(screen)
@@ -75,10 +65,24 @@ def battle(chapterType,chapter_name,screen):
     Zero.unloadBackgroundMusic()
     return BATTLE.resultInfo
 
-def mapCreator(chapterType,chapter_name,screen):
+#对话编辑器
+def dialogCreator(chapterType,chapterId,screen,part,collectionName=None):
     #卸载音乐
     Zero.unloadBackgroundMusic()
-    MAPCREATOR = Zero.mapCreator(chapterType,chapter_name)
+    #加载对话
+    DIALOG = Zero.DialogSystemDev(chapterType,chapterId,part,collectionName)
+    #主循环
+    while True:
+        if not DIALOG.display(screen):
+            Zero.display.flip()
+        else:
+            break
+
+#地图编辑器
+def mapCreator(chapterType,chapterId,screen,collectionName=None):
+    #卸载音乐
+    Zero.unloadBackgroundMusic()
+    MAPCREATOR = Zero.mapCreator(chapterType,chapterId,collectionName)
     MAPCREATOR.initialize(screen)
     #战斗系统主要loop
     while MAPCREATOR.isPlaying == True:

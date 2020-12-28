@@ -2,8 +2,10 @@
 from Zero3.battleSystemInterface import *
 
 class mapCreator(BattleSystemInterface):
-    def __init__(self,chapterType,chapterName):
-        BattleSystemInterface.__init__(self,chapterType,chapterName)
+    def __init__(self,chapterType,chapterId,collectionName=None):
+        BattleSystemInterface.__init__(self,chapterType,chapterId)
+        self.collectionName = collectionName
+        self.fileLocation = "Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId) if self.chapterType == "main_chapter" else "Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collectionName,self.chapterId)
         display.set_caption("Girls frontline-Last Wish: MapCreator")
         unloadBackgroundMusic()
     def initialize(self,screen):
@@ -11,7 +13,8 @@ class mapCreator(BattleSystemInterface):
         self.window_x,self.window_y = screen.get_size()
         self.decorations_setting = loadConfig("Data/decorations.yaml","decorations")
         #载入地图数据
-        loadData = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
+        
+        loadData = loadConfig(self.fileLocation)
         #初始化角色信息
         characterDataThread = initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],"dev")
         #加载角色信息
@@ -33,7 +36,7 @@ class mapCreator(BattleSystemInterface):
                     map_per_line.append(SnowEnvImg[randomInt(0,5)])
                 default_map.append(map_per_line)
             loadData["map"] = default_map
-            saveConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName),loadData)
+            saveConfig(self.fileLocation,loadData)
         else:
             block_y = len(loadData["map"])
             block_x = len(loadData["map"][0])
@@ -94,7 +97,7 @@ class mapCreator(BattleSystemInterface):
         self.UI_local_y = 0
         self.isPlaying = True
         #读取地图原始文件
-        self.originalData = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
+        self.originalData = loadConfig(self.fileLocation)
     def display(self,screen):
         #更新输入事件
         self._update_event()
@@ -154,7 +157,7 @@ class mapCreator(BattleSystemInterface):
                                 self.sangvisFerris_data.pop(any_chara_replace)
                                 self.originalData["sangvisFerri"].pop(any_chara_replace)
                 elif ifHover(self.UIButton["save"]) and self.object_to_put_down == None and self.deleteMode == False:
-                    saveConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName),self.originalData)
+                    saveConfig(self.fileLocation,self.originalData)
                 elif ifHover(self.UIButton["back"]) and self.object_to_put_down == None and self.deleteMode == False:
                     self.isPlaying = False
                     break
@@ -165,7 +168,7 @@ class mapCreator(BattleSystemInterface):
                 elif ifHover(self.UIButton["reload"]) and self.object_to_put_down == None and self.deleteMode == False:
                     tempLocal_x,tempLocal_y = self.MAP.getPos()
                     #读取地图数据
-                    loadData = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
+                    loadData = loadConfig(self.fileLocation)
                     #初始化角色信息
                     self.characters_data = {}
                     for each_character in loadData["character"]:
@@ -178,7 +181,7 @@ class mapCreator(BattleSystemInterface):
                     del loadData
                     self.MAP.setPos(tempLocal_x,tempLocal_y)
                     #读取地图
-                    self.originalData = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
+                    self.originalData = loadConfig(self.fileLocation)
                 else:
                     if pygame.mouse.get_pressed()[0] and block_get_click != None:
                         if self.object_to_put_down != None:

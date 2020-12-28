@@ -2,8 +2,8 @@
 from Zero3.battleSystemInterface import *
 
 class BattleSystem(BattleSystemInterface):
-    def __init__(self,chapterType=None,chapterName=None):
-        BattleSystemInterface.__init__(self,chapterType,chapterName)
+    def __init__(self,chapterType=None,chapterId=None):
+        BattleSystemInterface.__init__(self,chapterType,chapterId)
         #被选中的角色
         self.characterGetClick = None
         self.enemiesGetAttack = {}
@@ -58,7 +58,7 @@ class BattleSystem(BattleSystemInterface):
             DataTmp = {}
             DataTmp["type"] = "battle"
             DataTmp["chapterType"] = self.chapterType
-            DataTmp["chapterName"] = self.chapterName
+            DataTmp["chapterId"] = self.chapterId
             DataTmp["characters_data"] = self.characters_data
             DataTmp["sangvisFerris_data"] = self.sangvisFerris_data
             DataTmp["MAP"] = self.MAP
@@ -71,7 +71,7 @@ class BattleSystem(BattleSystemInterface):
         DataTmp = loadConfig("Save/save.yaml")
         if DataTmp["type"] == "battle":
             self.chapterType = DataTmp["chapterType"]
-            self.chapterName = DataTmp["chapterName"]
+            self.chapterId = DataTmp["chapterId"]
             self.characters_data = DataTmp["characters_data"]
             self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
             self.MAP = DataTmp["MAP"]
@@ -95,9 +95,9 @@ class BattleSystem(BattleSystemInterface):
         self.warnings_to_display = WarningSystem()
         loading_info = get_lang("LoadingTxt")
         #加载剧情
-        DataTmp = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,get_setting('Language')))
+        DataTmp = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,get_setting('Language')))
         #章节标题显示
-        self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleModeUiTxt["numChapter"],self.chapterName,DataTmp["title"],DataTmp["description"])
+        self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleModeUiTxt["numChapter"],self.chapterId,DataTmp["title"],DataTmp["description"])
         self.battleMode_info = DataTmp["battle_info"]
         self.dialog_during_battle = DataTmp["dialog_during_battle"]
         #正在加载的gif动态图标
@@ -113,7 +113,7 @@ class BattleSystem(BattleSystemInterface):
         nowLoadingIcon.draw(screen)
         display.flip(True)
         #读取并初始化章节信息
-        DataTmp = loadConfig("Data/{0}/{1}_map.yaml".format(self.chapterType,self.chapterName))
+        DataTmp = loadConfig("Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId))
         self.zoomIn = DataTmp["zoomIn"]*100
         #储存对话数据key的字典
         self.dialogInfo = DataTmp["dialogs"]
@@ -124,7 +124,7 @@ class BattleSystem(BattleSystemInterface):
             #初始化角色信息
             characterDataThread = initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
             #查看是否有战斗开始前的对话
-            if self.dialogInfo["initial"] == None:
+            if "initial" not in self.dialogInfo or self.dialogInfo["initial"] == None:
                 self.dialogKey = None
             else:
                 self.dialogKey = self.dialogInfo["initial"]

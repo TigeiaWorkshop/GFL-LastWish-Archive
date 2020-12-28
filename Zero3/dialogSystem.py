@@ -4,11 +4,11 @@ from Zero3.movie import cutscene,VedioFrame
 
 #视觉小说系统模块
 class DialogSystem:
-    def __init__(self,chapterType,chapterName,part,dialogId,dialog_options):
+    def __init__(self,chapterType,chapterId,part,dialogId,dialog_options):
         #读取章节信息
-        self.dialogData = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(chapterType,chapterName,get_setting("Language")))
+        self.dialogData = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(chapterType,chapterId,get_setting("Language")))
         if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
-            self.dialog_content = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(chapterType,chapterName,self.dialogData["default_lang"]),part)
+            self.dialog_content = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(chapterType,chapterId,self.dialogData["default_lang"]),part)
             for key,currentDialog in self.dialogData[part].items():
                 if key in self.dialog_content:
                     for key2,dataNeedReplace in currentDialog.items():
@@ -20,7 +20,7 @@ class DialogSystem:
             if len(self.dialog_content)==0:
                 raise Exception('ZeroEngine-Error: The dialog has no content!')
         #对话的部分
-        self.chapterName = chapterName
+        self.chapterId = chapterId
         self.part = part
         self.chapterType = chapterType
         #加载对话的背景图片
@@ -68,7 +68,7 @@ class DialogSystem:
     def __save_process(self):
         DataTmp = {}
         DataTmp["type"] = self.part
-        DataTmp["chapterName"] = self.chapterName
+        DataTmp["chapterId"] = self.chapterId
         DataTmp["chapterType"] = self.chapterType
         DataTmp["id"] = self.dialogId
         DataTmp["dialog_options"] = self.dialog_options
@@ -257,12 +257,15 @@ class DialogSystem:
         self.black_bg.set_alpha(255)
 
 class DialogSystemDev:
-    def __init__(self,chapterType,chapterName,part):
+    def __init__(self,chapterType,chapterId,part,collectionName=None):
         #设定初始化
         self.chapterType = chapterType
-        self.chapterName = chapterName
+        self.chapterId = chapterId
+        self.collectionName = collectionName
         self.lang = get_setting("Language")
         self.dialogId = "head"
+        self.fileLocation = "Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,self.lang) if self.chapterType == "main_chapter"\
+            else "Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collectionName,self.chapterId,self.lang)
         self.part = part
         #获取屏幕的尺寸
         self.window_x,self.window_y = display.get_size()
@@ -326,7 +329,7 @@ class DialogSystemDev:
         self.dialogData[self.part][self.dialogId]["narrator"] = self.narrator.get_text()
         self.dialogData[self.part][self.dialogId]["content"] = self.content.get_text()
         if self.isDefault == True:
-            saveConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),self.dialogData)
+            saveConfig(self.fileLocation,self.dialogData)
         else:
             #移除掉相似的内容
             for key,currentDialog in self.dialogData_default["dialog_before_battle"].items():
@@ -343,11 +346,11 @@ class DialogSystemDev:
                             del self.dialogData["dialog_after_battle"][key][key2]
                     if len(self.dialogData["dialog_after_battle"][key])==0:
                         del self.dialogData["dialog_after_battle"][key]
-            saveConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang),self.dialogData)
+            saveConfig(self.fileLocation,self.dialogData)
             self.__loadDialogData()
     #读取章节信息
     def __loadDialogData(self):
-        self.dialogData = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.lang))
+        self.dialogData = loadConfig(self.fileLocation)
         #初始化文件的数据
         if "dialog_before_battle" not in self.dialogData:
             self.dialogData["dialog_before_battle"] = {}
@@ -360,7 +363,8 @@ class DialogSystemDev:
         #如果不是默认主语言
         if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
             self.isDefault = False
-            self.dialogData_default = loadConfig("Data/{0}/{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterName,self.dialogData["default_lang"]))
+            self.dialogData_default = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,self.dialogData["default_lang"])) if self.chapterType == "main_chapter"\
+                else loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collectionName,self.chapterId,self.dialogData["default_lang"]))
             for key,currentDialog in self.dialogData_default["dialog_before_battle"].items():
                 if key in self.dialogData["dialog_before_battle"]:
                     for key2,dataNeedReplace in currentDialog.items():
@@ -812,7 +816,8 @@ class DialogContent(DialogInterface):
         self.dialoguebox_height = 0
         self.dialoguebox_max_height = None
         #鼠标图标
-        self.mouseImg = loadGif((pygame.image.load(os.path.join("Assets/image/UI/mouse_none.png")).convert_alpha(),pygame.image.load(os.path.join("Assets/image/UI/mouse.png")).convert_alpha()),(display.get_width()*0.82,display.get_height()*0.83),(self.FONTSIZE,self.FONTSIZE),50)
+        self.mouseImg = loadGif((pygame.image.load(os.path.join("Assets/image/UI/mouse_none.png")).convert_alpha(),\
+            pygame.image.load(os.path.join("Assets/image/UI/mouse.png")).convert_alpha()),(display.get_width()*0.82,display.get_height()*0.83),(self.FONTSIZE,self.FONTSIZE),50)
         self.ifHide = False
         self.readTime = 0
         self.totalLetters = 0
@@ -1014,7 +1019,8 @@ class DialogButtons:
                 self.autoButtonHovered.draw(screen)
                 if self.autoMode == True:
                     rotatedIcon = pygame.transform.rotate(self.autoIconHovered,self.autoIconDegree)
-                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.icon_y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
+                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,\
+                        self.autoButtonHovered.y+self.icon_y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
                     if self.autoIconDegree < 180:
                         self.autoIconDegree+=1
                     else:
@@ -1026,7 +1032,8 @@ class DialogButtons:
                 if self.autoMode == True:
                     self.autoButtonHovered.draw(screen)
                     rotatedIcon = pygame.transform.rotate(self.autoIconHovered,self.autoIconDegree)
-                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,self.autoButtonHovered.y+self.icon_y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
+                    screen.blit(rotatedIcon,(self.autoButtonHovered.description+self.autoIconHovered.get_width()/2-rotatedIcon.get_width()/2,\
+                        self.autoButtonHovered.y+self.icon_y+self.autoIconHovered.get_height()/2-rotatedIcon.get_height()/2))
                     if self.autoIconDegree < 180:
                         self.autoIconDegree+=1
                     else:

@@ -2,6 +2,7 @@
 from Source.scene import *
 import os
 import glob
+import shutil
 
 class MainMenu:
     def __init__(self,screen):
@@ -40,16 +41,17 @@ class MainMenu:
             self.main_menu_txt["menu_main"][key] = Zero.fontRenderPro(txt,mode,(txt_location,txt_y),Zero.get_standard_font_size("medium"))
             txt_y += font_size
         #加载创意工坊选择页面的文字
+        self.main_menu_txt["menu_workshop_choice"]["back"] = self.main_menu_txt["other"]["back"]
         txt_y = (window_y-len(self.main_menu_txt["menu_workshop_choice"])*font_size)/2
         for key,txt in self.main_menu_txt["menu_workshop_choice"].items():
             self.main_menu_txt["menu_workshop_choice"][key] = Zero.fontRenderPro(txt,"enable",(txt_location,txt_y),Zero.get_standard_font_size("medium"))
             txt_y += font_size
-        self.main_menu_txt["menu_workshop_choice"]["back"] = Zero.fontRenderPro(self.main_menu_txt["other"]["back"],"enable",(txt_location,txt_y),Zero.get_standard_font_size("medium"))
         #数值初始化
         self.cover_alpha = 0
         self.menu_type = 0
         self.chapter_select = []
         self.workshop_files_text = []
+        self.current_selected_workshop_collection = None
         #关卡选择的封面
         self.cover_img = Zero.loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
         #音效
@@ -74,37 +76,54 @@ class MainMenu:
             self.workshop_files.append(data["title"][Zero.get_setting("Language")])
         self.workshop_files.append(self.main_menu_txt["other"]["back"])
         txt_location = int(screen_size[0]*2/3)
-        font_size = Zero.get_standard_font_size("medium")*2
-        txt_y = (screen_size[1]-len(self.workshop_files)*font_size)/2
+        txt_y = (screen_size[1]-len(self.workshop_files)*Zero.get_standard_font_size("medium")*2)/2
         for i in range(len(self.workshop_files)):
             self.workshop_files[i] = Zero.fontRenderPro(self.workshop_files[i],"enable",(txt_location,txt_y),Zero.get_standard_font_size("medium"))
-            txt_y += font_size
+            txt_y += Zero.get_standard_font_size("medium")*2
     #重新加载章节选择菜单的选项
-    def __reload_chapter_select_list(self,screen_size,chapterType="main_chapter",collectionName=None,createMode=False):
+    def __reload_chapter_select_list(self,screen_size,chapterType="main_chapter",createMode=False,fileType="dialogs"):
         self.chapter_select = []
         if createMode:
             self.chapter_select.append(self.main_menu_txt["other"]["new_chapter"])
         chapterTitle = Zero.get_lang("Battle_UI","numChapter")
-        i = 0
-        fileLocation = "Data/{0}/*_dialogs_{1}.yaml".format(chapterType,Zero.get_setting("Language")) if chapterType == "main_chapter" else "Data/{0}/{1}/*_dialogs_{2}.yaml".format(chapterType,collectionName,Zero.get_setting("Language"))
+        if fileType == "dialogs":
+            fileLocation = "Data/{0}/*_dialogs_{1}.yaml".format(chapterType,Zero.get_setting("Language")) if chapterType == "main_chapter" else "Data/{0}/{1}/*_dialogs_{2}.yaml".format(chapterType,self.current_selected_workshop_collection,Zero.get_setting("Language"))
+        elif fileType == "map":
+            fileLocation = "Data/{0}/*_map.yaml".format(chapterType) if chapterType == "main_chapter" else "Data/{0}/{1}/*_map.yaml".format(chapterType,self.current_selected_workshop_collection)
+        else:
+            raise Exception('ZeroEngine-Error: fileType="{}" is not supported!'.format(fileType))
+        #历遍路径下的所有章节文件
         for path in glob.glob(fileLocation):
-            titleName = Zero.loadConfig(path,"title")
-            if i == 0 and "0" in path:#id部分有待修复
-                if Zero.console.get_events("dev"):
-                    self.chapter_select.append(chapterTitle.format(Zero.get_lang("Numbers")[i])+": "+titleName)
-            elif i < 11:
-                self.chapter_select.append(chapterTitle.format(Zero.get_lang("Numbers")[i])+": "+titleName)
+            chapterId = self.__find_chapter_id(path)
+            if fileType == "dialogs":
+                titleName = Zero.loadConfig(path,"title")
             else:
-                self.chapter_select.append(chapterTitle.format(i)+": "+titleName)
-            i+=1
+                guessDialogFilePath = "Data/{0}/chapter{1}_dialogs_{2}.yaml".format(chapterType,chapterId,Zero.get_setting("Language")) if chapterType == "main_chapter" else "Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(chapterType,self.current_selected_workshop_collection,chapterId,Zero.get_setting("Language"))
+                if os.path.exists(guessDialogFilePath):
+                    titleName = Zero.loadConfig(guessDialogFilePath,"title")
+                else:
+                    titleName = ""
+            if chapterId < 11:
+                if chapterId > 0 or Zero.console.get_events("dev"):
+                    if len(titleName) > 0:
+                        self.chapter_select.append(chapterTitle.format(Zero.get_lang("Numbers")[chapterId])+": "+titleName)
+                    else:
+                        self.chapter_select.append(chapterTitle.format(Zero.get_lang("Numbers")[chapterId]))
+            else:
+                self.chapter_select.append(chapterTitle.format(chapterId)+": "+titleName)
+        #将返回按钮放到菜单列表中
         self.chapter_select.append(self.main_menu_txt["other"]["back"])
         txt_y = (screen_size[1]-len(self.chapter_select)*Zero.get_standard_font_size("medium")*2)/2
         txt_x = int(screen_size[0]*2/3)
+        #将菜单列表中的文字转换成文字surface
         for i in range(len(self.chapter_select)):
+            """
             if i == 0 or i == len(self.chapter_select)-1:
                 mode = "enable"
             else:
                 mode = "disable"
+            """
+            mode = "enable"
             self.chapter_select[i] = Zero.fontRenderPro(self.chapter_select[i],mode,(txt_x,txt_y),Zero.get_standard_font_size("medium"))
             txt_y += Zero.get_standard_font_size("medium")*2
     def __draw_buttons(self,screen):
@@ -166,6 +185,35 @@ class MainMenu:
         }
         #储存数据
         Zero.saveConfig("Data/workshop/{}/info.yaml".format(fileName),example_info_data)
+    #创建新的对话文件
+    def __create_new_dialog(self):
+        chapterId = len(glob.glob("Data/workshop/{0}/*_dialogs_{1}.yaml".format(self.current_selected_workshop_collection,Zero.get_setting("Language"))))+1
+        shutil.copyfile("Data/chapter_dialogs_example.yaml","Data/workshop/{0}/chapter{1}_dialogs_{2}.yaml".format(self.current_selected_workshop_collection,chapterId,Zero.get_setting("Language")))
+    #创建新的地图文件
+    def __create_new_map(self):
+        chapterId = len(glob.glob("Data/workshop/{0}/*_map.yaml".format(self.current_selected_workshop_collection)))+1
+        shutil.copyfile("Data/chapter_map_example.yaml","Data/workshop/{0}/chapter{1}_map.yaml".format(self.current_selected_workshop_collection,chapterId))
+    def __find_chapter_id(self,path):
+        filePath,fileName = os.path.split(path)
+        if fileName[0:7] == "chapter":
+            return int(fileName[7:fileName.index('_')])
+        else:
+            raise Exception('ZeroEngine-Error: Cannot find the id of chapter because the file is not properly named!')
+    def __load_scene(self,chapterType,chapterId,screen,startPoint="dialog_before_battle",dialogId="head",dialog_options={}):
+        self.videoCapture.stop()
+        if chapterType == "main_chapter":
+            scene(chapterType,chapterId,screen,startPoint,dialogId,dialog_options)
+        else:
+            scene(chapterType,chapterId,screen,startPoint,dialogId,dialog_options,self.current_selected_workshop_collection)
+        self.videoCapture = self.videoCapture.clone()
+        self.videoCapture.start()
+        #是否可以继续游戏了（save文件是否被创建）
+        if os.path.exists("Save/save.yaml") and self.continueButtonIsOn == False:
+            self.main_menu_txt["menu_main"]["0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_main"]["0_continue"],"enable",self.main_menu_txt["menu_main"]["0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
+            self.continueButtonIsOn = True
+        elif not os.path.exists("Save/save.yaml") and self.continueButtonIsOn == True:
+            self.main_menu_txt["menu_main"]["0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_main"]["0_continue"],"disable",self.main_menu_txt["menu_main"]["0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
+            self.continueButtonIsOn = False
     def display(self,screen):
         #开始播放背景视频
         self.videoCapture.start()
@@ -205,17 +253,7 @@ class MainMenu:
                             if SAVE["type"] == "battle":
                                 SAVE["id"] = "head"
                                 SAVE["dialog_options"] = {}
-                            self.videoCapture.stop()
-                            scene(SAVE["chapterType"],SAVE["chapterName"],screen,SAVE["type"],SAVE["id"],SAVE["dialog_options"])
-                            self.videoCapture = self.videoCapture.clone()
-                            self.videoCapture.start()
-                            #是否可以继续游戏了（save文件是否被创建）
-                            if os.path.exists("Save/save.yaml") and self.continueButtonIsOn == False:
-                                self.main_menu_txt["menu_main"]["0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_main"]["0_continue"],"enable",self.main_menu_txt["menu_main"]["0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
-                                self.continueButtonIsOn = True
-                            elif not os.path.exists("Save/save.yaml") and self.continueButtonIsOn == True:
-                                self.main_menu_txt["menu_main"]["0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_main"]["0_continue"],"disable",self.main_menu_txt["menu_main"]["0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
-                                self.continueButtonIsOn = False
+                            self.__load_scene(SAVE["chapterType"],SAVE["chapterName"],screen,SAVE["type"],SAVE["id"],SAVE["dialog_options"])
                         else:
                             #raise Exception('ZeroEngine-Error: The save.yaml is not exist')
                             pass
@@ -251,17 +289,7 @@ class MainMenu:
                         for i in range(len(self.chapter_select)-1):
                             #章节选择
                             if Zero.ifHover(self.chapter_select[i]):
-                                self.videoCapture.stop()
-                                scene("main_chapter","chapter"+str(i+1),screen)
-                                self.videoCapture = self.videoCapture.clone()
-                                self.videoCapture.start()
-                                #是否可以继续游戏了（save文件是否被创建）
-                                if os.path.exists("Save/save.yaml") and self.continueButtonIsOn == False:
-                                    self.main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"enable",self.main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
-                                    self.continueButtonIsOn = True
-                                elif not os.path.exists("Save/save.yaml") and self.continueButtonIsOn == True:
-                                    self.main_menu_txt["menu_1"]["text0_continue"] = Zero.fontRenderPro(Zero.get_lang("MainMenu")["menu_1"]["text0_continue"],"disable",self.main_menu_txt["menu_1"]["text0_continue"].get_pos(),Zero.get_standard_font_size("medium"))
-                                    self.continueButtonIsOn = False
+                                self.__load_scene("main_chapter",i+1,screen)
                                 break
                 #选择创意工坊选项
                 elif self.menu_type == 2:
@@ -271,24 +299,12 @@ class MainMenu:
                     elif Zero.ifHover(self.main_menu_txt["menu_workshop_choice"]["1_mapCreator"]):
                         self.__reload_workshop_files_list(screen.get_size(),True)
                         self.menu_type = 4
-                        """
-                        self.videoCapture.stop()
-                        mapCreator("main_chapter","chapter1",screen)
-                        self.videoCapture = self.videoCapture.clone()
-                        self.videoCapture.start()
-                        """
                     elif Zero.ifHover(self.main_menu_txt["menu_workshop_choice"]["2_dialogCreator"]):
                         self.__reload_workshop_files_list(screen.get_size(),True)
                         self.menu_type = 5
-                        """
-                        self.videoCapture.stop()
-                        dialogCreator("main_chapter","chapter1",screen,"dialog_before_battle")
-                        self.videoCapture = self.videoCapture.clone()
-                        self.videoCapture.start()
-                        """
                     elif Zero.ifHover(self.main_menu_txt["menu_workshop_choice"]["back"]):
                         self.menu_type = 0
-                #创意工坊-选择合集
+                #创意工坊-选择想要游玩的合集
                 elif self.menu_type == 3:
                     if Zero.ifHover(self.workshop_files[-1]):
                         self.menu_type = 2
@@ -296,9 +312,11 @@ class MainMenu:
                         for i in range(len(self.workshop_files)-1):
                             #章节选择
                             if Zero.ifHover(self.workshop_files[i]):
-                                self.__reload_chapter_select_list(screen.get_size(),"workshop",self.workshop_files_text[i])
+                                self.current_selected_workshop_collection = self.workshop_files_text[i]
+                                self.__reload_chapter_select_list(screen.get_size(),"workshop")
                                 self.menu_type = 6
                                 break
+                #创意工坊-选择想要编辑地图的合集
                 elif self.menu_type == 4:
                     #新建合集
                     if Zero.ifHover(self.workshop_files[0]):
@@ -311,9 +329,11 @@ class MainMenu:
                         for i in range(1,len(self.workshop_files)-1):
                             #章节选择
                             if Zero.ifHover(self.workshop_files[i]):
-                                self.__reload_chapter_select_list(screen.get_size(),"workshop",self.workshop_files_text[i-1],True)
+                                self.current_selected_workshop_collection = self.workshop_files_text[i-1]
+                                self.__reload_chapter_select_list(screen.get_size(),"workshop",True,"map")
                                 self.menu_type = 7
                                 break
+                #创意工坊-选择想要编辑对话的合集
                 elif self.menu_type == 5:
                     #新建合集
                     if Zero.ifHover(self.workshop_files[0]):
@@ -326,17 +346,50 @@ class MainMenu:
                         for i in range(1,len(self.workshop_files)-1):
                             #章节选择
                             if Zero.ifHover(self.workshop_files[i]):
-                                self.__reload_chapter_select_list(screen.get_size(),"workshop",self.workshop_files_text[i-1],True)
+                                self.current_selected_workshop_collection = self.workshop_files_text[i-1]
+                                self.__reload_chapter_select_list(screen.get_size(),"workshop",True)
                                 self.menu_type = 8
                                 break
-                #创意工坊-选择关卡
+                #创意工坊-选择当前合集想要游玩的关卡
                 elif self.menu_type == 6:
                     if Zero.ifHover(self.chapter_select[-1]):
                         self.menu_type = 3
+                    else:
+                        for i in range(len(self.chapter_select)-1):
+                            #章节选择
+                            if Zero.ifHover(self.chapter_select[i]):
+                                self.__load_scene("workshop",i+1,screen)
+                                break
+                #创意工坊-选择当前合集想要编辑地图的关卡
                 elif self.menu_type == 7:
-                    if Zero.ifHover(self.chapter_select[-1]):
+                    if Zero.ifHover(self.chapter_select[0]):
+                        self.__create_new_map()
+                        self.__reload_chapter_select_list(screen.get_size(),"workshop",True,"map")
+                    elif Zero.ifHover(self.chapter_select[-1]):
                         self.menu_type = 4
+                    else:
+                        for i in range(1,len(self.chapter_select)-1):
+                            #章节选择
+                            if Zero.ifHover(self.chapter_select[i]):
+                                self.videoCapture.stop()
+                                mapCreator("workshop",i,screen,self.current_selected_workshop_collection)
+                                self.videoCapture = self.videoCapture.clone()
+                                self.videoCapture.start()
+                                break
+                #创意工坊-选择当前合集想要编辑对话的关卡
                 elif self.menu_type == 8:
-                    if Zero.ifHover(self.chapter_select[-1]):
+                    if Zero.ifHover(self.chapter_select[0]):
+                        self.__create_new_dialog()
+                        self.__reload_chapter_select_list(screen.get_size(),"workshop",True)
+                    elif Zero.ifHover(self.chapter_select[-1]):
                         self.menu_type = 5
+                    else:
+                        for i in range(1,len(self.chapter_select)-1):
+                            #章节选择
+                            if Zero.ifHover(self.chapter_select[i]):
+                                self.videoCapture.stop()
+                                dialogCreator("workshop",i,screen,"dialog_before_battle",self.current_selected_workshop_collection)
+                                self.videoCapture = self.videoCapture.clone()
+                                self.videoCapture.start()
+                                break
             Zero.display.flip()
