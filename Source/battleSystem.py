@@ -1,9 +1,9 @@
 # cython: language_level=3
-from Zero3.battleSystemInterface import *
+from Source.skill import *
 
-class BattleSystem(BattleSystemInterface):
-    def __init__(self,chapterType=None,chapterId=None):
-        BattleSystemInterface.__init__(self,chapterType,chapterId)
+class BattleSystem(Zero.BattleSystemInterface):
+    def __init__(self,chapterType=None,chapterId=None,collectionName=None):
+        Zero.BattleSystemInterface.__init__(self,chapterType,chapterId,collectionName)
         #被选中的角色
         self.characterGetClick = None
         self.enemiesGetAttack = {}
@@ -53,25 +53,28 @@ class BattleSystem(BattleSystemInterface):
         self.dialog_ifPathSet = False
     #储存章节信息
     def __save_data(self):
-        if pause_menu.ifSave == True:
-            pause_menu.ifSave = False
+        if Zero.pause_menu.ifSave == True:
+            Zero.pause_menu.ifSave = False
             DataTmp = {}
             DataTmp["type"] = "battle"
             DataTmp["chapterType"] = self.chapterType
             DataTmp["chapterId"] = self.chapterId
+            DataTmp["collectionName"] = self.collectionName
             DataTmp["characters_data"] = self.characters_data
             DataTmp["sangvisFerris_data"] = self.sangvisFerris_data
             DataTmp["MAP"] = self.MAP
             DataTmp["dialogKey"] = self.dialogKey
             DataTmp["dialogData"] = self.dialogData
             DataTmp["resultInfo"] = self.resultInfo
-            saveConfig("Save/save.yaml",DataTmp)
+            DataTmp["timeStamp"] = time.strftime(":%S", time.localtime())
+            Zero.saveConfig("Save/save.yaml",DataTmp)
     #从存档中加载游戏进程
     def load(self,screen):
-        DataTmp = loadConfig("Save/save.yaml")
+        DataTmp = Zero.loadConfig("Save/save.yaml")
         if DataTmp["type"] == "battle":
             self.chapterType = DataTmp["chapterType"]
             self.chapterId = DataTmp["chapterId"]
+            self.collectionName = DataTmp["collectionName"]
             self.characters_data = DataTmp["characters_data"]
             self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
             self.MAP = DataTmp["MAP"]
@@ -88,41 +91,43 @@ class BattleSystem(BattleSystemInterface):
         self.window_x,self.window_y = screen.get_size()
         #生成标准文字渲染器
         self.FONTSIZE = int(self.window_x/76)
-        self.FONT = createFont(self.FONTSIZE)
+        self.FONT = Zero.createFont(self.FONTSIZE)
         #加载按钮的文字
         self.selectMenuUI = SelectMenu()
-        self.battleModeUiTxt = get_lang("Battle_UI")
+        self.battleModeUiTxt = Zero.get_lang("Battle_UI")
         self.warnings_to_display = WarningSystem()
-        loading_info = get_lang("LoadingTxt")
+        loading_info = Zero.get_lang("LoadingTxt")
         #加载剧情
-        DataTmp = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,get_setting('Language')))
+        DataTmp = Zero.loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,Zero.get_setting('Language'))) if self.collectionName == None\
+            else Zero.loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collectionName,self.chapterId,Zero.get_setting('Language')))
         #章节标题显示
         self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleModeUiTxt["numChapter"],self.chapterId,DataTmp["title"],DataTmp["description"])
         self.battleMode_info = DataTmp["battle_info"]
         self.dialog_during_battle = DataTmp["dialog_during_battle"]
         #正在加载的gif动态图标
-        nowLoadingIcon = loadRealGif("Assets/image/UI/sv98_walking.gif",(self.window_x*0.7,self.window_y*0.83),(self.window_x*0.003*15,self.window_x*0.003*21))
+        nowLoadingIcon = Zero.loadRealGif("Assets/image/UI/sv98_walking.gif",(self.window_x*0.7,self.window_y*0.83),(self.window_x*0.003*15,self.window_x*0.003*21))
         #渐入效果
         for i in range(1,255,2):
             self.infoToDisplayDuringLoading.display(screen,i)
-            display.flip(True)
+            Zero.display.flip(True)
         #开始加载地图场景
         self.infoToDisplayDuringLoading.display(screen)
-        now_loading = self.FONT.render(loading_info["now_loading_map"],get_fontMode(),(255,255,255))
-        drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
+        now_loading = self.FONT.render(loading_info["now_loading_map"],Zero.get_fontMode(),(255,255,255))
+        Zero.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
-        display.flip(True)
+        Zero.display.flip(True)
         #读取并初始化章节信息
-        DataTmp = loadConfig("Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId))
+        DataTmp = Zero.loadConfig("Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId)) if self.collectionName == None\
+            else Zero.loadConfig("Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collectionName,self.chapterId))
         self.zoomIn = DataTmp["zoomIn"]*100
         #储存对话数据key的字典
         self.dialogInfo = DataTmp["dialogs"]
         if self.loadFromSave == True:
             #加载对应角色所需的图片
-            characterDataThread = loadCharacterDataFromSaveThread(self.characters_data,self.sangvisFerris_data)
+            characterDataThread = Zero.loadCharacterDataFromSaveThread(self.characters_data,self.sangvisFerris_data)
         else:
             #初始化角色信息
-            characterDataThread = initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
+            characterDataThread = Zero.initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
             #查看是否有战斗开始前的对话
             if "initial" not in self.dialogInfo or self.dialogInfo["initial"] == None:
                 self.dialogKey = None
@@ -131,12 +136,12 @@ class BattleSystem(BattleSystemInterface):
             self.dialogData = None
         self.bg_music = DataTmp["background_music"] 
         #初始化天气和环境的音效 -- 频道1
-        self.environment_sound = SoundManagement(1)
+        self.environment_sound = Zero.SoundManagement(1)
         self.weatherController = None
         if DataTmp["weather"] != None:
             self.environment_sound.add("Assets/sound/environment/{}.ogg".format(DataTmp["weather"]))
-            self.environment_sound.set_volume(get_setting("Sound","sound_environment")/100.0)
-            self.weatherController = WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
+            self.environment_sound.set_volume(Zero.get_setting("Sound","sound_environment")/100.0)
+            self.weatherController = Zero.WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
         #检测self.zoomIn参数是否越界
         if self.zoomIn < 200:
             self.zoomIn = 200
@@ -147,10 +152,10 @@ class BattleSystem(BattleSystemInterface):
         characterDataThread.start()
         while characterDataThread.isAlive():
             self.infoToDisplayDuringLoading.display(screen)
-            now_loading = self.FONT.render(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum),get_fontMode(),(255,255,255))
-            drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
+            now_loading = self.FONT.render(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum),Zero.get_fontMode(),(255,255,255))
+            Zero.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
             nowLoadingIcon.draw(screen)
-            display.flip(True)
+            Zero.display.flip(True)
         if self.loadFromSave == False:
             #获取角色数据
             self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
@@ -164,70 +169,70 @@ class BattleSystem(BattleSystemInterface):
         self.MAP.calculate_darkness(self.characters_data)
         #开始加载关卡设定
         self.infoToDisplayDuringLoading.display(screen)
-        now_loading = self.FONT.render(loading_info["now_loading_level"],get_fontMode(),findColorRGBA("white"))
-        drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
+        now_loading = self.FONT.render(loading_info["now_loading_level"],Zero.get_fontMode(),Zero.findColorRGBA("white"))
+        Zero.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
-        display.flip(True)
+        Zero.display.flip(True)
         #加载UI:
         #加载结束回合的图片
-        self.end_round_txt = self.FONT.render(get_lang("Battle_UI","endRound"),get_fontMode(),findColorRGBA("white"))
-        self.end_round_button = loadImage("Assets/image/UI/end_round_button.png",(self.window_x*0.8,self.window_y*0.7),self.end_round_txt.get_width()*2,self.end_round_txt.get_height()*2.5)
+        self.end_round_txt = self.FONT.render(Zero.get_lang("Battle_UI","endRound"),Zero.get_fontMode(),Zero.findColorRGBA("white"))
+        self.end_round_button = Zero.loadImage("Assets/image/UI/end_round_button.png",(self.window_x*0.8,self.window_y*0.7),self.end_round_txt.get_width()*2,self.end_round_txt.get_height()*2.5)
         #加载子弹图片
         #bullet_img = loadImg("Assets/image/UI/bullet.png", perBlockWidth/6, self.MAP.perBlockHeight/12)
         #加载血条,各色方块等UI图片 size:perBlockWidth, self.MAP.perBlockHeight/5
         self.original_UI_img = {
-            "hp_empty" : loadImg("Assets/image/UI/hp_empty.png"),
-            "hp_red" : loadImg("Assets/image/UI/hp_red.png"),
-            "hp_green" : loadImg("Assets/image/UI/hp_green.png"),
-            "action_point_blue" : loadImg("Assets/image/UI/action_point.png"),
-            "bullets_number_brown" : loadImg("Assets/image/UI/bullets_number.png"),
-            "green" : loadImg("Assets/image/UI/range/green.png"),
-            "red" : loadImg("Assets/image/UI/range/red.png"),
-            "yellow": loadImg("Assets/image/UI/range/yellow.png"),
-            "blue": loadImg("Assets/image/UI/range/blue.png"),
-            "orange": loadImg("Assets/image/UI/range/orange.png"),
-            "eye_orange": loadImg("Assets/image/UI/eye_orange.png"),
-            "eye_red": loadImg("Assets/image/UI/eye_red.png"),
-            "supplyBoard":loadImage("Assets/image/UI/score.png",((self.window_x-self.window_x/3)/2,-self.window_y/12),self.window_x/3,self.window_y/12),
+            "hp_empty" : Zero.loadImg("Assets/image/UI/hp_empty.png"),
+            "hp_red" : Zero.loadImg("Assets/image/UI/hp_red.png"),
+            "hp_green" : Zero.loadImg("Assets/image/UI/hp_green.png"),
+            "action_point_blue" : Zero.loadImg("Assets/image/UI/action_point.png"),
+            "bullets_number_brown" : Zero.loadImg("Assets/image/UI/bullets_number.png"),
+            "green" : Zero.loadImg("Assets/image/UI/range/green.png"),
+            "red" : Zero.loadImg("Assets/image/UI/range/red.png"),
+            "yellow": Zero.loadImg("Assets/image/UI/range/yellow.png"),
+            "blue": Zero.loadImg("Assets/image/UI/range/blue.png"),
+            "orange": Zero.loadImg("Assets/image/UI/range/orange.png"),
+            "eye_orange": Zero.loadImg("Assets/image/UI/eye_orange.png"),
+            "eye_red": Zero.loadImg("Assets/image/UI/eye_red.png"),
+            "supplyBoard":Zero.loadImage("Assets/image/UI/score.png",((self.window_x-self.window_x/3)/2,-self.window_y/12),self.window_x/3,self.window_y/12),
         }
         #UI - 变形后
         self.UI_img = {
-            "green" : resizeImg(self.original_UI_img["green"], (self.MAP.perBlockWidth*0.8, None)),
-            "red" : resizeImg(self.original_UI_img["red"], (self.MAP.perBlockWidth*0.8, None)),
-            "yellow" : resizeImg(self.original_UI_img["yellow"], (self.MAP.perBlockWidth*0.8, None)),
-            "blue" : resizeImg(self.original_UI_img["blue"], (self.MAP.perBlockWidth*0.8, None)),
-            "orange": resizeImg(self.original_UI_img["orange"], (self.MAP.perBlockWidth*0.8, None))
+            "green" : Zero.resizeImg(self.original_UI_img["green"], (self.MAP.perBlockWidth*0.8, None)),
+            "red" : Zero.resizeImg(self.original_UI_img["red"], (self.MAP.perBlockWidth*0.8, None)),
+            "yellow" : Zero.resizeImg(self.original_UI_img["yellow"], (self.MAP.perBlockWidth*0.8, None)),
+            "blue" : Zero.resizeImg(self.original_UI_img["blue"], (self.MAP.perBlockWidth*0.8, None)),
+            "orange": Zero.resizeImg(self.original_UI_img["orange"], (self.MAP.perBlockWidth*0.8, None))
         }
         #角色信息UI管理
         self.characterInfoBoardUI = CharacterInfoBoard(self.window_x,self.window_y)
         #加载对话框图片
-        self.dialoguebox_up = DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,self.window_x,self.window_y/2-self.window_y*0.35,self.FONTSIZE)
+        self.dialoguebox_up = Zero.DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,self.window_x,self.window_y/2-self.window_y*0.35,self.FONTSIZE)
         self.dialoguebox_up.flip()
-        self.dialoguebox_down = DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,-self.window_x*0.3,self.window_y/2+self.window_y*0.2,self.FONTSIZE)
+        self.dialoguebox_down = Zero.DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,-self.window_x*0.3,self.window_y/2+self.window_y*0.2,self.FONTSIZE)
         #-----加载音效-----
         #行走的音效 -- 频道0
-        self.footstep_sounds = SoundManagement(0)
+        self.footstep_sounds = Zero.SoundManagement(0)
         for walkingSoundPath in glob.glob(r'Assets/sound/snow/*.wav'):
             self.footstep_sounds.add(walkingSoundPath)
-        self.footstep_sounds.set_volume(get_setting("Sound","sound_effects")/100)
+        self.footstep_sounds.set_volume(Zero.get_setting("Sound","sound_effects")/100)
         #攻击的音效 -- 频道2
-        self.attackingSounds = AttackingSoundManager(get_setting("Sound","sound_effects"),2)
+        self.attackingSounds = Zero.AttackingSoundManager(Zero.get_setting("Sound","sound_effects"),2)
         #切换回合时的UI
         self.RoundSwitchUI = RoundSwitch(self.window_x,self.window_y,self.battleModeUiTxt)
         #关卡背景介绍信息文字
         for i in range(len(self.battleMode_info)):
-            self.battleMode_info[i] = self.FONT.render(self.battleMode_info[i],get_fontMode(),(255,255,255))
+            self.battleMode_info[i] = self.FONT.render(self.battleMode_info[i],Zero.get_fontMode(),(255,255,255))
         #显示章节信息
         for a in range(0,250,2):
             self.infoToDisplayDuringLoading.display(screen)
             for i in range(len(self.battleMode_info)):
                 self.battleMode_info[i].set_alpha(a)
-                drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
+                Zero.drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
                 if i == 1:
-                    temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),get_fontMode(),(255,255,255))
+                    temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),Zero.get_fontMode(),(255,255,255))
                     temp_secode.set_alpha(a)
-                    drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
-            display.flip(True)
+                    Zero.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
+            Zero.display.flip(True)
     #把战斗系统的画面画到screen上
     def display(self,screen):
         #更新输入事件
@@ -248,14 +253,14 @@ class BattleSystem(BattleSystemInterface):
             self.infoToDisplayDuringLoading.display(screen,self.txt_alpha)
             for i in range(len(self.battleMode_info)):
                 self.battleMode_info[i].set_alpha(self.txt_alpha)
-                drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
+                Zero.drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
                 if i == 1:
-                    temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),get_fontMode(),(255,255,255))
+                    temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),Zero.get_fontMode(),(255,255,255))
                     temp_secode.set_alpha(self.txt_alpha)
-                    drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
+                    Zero.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
             self.txt_alpha -= 5
         #刷新画面
-        display.flip()
+        Zero.display.flip()
     #对话模块
     def __play_dialog(self,screen):
         #画出地图
@@ -379,7 +384,7 @@ class BattleSystem(BattleSystemInterface):
                 #闲置一定时间（秒）
                 elif "idle" in currentDialog and currentDialog["idle"] != None:
                     if self.dialogData["secondsToIdle"] == None:
-                        self.dialogData["secondsToIdle"] = currentDialog["idle"]*display.fps
+                        self.dialogData["secondsToIdle"] = currentDialog["idle"]*Zero.display.fps
                     else:
                         if self.dialogData["secondsAlreadyIdle"] < self.dialogData["secondsToIdle"]:
                             self.dialogData["secondsAlreadyIdle"] += 1
@@ -402,12 +407,12 @@ class BattleSystem(BattleSystemInterface):
                 for event in self._get_event():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
-                            pause_menu.display(screen)
+                            Zero.pause_menu.display(screen)
                             self.__save_data()
-                            if pause_menu.ifBackToMainMenu == True:
-                                unloadBackgroundMusic()
+                            if Zero.pause_menu.ifBackToMainMenu == True:
+                                Zero.unloadBackgroundMusic()
                                 self.isPlaying = False
-                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
+                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and Zero.controller.joystick.get_button(0) == 1:
                         if "dialoguebox_up" in currentDialog or "dialoguebox_down" in currentDialog:
                             self.dialogData["dialogId"] += 1
                         if self.dialogData["dialogId"] < len(self.dialog_during_battle[self.dialogKey]):
@@ -452,7 +457,7 @@ class BattleSystem(BattleSystemInterface):
         right_click = False
         show_pause_menu = False
         #获取鼠标坐标
-        mouse_x,mouse_y = controller.get_pos()
+        mouse_x,mouse_y = Zero.controller.get_pos()
         #攻击范围
         attacking_range = None
         skill_range = None
@@ -471,13 +476,13 @@ class BattleSystem(BattleSystemInterface):
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 self._check_key_down(event)
                 if event.key == pygame.K_m:
-                    display.quit()
+                    Zero.display.quit()
             elif event.type == pygame.KEYUP:
                 self._check_key_up(event)
             #鼠标点击
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 #右键
-                if event.button == 1 or event.type == pygame.JOYBUTTONDOWN and controller.joystick.get_button(0) == 1:
+                if event.button == 1 or event.type == pygame.JOYBUTTONDOWN and Zero.controller.joystick.get_button(0) == 1:
                     right_click = True
                 #上下滚轮-放大和缩小地图
                 elif event.button == 4 and self.zoomIntoBe < 400:
@@ -497,7 +502,7 @@ class BattleSystem(BattleSystemInterface):
             self.MAP.changePerBlockSize(self.window_x/self.MAP.column*self.zoomIn/100,self.window_y/self.MAP.row*self.zoomIn/100,self.window_x,self.window_y)
             #根据perBlockWidth和perBlockHeight重新加载对应尺寸的UI
             for key in self.UI_img:
-                self.UI_img[key] = resizeImg(self.original_UI_img[key], (self.MAP.perBlockWidth*0.8, None))
+                self.UI_img[key] = Zero.resizeImg(self.original_UI_img[key], (self.MAP.perBlockWidth*0.8, None))
             self.selectMenuUI.allButton = None
         else:
             self.zoomIn = self.zoomIntoBe
@@ -507,14 +512,14 @@ class BattleSystem(BattleSystemInterface):
         for area in self.areaDrawColorBlock:
             for position in self.areaDrawColorBlock[area]:
                 xTemp,yTemp = self.MAP.calPosInMap(position[0],position[1])
-                drawImg(self.UI_img[area],(xTemp+self.MAP.perBlockWidth*0.1,yTemp),screen)
+                Zero.drawImg(self.UI_img[area],(xTemp+self.MAP.perBlockWidth*0.1,yTemp),screen)
 
         #玩家回合
         if self.whose_round == "player":
             if right_click == True:
                 block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                 #如果点击了回合结束的按钮
-                if ifHover(self.end_round_button) and self.isWaiting == True:
+                if Zero.ifHover(self.end_round_button) and self.isWaiting == True:
                     self.whose_round = "playerToSangvisFerris"
                     self.characterGetClick = None
                     self.NotDrawRangeBlocks = True
@@ -663,7 +668,7 @@ class BattleSystem(BattleSystemInterface):
                                 #显示路径
                                 self.areaDrawColorBlock["green"] = self.the_route
                                 xTemp,yTemp = self.MAP.calPosInMap(self.the_route[-1][0],self.the_route[-1][1])
-                                screen.blit(self.FONT.render(str(len(self.the_route)*2),get_fontMode(),(255,255,255)),(xTemp+self.FONTSIZE*2,yTemp+self.FONTSIZE))
+                                screen.blit(self.FONT.render(str(len(self.the_route)*2),Zero.get_fontMode(),(255,255,255)),(xTemp+self.FONTSIZE*2,yTemp+self.FONTSIZE))
                                 self.characters_data[self.characterGetClick].draw_custom("move",(xTemp,yTemp),screen,self.MAP)
                 #显示攻击范围        
                 elif self.action_choice == "attack":
@@ -672,7 +677,9 @@ class BattleSystem(BattleSystemInterface):
                     any_character_in_attack_range = False
                     for enemies in self.sangvisFerris_data:
                         if self.sangvisFerris_data[enemies].current_hp > 0:
-                            if (self.sangvisFerris_data[enemies].x,self.sangvisFerris_data[enemies].y) in attacking_range["near"] or (self.sangvisFerris_data[enemies].x,self.sangvisFerris_data[enemies].y) in attacking_range["middle"] or (self.sangvisFerris_data[enemies].x,self.sangvisFerris_data[enemies].y) in attacking_range["far"]:
+                            if (self.sangvisFerris_data[enemies].x,self.sangvisFerris_data[enemies].y) in attacking_range["near"]\
+                                or (self.sangvisFerris_data[enemies].x,self.sangvisFerris_data[enemies].y) in attacking_range["middle"]\
+                                    or (self.sangvisFerris_data[enemies].x,self.sangvisFerris_data[enemies].y) in attacking_range["far"]:
                                 any_character_in_attack_range = True
                                 break
                     if any_character_in_attack_range == True:
@@ -832,10 +839,10 @@ class BattleSystem(BattleSystemInterface):
                                 for key2,value2 in self.MAP.ornamentationData[i].items.items():
                                     if key2 == "bullet":
                                         self.characters_data[self.characterGetClick].bullets_carried += value2
-                                        self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(value2),get_fontMode(),(255,255,255)))
+                                        self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(value2),Zero.get_fontMode(),(255,255,255)))
                                     elif key2 == "hp":
                                         self.characters_data[self.characterGetClick].current_hp += value2
-                                        self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(value2),get_fontMode(),(255,255,255)))
+                                        self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(value2),Zero.get_fontMode(),(255,255,255)))
                                 if len(self.original_UI_img["supplyBoard"].items)>0:
                                     self.original_UI_img["supplyBoard"].yTogo = 10
                                 del self.MAP.ornamentationData[i]
@@ -860,11 +867,11 @@ class BattleSystem(BattleSystemInterface):
                         self.attackingSounds.play(self.characters_data[self.characterGetClick].kind)
                     if self.characters_data[self.characterGetClick].get_imgId("attack") == self.characters_data[self.characterGetClick].get_imgNum("attack")-2:
                         for each_enemy in self.enemiesGetAttack:
-                            if self.enemiesGetAttack[each_enemy] == "near" and random.randint(1,100) <= 95 or self.enemiesGetAttack[each_enemy] == "middle" and random.randint(1,100) <= 80 or self.enemiesGetAttack[each_enemy] == "far" and random.randint(1,100) <= 65:
+                            if self.enemiesGetAttack[each_enemy] == "near" and Zero.randomInt(1,100) <= 95 or self.enemiesGetAttack[each_enemy] == "middle" and Zero.randomInt(1,100) <= 80 or self.enemiesGetAttack[each_enemy] == "far" and Zero.randomInt(1,100) <= 65:
                                 the_damage = self.sangvisFerris_data[each_enemy].attackBy(self.characters_data[self.characterGetClick])
-                                self.damage_do_to_characters[each_enemy] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
+                                self.damage_do_to_characters[each_enemy] = self.FONT.render("-"+str(the_damage),Zero.get_fontMode(),Zero.findColorRGBA("red"))
                             else:
-                                self.damage_do_to_characters[each_enemy] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
+                                self.damage_do_to_characters[each_enemy] = self.FONT.render("Miss",Zero.get_fontMode(),Zero.findColorRGBA("red"))
                     elif self.characters_data[self.characterGetClick].get_imgId("attack") == self.characters_data[self.characterGetClick].get_imgNum("attack")-1:
                         self.characters_data[self.characterGetClick].current_bullets -= 1
                         self.isWaiting = True
@@ -883,7 +890,7 @@ class BattleSystem(BattleSystemInterface):
         if self.whose_round == "sangvisFerris":
             self.enemy_in_control = self.sangvisFerris_name_list[self.enemies_in_control_id]
             if self.enemy_action == None:
-                self.enemy_action = AI(self.enemy_in_control,self.MAP,self.characters_data,self.sangvisFerris_data,self.the_characters_detected_last_round)
+                self.enemy_action = Zero.AI(self.enemy_in_control,self.MAP,self.characters_data,self.sangvisFerris_data,self.the_characters_detected_last_round)
                 if self.enemy_action["action"] == "move" or self.enemy_action["action"] == "move&attack":
                     self.sangvisFerris_data[self.enemy_in_control].move_follow(self.enemy_action["route"])
                 elif self.enemy_action["action"] == "attack":
@@ -906,13 +913,13 @@ class BattleSystem(BattleSystemInterface):
                 if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == 3:
                     self.attackingSounds.play(self.sangvisFerris_data[self.enemy_in_control].kind)
                 elif self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == self.sangvisFerris_data[self.enemy_in_control].get_imgNum("attack")-1:
-                    temp_value = random.randint(0,100)
+                    temp_value = Zero.randomInt(0,100)
                     if self.enemy_action["target_area"] == "near" and temp_value <= 95 or self.enemy_action["target_area"] == "middle" and temp_value <= 80 or self.enemy_action["target_area"] == "far" and temp_value <= 65:
                         the_damage = self.characters_data[self.enemy_action["target"]].attackBy(self.sangvisFerris_data[self.enemy_in_control],self.resultInfo)
                         self.MAP.calculate_darkness(self.characters_data)
-                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),get_fontMode(),findColorRGBA("red"))
+                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),Zero.get_fontMode(),Zero.findColorRGBA("red"))
                     else:
-                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",get_fontMode(),findColorRGBA("red"))
+                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",Zero.get_fontMode(),Zero.findColorRGBA("red"))
                     self.enemy_action["action"] = "stay"
             #最终的idle状态
             elif self.enemy_action["action"] == "stay":
@@ -928,7 +935,7 @@ class BattleSystem(BattleSystemInterface):
 
         """↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"""
         rightClickCharacterAlphaDeduct = True
-        for key,value in dicMerge(self.characters_data,self.sangvisFerris_data).items():
+        for key,value in Zero.dicMerge(self.characters_data,self.sangvisFerris_data).items():
             #如果天亮的双方都可以看见/天黑，但是是友方角色/天黑，但是是敌方角色在可观测的范围内 -- 则画出角色
             if value.faction == "character" or value.faction == "sangvisFerri" and self.MAP.inLightArea(value):
                 if self.NotDrawRangeBlocks == True and pygame.mouse.get_pressed()[2]:
@@ -958,7 +965,7 @@ class BattleSystem(BattleSystemInterface):
                     xTemp,yTemp = self.MAP.calPosInMap(value.x,value.y)
                     xTemp+=self.MAP.perBlockWidth*0.05
                     yTemp-=self.MAP.perBlockWidth*0.05
-                    displayInCenter(self.damage_do_to_characters[key],self.UI_img["green"],xTemp,yTemp,screen)
+                    Zero.displayInCenter(self.damage_do_to_characters[key],self.UI_img["green"],xTemp,yTemp,screen)
                     self.damage_do_to_characters[key].set_alpha(the_alpha_to_check-5)
                 else:
                     del self.damage_do_to_characters[key]
@@ -1069,7 +1076,7 @@ class BattleSystem(BattleSystemInterface):
             start_point = (self.window_x - lenTemp)/2
             for i in range(len(self.original_UI_img["supplyBoard"].items)):
                 start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*0.25
-                drawImg(self.original_UI_img["supplyBoard"].items[i],(start_point,(self.original_UI_img["supplyBoard"].height - self.original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,self.original_UI_img["supplyBoard"].y)
+                Zero.drawImg(self.original_UI_img["supplyBoard"].items[i],(start_point,(self.original_UI_img["supplyBoard"].height - self.original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,self.original_UI_img["supplyBoard"].y)
                 start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*1.25
 
         if self.whose_round == "player":
@@ -1084,7 +1091,7 @@ class BattleSystem(BattleSystemInterface):
         if not pygame.mixer.music.get_busy():
             pygame.mixer.music.load("Assets/music/"+self.bg_music)
             pygame.mixer.music.play()
-            pygame.mixer.music.set_volume(get_setting("Sound","background_music")/100.0)
+            pygame.mixer.music.set_volume(Zero.get_setting("Sound","background_music")/100.0)
 
         #结束动画--胜利
         if self.whose_round == "result_win":
@@ -1102,8 +1109,8 @@ class BattleSystem(BattleSystemInterface):
             pass
         #展示暂停菜单
         if show_pause_menu == True:
-            pause_menu.display(screen)
+            Zero.pause_menu.display(screen)
             self.__save_data()
-            if pause_menu.ifBackToMainMenu == True:
-                unloadBackgroundMusic()
+            if Zero.pause_menu.ifBackToMainMenu == True:
+                Zero.unloadBackgroundMusic()
                 self.isPlaying = False

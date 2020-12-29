@@ -3,8 +3,7 @@ from Zero3.battleSystemInterface import *
 
 class mapCreator(BattleSystemInterface):
     def __init__(self,chapterType,chapterId,collectionName=None):
-        BattleSystemInterface.__init__(self,chapterType,chapterId)
-        self.collectionName = collectionName
+        BattleSystemInterface.__init__(self,chapterType,chapterId,collectionName)
         self.fileLocation = "Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId) if self.chapterType == "main_chapter" else "Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collectionName,self.chapterId)
         display.set_caption("Girls frontline-Last Wish: MapCreator")
         unloadBackgroundMusic()
@@ -13,10 +12,9 @@ class mapCreator(BattleSystemInterface):
         self.window_x,self.window_y = screen.get_size()
         self.decorations_setting = loadConfig("Data/decorations.yaml","decorations")
         #载入地图数据
-        
-        loadData = loadConfig(self.fileLocation)
+        mapFileData = loadConfig(self.fileLocation)
         #初始化角色信息
-        characterDataThread = initializeCharacterDataThread(loadData["character"],loadData["sangvisFerri"],"dev")
+        characterDataThread = initializeCharacterDataThread(mapFileData["character"],mapFileData["sangvisFerri"],"dev")
         #加载角色信息
         characterDataThread.start()
         characterDataThread.join()
@@ -24,7 +22,7 @@ class mapCreator(BattleSystemInterface):
         #加载所有角色的数据
         self.DATABASE = characterDataThread.DATABASE
         #初始化地图
-        self.MAP = loadData["map"]
+        self.MAP = mapFileData["map"]
         if self.MAP == None or len(self.MAP) == 0:
             SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
             block_y = 50
@@ -35,14 +33,14 @@ class mapCreator(BattleSystemInterface):
                 for a in range(block_x):
                     map_per_line.append(SnowEnvImg[randomInt(0,5)])
                 default_map.append(map_per_line)
-            loadData["map"] = default_map
-            saveConfig(self.fileLocation,loadData)
+            mapFileData["map"] = default_map
+            saveConfig(self.fileLocation,mapFileData)
         else:
-            block_y = len(loadData["map"])
-            block_x = len(loadData["map"][0])
+            block_y = len(mapFileData["map"])
+            block_x = len(mapFileData["map"][0])
         #加载地图
-        self._create_map(loadData,False)
-        del loadData
+        self._create_map(mapFileData,False)
+        del mapFileData
         #加载背景图片
         self.envImgDict={}
         for imgPath in glob.glob(r'Assets/image/environment/block/*.png'):
@@ -168,17 +166,17 @@ class mapCreator(BattleSystemInterface):
                 elif ifHover(self.UIButton["reload"]) and self.object_to_put_down == None and self.deleteMode == False:
                     tempLocal_x,tempLocal_y = self.MAP.getPos()
                     #读取地图数据
-                    loadData = loadConfig(self.fileLocation)
+                    mapFileData = loadConfig(self.fileLocation)
                     #初始化角色信息
                     self.characters_data = {}
-                    for each_character in loadData["character"]:
-                        self.characters_data[each_character] = CharacterDataManager(loadData["character"][each_character],self.DATABASE[loadData["character"][each_character]["type"]],self.window_y,"dev")
+                    for each_character in mapFileData["character"]:
+                        self.characters_data[each_character] = CharacterDataManager(mapFileData["character"][each_character],self.DATABASE[mapFileData["character"][each_character]["type"]],self.window_y,"dev")
                     self.sangvisFerris_data = {}
-                    for each_character in loadData["sangvisFerri"]:
-                        self.sangvisFerris_data[each_character] = SangvisFerriDataManager(loadData["sangvisFerri"][each_character],self.DATABASE[loadData["sangvisFerri"][each_character]["type"]],"dev")
+                    for each_character in mapFileData["sangvisFerri"]:
+                        self.sangvisFerris_data[each_character] = SangvisFerriDataManager(mapFileData["sangvisFerri"][each_character],self.DATABASE[mapFileData["sangvisFerri"][each_character]["type"]],"dev")
                     #加载地图
-                    self._create_map(loadData,False)
-                    del loadData
+                    self._create_map(mapFileData,False)
+                    del mapFileData
                     self.MAP.setPos(tempLocal_x,tempLocal_y)
                     #读取地图
                     self.originalData = loadConfig(self.fileLocation)

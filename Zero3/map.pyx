@@ -21,7 +21,7 @@ class MapObject:
             for x in range(len(self.__MapData[y])):
                 item = self.__MapData[y][x]
                 self.__MapData[y][x] = BlockObject(item,_BLOCKS_DATABASE[item]["canPassThrough"])
-        self.__MapData = numpy.asarray(self.__MapData)
+        #self.__MapData = numpy.asarray(self.__MapData)
         self.row,self.column = self.__MapData.shape
         #使用numpy的shape决定self.row和self.column
         self.ornamentationData = []
@@ -39,7 +39,7 @@ class MapObject:
                 else:
                     self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,itemData["image"]))
         self.ornamentationData.sort()
-        self.ornamentationData = numpy.asarray(self.ornamentationData)
+        #self.ornamentationData = numpy.asarray(self.ornamentationData)
         self.__lightArea = []
         self.surface_width = int(perBlockWidth*0.9*((self.row+self.column+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((self.row+self.column+1)/2)+perBlockWidth)

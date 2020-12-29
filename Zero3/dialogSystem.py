@@ -4,11 +4,19 @@ from Zero3.movie import cutscene,VedioFrame
 
 #视觉小说系统模块
 class DialogSystem:
-    def __init__(self,chapterType,chapterId,part,dialogId,dialog_options):
+    def __init__(self,chapterType,chapterId,part,collectionName=None):
+        #章节Id
+        self.chapterId = chapterId
+        #片段
+        self.part = part
+        #对话的部分
+        self.chapterType = chapterType
         #读取章节信息
-        self.dialogData = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(chapterType,chapterId,get_setting("Language")))
+        self.dialogData = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(chapterType,chapterId,get_setting("Language"))) if collectionName == None\
+            else loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(chapterType,collectionName,chapterId,get_setting("Language")))
         if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
-            self.dialog_content = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(chapterType,chapterId,self.dialogData["default_lang"]),part)
+            self.dialog_content = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(chapterType,chapterId,self.dialogData["default_lang"]),part) if collectionName == None\
+                else loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(chapterType,collectionName,chapterId,self.dialogData["default_lang"]),part)
             for key,currentDialog in self.dialogData[part].items():
                 if key in self.dialog_content:
                     for key2,dataNeedReplace in currentDialog.items():
@@ -19,10 +27,6 @@ class DialogSystem:
             self.dialog_content = self.dialogData[part]
             if len(self.dialog_content)==0:
                 raise Exception('ZeroEngine-Error: The dialog has no content!')
-        #对话的部分
-        self.chapterId = chapterId
-        self.part = part
-        self.chapterType = chapterType
         #加载对话的背景图片
         self.backgroundContent = DialogBackground()
         #获取屏幕的尺寸
@@ -37,7 +41,7 @@ class DialogSystem:
         #加载对话框系统
         self.dialogTxtSystem = DialogContent(self.window_x*0.015)
         #设定初始化
-        self.dialogId = dialogId
+        self.dialogId = "head"
         #如果dialog_content没有头
         if self.dialogId not in self.dialog_content:
             raise Exception('ZeroEngine-Error: The dialog must have a head!')
@@ -46,10 +50,7 @@ class DialogSystem:
         #更新背景音乐
         self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
         #玩家在对话时做出的选择
-        if isinstance(dialog_options,dict):
-            self.dialog_options = dialog_options
-        else:
-            raise Exception('ZeroEngine-Error: The "dialog_options" has to be a dict!')
+        self.dialog_options = {}
         #加载npc立绘系统并初始化
         self.npc_img_dic = NpcImageSystem()
         self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"])
@@ -81,6 +82,16 @@ class DialogSystem:
         if not os.path.exists("Save/global.yaml"):
             DataTmp = {"chapter_unlocked":1}
             saveConfig("Save/global.yaml",DataTmp)
+    def __load_process(self):
+        DataTmp = loadConfig("Save/save.yaml")
+        if DataTmp["type"] == "dialog_before_battle" or DataTmp["type"] == "dialog_after_battle":
+            self.part = DataTmp["type"]
+            self.chapterId = DataTmp["chapterId"]
+            self.chapterType = DataTmp["chapterType"]
+            self.dialogId = DataTmp["id"]
+            self.dialog_options = DataTmp["dialog_options"]
+        else:
+            raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
     def get_event(self):
         return self.__events
     def __update_scene(self,theNextDialogId):

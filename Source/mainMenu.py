@@ -1,8 +1,5 @@
 # cython: language_level=3
 from Source.scene import *
-import os
-import glob
-import shutil
 
 class MainMenu:
     def __init__(self,screen):
@@ -193,12 +190,14 @@ class MainMenu:
     def __create_new_map(self):
         chapterId = len(glob.glob("Data/workshop/{0}/*_map.yaml".format(self.current_selected_workshop_collection)))+1
         shutil.copyfile("Data/chapter_map_example.yaml","Data/workshop/{0}/chapter{1}_map.yaml".format(self.current_selected_workshop_collection,chapterId))
+    #根据路径判定章节的Id
     def __find_chapter_id(self,path):
         filePath,fileName = os.path.split(path)
         if fileName[0:7] == "chapter":
             return int(fileName[7:fileName.index('_')])
         else:
             raise Exception('ZeroEngine-Error: Cannot find the id of chapter because the file is not properly named!')
+    #加载章节
     def __load_scene(self,chapterType,chapterId,screen,startPoint="dialog_before_battle",dialogId="head",dialog_options={}):
         self.videoCapture.stop()
         if chapterType == "main_chapter":

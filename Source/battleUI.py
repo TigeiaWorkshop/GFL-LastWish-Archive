@@ -1,14 +1,14 @@
 # cython: language_level=3
-from Zero3.basic import *
+from Source.init import *
 
 #显示回合切换的UI
 class RoundSwitch:
     def __init__(self,window_x,window_y,battleUiTxt):
-        self.lineRedDown = loadImg("Assets/image/UI/lineRed.png",window_x,window_y/50)
+        self.lineRedDown = Zero.loadImg("Assets/image/UI/lineRed.png",window_x,window_y/50)
         self.lineRedUp = pygame.transform.rotate(self.lineRedDown, 180)
-        self.lineGreenDown = loadImg("Assets/image/UI/lineGreen.png",window_x,window_y/50)
+        self.lineGreenDown = Zero.loadImg("Assets/image/UI/lineGreen.png",window_x,window_y/50)
         self.lineGreenUp = pygame.transform.rotate(self.lineGreenDown, 180)
-        self.baseImg = loadImg("Assets/image/UI/roundSwitchBase.png",window_x,window_y/5)
+        self.baseImg = Zero.loadImg("Assets/image/UI/roundSwitchBase.png",window_x,window_y/5)
         self.baseImg.set_alpha(0)
         self.x = -window_x
         self.y = int((window_y - self.baseImg.get_height())/2)
@@ -18,14 +18,14 @@ class RoundSwitch:
         self.idleTime = 60
         self.now_total_rounds_text = battleUiTxt["numRound"]
         self.now_total_rounds_surface = None
-        self.your_round_txt_surface = fontRender(battleUiTxt["yourRound"], "white",window_x/36)
+        self.your_round_txt_surface = Zero.fontRender(battleUiTxt["yourRound"], "white",window_x/36)
         self.your_round_txt_surface.set_alpha(0)
-        self.enemy_round_txt_surface = fontRender(battleUiTxt["enemyRound"], "white",window_x/36)
+        self.enemy_round_txt_surface = Zero.fontRender(battleUiTxt["enemyRound"], "white",window_x/36)
         self.enemy_round_txt_surface.set_alpha(0)
     def display(self,screen,whose_round,total_rounds):
         #如果“第N回合”的文字surface还没有初始化，则初始化该文字
         if self.now_total_rounds_surface == None:
-            self.now_total_rounds_surface = fontRender(self.now_total_rounds_text.format(str(total_rounds)), "white",screen.get_width()/38)
+            self.now_total_rounds_surface = Zero.fontRender(self.now_total_rounds_text.format(str(total_rounds)), "white",screen.get_width()/38)
             self.now_total_rounds_surface.set_alpha(0)
         #如果UI底的alpha值在渐入阶段
         if self.baseAlphaUp == True:
@@ -93,16 +93,16 @@ class RoundSwitch:
         if self.x < 0:
             self.x += screen.get_width()/35
         #展示UI
-        drawImg(self.baseImg,(0,self.y),screen)
-        drawImg(self.now_total_rounds_surface,(screen.get_width()/2-self.now_total_rounds_surface.get_width(),self.y+screen.get_width()/36),screen)
+        Zero.drawImg(self.baseImg,(0,self.y),screen)
+        Zero.drawImg(self.now_total_rounds_surface,(screen.get_width()/2-self.now_total_rounds_surface.get_width(),self.y+screen.get_width()/36),screen)
         if whose_round == "playerToSangvisFerris":
-            drawImg(self.lineRedUp,(abs(self.x),self.y),screen)
-            drawImg(self.lineRedDown,(self.x,self.y2),screen)
-            drawImg(self.enemy_round_txt_surface,(screen.get_width()/2,self.y+screen.get_width()/18),screen)
+            Zero.drawImg(self.lineRedUp,(abs(self.x),self.y),screen)
+            Zero.drawImg(self.lineRedDown,(self.x,self.y2),screen)
+            Zero.drawImg(self.enemy_round_txt_surface,(screen.get_width()/2,self.y+screen.get_width()/18),screen)
         elif whose_round == "sangvisFerrisToPlayer":
-            drawImg(self.lineGreenUp,(abs(self.x),self.y),screen)
-            drawImg(self.lineGreenDown,(self.x,self.y2),screen)
-            drawImg(self.your_round_txt_surface,(screen.get_width()/2,self.y+screen.get_width()/18),screen)
+            Zero.drawImg(self.lineGreenUp,(abs(self.x),self.y),screen)
+            Zero.drawImg(self.lineGreenDown,(self.x,self.y2),screen)
+            Zero.drawImg(self.your_round_txt_surface,(screen.get_width()/2,self.y+screen.get_width()/18),screen)
         #如果UI展示还未完成，返回False
         return False
 
@@ -110,11 +110,11 @@ class RoundSwitch:
 class WarningSystem:
     def __init__(self):
         self.all_warnings = []
-        self.warnings = get_lang("Warnings")
+        self.warnings = Zero.get_lang("Warnings")
     def add(self,the_warning,fontSize=30):
         if len(self.all_warnings)>=5:
             self.all_warnings.pop()
-        self.all_warnings.insert(0,fontRender(self.warnings[the_warning],"red",fontSize,True))
+        self.all_warnings.insert(0,Zero.fontRender(self.warnings[the_warning],"red",fontSize,True))
     def display(self,screen):
         for i in range(len(self.all_warnings)):
             try:
@@ -132,8 +132,8 @@ class WarningSystem:
 #角色行动选项菜单
 class SelectMenu:
     def __init__(self):
-        selectMenuTxtDic = get_lang("SelectMenu")
-        self.selectButtonImg = loadImg("Assets/image/UI/menu.png")
+        selectMenuTxtDic = Zero.get_lang("SelectMenu")
+        self.selectButtonImg = Zero.loadImg("Assets/image/UI/menu.png")
         #攻击
         self.attackAP = 5
         self.attackTxt = selectMenuTxtDic["attack"]
@@ -162,7 +162,7 @@ class SelectMenu:
         self.allButton = None
     #初始化按钮
     def initialButtons(self,fontSize):
-        selectButtonBase = resizeImg(self.selectButtonImg, (round(fontSize*5), round(fontSize*2.6)))
+        selectButtonBase = Zero.resizeImg(self.selectButtonImg, (round(fontSize*5), round(fontSize*2.6)))
         selectButtonBaseWidth = selectButtonBase.get_width()
         sizeBig = int(fontSize)
         sizeSmall = int(fontSize*0.75)
@@ -175,33 +175,33 @@ class SelectMenu:
             "interact": selectButtonBase.copy()
         }
         #攻击按钮
-        txt_temp = fontRender(self.attackTxt,"black",sizeBig)
-        txt_temp2 = fontRender(self.attackAPTxt,"black",sizeSmall)
+        txt_temp = Zero.fontRender(self.attackTxt,"black",sizeBig)
+        txt_temp2 = Zero.fontRender(self.attackAPTxt,"black",sizeSmall)
         self.allButton["attack"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
         self.allButton["attack"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
         #移动按钮
-        txt_temp = fontRender(self.moveTxt,"black",sizeBig)
-        txt_temp2 = fontRender(self.moveAPTxt,"black",sizeSmall)
+        txt_temp = Zero.fontRender(self.moveTxt,"black",sizeBig)
+        txt_temp2 = Zero.fontRender(self.moveAPTxt,"black",sizeSmall)
         self.allButton["move"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
         self.allButton["move"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
         #换弹按钮
-        txt_temp = fontRender(self.reloadTxt,"black",sizeBig)
-        txt_temp2 = fontRender(self.reloadAPTxt,"black",sizeSmall)
+        txt_temp = Zero.fontRender(self.reloadTxt,"black",sizeBig)
+        txt_temp2 = Zero.fontRender(self.reloadAPTxt,"black",sizeSmall)
         self.allButton["reload"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
         self.allButton["reload"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
         #技能按钮
-        txt_temp = fontRender(self.skillTxt,"black",sizeBig)
-        txt_temp2 = fontRender(self.skillAPTxt,"black",sizeSmall)
+        txt_temp = Zero.fontRender(self.skillTxt,"black",sizeBig)
+        txt_temp2 = Zero.fontRender(self.skillAPTxt,"black",sizeSmall)
         self.allButton["skill"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
         self.allButton["skill"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
         #救助按钮
-        txt_temp = fontRender(self.rescueTxt,"black",sizeBig)
-        txt_temp2 = fontRender(self.rescueAPTxt,"black",sizeSmall)
+        txt_temp = Zero.fontRender(self.rescueTxt,"black",sizeBig)
+        txt_temp2 = Zero.fontRender(self.rescueAPTxt,"black",sizeSmall)
         self.allButton["rescue"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
         self.allButton["rescue"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
         #互动按钮
-        txt_temp = fontRender(self.interactTxt,"black",sizeBig)
-        txt_temp2 = fontRender(self.interactAPTxt,"black",sizeSmall)
+        txt_temp = Zero.fontRender(self.interactTxt,"black",sizeBig)
+        txt_temp2 = Zero.fontRender(self.interactAPTxt,"black",sizeSmall)
         self.allButton["interact"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
         self.allButton["interact"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
     def display(self,screen,fontSize,location,kind,friendsCanSave,thingsCanReact):
@@ -212,40 +212,40 @@ class SelectMenu:
         #攻击按钮 - 左
         txt_tempX = location["xStart"]-selectButtonBaseWidth*0.6
         txt_tempY = location["yStart"]
-        if ifHover(self.allButton["attack"],(txt_tempX,txt_tempY)):
+        if Zero.ifHover(self.allButton["attack"],(txt_tempX,txt_tempY)):
             buttonGetHover = "attack"
         screen.blit(self.allButton["attack"],(txt_tempX,txt_tempY))
         #移动按钮 - 右
         txt_tempX = location["xEnd"]-selectButtonBaseWidth*0.4
         #txt_tempY 与攻击按钮一致
-        if ifHover(self.allButton["move"],(txt_tempX,txt_tempY)):
+        if Zero.ifHover(self.allButton["move"],(txt_tempX,txt_tempY)):
             buttonGetHover = "move"
         screen.blit(self.allButton["move"],(txt_tempX,txt_tempY))
         #换弹按钮 - 下
         txt_tempX = location["xStart"]+selectButtonBaseWidth*0.5
         txt_tempY = location["yEnd"]-selectButtonBaseWidth*0.25
-        if ifHover(self.allButton["reload"],(txt_tempX,txt_tempY)):
+        if Zero.ifHover(self.allButton["reload"],(txt_tempX,txt_tempY)):
             buttonGetHover = "reload"
         screen.blit(self.allButton["reload"],(txt_tempX,txt_tempY))
         #技能按钮 - 上
         if kind != "HOC":
             #txt_tempX与换弹按钮一致
             txt_tempY = location["yStart"]-selectButtonBaseWidth*0.7
-            if ifHover(self.allButton["skill"],(txt_tempX,txt_tempY)):
+            if Zero.ifHover(self.allButton["skill"],(txt_tempX,txt_tempY)):
                 buttonGetHover = "skill"
             screen.blit(self.allButton["skill"],(txt_tempX,txt_tempY))
         #救助队友
         if len(friendsCanSave)>0:
             txt_tempX = location["xStart"]-selectButtonBaseWidth*0.6
             txt_tempY = location["yStart"]-selectButtonBaseWidth*0.7
-            if ifHover(self.allButton["rescue"],(txt_tempX,txt_tempY)):
+            if Zero.ifHover(self.allButton["rescue"],(txt_tempX,txt_tempY)):
                 buttonGetHover = "rescue"
             screen.blit(self.allButton["rescue"],(txt_tempX,txt_tempY))
         #互动
         if len(thingsCanReact)>0:
             txt_tempX = location["xEnd"]-selectButtonBaseWidth*0.4
             txt_tempY = location["yStart"]-selectButtonBaseWidth*0.7
-            if ifHover(self.allButton["interact"],(txt_tempX,txt_tempY)):
+            if Zero.ifHover(self.allButton["interact"],(txt_tempX,txt_tempY)):
                 buttonGetHover = "interact"
             screen.blit(self.allButton["interact"],(txt_tempX,txt_tempY))
         return buttonGetHover
@@ -253,12 +253,12 @@ class SelectMenu:
 #角色信息版
 class CharacterInfoBoard:
     def __init__(self,window_x,window_y,text_size=20):
-        self.boardImg = loadImg("Assets/image/UI/score.png",window_x/5,window_y/6)
+        self.boardImg = Zero.loadImg("Assets/image/UI/score.png",window_x/5,window_y/6)
         self.characterIconImages = {}
         all_icon_file_list = glob.glob(r'Assets/image/npc_icon/*.png')
         for i in range(len(all_icon_file_list)):
             img_name = all_icon_file_list[i].replace("Assets","").replace("image","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
-            self.characterIconImages[img_name] = loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
+            self.characterIconImages[img_name] = Zero.loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
         del all_icon_file_list
         self.text_size = text_size
         self.informationBoard = None
@@ -272,12 +272,12 @@ class CharacterInfoBoard:
         #画出角色图标
         self.informationBoard.blit(self.characterIconImages[theCharacterData.type],(padding,padding))
         #加载所需的文字
-        tcgc_hp1 = fontRender("HP: ","white",fontSize)
-        tcgc_hp2 = fontRender(str(theCharacterData.current_hp)+"/"+str(theCharacterData.max_hp),"black",fontSize)
-        tcgc_action_point1 = fontRender("AP: ","white",fontSize)
-        tcgc_action_point2 = fontRender(str(theCharacterData.get_action_point())+"/"+str(theCharacterData.max_action_point),"black",fontSize)
-        tcgc_bullets_situation1 = fontRender("BP: ","white",fontSize)
-        tcgc_bullets_situation2 = fontRender(str(theCharacterData.current_bullets)+"/"+str(theCharacterData.bullets_carried),"black",fontSize)
+        tcgc_hp1 = Zero.fontRender("HP: ","white",fontSize)
+        tcgc_hp2 = Zero.fontRender(str(theCharacterData.current_hp)+"/"+str(theCharacterData.max_hp),"black",fontSize)
+        tcgc_action_point1 = Zero.fontRender("AP: ","white",fontSize)
+        tcgc_action_point2 = Zero.fontRender(str(theCharacterData.get_action_point())+"/"+str(theCharacterData.max_action_point),"black",fontSize)
+        tcgc_bullets_situation1 = Zero.fontRender("BP: ","white",fontSize)
+        tcgc_bullets_situation2 = Zero.fontRender(str(theCharacterData.current_bullets)+"/"+str(theCharacterData.bullets_carried),"black",fontSize)
         #先画出hp,ap和bp的文字
         temp_posX = self.characterIconImages[theCharacterData.type].get_width()*2
         temp_posY = padding-fontSize*0.2
@@ -285,19 +285,19 @@ class CharacterInfoBoard:
         self.informationBoard.blit(tcgc_action_point1,(temp_posX,temp_posY+self.text_size*1.5))
         self.informationBoard.blit(tcgc_bullets_situation1,(temp_posX,temp_posY+self.text_size*3.0))
         #画出底部空白的血条格
-        hp_empty = resizeImg(original_UI_img["hp_empty"],(int(self.boardImg.get_width()/3),int(self.text_size)))
+        hp_empty = Zero.resizeImg(original_UI_img["hp_empty"],(int(self.boardImg.get_width()/3),int(self.text_size)))
         temp_posX = self.characterIconImages[theCharacterData.type].get_width()*2.4
         temp_posY = padding
         self.informationBoard.blit(hp_empty,(temp_posX,temp_posY))
         self.informationBoard.blit(hp_empty,(temp_posX,temp_posY+self.text_size*1.5))
         self.informationBoard.blit(hp_empty,(temp_posX,temp_posY+self.text_size*3))
         #画出三个信息条
-        self.informationBoard.blit(resizeImg(original_UI_img["hp_green"],(int(hp_empty.get_width()*theCharacterData.current_hp/theCharacterData.max_hp),int(self.text_size))),(temp_posX ,temp_posY))
-        self.informationBoard.blit(resizeImg(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*theCharacterData.get_action_point()/theCharacterData.max_action_point),int(self.text_size))),(temp_posX ,temp_posY+self.text_size*1.5))
-        self.informationBoard.blit(resizeImg(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*theCharacterData.current_bullets/theCharacterData.magazine_capacity),int(self.text_size))),(temp_posX ,temp_posY+self.text_size*3))
-        displayInCenter(tcgc_hp2,hp_empty,temp_posX ,temp_posY,self.informationBoard)
-        displayInCenter(tcgc_action_point2,hp_empty,temp_posX ,temp_posY+self.text_size*1.5,self.informationBoard)
-        displayInCenter(tcgc_bullets_situation2,hp_empty,temp_posX ,temp_posY+self.text_size*3,self.informationBoard)
+        self.informationBoard.blit(Zero.resizeImg(original_UI_img["hp_green"],(int(hp_empty.get_width()*theCharacterData.current_hp/theCharacterData.max_hp),int(self.text_size))),(temp_posX ,temp_posY))
+        self.informationBoard.blit(Zero.resizeImg(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*theCharacterData.get_action_point()/theCharacterData.max_action_point),int(self.text_size))),(temp_posX ,temp_posY+self.text_size*1.5))
+        self.informationBoard.blit(Zero.resizeImg(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*theCharacterData.current_bullets/theCharacterData.magazine_capacity),int(self.text_size))),(temp_posX ,temp_posY+self.text_size*3))
+        Zero.displayInCenter(tcgc_hp2,hp_empty,temp_posX ,temp_posY,self.informationBoard)
+        Zero.displayInCenter(tcgc_action_point2,hp_empty,temp_posX ,temp_posY+self.text_size*1.5,self.informationBoard)
+        Zero.displayInCenter(tcgc_bullets_situation2,hp_empty,temp_posX ,temp_posY+self.text_size*3,self.informationBoard)
     def display(self,screen,theCharacterData,original_UI_img):
         if self.informationBoard == None:
             self.updateInformationBoard(screen.get_width()/96,theCharacterData,original_UI_img)
@@ -306,17 +306,17 @@ class CharacterInfoBoard:
 #计分板
 class ResultBoard:
     def __init__(self,finalResult,window_x,window_y):
-        resultTxt = get_lang("ResultBoard")
+        resultTxt = Zero.get_lang("ResultBoard")
         self.x = int(window_x/9.6)
         self.y = int(window_x/9.6)
         self.txt_x = int(window_x/7.68)
-        self.boardImg = loadImg("Assets/image/UI/score.png",window_x/6,window_x/3)
-        self.total_kills = fontRender(resultTxt["total_kills"]+": "+str(finalResult["total_kills"]),"white",window_x/96)
-        self.total_time = fontRender(resultTxt["total_time"]+": "+str(time.strftime('%M:%S',finalResult["total_time"])),"white",window_x/96)
-        self.total_rounds_txt = fontRender(resultTxt["total_rounds"]+": "+str(finalResult["total_rounds"]),"white",window_x/96)
-        self.characters_down = fontRender(resultTxt["characters_down"]+": "+str(finalResult["times_characters_down"]),"white",window_x/96)
-        self.player_rate = fontRender(resultTxt["rank"]+": "+"A","white",window_x/96)
-        self.pressKeyContinue = fontRender(resultTxt["pressKeyContinue"],"white",window_x/96)
+        self.boardImg = Zero.loadImg("Assets/image/UI/score.png",window_x/6,window_x/3)
+        self.total_kills = Zero.fontRender(resultTxt["total_kills"]+": "+str(finalResult["total_kills"]),"white",window_x/96)
+        self.total_time = Zero.fontRender(resultTxt["total_time"]+": "+str(time.strftime('%M:%S',finalResult["total_time"])),"white",window_x/96)
+        self.total_rounds_txt = Zero.fontRender(resultTxt["total_rounds"]+": "+str(finalResult["total_rounds"]),"white",window_x/96)
+        self.characters_down = Zero.fontRender(resultTxt["characters_down"]+": "+str(finalResult["times_characters_down"]),"white",window_x/96)
+        self.player_rate = Zero.fontRender(resultTxt["rank"]+": "+"A","white",window_x/96)
+        self.pressKeyContinue = Zero.fontRender(resultTxt["pressKeyContinue"],"white",window_x/96)
     def display(self,screen):
         screen.blit(self.boardImg,(self.x,self.y))
         screen.blit(self.total_kills,(self.txt_x ,300))
@@ -329,13 +329,13 @@ class ResultBoard:
 #章节标题(在加载时显示)
 class LoadingTitle:
     def __init__(self,window_x,window_y,numChapter_txt,chapterId,chapterTitle_txt,chapterDesc_txt):
-        self.black_bg = get_SingleColorSurface("black")
-        title_chapterNum = fontRender(numChapter_txt.format(chapterId),"white",window_x/38)
-        self.title_chapterNum = ImageSurface(title_chapterNum,(window_x-title_chapterNum.get_width())/2,window_y*0.37)
-        title_chapterName = fontRender(chapterTitle_txt,"white",window_x/38)
-        self.title_chapterName = ImageSurface(title_chapterName,(window_x-title_chapterName.get_width())/2,window_y*0.46)
-        title_description = fontRender(chapterDesc_txt,"white",window_x/76)
-        self.title_description = ImageSurface(title_description,(window_x-title_description.get_width())/2,window_y*0.6)
+        self.black_bg = Zero.get_SingleColorSurface("black")
+        title_chapterNum = Zero.fontRender(numChapter_txt.format(chapterId),"white",window_x/38)
+        self.title_chapterNum = Zero.ImageSurface(title_chapterNum,(window_x-title_chapterNum.get_width())/2,window_y*0.37)
+        title_chapterName = Zero.fontRender(chapterTitle_txt,"white",window_x/38)
+        self.title_chapterName = Zero.ImageSurface(title_chapterName,(window_x-title_chapterName.get_width())/2,window_y*0.46)
+        title_description = Zero.fontRender(chapterDesc_txt,"white",window_x/76)
+        self.title_description = Zero.ImageSurface(title_description,(window_x-title_description.get_width())/2,window_y*0.6)
     def display(self,screen,alpha=255):
         self.title_chapterNum.set_alpha(alpha)
         self.title_chapterName.set_alpha(alpha)
