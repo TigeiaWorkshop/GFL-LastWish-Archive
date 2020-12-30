@@ -10,6 +10,8 @@ class GameObject:
     def __init__(self,x,y):
         self.x = x
         self.y = y
+    def __lt__(self,other):
+        return self.y+self.x < other.y+other.x
     def get_pos(self):
         return self.x,self.y
 
@@ -119,15 +121,15 @@ class WeatherSystem:
             img_x = random.randint(1,window_x*1.5)
             img_y = random.randint(1,window_y)
             self.ImgObject.append(Snow(imgId,img_size,img_speed,img_x,img_y))
-    def display(self,screen,perBlockWidth,perBlockHeight,local_x=0,local_y=0):
+    def display(self,screen,perBlockWidth):
         speed_unit = perBlockWidth/5
         for i in range(len(self.ImgObject)):
-            if 0<=self.ImgObject[i].x<=screen.get_width() and 0<=self.ImgObject[i].y+local_y<=screen.get_height():
+            if 0 <= self.ImgObject[i].x <= screen.get_width() and 0 <= self.ImgObject[i].y <= screen.get_height():
                 imgTemp = pygame.transform.scale(self.img_list[self.ImgObject[i].imgId], (round(perBlockWidth/self.ImgObject[i].size), round(perBlockWidth/self.ImgObject[i].size)))
-                screen.blit(imgTemp,(self.ImgObject[i].x,self.ImgObject[i].y+local_y))
+                screen.blit(imgTemp,(self.ImgObject[i].x,self.ImgObject[i].y))
             self.ImgObject[i].x -= self.ImgObject[i].speed*speed_unit
             self.ImgObject[i].y += self.ImgObject[i].speed*speed_unit
-            if self.ImgObject[i].x <= 0 or self.ImgObject[i].y+local_y >= screen.get_height():
+            if self.ImgObject[i].x <= 0 or self.ImgObject[i].y >= screen.get_height():
                 self.ImgObject[i].y = random.randint(-50,0)
                 self.ImgObject[i].x = random.randint(0,screen.get_width()*2)
 

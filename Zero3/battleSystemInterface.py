@@ -92,24 +92,24 @@ class BattleSystemInterface:
         #根据按键情况设定要移动的数值
         if self.__pressKeyToMove["up"] == True:
             if self.screen_to_move_y == None:
-                self.screen_to_move_y = self.MAP.perBlockHeight/4
+                self.screen_to_move_y = self.MAP.get_block_height()/4
             else:
-                self.screen_to_move_y += self.MAP.perBlockHeight/4
+                self.screen_to_move_y += self.MAP.get_block_height()/4
         if self.__pressKeyToMove["down"] == True:
             if self.screen_to_move_y == None:
-                self.screen_to_move_y = -self.MAP.perBlockHeight/4
+                self.screen_to_move_y = -self.MAP.get_block_height()/4
             else:
-                self.screen_to_move_y -= self.MAP.perBlockHeight/4
+                self.screen_to_move_y -= self.MAP.get_block_height()/4
         if self.__pressKeyToMove["left"] == True:
             if self.screen_to_move_x == None:
-                self.screen_to_move_x = self.MAP.perBlockWidth/4
+                self.screen_to_move_x = self.MAP.get_block_width()/4
             else:
-                self.screen_to_move_x += self.MAP.perBlockWidth/4
+                self.screen_to_move_x += self.MAP.get_block_width()/4
         if self.__pressKeyToMove["right"] == True:
             if self.screen_to_move_x == None:
-                self.screen_to_move_x = -self.MAP.perBlockWidth/4
+                self.screen_to_move_x = -self.MAP.get_block_width()/4
             else:
-                self.screen_to_move_x -= self.MAP.perBlockWidth/4
+                self.screen_to_move_x -= self.MAP.get_block_width()/4
     def _move_screen(self):
         #如果需要移动屏幕
         if self.screen_to_move_x != None and self.screen_to_move_x != 0:
@@ -136,7 +136,7 @@ class BattleSystemInterface:
         self.screen_to_move_x,self.screen_to_move_y = self.MAP.display_map(screen,self.screen_to_move_x,self.screen_to_move_y)
     def _display_weather(self,screen):
         if self.weatherController != None:
-            self.weatherController.display(screen,self.MAP.perBlockWidth,self.MAP.perBlockHeight)
+            self.weatherController.display(screen,self.MAP.get_block_width())
     def _get_event(self):
         return self.__events
     def _update_event(self):

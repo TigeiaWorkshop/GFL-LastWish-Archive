@@ -12,8 +12,6 @@ class MapObject:
     def  __init__(self,mapDataDic,int perBlockWidth,int perBlockHeight,darkMode=None):
         #加载地图设置
         self.__darkMode = mapDataDic["darkMode"] if darkMode==None else darkMode
-        self.perBlockWidth = perBlockWidth
-        self.perBlockHeight = perBlockHeight
         #初始化地图数据
         self.__MapData = mapDataDic["map"]
         self.backgroundImageName = mapDataDic["backgroundImage"]
@@ -22,10 +20,26 @@ class MapObject:
                 item = self.__MapData[y][x]
                 self.__MapData[y][x] = BlockObject(item,_BLOCKS_DATABASE[item]["canPassThrough"])
         self.__MapData = numpy.asarray(self.__MapData)
-        self.row,self.column = self.__MapData.shape
         #使用numpy的shape决定self.row和self.column
+        self.row,self.column = self.__MapData.shape
+        self.load_decorations(mapDataDic["decoration"])
+        self.load_env_img((perBlockWidth,perBlockHeight))
+        self.__LightArea = []
+        self.surface_width = int(perBlockWidth*0.9*((self.row+self.column+1)/2))
+        self.surface_height = int(perBlockWidth*0.45*((self.row+self.column+1)/2)+perBlockWidth)
+        self.__local_x = mapDataDic["local_x"]
+        self.__local_y = mapDataDic["local_y"]
+        self.__needUpdateMapSurface = True
+    def get_block_width(self):
+        width = _MAP_ENV_IMAGE.get_block_width()
+        return width
+    def get_block_height(self):
+        height = _MAP_ENV_IMAGE.get_block_height()
+        return height
+    #加载装饰物
+    def load_decorations(self,decorationData):
         self.__decorations = []
-        for decorationType,itemsThatType in mapDataDic["decoration"].items():
+        for decorationType,itemsThatType in decorationData.items():
             for itemKey,itemData in itemsThatType.items():
                 if decorationType == "campfire":
                     self.__decorations.append(DecorationObject(itemData["x"],itemData["y"],decorationType,decorationType))
@@ -37,18 +51,10 @@ class MapObject:
                     self.__decorations[-1].items = itemData["items"]
                 else:
                     self.__decorations.append(DecorationObject(itemData["x"],itemData["y"],decorationType,itemData["image"]))
-        self.__decorations.sort()
-        self.__decorations = numpy.asarray(self.__decorations)
-        self.__LightArea = []
-        self.surface_width = int(perBlockWidth*0.9*((self.row+self.column+1)/2))
-        self.surface_height = int(perBlockWidth*0.45*((self.row+self.column+1)/2)+perBlockWidth)
-        self.__local_x = mapDataDic["local_x"]
-        self.__local_y = mapDataDic["local_y"]
-        self.__needUpdateMapSurface = True
-        self.load_env_img()
-    def load_env_img(self):
+        self.__decorations = numpy.sort(numpy.asarray(self.__decorations))
+    def load_env_img(self,block_size):
         global _MAP_ENV_IMAGE
-        _MAP_ENV_IMAGE = EnvImagesManagement(self.__MapData,self.__decorations,self.backgroundImageName,self.perBlockWidth,self.__darkMode)
+        _MAP_ENV_IMAGE = EnvImagesManagement(self.__MapData,self.__decorations,self.backgroundImageName,block_size,self.__darkMode)
     #根据index寻找装饰物
     def find_decoration_with_id(self,unsigned int index):
         return self.__decorations[index]
@@ -64,24 +70,19 @@ class MapObject:
         self.__decorations[index].switch()
     #移除装饰物
     def remove_decoration(self,decoration):
-        try:
-            self.__decorations.remove(decoration)
-        except ValueError:
-            print("ZeroEngine-Warning: Cannot remove decoration, the program will try to do this using tractional way")
-            pos = decoration.get_pos()
-            for i in range(len(self.__decorations)-1,-1,-1):
-                if self.__decorations[i].x == pos[0] and self.__decorations[i].y == pos[1]:
-                    del self.__decorations[i]
-                    break
+        cdef (int,int) pos = decoration.get_pos()
+        cdef int i
+        for i in range(len(self.__decorations)-1,-1,-1):
+            if self.__decorations[i].x == pos[0] and self.__decorations[i].y == pos[1]:
+                self.__decorations = numpy.delete(self.__decorations,i)
+                break
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,newPerBlockHeight,window_x,window_y):
-        self.addPos_x((self.perBlockWidth-newPerBlockWidth)*self.column/2)
-        self.addPos_y((self.perBlockHeight-newPerBlockHeight)*self.row/2)
+        self.addPos_x((self.get_block_width()-newPerBlockWidth)*self.column/2)
+        self.addPos_y((self.get_block_height()-newPerBlockHeight)*self.row/2)
         self.surface_width = int(newPerBlockWidth*0.9*((self.row+self.column+1)/2))
         self.surface_height = int(newPerBlockWidth*0.45*((self.row+self.column+1)/2)+newPerBlockWidth)
-        self.perBlockWidth = round(newPerBlockWidth)
-        self.newPerBlockHeight = round(newPerBlockHeight)
-        _MAP_ENV_IMAGE.resize(self.perBlockWidth)
+        _MAP_ENV_IMAGE.resize(newPerBlockWidth,newPerBlockHeight)
         if self.surface_width < window_x:
             self.surface_width = window_x
         if self.surface_height < window_y:
@@ -145,7 +146,7 @@ class MapObject:
         cdef unsigned int yRange = self.row
         cdef unsigned int x
         cdef unsigned int xRange = self.column
-        cdef int screen_min = -self.perBlockWidth
+        cdef int screen_min = -self.get_block_width()
         cdef unsigned int anyBlockBlitThisLine
         cdef int window_x = window_size[0]
         cdef int window_y = window_size[1]
@@ -182,12 +183,12 @@ class MapObject:
             charactersPos.append((int(dataDic.x),int(dataDic.y)))
             charactersPos.append((int(dataDic.x)+1,int(dataDic.y)+1))
         #计算offSet
-        cdef int offSetX = round(self.perBlockWidth/4)
-        cdef int offSetY = round(self.perBlockWidth/8)
-        cdef int offSetX_tree = round(self.perBlockWidth*0.125)
-        cdef int offSetY_tree = round(self.perBlockWidth*0.25)
+        cdef int offSetX = round(self.get_block_width()/4)
+        cdef int offSetY = round(self.get_block_width()/8)
+        cdef int offSetX_tree = round(self.get_block_width()*0.125)
+        cdef int offSetY_tree = round(self.get_block_width()*0.25)
         #计算需要画出的范围
-        cdef int screen_min = -self.perBlockWidth
+        cdef int screen_min = -self.get_block_width()
         cdef int screen_width = screen.get_width()
         cdef int screen_height = screen.get_height()
         #历遍装饰物列表里的物品
@@ -208,20 +209,20 @@ class MapObject:
                         item.alpha -= 15
                     #根据alpha值生成对应的图片
                     if item.alpha >= 255:
-                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",int(item.imgId),False), (round(self.get_block_width()/2),round(self.get_block_width()/2)))
                         if item.imgId >= _MAP_ENV_IMAGE.get_decoration_num("campfire")-2:
                             item.imgId = 0
                         else:
                             item.imgId += 0.1
                     elif item.alpha <= 0:
                         if keyWordTemp == False:
-                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",-1,False), (round(self.get_block_width()/2),round(self.get_block_width()/2)))
                         else:
-                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire","campfire",True), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire","campfire",True), (round(self.get_block_width()/2),round(self.get_block_width()/2)))
                     else:
-                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",-1,False), (round(self.get_block_width()/2),round(self.get_block_width()/2)))
                         screen.blit(imgToBlit,(thePosInMap[0]+offSetX,thePosInMap[1]-offSetY))
-                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",int(item.imgId),False), (round(self.get_block_width()/2),round(self.get_block_width()/2)))
                         imgToBlit.set_alpha(item.alpha)
                         if item.imgId >= _MAP_ENV_IMAGE.get_decoration_num("campfire")-2:
                             item.imgId = 0
@@ -229,14 +230,14 @@ class MapObject:
                             item.imgId += 0.1
                 #树
                 elif item.type == "tree":
-                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("tree",item.image,keyWordTemp),(round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
+                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("tree",item.image,keyWordTemp),(round(self.get_block_width()*0.75),round(self.get_block_width()*0.75)))
                     thePosInMap = (thePosInMap[0]-offSetX_tree,thePosInMap[1]-offSetY_tree)
                     if item.get_pos() in charactersPos:
                         if self.__darkMode == False or self.inLightArea(item):
                             imgToBlit.set_alpha(100)
                 #其他装饰物
                 elif item.type == "decoration" or item.type == "obstacle" or item.type == "chest":
-                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image(item.type,item.image,keyWordTemp),(round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image(item.type,item.image,keyWordTemp),(round(self.get_block_width()/2),round(self.get_block_width()/2)))
                 #画上装饰物
                 if imgToBlit != None:
                     screen.blit(imgToBlit,(thePosInMap[0]+offSetX,thePosInMap[1]-offSetY))
@@ -249,18 +250,18 @@ class MapObject:
         return self.__MapData[pos["y"]][pos["x"]].canPassThrough
     #计算在地图中的方块
     def calBlockInMap(self,int mouse_x,int mouse_y):
-        cdef int guess_x = int(((mouse_x-self.__local_x-self.row*self.perBlockWidth*0.43)/0.43+(mouse_y-self.__local_y-self.perBlockWidth*0.4)/0.22)/2/self.perBlockWidth)
-        cdef int guess_y = int((mouse_y-self.__local_y-self.perBlockWidth*0.4)/self.perBlockWidth/0.22) - guess_x
+        cdef int guess_x = int(((mouse_x-self.__local_x-self.row*self.get_block_width()*0.43)/0.43+(mouse_y-self.__local_y-self.get_block_width()*0.4)/0.22)/2/self.get_block_width())
+        cdef int guess_y = int((mouse_y-self.__local_y-self.get_block_width()*0.4)/self.get_block_width()/0.22) - guess_x
         cdef int x
         cdef int y
         cdef (int, int) posTupleTemp
-        cdef float lenUnitW = self.perBlockWidth/5
-        cdef float lenUnitH = self.perBlockWidth*0.8/393*214
+        cdef float lenUnitW = self.get_block_width()/5
+        cdef float lenUnitH = self.get_block_width()*0.8/393*214
         block_get_click = None
         for y in range(guess_y-1,guess_y+4):
             for x in range(guess_x-1,guess_x+4):
                 posTupleTemp = self.calPosInMap(x,y)
-                if lenUnitW<mouse_x-posTupleTemp[0]-self.perBlockWidth*0.05<lenUnitW*3 and 0<mouse_y-posTupleTemp[1]<lenUnitH:
+                if lenUnitW<mouse_x-posTupleTemp[0]-self.get_block_width()*0.05<lenUnitW*3 and 0<mouse_y-posTupleTemp[1]<lenUnitH:
                     block_get_click = {"x":x,"y":y}
                     break
         return block_get_click
@@ -269,9 +270,9 @@ class MapObject:
         xStart,yStart = self.calPosInMap(x,y)
         return {
         "xStart": xStart,
-        "xEnd": xStart + self.perBlockWidth,
+        "xEnd": xStart + self.get_block_width(),
         "yStart": yStart,
-        "yEnd": yStart + self.perBlockWidth*0.5
+        "yEnd": yStart + self.get_block_width()*0.5
         }
     #计算光亮区域
     def calculate_darkness(self,characters_data):
@@ -311,8 +312,8 @@ class MapObject:
         self.__needUpdateMapSurface = True
     #计算在地图中的位置
     def calPosInMap(self,float x,float y):
-        cdef float widthTmp = self.perBlockWidth*0.43
-        return round((x-y)*widthTmp+self.__local_x+self.row*widthTmp),round((y+x)*self.perBlockWidth*0.22+self.__local_y+self.perBlockWidth*0.4)
+        cdef float widthTmp = self.get_block_width()*0.43
+        return round((x-y)*widthTmp+self.__local_x+self.row*widthTmp),round((y+x)*self.get_block_width()*0.22+self.__local_y+self.get_block_width()*0.4)
     #查看角色是否在光亮范围内
     def inLightArea(self,doll):
         return self.isPosInLightArea(doll.x,doll.y)

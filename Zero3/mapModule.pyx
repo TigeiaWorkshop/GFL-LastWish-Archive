@@ -1,10 +1,10 @@
 # cython: language_level=3
-from Zero3.basic import addDarkness, loadImg, resizeImg
+from Zero3.basic import addDarkness, loadImg, resizeImg, GameObject
 import pygame
 
 #地图场景模块
 class EnvImagesManagement:
-    def __init__(self,theMap,decorationData,bgImgName,theWidth,darkMode,darkness=150):
+    def __init__(self,theMap,decorationData,bgImgName,blockSize,darkMode,darkness=150):
         self.__ENV_IMAGE_DICT_ORIGINAL = {}
         self.__ENV_IMAGE_DICT_ORIGINAL_DARK = None
         self.__ENV_IMAGE_DICT = {}
@@ -14,6 +14,8 @@ class EnvImagesManagement:
         self.__BACKGROUND_IMAGE = loadImg("Assets/image/dialog_background/{}".format(bgImgName),ifConvertAlpha=False).convert() if bgImgName != None else None
         self.__BACKGROUND_SURFACE = None
         self.__MAP_SURFACE = None
+        self.__BLOCK_WIDTH = round(blockSize[0])
+        self.__BLOCK_HEIGHT =  round(blockSize[1])
         cdef list all_images_needed = []
         for y in range(len(theMap)):
             for x in range(len(theMap[y])):
@@ -23,7 +25,7 @@ class EnvImagesManagement:
         for fileName in all_images_needed:
             try:
                 self.__ENV_IMAGE_DICT_ORIGINAL[fileName] = loadImg("Assets/image/environment/block/"+fileName+".png")
-                self.__ENV_IMAGE_DICT[fileName] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL[fileName],(theWidth,None))
+                self.__ENV_IMAGE_DICT[fileName] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL[fileName],(self.__BLOCK_WIDTH,None))
             except BaseException:
                 raise Exception('ZeroEngine-Error: An map-block called '+fileName+' cannot find its image in the folder.')
         #加载场地设施的图片
@@ -56,12 +58,18 @@ class EnvImagesManagement:
                 elif "campfire" not in self.__DECORATION_IMAGE_DICT_DARK:
                     self.__DECORATION_IMAGE_DICT_DARK["campfire"] = {}
                     self.__DECORATION_IMAGE_DICT_DARK["campfire"]["campfire"] = (addDarkness(self.__DECORATION_IMAGE_DICT["campfire"][-1],darkness))
-    def resize(self,newWidth):
+    def get_block_width(self):
+        return self.__BLOCK_WIDTH
+    def get_block_height(self):
+        return self.__BLOCK_HEIGHT
+    def resize(self,newWidth,newHeight):
+        self.__BLOCK_WIDTH = round(newWidth)
+        self.__BLOCK_HEIGHT = round(newHeight)
         for key in self.__ENV_IMAGE_DICT:
-            self.__ENV_IMAGE_DICT[key] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL[key],(newWidth, None))
+            self.__ENV_IMAGE_DICT[key] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL[key],(self.__BLOCK_WIDTH, None))
         if self.__ENV_IMAGE_DICT_ORIGINAL_DARK != None:
             for key in self.__ENV_IMAGE_DICT_DARK:
-                self.__ENV_IMAGE_DICT_DARK[key] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL_DARK[key],(newWidth,None))
+                self.__ENV_IMAGE_DICT_DARK[key] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL_DARK[key],(self.__BLOCK_WIDTH,None))
     def get_env_image(self,key,darkMode):
         try:
             if darkMode:
@@ -72,11 +80,11 @@ class EnvImagesManagement:
             print('ZeroEngine-Warning: Cannot find block image "{}", we will try to load it for you right now, but please by aware.'.format(key))
             imgTmp = loadImg("Assets/image/environment/block/"+key+".png")
             self.__ENV_IMAGE_DICT_ORIGINAL[key] = imgTmp
-            self.__ENV_IMAGE_DICT[key] = resizeImg(imgTmp,(self.perBlockWidth,None))
+            self.__ENV_IMAGE_DICT[key] = resizeImg(imgTmp,(self.__BLOCK_WIDTH,None))
             if self.__ENV_IMAGE_DICT_ORIGINAL_DARK != None:
                 imgTmp = addDarkness(imgTmp,150)
                 self.__ENV_IMAGE_DICT_ORIGINAL_DARK[key] = imgTmp
-                self.__ENV_IMAGE_DICT_DARK[key] = resizeImg(imgTmp,(self.perBlockWidth,None))
+                self.__ENV_IMAGE_DICT_DARK[key] = resizeImg(imgTmp,(self.__BLOCK_WIDTH,None))
     def get_decoration_image(self,decorationType,key,darkMode,darkness=150):
         try:
             if darkMode:
@@ -114,23 +122,20 @@ class BlockObject:
         self.canPassThrough = canPassThrough
 
 #点
-class Point:
+class Point(GameObject):
     def __init__(self,x,y):
+        GameObject.__init__(self,x,y)
         self.x = x
         self.y = y
-    def __lt__(self,other):
-        return self.y+self.x < other.y+other.x
     def __eq__(self, other):
         if self.x == other.x and self.y == other.y:
             return True
         return False
-    def get_pos(self):
-        return self.x,self.y
 
 #管理场景装饰物的类
-class DecorationObject(Point):
+class DecorationObject(GameObject):
     def  __init__(self,x,y,itemType,image):
-        Point.__init__(self,x,y)
+        GameObject.__init__(self,x,y)
         self.type = itemType
         self.image = image
         self.alpha = None

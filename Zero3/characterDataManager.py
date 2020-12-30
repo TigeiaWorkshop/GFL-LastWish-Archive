@@ -284,7 +284,7 @@ class Doll:
             self.ifFlip = theBool
     def draw(self,screen,theMapClass):
         #调整小人图片的尺寸
-        img_of_char = getDollImg(self.type,self.__currentAction,self.__imgId_dict[self.__currentAction]["imgId"],round(theMapClass.perBlockWidth*1.6))
+        img_of_char = getDollImg(self.type,self.__currentAction,self.__imgId_dict[self.__currentAction]["imgId"],round(theMapClass.get_block_width()*1.6))
         #调整alpha值
         imgAlpha = self.get_imgAlpaha(self.__currentAction)
         if imgAlpha != 255:
@@ -297,7 +297,7 @@ class Doll:
             self.__move_based_on_path(theMapClass)
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)
-        screen.blit(img_of_char,(xTemp-theMapClass.perBlockWidth*0.3,yTemp-theMapClass.perBlockWidth*0.85))
+        screen.blit(img_of_char,(xTemp-theMapClass.get_block_width()*0.3,yTemp-theMapClass.get_block_width()*0.85))
         #如果角色图片还没播放完
         if not self._ifActionPlayReverse:
             if self.__imgId_dict[self.__currentAction]["imgId"] < getDollImgNum(self.type,self.__currentAction)-1:
@@ -322,13 +322,13 @@ class Doll:
                 self.set_action()
     def draw_custom(self,action,pos,screen,theMapClass,alpha=155,isContinue=True):
         #调整小人图片的尺寸
-        img_of_char = getDollImg(self.type,action,self.__imgId_dict[action]["imgId"],round(theMapClass.perBlockWidth*1.6))
+        img_of_char = getDollImg(self.type,action,self.__imgId_dict[action]["imgId"],round(theMapClass.get_block_width()*1.6))
         #反转图片
         if self.ifFlip == True:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
         img_of_char.set_alpha(alpha)
         #把角色图片画到屏幕上
-        screen.blit(img_of_char,(pos[0]-theMapClass.perBlockWidth*0.3,pos[1]-theMapClass.perBlockWidth*0.85))
+        screen.blit(img_of_char,(pos[0]-theMapClass.get_block_width()*0.3,pos[1]-theMapClass.get_block_width()*0.85))
         #调整id，并返回对应的bool状态
         if self.__imgId_dict[action]["imgId"] < getDollImgNum(self.type,action)-1:
             self.__imgId_dict[action]["imgId"] += 1
@@ -353,17 +353,17 @@ class Doll:
             percent_of_hp = self.dying/3
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)
-        xTemp += theMapClass.perBlockWidth*0.25
-        yTemp -= theMapClass.perBlockWidth*0.2
+        xTemp += theMapClass.get_block_width()*0.25
+        yTemp -= theMapClass.get_block_width()*0.2
         if self.faction == "character" and self.detection != None:
-            eyeImgWidth = round(theMapClass.perBlockWidth/6*self.eyeImgSize)
-            eyeImgHeight = round(theMapClass.perBlockWidth/10*self.eyeImgSize)
-            numberX = (eyeImgWidth - theMapClass.perBlockWidth/6)/2
-            numberY = (eyeImgHeight - theMapClass.perBlockWidth/10)/2
+            eyeImgWidth = round(theMapClass.get_block_width()/6*self.eyeImgSize)
+            eyeImgHeight = round(theMapClass.get_block_width()/10*self.eyeImgSize)
+            numberX = (eyeImgWidth - theMapClass.get_block_width()/6)/2
+            numberY = (eyeImgHeight - theMapClass.get_block_width()/10)/2
             if self.detection == True:
-                screen.blit(resizeImg(original_UI_img["eye_red"], (eyeImgWidth,eyeImgHeight)),(xTemp+theMapClass.perBlockWidth*0.51-numberX,yTemp-numberY))
+                screen.blit(resizeImg(original_UI_img["eye_red"], (eyeImgWidth,eyeImgHeight)),(xTemp+theMapClass.get_block_width()*0.51-numberX,yTemp-numberY))
             elif self.detection == False:
-                screen.blit(resizeImg(original_UI_img["eye_orange"], (eyeImgWidth,eyeImgHeight)),(xTemp+theMapClass.perBlockWidth*0.51-numberX,yTemp-numberY))
+                screen.blit(resizeImg(original_UI_img["eye_orange"], (eyeImgWidth,eyeImgHeight)),(xTemp+theMapClass.get_block_width()*0.51-numberX,yTemp-numberY))
             if self.eyeImgSize > 1:
                 self.eyeImgSize-=1
             if self.ImageGetHurt != None and self.ImageGetHurt.x != None:
@@ -378,9 +378,9 @@ class Doll:
                             self.ImageGetHurt.alpha -= 2
                         else:
                             self.ImageGetHurt.x = None
-        hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(theMapClass.perBlockWidth/2), round(theMapClass.perBlockWidth/10)))
+        hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(theMapClass.get_block_width()/2), round(theMapClass.get_block_width()/10)))
         screen.blit(hpEmptyScale,(xTemp,yTemp))
-        screen.blit(pygame.transform.scale(hp_img,(round(theMapClass.perBlockWidth*percent_of_hp/2),round(theMapClass.perBlockWidth/10))),(xTemp,yTemp))
+        screen.blit(pygame.transform.scale(hp_img,(round(theMapClass.get_block_width()*percent_of_hp/2),round(theMapClass.get_block_width()/10))),(xTemp,yTemp))
         displayInCenter(current_hp_to_display,hpEmptyScale,xTemp,yTemp,screen)
     #获取角色特定动作的图片播放ID
     def get_imgId(self,action):

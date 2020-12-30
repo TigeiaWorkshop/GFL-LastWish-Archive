@@ -2545,7 +2545,7 @@ decoration:
         bullet: 100
       x: 15
       y: 10
-  decoration:
+  other:
     Desert_small_Agave_Cactus_03_0:
       image: Desert_small_Agave_Cactus_03
       x: 8

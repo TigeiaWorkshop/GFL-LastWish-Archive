@@ -45,26 +45,26 @@ class mapCreator(BattleSystemInterface):
         self.envImgDict={}
         for imgPath in glob.glob(r'Assets/image/environment/block/*.png'):
             img_name = imgPath.replace(".","").replace("Assets","").replace("block","").replace("image","").replace("environment","").replace("png","").replace("\\","").replace("/","")
-            self.envImgDict[img_name] = loadImg(imgPath,int(self.MAP.perBlockWidth/3))
+            self.envImgDict[img_name] = loadImg(imgPath,int(self.MAP.get_block_width()/3))
         #加载所有友方的角色的图片文件
         self.charactersImgDict={}
         for imgPath in glob.glob(r'Assets/image/character/*'):
             img_name = imgPath.replace(".","").replace("Assets","").replace("image","").replace("character","").replace("\\","").replace("/","")
-            self.charactersImgDict[img_name] = loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",self.MAP.perBlockWidth)
+            self.charactersImgDict[img_name] = loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",self.MAP.get_block_width())
         #加载所有敌对角色的图片文件
         self.sangvisFerrisImgDict={}
         for imgPath in glob.glob(r'Assets/image/sangvisFerri/*'):
             img_name = imgPath.replace(".","").replace("Assets","").replace("image","").replace("sangvisFerri","").replace("\\","").replace("/","")
-            self.sangvisFerrisImgDict[img_name] = loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",self.MAP.perBlockWidth)
+            self.sangvisFerrisImgDict[img_name] = loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",self.MAP.get_block_width())
         #加载所有的装饰品
         self.decorationsImgDict = {}
         for imgPath in glob.glob(r'Assets/image/environment/decoration/*'):
             img_name = imgPath.replace(".png","").replace(".","").replace("Assets","").replace("image","").replace("environment","").replace("decoration","").replace("\\","").replace("/","")
-            self.decorationsImgDict[img_name] = loadImg(imgPath,self.MAP.perBlockWidth/5)
+            self.decorationsImgDict[img_name] = loadImg(imgPath,self.MAP.get_block_width()/5)
         #绿色方块/方块标准
-        self.greenBlock = loadImg("Assets/image/UI/range/green.png",int(self.MAP.perBlockWidth*0.8))
+        self.greenBlock = loadImg("Assets/image/UI/range/green.png",int(self.MAP.get_block_width()*0.8))
         self.greenBlock.set_alpha(150)
-        self.redBlock = loadImg("Assets/image/UI/range/red.png",int(self.MAP.perBlockWidth*0.8))
+        self.redBlock = loadImg("Assets/image/UI/range/red.png",int(self.MAP.get_block_width()*0.8))
         self.redBlock.set_alpha(150)
         self.deleteMode = False
         self.object_to_put_down = None
@@ -78,9 +78,9 @@ class mapCreator(BattleSystemInterface):
         self.UIContainerRightButton.rotate(90)
         #UI按钮
         self.UIButton = {}
-        UI_x = self.MAP.perBlockWidth*0.5
+        UI_x = self.MAP.get_block_width()*0.5
         UI_y = int(self.window_y*0.02)
-        UI_height = int(self.MAP.perBlockWidth*0.3)
+        UI_height = int(self.MAP.get_block_width()*0.3)
         self.UIButton["save"] = ButtonWithFadeInOut("Assets/image/UI/menu.png",get_lang("MapCreator","save"),"black",100,UI_x,UI_y,UI_height)
         UI_x += self.UIButton["save"].get_width()+UI_height
         self.UIButton["back"] = ButtonWithFadeInOut("Assets/image/UI/menu.png",get_lang("MapCreator","back"),"black",100,UI_x,UI_y,UI_height)
@@ -129,18 +129,11 @@ class mapCreator(BattleSystemInterface):
                     elif event.button == 5:
                         self.UI_local_x -= self.window_x*0.05
                 elif self.deleteMode == True and block_get_click != None:
-                    any_dec_replace_name = None
-                    any_dec_replace_type = None
-                    for key,value in self.MAP.facilityData.items():
-                        for key2,value2 in value.items():
-                            if value2["x"] == block_get_click["x"] and value2["y"] == block_get_click["y"]:
-                                any_dec_replace_name = key2
-                                any_dec_replace_type = key
-                                break
+                    #查看当前位置是否有装饰物
+                    decoration = self.MAP.find_decoration_on((block_get_click["x"],block_get_click["y"]))
                     #如果发现有冲突的装饰物
-                    if any_dec_replace_name != None:
-                        self.originalData["facility"][any_dec_replace_type].pop(any_dec_replace_name)
-                        self.MAP.facilityData[any_dec_replace_type].pop(any_dec_replace_name)
+                    if decoration != None:
+                        self.MAP.remove_decoration(decoration)
                     else:
                         any_chara_replace = None
                         for key,value in dicMerge(self.characters_data,self.sangvisFerris_data).items():
@@ -187,29 +180,20 @@ class mapCreator(BattleSystemInterface):
                                 self.originalData["map"][block_get_click["y"]][block_get_click["x"]] = self.object_to_put_down["id"]
                                 self.MAP.update_block(block_get_click,self.object_to_put_down["id"])
                             elif self.object_to_put_down["type"] == "decoration":
-                                #查看当前位置是否有物品
-                                any_dec_replace_name = None
-                                any_dec_replace_type = None
-                                for key,value in self.MAP.facilityData.items():
-                                    for key2,value2 in value.items():
-                                        if value2["x"] == block_get_click["x"] and value2["y"] == block_get_click["y"]:
-                                            any_dec_replace_name = key2
-                                            any_dec_replace_type = key
-                                            break
+                                #查看当前位置是否有装饰物
+                                decoration = self.MAP.find_decoration_on((block_get_click["x"],block_get_click["y"]))
                                 #如果发现有冲突的装饰物
-                                if any_dec_replace_name != None:
-                                    self.originalData["facility"][any_dec_replace_type].pop(any_dec_replace_name)
-                                    self.MAP.facilityData[any_dec_replace_type].pop(any_dec_replace_name)
+                                if decoration != None:
+                                    self.MAP.remove_decoration(decoration)
                                 decorationType = self.decorations_setting[self.object_to_put_down["id"]]
-                                if decorationType not in self.originalData["facility"]:
-                                    self.originalData["facility"][decorationType] = {}
-                                    self.MAP.facilityData[decorationType] = {}
+                                if decorationType not in self.originalData["decoration"]:
+                                    self.originalData["decoration"][decorationType] = {}
                                 the_id = 0
-                                while self.object_to_put_down["id"]+"_"+str(the_id) in self.originalData["facility"][decorationType]:
+                                while self.object_to_put_down["id"]+"_"+str(the_id) in self.originalData["decoration"][decorationType]:
                                     the_id+=1
                                 nameTemp = self.object_to_put_down["id"]+"_"+str(the_id)
-                                self.originalData["facility"][decorationType][nameTemp] = {"image": self.object_to_put_down["id"],"x": block_get_click["x"],"y": block_get_click["y"]}
-                                self.MAP.facilityData[decorationType][nameTemp] = {"image": self.object_to_put_down["id"],"x": block_get_click["x"],"y": block_get_click["y"]}
+                                self.originalData["decoration"][decorationType][nameTemp] = {"image": self.object_to_put_down["id"],"x": block_get_click["x"],"y": block_get_click["y"]}
+                                self.MAP.load_decorations(self.originalData["decoration"])
                             elif self.object_to_put_down["type"] == "character" or self.object_to_put_down["type"] == "sangvisFerri":
                                 any_chara_replace = None
                                 for key,value in dicMerge(self.characters_data,self.sangvisFerris_data).items():
@@ -255,10 +239,10 @@ class mapCreator(BattleSystemInterface):
         if block_get_click != None and ifHover(self.UIContainerRight)==False and ifHover(self.UIContainer)==False:
             if self.deleteMode == True:
                 xTemp,yTemp = self.MAP.calPosInMap(block_get_click["x"],block_get_click["y"])
-                drawImg(self.redBlock,(xTemp+self.MAP.perBlockWidth*0.1,yTemp),screen)
+                drawImg(self.redBlock,(xTemp+self.MAP.get_block_width()*0.1,yTemp),screen)
             elif self.object_to_put_down != None:
                 xTemp,yTemp = self.MAP.calPosInMap(block_get_click["x"],block_get_click["y"])
-                drawImg(self.greenBlock,(xTemp+self.MAP.perBlockWidth*0.1,yTemp),screen)
+                drawImg(self.greenBlock,(xTemp+self.MAP.get_block_width()*0.1,yTemp),screen)
 
         #角色动画
         for key in self.characters_data:
@@ -271,7 +255,7 @@ class mapCreator(BattleSystemInterface):
                 self.data_to_edit = self.sangvisFerris_data[key]
 
         #展示设施
-        self.MAP.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
+        self.MAP.display_decoration(screen,self.characters_data,self.sangvisFerris_data)
 
         #画出UI
         self.UIContainerButton.display(screen,0,self.UIContainer.y)
@@ -285,9 +269,9 @@ class mapCreator(BattleSystemInterface):
         #显示所有可放置的友方角色
         i=0
         for key in self.charactersImgDict:
-            tempX = self.UIContainer.x+self.MAP.perBlockWidth*i*0.6+self.UI_local_x
+            tempX = self.UIContainer.x+self.MAP.get_block_width()*i*0.6+self.UI_local_x
             if 0 <= tempX <= self.UIContainer.width*0.9:
-                tempY = self.UIContainer.y-self.MAP.perBlockWidth*0.25
+                tempY = self.UIContainer.y-self.MAP.get_block_width()*0.25
                 drawImg(self.charactersImgDict[key],(tempX,tempY),screen)
                 if pygame.mouse.get_pressed()[0] and ifHover(self.charactersImgDict[key],(tempX,tempY)):
                     self.object_to_put_down = {"type":"character","id":key}
@@ -297,9 +281,9 @@ class mapCreator(BattleSystemInterface):
         i=0
         #显示所有可放置的敌方角色
         for key in self.sangvisFerrisImgDict:
-            tempX = self.UIContainer.x+self.MAP.perBlockWidth*i*0.6+self.UI_local_x
+            tempX = self.UIContainer.x+self.MAP.get_block_width()*i*0.6+self.UI_local_x
             if 0 <= tempX <= self.UIContainer.width*0.9:
-                tempY = self.UIContainer.y+self.MAP.perBlockWidth*0.25
+                tempY = self.UIContainer.y+self.MAP.get_block_width()*0.25
                 drawImg(self.sangvisFerrisImgDict[key],(tempX,tempY),screen)
                 if pygame.mouse.get_pressed()[0] and ifHover(self.sangvisFerrisImgDict[key],(tempX,tempY)):
                     self.object_to_put_down = {"type":"sangvisFerri","id":key}
@@ -310,17 +294,17 @@ class mapCreator(BattleSystemInterface):
         #显示所有可放置的环境方块
         i=0
         for img_name in self.envImgDict:
-            posY = self.UIContainerRight.y+self.MAP.perBlockWidth*5*int(i/4)+self.UI_local_y
+            posY = self.UIContainerRight.y+self.MAP.get_block_width()*5*int(i/4)+self.UI_local_y
             if self.window_y*0.05<posY<self.window_y*0.9:
-                posX = self.UIContainerRight.x+self.MAP.perBlockWidth/6+self.MAP.perBlockWidth/2.3*(i%4)
+                posX = self.UIContainerRight.x+self.MAP.get_block_width()/6+self.MAP.get_block_width()/2.3*(i%4)
                 drawImg(self.envImgDict[img_name],(posX,posY),screen)
                 if pygame.mouse.get_pressed()[0] and ifHover(self.envImgDict[img_name],(posX,posY)):
                     self.object_to_put_down = {"type":"block","id":img_name}
             i+=1
         for img_name in self.decorationsImgDict:
-            posY = self.UIContainerRight.y+self.MAP.perBlockWidth*5*int(i/4)+self.UI_local_y
+            posY = self.UIContainerRight.y+self.MAP.get_block_width()*5*int(i/4)+self.UI_local_y
             if self.window_y*0.05<posY<self.window_y*0.9:
-                posX = self.UIContainerRight.x+self.MAP.perBlockWidth/6+self.MAP.perBlockWidth/2.3*(i%4)
+                posX = self.UIContainerRight.x+self.MAP.get_block_width()/6+self.MAP.get_block_width()/2.3*(i%4)
                 drawImg(self.decorationsImgDict[img_name],(posX,posY),screen)
                 if pygame.mouse.get_pressed()[0] and ifHover(self.decorationsImgDict[img_name],(posX,posY)):
                     self.object_to_put_down = {"type":"decoration","id":img_name}
@@ -333,9 +317,9 @@ class mapCreator(BattleSystemInterface):
             elif self.object_to_put_down["type"] == "decoration":
                 drawImg(self.decorationsImgDict[self.object_to_put_down["id"]],(mouse_x,mouse_y),screen)
             elif self.object_to_put_down["type"] == "character":
-                drawImg(self.charactersImgDict[self.object_to_put_down["id"]],(mouse_x-self.MAP.perBlockWidth/2,mouse_y-self.MAP.perBlockWidth/2.1),screen)
+                drawImg(self.charactersImgDict[self.object_to_put_down["id"]],(mouse_x-self.MAP.get_block_width()/2,mouse_y-self.MAP.get_block_width()/2.1),screen)
             elif self.object_to_put_down["type"] == "sangvisFerri":
-                drawImg(self.sangvisFerrisImgDict[self.object_to_put_down["id"]],(mouse_x-self.MAP.perBlockWidth/2,mouse_y-self.MAP.perBlockWidth/2.1),screen)
+                drawImg(self.sangvisFerrisImgDict[self.object_to_put_down["id"]],(mouse_x-self.MAP.get_block_width()/2,mouse_y-self.MAP.get_block_width()/2.1),screen)
         
         #显示即将被编辑的数据
         if self.data_to_edit != None:
