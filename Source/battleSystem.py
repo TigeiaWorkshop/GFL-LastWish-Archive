@@ -2,8 +2,8 @@
 from Source.skill import *
 
 class BattleSystem(Zero.BattleSystemInterface):
-    def __init__(self,chapterType=None,chapterId=None,collectionName=None):
-        Zero.BattleSystemInterface.__init__(self,chapterType,chapterId,collectionName)
+    def __init__(self,chapterType=None,chapterId=None,collection_name=None):
+        Zero.BattleSystemInterface.__init__(self,chapterType,chapterId,collection_name)
         #被选中的角色
         self.characterGetClick = None
         self.enemiesGetAttack = {}
@@ -51,6 +51,10 @@ class BattleSystem(Zero.BattleSystemInterface):
         self.ResultBoardUI = None
         #对话-动作是否被设置
         self.dialog_ifPathSet = False
+        #可以互动的物品列表
+        self.thingsCanReact = []
+        #需要救助的角色列表
+        self.friendsCanSave = []
     #储存章节信息
     def __save_data(self):
         if Zero.pause_menu.ifSave == True:
@@ -59,7 +63,7 @@ class BattleSystem(Zero.BattleSystemInterface):
             DataTmp["type"] = "battle"
             DataTmp["chapterType"] = self.chapterType
             DataTmp["chapterId"] = self.chapterId
-            DataTmp["collectionName"] = self.collectionName
+            DataTmp["collection_name"] = self.collection_name
             DataTmp["characters_data"] = self.characters_data
             DataTmp["sangvisFerris_data"] = self.sangvisFerris_data
             DataTmp["MAP"] = self.MAP
@@ -74,7 +78,7 @@ class BattleSystem(Zero.BattleSystemInterface):
         if DataTmp["type"] == "battle":
             self.chapterType = DataTmp["chapterType"]
             self.chapterId = DataTmp["chapterId"]
-            self.collectionName = DataTmp["collectionName"]
+            self.collection_name = DataTmp["collection_name"]
             self.characters_data = DataTmp["characters_data"]
             self.sangvisFerris_data = DataTmp["sangvisFerris_data"] 
             self.MAP = DataTmp["MAP"]
@@ -98,8 +102,8 @@ class BattleSystem(Zero.BattleSystemInterface):
         self.warnings_to_display = WarningSystem()
         loading_info = Zero.get_lang("LoadingTxt")
         #加载剧情
-        DataTmp = Zero.loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,Zero.get_setting('Language'))) if self.collectionName == None\
-            else Zero.loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collectionName,self.chapterId,Zero.get_setting('Language')))
+        DataTmp = Zero.loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,Zero.get_setting('Language'))) if self.collection_name == None\
+            else Zero.loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collection_name,self.chapterId,Zero.get_setting('Language')))
         #章节标题显示
         self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleModeUiTxt["numChapter"],self.chapterId,DataTmp["title"],DataTmp["description"])
         self.battleMode_info = DataTmp["battle_info"]
@@ -117,8 +121,8 @@ class BattleSystem(Zero.BattleSystemInterface):
         nowLoadingIcon.draw(screen)
         Zero.display.flip(True)
         #读取并初始化章节信息
-        DataTmp = Zero.loadConfig("Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId)) if self.collectionName == None\
-            else Zero.loadConfig("Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collectionName,self.chapterId))
+        DataTmp = Zero.loadConfig("Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId)) if self.collection_name == None\
+            else Zero.loadConfig("Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collection_name,self.chapterId))
         self.zoomIn = DataTmp["zoomIn"]*100
         #储存对话数据key的字典
         self.dialogInfo = DataTmp["dialogs"]
@@ -272,7 +276,7 @@ class BattleSystem(Zero.BattleSystemInterface):
             if self.MAP.inLightArea(self.sangvisFerris_data[enemies]):
                 self.sangvisFerris_data[enemies].draw(screen,self.MAP)
         #展示设施
-        self.MAP.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
+        self.MAP.display_decoration(screen,self.characters_data,self.sangvisFerris_data)
         #加载雪花
         self._display_weather(screen)
         #如果战斗有对话
@@ -461,8 +465,6 @@ class BattleSystem(Zero.BattleSystemInterface):
         #攻击范围
         attacking_range = None
         skill_range = None
-        friendsCanSave = []
-        thingsCanReact = []
         for event in self._get_event():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE and self.characterGetClick == None:
@@ -606,9 +608,9 @@ class BattleSystem(Zero.BattleSystemInterface):
                     self.NotDrawRangeBlocks = True
                     attacking_range = None
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
-                elif self.action_choice == "interact" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.ornamentationGetClick != None:
+                elif self.action_choice == "interact" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.decorationGetClick != None:
                     self.characters_data[self.characterGetClick].reduce_action_point(2)
-                    self.MAP.ornamentationData[self.ornamentationGetClick].triggered = not self.MAP.ornamentationData[self.ornamentationGetClick].triggered
+                    self.MAP.interact_decoration_with_id(self.decorationGetClick)
                     self.MAP.calculate_darkness(self.characters_data)
                     self.characterGetClick = None
                     self.action_choice = None
@@ -629,14 +631,16 @@ class BattleSystem(Zero.BattleSystemInterface):
                                 self.characters_data[key].playSound("get_click")
                                 self.characterGetClick = key
                             self.characterInfoBoardUI.update()
-                            friendsCanSave = []
-                            thingsCanReact = []
+                            self.friendsCanSave = []
+                            self.thingsCanReact = []
                             for key2 in self.characters_data:
                                 if self.characters_data[key2].dying != False and self.characters_data[key].near(self.characters_data[key2].dying):
-                                    friendsCanSave.append(key2)
-                            for i in range(len(self.MAP.ornamentationData)):
-                                if self.MAP.ornamentationData[i].type == "campfire" and self.characters_data[key].near(self.MAP.ornamentationData[i]):
-                                    thingsCanReact.append(i)
+                                    self.friendsCanSave.append(key2)
+                            index = 0
+                            for decoration in self.MAP.get_decorations():
+                                if decoration.type == "campfire" and self.characters_data[key].near(decoration):
+                                    self.thingsCanReact.append(index)
+                                index += 1
                             self.NotDrawRangeBlocks = "SelectMenu"
                             break
             #选择菜单的判定，显示功能在角色动画之后
@@ -798,7 +802,7 @@ class BattleSystem(Zero.BattleSystemInterface):
                     self.areaDrawColorBlock["green"] = []
                     self.areaDrawColorBlock["orange"] = []
                     self.friendGetHelp = None
-                    for friendNeedHelp in friendsCanSave:
+                    for friendNeedHelp in self.friendsCanSave:
                         if block_get_click != None and block_get_click["x"] == self.characters_data[friendNeedHelp].x and block_get_click["y"] == self.characters_data[friendNeedHelp].y:
                             self.areaDrawColorBlock["orange"] = [(block_get_click["x"],block_get_click["y"])]
                             self.friendGetHelp = friendNeedHelp
@@ -807,13 +811,14 @@ class BattleSystem(Zero.BattleSystemInterface):
                 elif self.action_choice == "interact":
                     self.areaDrawColorBlock["green"] = []
                     self.areaDrawColorBlock["orange"] = []
-                    self.ornamentationGetClick = None
-                    for ornamentationId in thingsCanReact:
-                        if block_get_click != None and block_get_click["x"] == self.MAP.ornamentationData[ornamentationId].x and block_get_click["y"] == self.MAP.ornamentationData[ornamentationId].y:
+                    self.decorationGetClick = None
+                    for index in self.thingsCanReact:
+                        decoration = self.MAP.find_decoration_with_id(index)
+                        if block_get_click != None and decoration.is_on_pos(block_get_click):
                             self.areaDrawColorBlock["orange"] = [(block_get_click["x"],block_get_click["y"])]
-                            self.ornamentationGetClick = ornamentationId
+                            self.decorationGetClick = index
                         else:
-                            self.areaDrawColorBlock["green"].append((self.MAP.ornamentationData[ornamentationId].x,self.MAP.ornamentationData[ornamentationId].y))
+                            self.areaDrawColorBlock["green"].append((decoration.x,decoration.y))
 
             #当有角色被点击时
             if self.characterGetClick != None and self.isWaiting == False:
@@ -833,20 +838,19 @@ class BattleSystem(Zero.BattleSystemInterface):
                     else:
                         self.footstep_sounds.stop()
                         #检测是不是站在补给上
-                        for i in range(len(self.MAP.ornamentationData)-1,-1,-1):
-                            if self.MAP.ornamentationData[i].type == "chest" and self.MAP.ornamentationData[i].get_pos() == self.characters_data[self.characterGetClick].get_pos():
-                                self.original_UI_img["supplyBoard"].items = []
-                                for key2,value2 in self.MAP.ornamentationData[i].items.items():
-                                    if key2 == "bullet":
-                                        self.characters_data[self.characterGetClick].bullets_carried += value2
-                                        self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(value2),Zero.get_fontMode(),(255,255,255)))
-                                    elif key2 == "hp":
-                                        self.characters_data[self.characterGetClick].current_hp += value2
-                                        self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(value2),Zero.get_fontMode(),(255,255,255)))
-                                if len(self.original_UI_img["supplyBoard"].items)>0:
-                                    self.original_UI_img["supplyBoard"].yTogo = 10
-                                del self.MAP.ornamentationData[i]
-                                break
+                        decoration = self.MAP.find_decoration_on(self.characters_data[self.characterGetClick].get_pos())
+                        if decoration != None and decoration.type == "chest":
+                            self.original_UI_img["supplyBoard"].items = []
+                            for itemType,itemData in decoration.items.items():
+                                if itemType == "bullet":
+                                    self.characters_data[self.characterGetClick].bullets_carried += itemData
+                                    self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(itemData),Zero.get_fontMode(),(255,255,255)))
+                                elif itemType == "hp":
+                                    self.characters_data[self.characterGetClick].current_hp += itemData
+                                    self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(itemData),Zero.get_fontMode(),(255,255,255)))
+                            if len(self.original_UI_img["supplyBoard"].items)>0:
+                                self.original_UI_img["supplyBoard"].yTogo = 10
+                            self.MAP.remove_decoration(decoration)
                         keyTemp = str(self.characters_data[self.characterGetClick].x)+"-"+str(self.characters_data[self.characterGetClick].y) 
                         #检测是否角色有set的动画
                         self.isWaiting = True
@@ -1011,20 +1015,19 @@ class BattleSystem(Zero.BattleSystemInterface):
                 self.UI_img["green"].set_alpha(255)
                 self.rightClickCharacterAlpha = None
         #展示设施
-        self.MAP.display_ornamentation(screen,self.characters_data,self.sangvisFerris_data)
+        self.MAP.display_decoration(screen,self.characters_data,self.sangvisFerris_data)
         #展示所有角色Ui
         for every_chara in self.characters_data:
             self.characters_data[every_chara].drawUI(screen,self.original_UI_img,self.MAP)
         for enemies in self.sangvisFerris_data:
             if self.MAP.isPosInLightArea(int(self.sangvisFerris_data[enemies].x),int(self.sangvisFerris_data[enemies].y)):
                 self.sangvisFerris_data[enemies].drawUI(screen,self.original_UI_img,self.MAP)
-
         #显示选择菜单
         if self.NotDrawRangeBlocks == "SelectMenu":
             #左下角的角色信息
             self.characterInfoBoardUI.display(screen,self.characters_data[self.characterGetClick],self.original_UI_img)
             #----选择菜单----
-            self.buttonGetHover = self.selectMenuUI.display(screen,round(self.MAP.perBlockWidth/10),self.MAP.getBlockExactLocation(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].kind,friendsCanSave,thingsCanReact)
+            self.buttonGetHover = self.selectMenuUI.display(screen,round(self.MAP.perBlockWidth/10),self.MAP.getBlockExactLocation(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].kind,self.friendsCanSave,self.thingsCanReact)
         #加载雪花
         self._display_weather(screen)
         

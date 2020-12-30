@@ -2,9 +2,9 @@
 from Zero3.battleSystemInterface import *
 
 class mapCreator(BattleSystemInterface):
-    def __init__(self,chapterType,chapterId,collectionName=None):
-        BattleSystemInterface.__init__(self,chapterType,chapterId,collectionName)
-        self.fileLocation = "Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId) if self.chapterType == "main_chapter" else "Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collectionName,self.chapterId)
+    def __init__(self,chapterType,chapterId,collection_name=None):
+        BattleSystemInterface.__init__(self,chapterType,chapterId,collection_name)
+        self.fileLocation = "Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId) if self.chapterType == "main_chapter" else "Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collection_name,self.chapterId)
         display.set_caption("Girls frontline-Last Wish: MapCreator")
         unloadBackgroundMusic()
     def initialize(self,screen):

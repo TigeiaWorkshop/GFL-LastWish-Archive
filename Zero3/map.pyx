@@ -21,26 +21,25 @@ class MapObject:
             for x in range(len(self.__MapData[y])):
                 item = self.__MapData[y][x]
                 self.__MapData[y][x] = BlockObject(item,_BLOCKS_DATABASE[item]["canPassThrough"])
-        #self.__MapData = numpy.asarray(self.__MapData)
+        self.__MapData = numpy.asarray(self.__MapData)
         self.row,self.column = self.__MapData.shape
         #使用numpy的shape决定self.row和self.column
-        self.ornamentationData = []
-        for ornamentationType,itemsThatType in mapDataDic["ornamentation"].items():
+        self.__decorations = []
+        for decorationType,itemsThatType in mapDataDic["decoration"].items():
             for itemKey,itemData in itemsThatType.items():
-                if ornamentationType == "campfire":
-                    self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,ornamentationType))
-                    self.ornamentationData[-1].imgId = randomInt(0,9)
-                    self.ornamentationData[-1].range = itemData["range"]
-                    self.ornamentationData[-1].alpha = 255
-                    self.ornamentationData[-1].triggered = True
-                elif ornamentationType == "chest":
-                    self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,ornamentationType))
-                    self.ornamentationData[-1].items = itemData["items"]
+                if decorationType == "campfire":
+                    self.__decorations.append(DecorationObject(itemData["x"],itemData["y"],decorationType,decorationType))
+                    self.__decorations[-1].imgId = randomInt(0,9)
+                    self.__decorations[-1].range = itemData["range"]
+                    self.__decorations[-1].alpha = 255
+                elif decorationType == "chest":
+                    self.__decorations.append(DecorationObject(itemData["x"],itemData["y"],decorationType,decorationType))
+                    self.__decorations[-1].items = itemData["items"]
                 else:
-                    self.ornamentationData.append(OrnamentationObject(itemData["x"],itemData["y"],ornamentationType,itemData["image"]))
-        self.ornamentationData.sort()
-        #self.ornamentationData = numpy.asarray(self.ornamentationData)
-        self.__lightArea = []
+                    self.__decorations.append(DecorationObject(itemData["x"],itemData["y"],decorationType,itemData["image"]))
+        self.__decorations.sort()
+        self.__decorations = numpy.asarray(self.__decorations)
+        self.__LightArea = []
         self.surface_width = int(perBlockWidth*0.9*((self.row+self.column+1)/2))
         self.surface_height = int(perBlockWidth*0.45*((self.row+self.column+1)/2)+perBlockWidth)
         self.__local_x = mapDataDic["local_x"]
@@ -49,7 +48,31 @@ class MapObject:
         self.load_env_img()
     def load_env_img(self):
         global _MAP_ENV_IMAGE
-        _MAP_ENV_IMAGE = EnvImagesManagement(self.__MapData,self.ornamentationData,self.backgroundImageName,self.perBlockWidth,self.__darkMode)
+        _MAP_ENV_IMAGE = EnvImagesManagement(self.__MapData,self.__decorations,self.backgroundImageName,self.perBlockWidth,self.__darkMode)
+    #根据index寻找装饰物
+    def find_decoration_with_id(self,unsigned int index):
+        return self.__decorations[index]
+    #根据坐标寻找装饰物
+    def find_decoration_on(self,pos):
+        for decoration in self.__decorations:
+            if decoration.x == pos[0] and decoration.y == pos[1]:
+                return decoration
+        return None
+    def get_decorations(self):
+        return self.__decorations.copy().tolist()
+    def interact_decoration_with_id(self,unsigned int index):
+        self.__decorations[index].switch()
+    #移除装饰物
+    def remove_decoration(self,decoration):
+        try:
+            self.__decorations.remove(decoration)
+        except ValueError:
+            print("ZeroEngine-Warning: Cannot remove decoration, the program will try to do this using tractional way")
+            pos = decoration.get_pos()
+            for i in range(len(self.__decorations)-1,-1,-1):
+                if self.__decorations[i].x == pos[0] and self.__decorations[i].y == pos[1]:
+                    del self.__decorations[i]
+                    break
     #控制地图放大缩小
     def changePerBlockSize(self,newPerBlockWidth,newPerBlockHeight,window_x,window_y):
         self.addPos_x((self.perBlockWidth-newPerBlockWidth)*self.column/2)
@@ -151,7 +174,7 @@ class MapObject:
                     posTupleTemp = self.calPosInMap(x,y)
                     mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.__MapData[y][x].name,False),(posTupleTemp[0]-self.__local_x,posTupleTemp[1]-self.__local_y))
     #把装饰物画到屏幕上
-    def display_ornamentation(self,screen,characters_data,sangvisFerris_data):
+    def display_decoration(self,screen,characters_data,sangvisFerris_data):
         cdef (int,int) thePosInMap
         #检测角色所占据的装饰物（即需要透明化，方便玩家看到角色）
         cdef list charactersPos = []
@@ -168,7 +191,7 @@ class MapObject:
         cdef int screen_width = screen.get_width()
         cdef int screen_height = screen.get_height()
         #历遍装饰物列表里的物品
-        for item in self.ornamentationData:
+        for item in self.__decorations:
             imgToBlit = None
             thePosInMap = self.calPosInMap(item.x,item.y)
             if screen_min<=thePosInMap[0]<screen_width and screen_min<=thePosInMap[1]<screen_height:
@@ -185,35 +208,35 @@ class MapObject:
                         item.alpha -= 15
                     #根据alpha值生成对应的图片
                     if item.alpha >= 255:
-                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
-                        if item.imgId >= _MAP_ENV_IMAGE.get_ornamentation_num("campfire")-2:
+                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        if item.imgId >= _MAP_ENV_IMAGE.get_decoration_num("campfire")-2:
                             item.imgId = 0
                         else:
                             item.imgId += 0.1
                     elif item.alpha <= 0:
                         if keyWordTemp == False:
-                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                         else:
-                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire","campfire",True), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                            imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire","campfire",True), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                     else:
-                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",-1,False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                         screen.blit(imgToBlit,(thePosInMap[0]+offSetX,thePosInMap[1]-offSetY))
-                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                        imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("campfire",int(item.imgId),False), (round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                         imgToBlit.set_alpha(item.alpha)
-                        if item.imgId >= _MAP_ENV_IMAGE.get_ornamentation_num("campfire")-2:
+                        if item.imgId >= _MAP_ENV_IMAGE.get_decoration_num("campfire")-2:
                             item.imgId = 0
                         else:
                             item.imgId += 0.1
                 #树
                 elif item.type == "tree":
-                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image("tree",item.image,keyWordTemp),(round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
+                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image("tree",item.image,keyWordTemp),(round(self.perBlockWidth*0.75),round(self.perBlockWidth*0.75)))
                     thePosInMap = (thePosInMap[0]-offSetX_tree,thePosInMap[1]-offSetY_tree)
                     if item.get_pos() in charactersPos:
                         if self.__darkMode == False or self.inLightArea(item):
                             imgToBlit.set_alpha(100)
                 #其他装饰物
                 elif item.type == "decoration" or item.type == "obstacle" or item.type == "chest":
-                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_ornamentation_image(item.type,item.image,keyWordTemp),(round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
+                    imgToBlit = pygame.transform.scale(_MAP_ENV_IMAGE.get_decoration_image(item.type,item.image,keyWordTemp),(round(self.perBlockWidth/2),round(self.perBlockWidth/2)))
                 #画上装饰物
                 if imgToBlit != None:
                     screen.blit(imgToBlit,(thePosInMap[0]+offSetX,thePosInMap[1]-offSetY))
@@ -273,7 +296,7 @@ class MapObject:
                     for x in range(int(characters_data[each_chara].x-the_character_effective_range+(y-characters_data[each_chara].y)+1),int(characters_data[each_chara].x+the_character_effective_range-(y-characters_data[each_chara].y))):
                         if [x,y] not in lightArea:
                             lightArea.append([x,y])
-        for item in self.ornamentationData:
+        for item in self.__decorations:
             if item.type == "campfire" and item.triggered == True:
                 for y in range(int(item.y-item.range),int(item.y+item.range)):
                     if y < item.y:
@@ -284,7 +307,7 @@ class MapObject:
                         for x in range(int(item.x-item.range+(y-item.y)+1),int(item.x+item.range-(y-item.y))):
                             if [x,y] not in lightArea:
                                 lightArea.append([x,y])
-        self.__lightArea = numpy.asarray(lightArea,dtype=numpy.int8)
+        self.__LightArea = numpy.asarray(lightArea,dtype=numpy.int8)
         self.__needUpdateMapSurface = True
     #计算在地图中的位置
     def calPosInMap(self,float x,float y):
@@ -297,7 +320,7 @@ class MapObject:
         if self.__darkMode == False:
             return True
         else:
-            return numpy.any(numpy.equal(self.__lightArea,[x,y]).all(1))
+            return numpy.any(numpy.equal(self.__LightArea,[x,y]).all(1))
     #以下是A星寻路功能
     def findPath(self,startPosition,endPosition,friend_data_dict,enemies_data_dict,routeLen=None,ignoreEnemyCharacters=[]):
         cdef unsigned int startX,startY,endX,endY
@@ -333,7 +356,7 @@ class MapObject:
                     self.map2d[x][y]=1
         """
         #历遍设施，设置障碍方块
-        for item in self.ornamentationData:
+        for item in self.__decorations:
             if item.type == "obstacle" or item.type == "campfire":
                 self.map2d[item.x][item.y] = 1
         #如果终点有我方角色，则不允许

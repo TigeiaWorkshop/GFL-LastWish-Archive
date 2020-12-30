@@ -9,11 +9,20 @@ pygame.init()
 
 #配置文件加载
 def loadConfig(path,key=None):
-    with open(path, "r", encoding='utf-8') as f:
-        if key == None:
-            return yaml.load(f.read(),Loader=yaml.FullLoader)
-        else:
-            return yaml.load(f.read(),Loader=yaml.FullLoader)[key]
+    try:
+        with open(path, "r", encoding='utf-8') as f:
+            Data = yaml.load(f.read(),Loader=yaml.FullLoader)
+    except yaml.constructor.ConstructorError:
+        print("ZeroEngine-Warning: Encounter a fatal error while loading the yaml file in path:")
+        print("'{}'".format(path))
+        print("One possible reason is that at least one numpy array exists inside the yaml file.")
+        print("The program will try to load the data using yaml.UnsafeLoader.")
+        with open(path, "r", encoding='utf-8') as f:
+            Data = yaml.load(f.read(), Loader=yaml.UnsafeLoader)
+    if key == None:
+        return Data
+    else:
+        return Data[key]
 
 #配置文件保存
 def saveConfig(path,data):

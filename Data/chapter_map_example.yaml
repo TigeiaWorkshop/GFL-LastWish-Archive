@@ -11,7 +11,7 @@ dialogs: {}
 local_x: 0
 local_y: 0
 map: null
-ornamentation:
+decoration:
   campfire:
     campfire1:
       range: 3

@@ -5,7 +5,7 @@ from Zero3.AI import *
 
 #战斗系统接口，请勿实例化
 class BattleSystemInterface:
-    def __init__(self,chapterType,chapterId,collectionName):
+    def __init__(self,chapterType,chapterId,collection_name):
         #用于判断是否移动屏幕的参数
         self.__mouse_move_temp_x = -1
         self.__mouse_move_temp_y = -1
@@ -31,7 +31,7 @@ class BattleSystemInterface:
         #章节名和种类
         self.chapterId = chapterId
         self.chapterType = chapterType
-        self.collectionName = collectionName
+        self.collection_name = collection_name
     def _create_map(self,MapData,darkMode=None):
         self.MAP = MapObject(MapData,round(self.window_x/10),round(self.window_y/10),darkMode)
     #检测手柄事件

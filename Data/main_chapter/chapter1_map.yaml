@@ -2529,7 +2529,7 @@ map:
   - TileSnow01
   - TileSnow02ToStone02
   - TileSnow02ToStone01
-ornamentation:
+decoration:
   campfire:
     campfire1:
       range: 3

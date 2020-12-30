@@ -198,12 +198,42 @@ class MainMenu:
         else:
             raise Exception('ZeroEngine-Error: Cannot find the id of chapter because the file is not properly named!')
     #加载章节
-    def __load_scene(self,chapterType,chapterId,screen,startPoint="dialog_before_battle",dialogId="head",dialog_options={}):
+    def __load_scene(self,chapterType,chapterId,screen):
         self.videoCapture.stop()
-        if chapterType == "main_chapter":
-            scene(chapterType,chapterId,screen,startPoint,dialogId,dialog_options)
+        collection_name = None if chapterType == "main_chapter" else self.current_selected_workshop_collection
+        dialog(chapterType,chapterId,screen,"dialog_before_battle",collection_name)
+        if not Zero.pause_menu.checkIfBackToMainMenu():
+            battle(chapterType,chapterId,screen,collection_name)
         else:
-            scene(chapterType,chapterId,screen,startPoint,dialogId,dialog_options,self.current_selected_workshop_collection)
+            return
+        if not Zero.pause_menu.checkIfBackToMainMenu():
+            dialog(chapterType,chapterId,screen,"dialog_after_battle",collection_name)
+        self.__reset_menu()
+    def __continue_scene(self,screen):
+        self.videoCapture.stop()
+        if os.path.exists("Save/save.yaml"):
+            SAVE = Zero.loadConfig("Save/save.yaml")
+            startPoint = SAVE["type"]
+            if startPoint == "dialog_before_battle":
+                dialog(None,None,screen,None)
+                if not Zero.pause_menu.checkIfBackToMainMenu():
+                    battle(SAVE["chapterType"],SAVE["chapterId"],screen,SAVE["collection_name"])
+                else:
+                    return
+                if not Zero.pause_menu.checkIfBackToMainMenu():
+                    dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
+            elif startPoint == "battle":
+                battle(None,None,screen,)
+                if not Zero.pause_menu.checkIfBackToMainMenu():
+                    dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
+            elif startPoint == "dialog_after_battle":
+                dialog(None,None,screen,None)
+        else:
+            #raise Exception('ZeroEngine-Error: The save.yaml is not exist')
+            pass
+        self.__reset_menu()
+    #更新主菜单的部分元素
+    def __reset_menu(self):
         self.videoCapture = self.videoCapture.clone()
         self.videoCapture.start()
         #是否可以继续游戏了（save文件是否被创建）
@@ -247,15 +277,7 @@ class MainMenu:
                 if self.menu_type == 0:
                     #继续游戏
                     if Zero.ifHover(self.main_menu_txt["menu_main"]["0_continue"]):
-                        if os.path.exists("Save/save.yaml"):
-                            SAVE = Zero.loadConfig("Save/save.yaml")
-                            if SAVE["type"] == "battle":
-                                SAVE["id"] = "head"
-                                SAVE["dialog_options"] = {}
-                            self.__load_scene(SAVE["chapterType"],SAVE["chapterName"],screen,SAVE["type"],SAVE["id"],SAVE["dialog_options"])
-                        else:
-                            #raise Exception('ZeroEngine-Error: The save.yaml is not exist')
-                            pass
+                        self.__continue_scene(screen)
                     #选择章节
                     elif Zero.ifHover(self.main_menu_txt["menu_main"]["1_chooseChapter"]):
                         #加载菜单章节选择页面的文字

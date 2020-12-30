@@ -4,13 +4,13 @@ import pygame
 
 #地图场景模块
 class EnvImagesManagement:
-    def __init__(self,theMap,ornamentationData,bgImgName,theWidth,darkMode,darkness=150):
+    def __init__(self,theMap,decorationData,bgImgName,theWidth,darkMode,darkness=150):
         self.__ENV_IMAGE_DICT_ORIGINAL = {}
         self.__ENV_IMAGE_DICT_ORIGINAL_DARK = None
         self.__ENV_IMAGE_DICT = {}
         self.__ENV_IMAGE_DICT_DARK = None
-        self.__ORNAMENTATION_IMAGE_DICT = {}
-        self.__ORNAMENTATION_IMAGE_DICT_DARK = None
+        self.__DECORATION_IMAGE_DICT = {}
+        self.__DECORATION_IMAGE_DICT_DARK = None
         self.__BACKGROUND_IMAGE = loadImg("Assets/image/dialog_background/{}".format(bgImgName),ifConvertAlpha=False).convert() if bgImgName != None else None
         self.__BACKGROUND_SURFACE = None
         self.__MAP_SURFACE = None
@@ -27,18 +27,18 @@ class EnvImagesManagement:
             except BaseException:
                 raise Exception('ZeroEngine-Error: An map-block called '+fileName+' cannot find its image in the folder.')
         #加载场地设施的图片
-        for ornamentation in ornamentationData:
+        for decoration in decorationData:
             #--篝火--
-            if ornamentation.type == "campfire":
-                if "campfire" not in self.__ORNAMENTATION_IMAGE_DICT:
-                    self.__ORNAMENTATION_IMAGE_DICT["campfire"] = []
+            if decoration.type == "campfire":
+                if "campfire" not in self.__DECORATION_IMAGE_DICT:
+                    self.__DECORATION_IMAGE_DICT["campfire"] = []
                     for i in range(1,12):
-                        self.__ORNAMENTATION_IMAGE_DICT["campfire"].append(loadImg("Assets/image/environment/campfire/{}.png".format(i)))
-            elif ornamentation.type not in self.__ORNAMENTATION_IMAGE_DICT:
-                self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type] = {}
-                self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type][ornamentation.image] = loadImg("Assets/image/environment/decoration/"+ornamentation.image+".png")
-            elif ornamentation.image not in self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type]:
-                self.__ORNAMENTATION_IMAGE_DICT[ornamentation.type][ornamentation.image] = loadImg("Assets/image/environment/decoration/"+ornamentation.image+".png")
+                        self.__DECORATION_IMAGE_DICT["campfire"].append(loadImg("Assets/image/environment/campfire/{}.png".format(i)))
+            elif decoration.type not in self.__DECORATION_IMAGE_DICT:
+                self.__DECORATION_IMAGE_DICT[decoration.type] = {}
+                self.__DECORATION_IMAGE_DICT[decoration.type][decoration.image] = loadImg("Assets/image/environment/decoration/"+decoration.image+".png")
+            elif decoration.image not in self.__DECORATION_IMAGE_DICT[decoration.type]:
+                self.__DECORATION_IMAGE_DICT[decoration.type][decoration.image] = loadImg("Assets/image/environment/decoration/"+decoration.image+".png")
         #如果是夜战模式
         if darkMode:
             self.__ENV_IMAGE_DICT_ORIGINAL_DARK = {}
@@ -47,15 +47,15 @@ class EnvImagesManagement:
             self.__ENV_IMAGE_DICT_DARK = {}
             for img,value in self.__ENV_IMAGE_DICT.items():
                 self.__ENV_IMAGE_DICT_DARK[img] = addDarkness(value,darkness)
-            self.__ORNAMENTATION_IMAGE_DICT_DARK = {}
-            for key,value in self.__ORNAMENTATION_IMAGE_DICT.items():
+            self.__DECORATION_IMAGE_DICT_DARK = {}
+            for key,value in self.__DECORATION_IMAGE_DICT.items():
                 if key != "campfire":
-                    self.__ORNAMENTATION_IMAGE_DICT_DARK[key] = {}
+                    self.__DECORATION_IMAGE_DICT_DARK[key] = {}
                     for key2,value2 in value.items():
-                        self.__ORNAMENTATION_IMAGE_DICT_DARK[key][key2] = addDarkness(value2,darkness)
-                elif "campfire" not in self.__ORNAMENTATION_IMAGE_DICT_DARK:
-                    self.__ORNAMENTATION_IMAGE_DICT_DARK["campfire"] = {}
-                    self.__ORNAMENTATION_IMAGE_DICT_DARK["campfire"]["campfire"] = (addDarkness(self.__ORNAMENTATION_IMAGE_DICT["campfire"][-1],darkness))
+                        self.__DECORATION_IMAGE_DICT_DARK[key][key2] = addDarkness(value2,darkness)
+                elif "campfire" not in self.__DECORATION_IMAGE_DICT_DARK:
+                    self.__DECORATION_IMAGE_DICT_DARK["campfire"] = {}
+                    self.__DECORATION_IMAGE_DICT_DARK["campfire"]["campfire"] = (addDarkness(self.__DECORATION_IMAGE_DICT["campfire"][-1],darkness))
     def resize(self,newWidth):
         for key in self.__ENV_IMAGE_DICT:
             self.__ENV_IMAGE_DICT[key] = resizeImg(self.__ENV_IMAGE_DICT_ORIGINAL[key],(newWidth, None))
@@ -77,22 +77,22 @@ class EnvImagesManagement:
                 imgTmp = addDarkness(imgTmp,150)
                 self.__ENV_IMAGE_DICT_ORIGINAL_DARK[key] = imgTmp
                 self.__ENV_IMAGE_DICT_DARK[key] = resizeImg(imgTmp,(self.perBlockWidth,None))
-    def get_ornamentation_image(self,ornamentationType,key,darkMode,darkness=150):
+    def get_decoration_image(self,decorationType,key,darkMode,darkness=150):
         try:
             if darkMode:
-                return self.__ORNAMENTATION_IMAGE_DICT_DARK[ornamentationType][key]
+                return self.__DECORATION_IMAGE_DICT_DARK[decorationType][key]
             else:
-                return self.__ORNAMENTATION_IMAGE_DICT[ornamentationType][key]
+                return self.__DECORATION_IMAGE_DICT[decorationType][key]
         #如果图片没找到
         except BaseException:
-            print('ZeroEngine-Warning: Cannot find ornamentation image "{0}" in type "{1}", we will try to load it for you right now, but please by aware.'.format(key,ornamentationType))
+            print('ZeroEngine-Warning: Cannot find decoration image "{0}" in type "{1}", we will try to load it for you right now, but please by aware.'.format(key,decorationType))
             imgTmp = loadImg("Assets/image/environment/decoration/"+key+".png")
-            self.__ORNAMENTATION_IMAGE_DICT[ornamentationType][key] = imgTmp
-            if self.__ORNAMENTATION_IMAGE_DICT_DARK != None:
-                self.__ORNAMENTATION_IMAGE_DICT_DARK[ornamentationType][key] = addDarkness(imgTmp,darkness)
+            self.__DECORATION_IMAGE_DICT[decorationType][key] = imgTmp
+            if self.__DECORATION_IMAGE_DICT_DARK != None:
+                self.__DECORATION_IMAGE_DICT_DARK[decorationType][key] = addDarkness(imgTmp,darkness)
     #获取当前装饰物种类的数量
-    def get_ornamentation_num(self,ornamentationType):
-        return len(self.__ORNAMENTATION_IMAGE_DICT[ornamentationType])
+    def get_decoration_num(self,decorationType):
+        return len(self.__DECORATION_IMAGE_DICT[decorationType])
     def get_new_background_image(self,screen_size,map_size):
         if self.__BACKGROUND_IMAGE != None:
             self.__BACKGROUND_SURFACE = resizeImg(self.__BACKGROUND_IMAGE,screen_size)
@@ -128,12 +128,26 @@ class Point:
         return self.x,self.y
 
 #管理场景装饰物的类
-class OrnamentationObject(Point):
+class DecorationObject(Point):
     def  __init__(self,x,y,itemType,image):
         Point.__init__(self,x,y)
         self.type = itemType
         self.image = image
         self.alpha = None
+        self.triggered = True
+    def is_on_pos(self,pos):
+        if isinstance(pos,dict):
+            if self.x == pos["x"] and self.y == pos["y"]:
+                return True
+            else:
+                return False
+        else:
+            if self.x == pos[0] and self.y == pos[1]:
+                return True
+            else:
+                return False
+    def switch(self):
+        self.triggered = not self.triggered
 
 #描述AStar算法中的节点数据
 class Node:

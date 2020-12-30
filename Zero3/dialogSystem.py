@@ -4,29 +4,7 @@ from Zero3.movie import cutscene,VedioFrame
 
 #视觉小说系统模块
 class DialogSystem:
-    def __init__(self,chapterType,chapterId,part,collectionName=None):
-        #章节Id
-        self.chapterId = chapterId
-        #片段
-        self.part = part
-        #对话的部分
-        self.chapterType = chapterType
-        #读取章节信息
-        self.dialogData = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(chapterType,chapterId,get_setting("Language"))) if collectionName == None\
-            else loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(chapterType,collectionName,chapterId,get_setting("Language")))
-        if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
-            self.dialog_content = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(chapterType,chapterId,self.dialogData["default_lang"]),part) if collectionName == None\
-                else loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(chapterType,collectionName,chapterId,self.dialogData["default_lang"]),part)
-            for key,currentDialog in self.dialogData[part].items():
-                if key in self.dialog_content:
-                    for key2,dataNeedReplace in currentDialog.items():
-                        self.dialog_content[key][key2] = dataNeedReplace
-                else:
-                    self.dialog_content[key] = currentDialog
-        else:
-            self.dialog_content = self.dialogData[part]
-            if len(self.dialog_content)==0:
-                raise Exception('ZeroEngine-Error: The dialog has no content!')
+    def __init__(self):
         #加载对话的背景图片
         self.backgroundContent = DialogBackground()
         #获取屏幕的尺寸
@@ -40,20 +18,8 @@ class DialogSystem:
         self.black_bg = get_SingleColorSurface("black")
         #加载对话框系统
         self.dialogTxtSystem = DialogContent(self.window_x*0.015)
-        #设定初始化
-        self.dialogId = "head"
-        #如果dialog_content没有头
-        if self.dialogId not in self.dialog_content:
-            raise Exception('ZeroEngine-Error: The dialog must have a head!')
-        else:
-            self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
-        #更新背景音乐
-        self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
-        #玩家在对话时做出的选择
-        self.dialog_options = {}
         #加载npc立绘系统并初始化
         self.npc_img_dic = NpcImageSystem()
-        self.npc_img_dic.process(self.dialog_content[self.dialogId]["characters_img"])
         self.showHistory = False
         self.historySurface = None
         self.historySurface_local_y = 0
@@ -64,15 +30,16 @@ class DialogSystem:
         self.__events = None
         #是否开启自动保存
         self.auto_save = False
-    def __update_event(self):
-        self.__events = pygame.event.get()
+    #保存数据
     def __save_process(self):
-        DataTmp = {}
-        DataTmp["type"] = self.part
-        DataTmp["chapterId"] = self.chapterId
-        DataTmp["chapterType"] = self.chapterType
-        DataTmp["id"] = self.dialogId
-        DataTmp["dialog_options"] = self.dialog_options
+        DataTmp = {
+            "chapterType": self.chapterType,
+            "chapterId": self.chapterId,
+            "type": self.part,
+            "id": self.dialogId,
+            "dialog_options": self.dialog_options,
+            "collection_name": self.collection_name
+        }
         #别忘了看看Save文件夹是不是都不存在
         if not os.path.exists("Save"):
             os.makedirs("Save")
@@ -82,30 +49,91 @@ class DialogSystem:
         if not os.path.exists("Save/global.yaml"):
             DataTmp = {"chapter_unlocked":1}
             saveConfig("Save/global.yaml",DataTmp)
-    def __load_process(self):
-        DataTmp = loadConfig("Save/save.yaml")
-        if DataTmp["type"] == "dialog_before_battle" or DataTmp["type"] == "dialog_after_battle":
-            self.part = DataTmp["type"]
-            self.chapterId = DataTmp["chapterId"]
-            self.chapterType = DataTmp["chapterType"]
-            self.dialogId = DataTmp["id"]
-            self.dialog_options = DataTmp["dialog_options"]
+    #读取章节
+    def load(self,saveData=None):
+        saveData = loadConfig("Save/save.yaml")
+        if saveData["type"] == "dialog_before_battle" or saveData["type"] == "dialog_after_battle":
+            """章节信息"""
+            #类型
+            self.chapterType = saveData["chapterType"]
+            #章节id
+            self.chapterId = saveData["chapterId"]
+            #部分
+            self.part = saveData["type"]
+            #对白id
+            self.dialogId = saveData["id"]
+            #玩家做出的选项
+            self.dialog_options = saveData["dialog_options"]
+            #合集名称-用于dlc和创意工坊
+            self.collection_name = saveData["collection_name"]
+            self.__process_data()
         else:
             raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
+    #新建章节
+    def new(self,chapterType,chapterId,part,collection_name=None):
+        """章节信息"""
+        #类型
+        self.chapterType = chapterType
+        #章节id
+        self.chapterId = chapterId
+        #部分
+        self.part = part
+        #对白id
+        self.dialogId = "head"
+        #玩家做出的选项
+        self.dialog_options = {}
+        #合集名称-用于dlc和创意工坊
+        self.collection_name = collection_name
+        self.__process_data()
+    #加载章节信息
+    def __process_data(self):
+        dialogData = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,get_setting("Language"))) if self.collection_name == None\
+            else loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collection_name,self.chapterId,get_setting("Language")))
+        #如果该dialog文件是另一个语言dialog文件的子类
+        if "default_lang" in dialogData and dialogData["default_lang"] != None:
+            self.dialogContent = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,dialogData["default_lang"]),self.part) if self.collection_name == None\
+                else loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collection_name,self.chapterId,dialogData["default_lang"]),self.part)
+            for key,currentDialog in dialogData[self.part].items():
+                if key in self.dialogContent:
+                    for key2,dataNeedReplace in currentDialog.items():
+                        self.dialogContent[key][key2] = dataNeedReplace
+                else:
+                    self.dialogContent[key] = currentDialog
+        else:
+            self.dialogContent = dialogData[self.part]
+            if len(self.dialogContent)==0:
+                raise Exception('ZeroEngine-Error: The dialog has no content!')
+        self.npc_img_dic.process(self.dialogContent[self.dialogId]["characters_img"])
+        #如果dialog Id 不存在
+        if self.dialogId not in self.dialogContent:
+            raise Exception('ZeroEngine-Error: The dialog id {} does not exist!'.format(self.dialogId))
+        else:
+            self.dialogTxtSystem.update(self.dialogContent[self.dialogId]["content"],self.dialogContent[self.dialogId]["narrator"])
+        #更新背景音乐
+        self.backgroundContent.update(self.dialogContent[self.dialogId]["background_img"],None)
+    #获取输入事件
     def get_event(self):
         return self.__events
+    #更新输入事件
+    def __update_event(self):
+        self.__events = pygame.event.get()
+    #更新场景
     def __update_scene(self,theNextDialogId):
         #更新背景
-        self.backgroundContent.update(self.dialog_content[theNextDialogId]["background_img"],self.dialog_content[theNextDialogId]["background_music"])
+        self.backgroundContent.update(self.dialogContent[theNextDialogId]["background_img"],self.dialogContent[theNextDialogId]["background_music"])
         #重设立绘系统
-        self.npc_img_dic.process(self.dialog_content[theNextDialogId]["characters_img"])
+        self.npc_img_dic.process(self.dialogContent[theNextDialogId]["characters_img"])
         #切换dialogId
         self.dialogId = theNextDialogId
-        self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
+        self.dialogTxtSystem.update(self.dialogContent[self.dialogId]["content"],self.dialogContent[self.dialogId]["narrator"])
         #是否保存
         if self.auto_save == True:
             self.__save_process()
     def display(self,screen):
+        #检测章节是否初始化
+        if self.chapterId == None:
+            raise Exception('ZeroEngine-Error: The dialog has not been initialized!')
+        self.window_x,self.window_y = screen.get_size()
         #背景
         self.backgroundContent.display(screen)
         self.npc_img_dic.display(screen)
@@ -148,8 +176,8 @@ class DialogSystem:
                     self.historySurface_local_y -= self.window_y*0.1
                 #返回上一个对话场景（在被允许的情况下）
                 elif event.button == 3 or controller.joystick.get_button(1) == 1:
-                    if self.dialog_content[self.dialogId]["last_dialog_id"] != None:
-                        self.__update_scene(self.dialog_content[self.dialogId]["last_dialog_id"])
+                    if self.dialogContent[self.dialogId]["last_dialog_id"] != None:
+                        self.__update_scene(self.dialogContent[self.dialogId]["last_dialog_id"])
                         dialogPlayResult = False
                     else:
                         pass
@@ -163,13 +191,13 @@ class DialogSystem:
                     self.fadeOut(screen)
                     return True
         #显示选项
-        if dialogPlayResult == True and self.dialog_content[self.dialogId]["next_dialog_id"] != None and self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "option":
-            optionBox_y_base = (self.window_y*3/4-(len(self.dialog_content[self.dialogId]["next_dialog_id"]["target"]))*2*self.window_x*0.03)/4
+        if dialogPlayResult == True and self.dialogContent[self.dialogId]["next_dialog_id"] != None and self.dialogContent[self.dialogId]["next_dialog_id"]["type"] == "option":
+            optionBox_y_base = (self.window_y*3/4-(len(self.dialogContent[self.dialogId]["next_dialog_id"]["target"]))*2*self.window_x*0.03)/4
             optionBox_height = int(self.window_x*0.05)
             nextDialogId = None
             i=0
-            for i in range(len(self.dialog_content[self.dialogId]["next_dialog_id"]["target"])):
-                option_txt = self.dialogTxtSystem.fontRender(self.dialog_content[self.dialogId]["next_dialog_id"]["target"][i]["txt"],(255, 255, 255))
+            for i in range(len(self.dialogContent[self.dialogId]["next_dialog_id"]["target"])):
+                option_txt = self.dialogTxtSystem.fontRender(self.dialogContent[self.dialogId]["next_dialog_id"]["target"][i]["txt"],(255, 255, 255))
                 optionBox_width = int(option_txt.get_width()+self.window_x*0.05) 
                 optionBox_x = (self.window_x-optionBox_width)/2
                 optionBox_y = (i+1)*2*self.window_x*0.03+optionBox_y_base
@@ -178,7 +206,7 @@ class DialogSystem:
                     optionBox_scaled = pygame.transform.scale(self.optionBoxSelected,(optionBox_width,optionBox_height))
                     if leftClick == True and self.showHistory == False:
                         #保存选取的选项
-                        nextDialogId = self.dialog_content[self.dialogId]["next_dialog_id"]["target"][i]["id"]
+                        nextDialogId = self.dialogContent[self.dialogId]["next_dialog_id"]["target"][i]["id"]
                 else:
                     optionBox_scaled = pygame.transform.scale(self.optionBox,(optionBox_width,optionBox_height))
                 displayWithInCenter(option_txt,optionBox_scaled,optionBox_x,optionBox_y,screen)
@@ -196,18 +224,18 @@ class DialogSystem:
                 dialogIdTemp = "head"
                 local_y = self.historySurface_local_y
                 while dialogIdTemp != None:
-                    if self.dialog_content[dialogIdTemp]["narrator"] != None:
-                        narratorTemp = self.dialogTxtSystem.fontRender(self.dialog_content[dialogIdTemp]["narrator"]+': ["',(255, 255, 255))
+                    if self.dialogContent[dialogIdTemp]["narrator"] != None:
+                        narratorTemp = self.dialogTxtSystem.fontRender(self.dialogContent[dialogIdTemp]["narrator"]+': ["',(255, 255, 255))
                         self.historySurface.blit(narratorTemp,(self.window_x*0.15-narratorTemp.get_width(),self.window_y*0.1+local_y))
-                    for i in range(len(self.dialog_content[dialogIdTemp]["content"])):
-                        txt = self.dialog_content[dialogIdTemp]["content"][i]
-                        txt += '"]' if i == len(self.dialog_content[dialogIdTemp]["content"])-1 and self.dialog_content[dialogIdTemp]["narrator"] != None else ""
+                    for i in range(len(self.dialogContent[dialogIdTemp]["content"])):
+                        txt = self.dialogContent[dialogIdTemp]["content"][i]
+                        txt += '"]' if i == len(self.dialogContent[dialogIdTemp]["content"])-1 and self.dialogContent[dialogIdTemp]["narrator"] != None else ""
                         self.historySurface.blit(self.dialogTxtSystem.fontRender(txt,(255, 255, 255)),(self.window_x*0.15,self.window_y*0.1+local_y))
                         local_y+=self.dialogTxtSystem.FONTSIZE*1.5
                     if dialogIdTemp != self.dialogId:
-                        if self.dialog_content[dialogIdTemp]["next_dialog_id"]["type"] == "default" or self.dialog_content[dialogIdTemp]["next_dialog_id"]["type"] == "changeScene":
-                            dialogIdTemp = self.dialog_content[dialogIdTemp]["next_dialog_id"]["target"]
-                        elif self.dialog_content[dialogIdTemp]["next_dialog_id"]["type"] == "option":
+                        if self.dialogContent[dialogIdTemp]["next_dialog_id"]["type"] == "default" or self.dialogContent[dialogIdTemp]["next_dialog_id"]["type"] == "changeScene":
+                            dialogIdTemp = self.dialogContent[dialogIdTemp]["next_dialog_id"]["target"]
+                        elif self.dialogContent[dialogIdTemp]["next_dialog_id"]["type"] == "option":
                             narratorTemp = self.dialogTxtSystem.fontRender(self.ButtonsMananger.choiceTxt+" - ",(0,191,255))
                             self.historySurface.blit(narratorTemp,(self.window_x*0.15-narratorTemp.get_width(),self.window_y*0.1+local_y))
                             self.historySurface.blit(self.dialogTxtSystem.fontRender(str(self.dialog_options[dialogIdTemp]["target"]),(0,191,255)),(self.window_x*0.15,self.window_y*0.1+local_y))
@@ -221,34 +249,34 @@ class DialogSystem:
             self.history_back.display(screen)
             ifHover(self.history_back)
         elif self.dialogTxtSystem.forceUpdate() or leftClick:
-            if self.dialog_content[self.dialogId]["next_dialog_id"] == None or self.dialog_content[self.dialogId]["next_dialog_id"]["target"] == None:
+            if self.dialogContent[self.dialogId]["next_dialog_id"] == None or self.dialogContent[self.dialogId]["next_dialog_id"]["target"] == None:
                 self.fadeOut(screen)
                 return True
-            elif self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "default":
-                self.__update_scene(self.dialog_content[self.dialogId]["next_dialog_id"]["target"])
+            elif self.dialogContent[self.dialogId]["next_dialog_id"]["type"] == "default":
+                self.__update_scene(self.dialogContent[self.dialogId]["next_dialog_id"]["target"])
             #如果是需要播放过程动画
-            elif self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "cutscene":
+            elif self.dialogContent[self.dialogId]["next_dialog_id"]["type"] == "cutscene":
                 self.fadeOut(screen)
-                cutscene(screen,"Assets\movie\{}".format(self.dialog_content[self.dialogId]["next_dialog_id"]["target"]))
+                cutscene(screen,"Assets\movie\{}".format(self.dialogContent[self.dialogId]["next_dialog_id"]["target"]))
                 return True
             #如果是切换场景
-            elif self.dialog_content[self.dialogId]["next_dialog_id"]["type"] == "changeScene":
+            elif self.dialogContent[self.dialogId]["next_dialog_id"]["type"] == "changeScene":
                 self.fadeOut(screen)
                 pygame.time.wait(2000)
                 #重设立绘系统
-                theNextDialogId = self.dialog_content[self.dialogId]["next_dialog_id"]["target"]
-                self.npc_img_dic.process(self.dialog_content[theNextDialogId]["characters_img"])
+                theNextDialogId = self.dialogContent[self.dialogId]["next_dialog_id"]["target"]
+                self.npc_img_dic.process(self.dialogContent[theNextDialogId]["characters_img"])
                 self.dialogId = theNextDialogId
                 self.dialogTxtSystem.resetDialogueboxData()
-                self.dialogTxtSystem.update(self.dialog_content[self.dialogId]["content"],self.dialog_content[self.dialogId]["narrator"])
-                self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],None)
+                self.dialogTxtSystem.update(self.dialogContent[self.dialogId]["content"],self.dialogContent[self.dialogId]["narrator"])
+                self.backgroundContent.update(self.dialogContent[self.dialogId]["background_img"],None)
                 self.fadeIn(screen)
                 #更新背景（音乐）
                 self.ready()
         controller.display(screen)
         return False
     def ready(self):
-        self.backgroundContent.update(self.dialog_content[self.dialogId]["background_img"],self.dialog_content[self.dialogId]["background_music"])
+        self.backgroundContent.update(self.dialogContent[self.dialogId]["background_img"],self.dialogContent[self.dialogId]["background_music"])
     #淡出
     def fadeOut(self,screen):
         pygame.mixer.music.fadeout(1000)
@@ -268,15 +296,15 @@ class DialogSystem:
         self.black_bg.set_alpha(255)
 
 class DialogSystemDev:
-    def __init__(self,chapterType,chapterId,part,collectionName=None):
+    def __init__(self,chapterType,chapterId,part,collection_name=None):
         #设定初始化
         self.chapterType = chapterType
         self.chapterId = chapterId
-        self.collectionName = collectionName
+        self.collection_name = collection_name
         self.lang = get_setting("Language")
         self.dialogId = "head"
         self.fileLocation = "Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,self.lang) if self.chapterType == "main_chapter"\
-            else "Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collectionName,self.chapterId,self.lang)
+            else "Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collection_name,self.chapterId,self.lang)
         self.part = part
         #获取屏幕的尺寸
         self.window_x,self.window_y = display.get_size()
@@ -375,7 +403,7 @@ class DialogSystemDev:
         if "default_lang" in self.dialogData and self.dialogData["default_lang"] != None:
             self.isDefault = False
             self.dialogData_default = loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,self.dialogData["default_lang"])) if self.chapterType == "main_chapter"\
-                else loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collectionName,self.chapterId,self.dialogData["default_lang"]))
+                else loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collection_name,self.chapterId,self.dialogData["default_lang"]))
             for key,currentDialog in self.dialogData_default["dialog_before_battle"].items():
                 if key in self.dialogData["dialog_before_battle"]:
                     for key2,dataNeedReplace in currentDialog.items():
