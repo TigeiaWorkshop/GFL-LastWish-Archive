@@ -187,7 +187,7 @@ class Doll:
                 if self.y <= self.__movingPath[0][1]:
                     self.y = self.__movingPath[0][1]
                     self.__movingPath.pop(0)
-                    if theMapClass.darkMode:
+                    if theMapClass.isAtNight():
                         self.__reProcessMap = True
         else:
             self.__movingPath = None
@@ -284,7 +284,7 @@ class Doll:
             self.ifFlip = theBool
     def draw(self,screen,theMapClass):
         #调整小人图片的尺寸
-        img_of_char = getDollImg(self.type,self.__currentAction,self.__imgId_dict[self.__currentAction]["imgId"],round(theMapClass.get_block_width()*1.6))
+        img_of_char = getDollImg(self.type,self.__currentAction,self.__imgId_dict[self.__currentAction]["imgId"],round(theMapClass.block_width*1.6))
         #调整alpha值
         imgAlpha = self.get_imgAlpaha(self.__currentAction)
         if imgAlpha != 255:
@@ -297,7 +297,7 @@ class Doll:
             self.__move_based_on_path(theMapClass)
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)
-        screen.blit(img_of_char,(xTemp-theMapClass.get_block_width()*0.3,yTemp-theMapClass.get_block_width()*0.85))
+        screen.blit(img_of_char,(xTemp-theMapClass.block_width*0.3,yTemp-theMapClass.block_width*0.85))
         #如果角色图片还没播放完
         if not self._ifActionPlayReverse:
             if self.__imgId_dict[self.__currentAction]["imgId"] < getDollImgNum(self.type,self.__currentAction)-1:
@@ -322,13 +322,13 @@ class Doll:
                 self.set_action()
     def draw_custom(self,action,pos,screen,theMapClass,alpha=155,isContinue=True):
         #调整小人图片的尺寸
-        img_of_char = getDollImg(self.type,action,self.__imgId_dict[action]["imgId"],round(theMapClass.get_block_width()*1.6))
+        img_of_char = getDollImg(self.type,action,self.__imgId_dict[action]["imgId"],round(theMapClass.block_width*1.6))
         #反转图片
         if self.ifFlip == True:
             img_of_char = pygame.transform.flip(img_of_char,True,False)
         img_of_char.set_alpha(alpha)
         #把角色图片画到屏幕上
-        screen.blit(img_of_char,(pos[0]-theMapClass.get_block_width()*0.3,pos[1]-theMapClass.get_block_width()*0.85))
+        screen.blit(img_of_char,(pos[0]-theMapClass.block_width*0.3,pos[1]-theMapClass.block_width*0.85))
         #调整id，并返回对应的bool状态
         if self.__imgId_dict[action]["imgId"] < getDollImgNum(self.type,action)-1:
             self.__imgId_dict[action]["imgId"] += 1
@@ -353,17 +353,17 @@ class Doll:
             percent_of_hp = self.dying/3
         #把角色图片画到屏幕上
         xTemp,yTemp = theMapClass.calPosInMap(self.x,self.y)
-        xTemp += theMapClass.get_block_width()*0.25
-        yTemp -= theMapClass.get_block_width()*0.2
+        xTemp += theMapClass.block_width*0.25
+        yTemp -= theMapClass.block_width*0.2
         if self.faction == "character" and self.detection != None:
-            eyeImgWidth = round(theMapClass.get_block_width()/6*self.eyeImgSize)
-            eyeImgHeight = round(theMapClass.get_block_width()/10*self.eyeImgSize)
-            numberX = (eyeImgWidth - theMapClass.get_block_width()/6)/2
-            numberY = (eyeImgHeight - theMapClass.get_block_width()/10)/2
+            eyeImgWidth = round(theMapClass.block_width/6*self.eyeImgSize)
+            eyeImgHeight = round(theMapClass.block_width/10*self.eyeImgSize)
+            numberX = (eyeImgWidth - theMapClass.block_width/6)/2
+            numberY = (eyeImgHeight - theMapClass.block_width/10)/2
             if self.detection == True:
-                screen.blit(resizeImg(original_UI_img["eye_red"], (eyeImgWidth,eyeImgHeight)),(xTemp+theMapClass.get_block_width()*0.51-numberX,yTemp-numberY))
+                screen.blit(resizeImg(original_UI_img["eye_red"], (eyeImgWidth,eyeImgHeight)),(xTemp+theMapClass.block_width*0.51-numberX,yTemp-numberY))
             elif self.detection == False:
-                screen.blit(resizeImg(original_UI_img["eye_orange"], (eyeImgWidth,eyeImgHeight)),(xTemp+theMapClass.get_block_width()*0.51-numberX,yTemp-numberY))
+                screen.blit(resizeImg(original_UI_img["eye_orange"], (eyeImgWidth,eyeImgHeight)),(xTemp+theMapClass.block_width*0.51-numberX,yTemp-numberY))
             if self.eyeImgSize > 1:
                 self.eyeImgSize-=1
             if self.ImageGetHurt != None and self.ImageGetHurt.x != None:
@@ -378,9 +378,9 @@ class Doll:
                             self.ImageGetHurt.alpha -= 2
                         else:
                             self.ImageGetHurt.x = None
-        hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(theMapClass.get_block_width()/2), round(theMapClass.get_block_width()/10)))
+        hpEmptyScale = pygame.transform.scale(original_UI_img["hp_empty"], (round(theMapClass.block_width/2), round(theMapClass.block_width/10)))
         screen.blit(hpEmptyScale,(xTemp,yTemp))
-        screen.blit(pygame.transform.scale(hp_img,(round(theMapClass.get_block_width()*percent_of_hp/2),round(theMapClass.get_block_width()/10))),(xTemp,yTemp))
+        screen.blit(pygame.transform.scale(hp_img,(round(theMapClass.block_width*percent_of_hp/2),round(theMapClass.block_width/10))),(xTemp,yTemp))
         displayInCenter(current_hp_to_display,hpEmptyScale,xTemp,yTemp,screen)
     #获取角色特定动作的图片播放ID
     def get_imgId(self,action):
@@ -612,9 +612,7 @@ def character_creator(character_name,action,faction):
     if os.path.exists("Assets/image/{0}/{1}/{2}".format(faction,character_name,action)):
         files_amount = len(glob.glob("Assets/image/{0}/{1}/{2}/*.png".format(faction,character_name,action)))
         if files_amount > 0:
-            images_list = []
-            for i in range(files_amount):
-                images_list.append(pygame.image.load(os.path.join("Assets/image/{0}/{1}/{2}/{3}_{4}_{5}.png".format(faction,character_name,action,character_name,action,i))).convert_alpha())
+            images_list = [pygame.image.load(os.path.join("Assets/image/{0}/{1}/{2}/{3}_{4}_{5}.png".format(faction,character_name,action,character_name,action,i))).convert_alpha() for i in range(files_amount)]
             __CHARACTERS_IMAGE_DICT[character_name][action] = {"img":images_list,"imgNum":files_amount}
             return {"imgId":0,"alpha":255}
         else:

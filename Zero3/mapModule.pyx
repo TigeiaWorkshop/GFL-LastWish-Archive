@@ -33,9 +33,7 @@ class EnvImagesManagement:
             #--篝火--
             if decoration.type == "campfire":
                 if "campfire" not in self.__DECORATION_IMAGE_DICT:
-                    self.__DECORATION_IMAGE_DICT["campfire"] = []
-                    for i in range(1,12):
-                        self.__DECORATION_IMAGE_DICT["campfire"].append(loadImg("Assets/image/environment/campfire/{}.png".format(i)))
+                    self.__DECORATION_IMAGE_DICT["campfire"] = [loadImg("Assets/image/environment/campfire/{}.png".format(i)) for i in range(1,12)]
             elif decoration.type not in self.__DECORATION_IMAGE_DICT:
                 self.__DECORATION_IMAGE_DICT[decoration.type] = {}
                 self.__DECORATION_IMAGE_DICT[decoration.type][decoration.image] = loadImg("Assets/image/environment/decoration/"+decoration.image+".png")

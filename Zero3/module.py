@@ -108,13 +108,11 @@ class ProgressBar(ImageInterface):
 
 #环境系统
 class WeatherSystem:
-    def  __init__(self,weather,window_x,window_y):
+    def  __init__(self,weather,window_x,window_y,entityNum=50):
         self.name = 0
-        self.img_list = []
-        for imgPath in glob.glob("Assets/image/environment/"+weather+"/*.png"):
-            self.img_list.append(pygame.image.load(os.path.join(imgPath)).convert_alpha())
+        self.img_list = [pygame.image.load(os.path.join(imgPath)).convert_alpha() for imgPath in glob.glob("Assets/image/environment/"+weather+"/*.png")]
         self.ImgObject = []
-        for i in range(50):
+        for i in range(entityNum):
             imgId = random.randint(0,len(self.img_list)-1)
             img_size = random.randint(5,10)
             img_speed = random.randint(1,3)

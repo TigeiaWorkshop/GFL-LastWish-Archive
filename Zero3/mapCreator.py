@@ -27,12 +27,7 @@ class mapCreator(BattleSystemInterface):
             SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
             block_y = 50
             block_x = 50
-            default_map = []
-            for i in range(block_y):
-                map_per_line = []
-                for a in range(block_x):
-                    map_per_line.append(SnowEnvImg[randomInt(0,5)])
-                default_map.append(map_per_line)
+            default_map = [[SnowEnvImg[randomInt(0,5)] for a in range(block_x)] for i in range(block_y)]
             mapFileData["map"] = default_map
             saveConfig(self.fileLocation,mapFileData)
         else:

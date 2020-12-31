@@ -182,8 +182,8 @@ class BattleSystem(Zero.BattleSystemInterface):
         self.end_round_txt = self.FONT.render(Zero.get_lang("Battle_UI","endRound"),Zero.get_fontMode(),Zero.findColorRGBA("white"))
         self.end_round_button = Zero.loadImage("Assets/image/UI/end_round_button.png",(self.window_x*0.8,self.window_y*0.7),self.end_round_txt.get_width()*2,self.end_round_txt.get_height()*2.5)
         #加载子弹图片
-        #bullet_img = loadImg("Assets/image/UI/bullet.png", get_block_width()/6, self.MAP.get_block_height()/12)
-        #加载血条,各色方块等UI图片 size:get_block_width(), self.MAP.get_block_height()/5
+        #bullet_img = loadImg("Assets/image/UI/bullet.png", get_block_width()/6, self.MAP.block_height/12)
+        #加载血条,各色方块等UI图片 size:get_block_width(), self.MAP.block_height/5
         self.original_UI_img = {
             "hp_empty" : Zero.loadImg("Assets/image/UI/hp_empty.png"),
             "hp_red" : Zero.loadImg("Assets/image/UI/hp_red.png"),
@@ -201,11 +201,11 @@ class BattleSystem(Zero.BattleSystemInterface):
         }
         #UI - 变形后
         self.UI_img = {
-            "green" : Zero.resizeImg(self.original_UI_img["green"], (self.MAP.get_block_width()*0.8, None)),
-            "red" : Zero.resizeImg(self.original_UI_img["red"], (self.MAP.get_block_width()*0.8, None)),
-            "yellow" : Zero.resizeImg(self.original_UI_img["yellow"], (self.MAP.get_block_width()*0.8, None)),
-            "blue" : Zero.resizeImg(self.original_UI_img["blue"], (self.MAP.get_block_width()*0.8, None)),
-            "orange": Zero.resizeImg(self.original_UI_img["orange"], (self.MAP.get_block_width()*0.8, None))
+            "green" : Zero.resizeImg(self.original_UI_img["green"], (self.MAP.block_width*0.8, None)),
+            "red" : Zero.resizeImg(self.original_UI_img["red"], (self.MAP.block_width*0.8, None)),
+            "yellow" : Zero.resizeImg(self.original_UI_img["yellow"], (self.MAP.block_width*0.8, None)),
+            "blue" : Zero.resizeImg(self.original_UI_img["blue"], (self.MAP.block_width*0.8, None)),
+            "orange": Zero.resizeImg(self.original_UI_img["orange"], (self.MAP.block_width*0.8, None))
         }
         #角色信息UI管理
         self.characterInfoBoardUI = CharacterInfoBoard(self.window_x,self.window_y)
@@ -504,7 +504,7 @@ class BattleSystem(Zero.BattleSystemInterface):
             self.MAP.changePerBlockSize(self.window_x/self.MAP.column*self.zoomIn/100,self.window_y/self.MAP.row*self.zoomIn/100,self.window_x,self.window_y)
             #根据block尺寸重新加载对应尺寸的UI
             for key in self.UI_img:
-                self.UI_img[key] = Zero.resizeImg(self.original_UI_img[key], (self.MAP.get_block_width()*0.8, None))
+                self.UI_img[key] = Zero.resizeImg(self.original_UI_img[key], (self.MAP.block_width*0.8, None))
             self.selectMenuUI.allButton = None
         else:
             self.zoomIn = self.zoomIntoBe
@@ -514,7 +514,7 @@ class BattleSystem(Zero.BattleSystemInterface):
         for area in self.areaDrawColorBlock:
             for position in self.areaDrawColorBlock[area]:
                 xTemp,yTemp = self.MAP.calPosInMap(position[0],position[1])
-                Zero.drawImg(self.UI_img[area],(xTemp+self.MAP.get_block_width()*0.1,yTemp),screen)
+                Zero.drawImg(self.UI_img[area],(xTemp+self.MAP.block_width*0.1,yTemp),screen)
 
         #玩家回合
         if self.whose_round == "player":
@@ -631,13 +631,10 @@ class BattleSystem(Zero.BattleSystemInterface):
                                 self.characters_data[key].playSound("get_click")
                                 self.characterGetClick = key
                             self.characterInfoBoardUI.update()
-                            self.friendsCanSave = []
+                            self.friendsCanSave = [key2 for key2 in self.characters_data if self.characters_data[key2].dying != False and self.characters_data[key].near(self.characters_data[key2])]
                             self.thingsCanReact = []
-                            for key2 in self.characters_data:
-                                if self.characters_data[key2].dying != False and self.characters_data[key].near(self.characters_data[key2].dying):
-                                    self.friendsCanSave.append(key2)
                             index = 0
-                            for decoration in self.MAP.get_decorations():
+                            for decoration in self.MAP.decorations:
                                 if decoration.type == "campfire" and self.characters_data[key].near(decoration):
                                     self.thingsCanReact.append(index)
                                 index += 1
@@ -650,12 +647,12 @@ class BattleSystem(Zero.BattleSystemInterface):
                 if self.screen_to_move_x == None:
                     if tempX < self.window_x*0.2 and self.MAP.getPos_x()<=0:
                         self.screen_to_move_x = self.window_x*0.2-tempX
-                    elif tempX > self.window_x*0.8 and self.MAP.getPos_x()>=self.MAP.column*self.MAP.get_block_width()*-1:
+                    elif tempX > self.window_x*0.8 and self.MAP.getPos_x()>=self.MAP.column*self.MAP.block_width*-1:
                         self.screen_to_move_x = self.window_x*0.8-tempX
                 if self.screen_to_move_y == None:
                     if tempY < self.window_y*0.2 and self.MAP.getPos_y()<=0:
                         self.screen_to_move_y = self.window_y*0.2-tempY
-                    elif tempY > self.window_y*0.8 and self.MAP.getPos_y()>=self.MAP.row*self.MAP.get_block_height()*-1:
+                    elif tempY > self.window_y*0.8 and self.MAP.getPos_y()>=self.MAP.row*self.MAP.block_height*-1:
                         self.screen_to_move_y = self.window_y*0.8-tempY
             #显示攻击/移动/技能范围
             if self.NotDrawRangeBlocks == False and self.characterGetClick != None:
@@ -967,8 +964,8 @@ class BattleSystem(Zero.BattleSystemInterface):
                 the_alpha_to_check = self.damage_do_to_characters[key].get_alpha()
                 if the_alpha_to_check > 0:
                     xTemp,yTemp = self.MAP.calPosInMap(value.x,value.y)
-                    xTemp+=self.MAP.get_block_width()*0.05
-                    yTemp-=self.MAP.get_block_width()*0.05
+                    xTemp+=self.MAP.block_width*0.05
+                    yTemp-=self.MAP.block_width*0.05
                     Zero.displayInCenter(self.damage_do_to_characters[key],self.UI_img["green"],xTemp,yTemp,screen)
                     self.damage_do_to_characters[key].set_alpha(the_alpha_to_check-5)
                 else:
@@ -1027,7 +1024,7 @@ class BattleSystem(Zero.BattleSystemInterface):
             #左下角的角色信息
             self.characterInfoBoardUI.display(screen,self.characters_data[self.characterGetClick],self.original_UI_img)
             #----选择菜单----
-            self.buttonGetHover = self.selectMenuUI.display(screen,round(self.MAP.get_block_width()/10),self.MAP.getBlockExactLocation(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].kind,self.friendsCanSave,self.thingsCanReact)
+            self.buttonGetHover = self.selectMenuUI.display(screen,round(self.MAP.block_width/10),self.MAP.getBlockExactLocation(self.characters_data[self.characterGetClick].x,self.characters_data[self.characterGetClick].y),self.characters_data[self.characterGetClick].kind,self.friendsCanSave,self.thingsCanReact)
         #加载雪花
         self._display_weather(screen)
         
@@ -1036,10 +1033,7 @@ class BattleSystem(Zero.BattleSystemInterface):
             if self.RoundSwitchUI.display(screen,self.whose_round,self.resultInfo["total_rounds"]) == True:
                 if self.whose_round == "playerToSangvisFerris":
                     self.enemies_in_control_id = 0
-                    self.sangvisFerris_name_list = []
-                    for every_chara in self.sangvisFerris_data:
-                        if self.sangvisFerris_data[every_chara].current_hp>0:
-                            self.sangvisFerris_name_list.append(every_chara)
+                    self.sangvisFerris_name_list = [every_chara for every_chara in self.sangvisFerris_data if self.sangvisFerris_data[every_chara].current_hp > 0]
                     for every_chara in self.characters_data:
                         if self.characters_data[every_chara].dying != False:
                             self.characters_data[every_chara].dying -= 1
