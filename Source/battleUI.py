@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Source.init import *
+from .init import *
 
 #显示回合切换的UI
 class RoundSwitch:

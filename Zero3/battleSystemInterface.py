@@ -1,7 +1,7 @@
 # cython: language_level=3
-from Zero3.characterDataManager import *
-from Zero3.scr_pyx.map import MapObject
-from Zero3.AI import *
+from .characterDataManager import *
+from .scr_pyx.map import MapObject
+from .entity_ai import *
 
 #战斗系统接口，请勿实例化
 class BattleSystemInterface:

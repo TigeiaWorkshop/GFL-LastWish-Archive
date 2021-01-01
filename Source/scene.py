@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Source.battleSystem import *
+from .battleSystem import *
 
 #对话系统
 def dialog(chapterType,chapterId,screen,part,collection_name=None):

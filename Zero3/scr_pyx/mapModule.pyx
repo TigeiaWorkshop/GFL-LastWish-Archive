@@ -99,12 +99,13 @@ class EnvImagesManagement:
     #获取当前装饰物种类的数量
     def get_decoration_num(self,decorationType):
         return len(self.__DECORATION_IMAGE_DICT[decorationType])
-    def get_new_background_image(self,screen_size,map_size):
+    def new_surface(self,screen_size,map_size):
         if self.__BACKGROUND_IMAGE != None:
             self.__BACKGROUND_SURFACE = resizeImg(self.__BACKGROUND_IMAGE,screen_size)
         else:
             self.__BACKGROUND_SURFACE = pygame.Surface(screen_size).convert()
         self.__MAP_SURFACE = pygame.Surface(map_size,flags=pygame.SRCALPHA).convert_alpha()
+    def get_surface(self):
         return self.__MAP_SURFACE
     def display_background_surface(self,screen,pos):
         screen.blit(self.__BACKGROUND_SURFACE,(0,0))

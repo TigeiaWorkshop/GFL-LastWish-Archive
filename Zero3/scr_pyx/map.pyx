@@ -30,6 +30,7 @@ class MapObject:
         self.__local_x = mapDataDic["local_x"]
         self.__local_y = mapDataDic["local_y"]
         self.__needUpdateMapSurface = True
+        self.__block_on_surface = None
     @property
     def block_width(self):
         return _MAP_ENV_IMAGE.get_block_width()
@@ -135,10 +136,7 @@ class MapObject:
         if self.__needUpdateMapSurface:
             self.__needUpdateMapSurface = False
             self.__update_map_surface(screen.get_size())
-        if self.__darkMode:
-            _MAP_ENV_IMAGE.display_background_surface(screen,(0,0))
-        else:
-            _MAP_ENV_IMAGE.display_background_surface(screen,self.getPos())
+        _MAP_ENV_IMAGE.display_background_surface(screen,self.getPos())
         return (screen_to_move_x,screen_to_move_y)
     #重新绘制地图
     def __update_map_surface(self,window_size):
@@ -148,33 +146,44 @@ class MapObject:
         cdef unsigned int x
         cdef unsigned int xRange = self.column
         cdef int screen_min = -self.block_width
-        cdef unsigned int anyBlockBlitThisLine
         cdef int window_x = window_size[0]
         cdef int window_y = window_size[1]
-        if self.__darkMode == True:
-            mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_size,window_size)
-            #画出地图
-            for y in range(yRange):
-                anyBlockBlitThisLine = 0
-                for x in range(xRange):
-                    posTupleTemp = self.calPosInMap(x,y)
-                    if screen_min<=posTupleTemp[0]<window_x and screen_min<=posTupleTemp[1]<window_y:
-                        anyBlockBlitThisLine = 1
+        if not isinstance(self.__block_on_surface, numpy.ndarray):
+            mapSurface = _MAP_ENV_IMAGE.new_surface(window_size,(self.surface_width,self.surface_height))
+            self.__block_on_surface = numpy.zeros((self.row,self.column), dtype=numpy.int8)
+            #self.__first_block_on_surface = numpy.zeros((self.row,), dtype=numpy.int8)
+        #mapSurfaceNew = pygame.Surface((self.surface_width,self.surface_height),flags=pygame.SRCALPHA).convert_alpha()
+        #cdef unsigned int mapSurfaceNewNeedBlit = 0
+        mapSurface = _MAP_ENV_IMAGE.get_surface()
+        #画出地图
+        for y in range(yRange):
+            for x in range(xRange):
+                posTupleTemp = self.calPosInMap(x,y)
+                if screen_min<=posTupleTemp[0]<window_x and screen_min<=posTupleTemp[1]<window_y:
+                    if self.__block_on_surface[y][x] == 0:
                         if not self.isPosInLightArea(x,y):
-                            mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.__MapData[y][x].name,True),(posTupleTemp[0],posTupleTemp[1]))
+                            mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.__MapData[y][x].name,True),(posTupleTemp[0]-self.__local_x,posTupleTemp[1]-self.__local_y))
                         else:
-                            mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.__MapData[y][x].name,False),(posTupleTemp[0],posTupleTemp[1]))
-                    elif posTupleTemp[0] >= window_x or posTupleTemp[1] >= window_y:
-                        break
-                if anyBlockBlitThisLine == 0 and posTupleTemp[1] >= window_y:
+                            mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.__MapData[y][x].name,False),(posTupleTemp[0]-self.__local_x,posTupleTemp[1]-self.__local_y))
+                        self.__block_on_surface[y][x] = 1
+                        if y < yRange-1:
+                            self.__block_on_surface[y+1][x] = 0
+                        if x < xRange-1:
+                            self.__block_on_surface[y][x+1] = 0
+                        #if self.__first_block_on_surface[y] == 0:
+                        #    self.__first_block_on_surface[y] = x 
+                    else:
+                        pass
+                elif posTupleTemp[0] >= window_x or posTupleTemp[1] >= window_y:
                     break
-        else:
-            mapSurface = _MAP_ENV_IMAGE.get_new_background_image(window_size,(self.surface_width,self.surface_height))
-            #画出地图
-            for y in range(yRange):
-                for x in range(xRange):
-                    posTupleTemp = self.calPosInMap(x,y)
-                    mapSurface.blit(_MAP_ENV_IMAGE.get_env_image(self.__MapData[y][x].name,False),(posTupleTemp[0]-self.__local_x,posTupleTemp[1]-self.__local_y))
+            if self.calPosInMap(0,y+1)[1] >= window_y:
+                break
+        """
+        if mapSurfaceNewNeedBlit == 1:
+            print("hit")
+            mapSurfaceNew.blit(mapSurface,(0,0))
+            mapSurface = mapSurfaceNew
+        """
     #把装饰物画到屏幕上
     def display_decoration(self,screen,characters_data,sangvisFerris_data):
         cdef (int,int) thePosInMap
@@ -311,6 +320,7 @@ class MapObject:
                                 lightArea.append([x,y])
         self.__LightArea = numpy.asarray(lightArea,dtype=numpy.int8)
         self.__needUpdateMapSurface = True
+        self.__block_on_surface = None
     #计算在地图中的位置
     def calPosInMap(self,float x,float y):
         cdef float widthTmp = self.block_width*0.43

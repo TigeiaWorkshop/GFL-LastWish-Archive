@@ -1,6 +1,6 @@
 # cython: language_level=3
-from Zero3.basic import *
-from Zero3.scr_pyx.movie import cutscene,VedioFrame,VedioPlayer
+from .basic import *
+from .scr_pyx.movie import cutscene,VedioFrame,VedioPlayer
 
 #视觉小说系统模块
 class DialogSystem:

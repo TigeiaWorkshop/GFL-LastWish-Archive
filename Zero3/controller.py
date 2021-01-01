@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Zero3.font import *
+from .font import *
 from sys import exit
 
 #手柄控制组件

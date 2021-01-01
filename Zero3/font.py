@@ -1,7 +1,7 @@
 # cython: language_level=3
 import pygame.freetype
 from pygame.colordict import THECOLORS
-from Zero3.config import *
+from .config import *
 
 #文字渲染器管理模块
 class FontGenerator:

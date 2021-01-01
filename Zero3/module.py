@@ -1,7 +1,7 @@
 # cython: language_level=3
 import glob
 import random
-from Zero3.controller import *
+from .controller import *
 import time
 from tkinter import Tk
 

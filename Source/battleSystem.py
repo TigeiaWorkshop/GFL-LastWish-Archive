@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Source.skill import *
+from .skill import *
 
 class BattleSystem(Zero.BattleSystemInterface):
     def __init__(self,chapterType=None,chapterId=None,collection_name=None):

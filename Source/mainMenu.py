@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Source.scene import *
+from .scene import *
 
 class MainMenu:
     def __init__(self,screen):

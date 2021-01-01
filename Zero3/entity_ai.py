@@ -1,5 +1,5 @@
 # cython: language_level=3
-
+"""AI系统"""
 def AI(aiInControl,theMap,characters_data,sangvisFerris_data,the_characters_detected_last_round):
     character_with_min_hp = None
     characters_can_be_detect = []

@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Zero3.battleSystemInterface import *
+from .battleSystemInterface import *
 
 class mapCreator(BattleSystemInterface):
     def __init__(self,chapterType,chapterId,collection_name=None):
