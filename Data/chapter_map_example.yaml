@@ -7,10 +7,6 @@ character:
     x: 5
     y: 7
 darkMode: false
-dialogs: {}
-local_x: 0
-local_y: 0
-map: null
 decoration:
   campfire:
     campfire1:
@@ -33,6 +29,10 @@ decoration:
       image: Forest_big_stone_01
       x: 10
       y: 12
+dialogs: {}
+local_x: 0
+local_y: 0
+map: null
 sangvisFerri:
   guard:
     type: guard

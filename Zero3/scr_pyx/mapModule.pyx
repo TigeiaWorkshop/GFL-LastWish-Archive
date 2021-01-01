@@ -1,5 +1,5 @@
 # cython: language_level=3
-from Zero3.basic import addDarkness, loadImg, resizeImg, GameObject
+from ..basic import addDarkness, loadImg, resizeImg, GameObject
 import pygame
 
 #地图场景模块

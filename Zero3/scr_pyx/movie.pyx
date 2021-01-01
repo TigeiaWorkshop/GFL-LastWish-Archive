@@ -4,7 +4,7 @@ import av
 import os
 import threading, queue
 from math import ceil
-from Zero3.module import get_setting,ProgressBar,ImageSurface
+from ..module import get_setting,ProgressBar,ImageSurface
 
 def getAudioFromVideo(moviePath,audioType="mp3"):
     #如果没有Cache文件夹，则创建一个

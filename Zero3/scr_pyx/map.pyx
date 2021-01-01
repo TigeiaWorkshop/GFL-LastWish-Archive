@@ -1,7 +1,7 @@
 # cython: language_level=3
 import numpy
-from Zero3.basic import randomInt, loadConfig
-from Zero3.mapModule import *
+from .mapModule import *
+from ..basic import randomInt, loadConfig
 
 _MAP_ENV_IMAGE = None
 #方块数据

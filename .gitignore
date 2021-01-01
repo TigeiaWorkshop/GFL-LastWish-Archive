@@ -2,8 +2,7 @@ main.py
 main_pyd.py
 __pycache__/
 build/
-Zero3/*.pyd
-Zero3/*.c
+*.pyd
 Save/
 Cache/
 Data/workshop/

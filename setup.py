@@ -15,14 +15,16 @@ produce_html_files = False
 
 #删除旧的pyd文件
 if remove_old_pyd:
-    for path in glob.glob(r'Zero3/*.pyd'):
+    for path in glob.glob(r'Zero3/scr_pyx/*.pyd'):
         os.remove(path)
 #生成Zero引擎的c和pyd文件
-for path in glob.glob(r'Zero3/*.pyx'):
+open("Zero3/scr_pyx/__init__.py","w")
+for path in glob.glob(r'Zero3/scr_pyx/*.pyx'):
     setup(ext_modules=cythonize(path,show_all_warnings=True,annotate=produce_html_files))
     #删除Zero引擎的c文件
     if not debug_c:
         os.remove(path.replace(".pyx",".c"))
+os.remove("Zero3/scr_pyx/__init__.py")
 #生成游戏本体源代码的c和pyd文件
 if compile_py_files_in_Source:
     for path in glob.glob(r'Source/*.py'):

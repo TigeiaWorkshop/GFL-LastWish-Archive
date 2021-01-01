@@ -3,7 +3,7 @@
 from Zero3.dialogSystem import *
 from Zero3.battleSystemInterface import *
 from Zero3.mapCreator import *
-from Zero3.movie import *
+from Zero3.experimental import *
 import platform
 
 print("Zero Engine 3 (pygame {}, python {})".format(pygame.version.ver,platform.python_version()))

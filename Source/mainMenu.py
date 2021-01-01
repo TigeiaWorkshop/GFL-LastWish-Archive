@@ -49,6 +49,7 @@ class MainMenu:
         self.chapter_select = []
         self.workshop_files_text = []
         self.current_selected_workshop_collection = None
+        self.exit_confirm_menu = Zero.Message(self.main_menu_txt["other"]["tip"],self.main_menu_txt["other"]["exit_confirm"],(self.main_menu_txt["other"]["confirm"],self.main_menu_txt["other"]["deny"]),True,return_button=1,escape_button=1)
         #关卡选择的封面
         self.cover_img = Zero.loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
         #音效
@@ -298,8 +299,8 @@ class MainMenu:
                     #制作组
                     elif Zero.ifHover(self.main_menu_txt["menu_main"]["6_developer_team"]):
                         pass
-                    #7_exit
-                    elif Zero.ifHover(self.main_menu_txt["menu_main"]["7_exit"]):
+                    #退出
+                    elif Zero.ifHover(self.main_menu_txt["menu_main"]["7_exit"]) and self.exit_confirm_menu.draw() == 0:
                         self.videoCapture.stop()
                         Zero.display.quit()
                 #选择主线章节
