@@ -1,9 +1,9 @@
 # cython: language_level=3
 from .skill import *
 
-class BattleSystem(Zero.BattleSystemInterface):
+class BattleSystem(linpg.BattleSystemInterface):
     def __init__(self,chapterType=None,chapterId=None,collection_name=None):
-        Zero.BattleSystemInterface.__init__(self,chapterType,chapterId,collection_name)
+        linpg.BattleSystemInterface.__init__(self,chapterType,chapterId,collection_name)
         #被选中的角色
         self.characterGetClick = None
         self.enemiesGetAttack = {}
@@ -57,8 +57,8 @@ class BattleSystem(Zero.BattleSystemInterface):
         self.friendsCanSave = []
     #储存章节信息
     def __save_data(self):
-        if Zero.pause_menu.ifSave == True:
-            Zero.pause_menu.ifSave = False
+        if linpg.pause_menu.ifSave == True:
+            linpg.pause_menu.ifSave = False
             DataTmp = {}
             DataTmp["type"] = "battle"
             DataTmp["chapterType"] = self.chapterType
@@ -71,10 +71,10 @@ class BattleSystem(Zero.BattleSystemInterface):
             DataTmp["dialogData"] = self.dialogData
             DataTmp["resultInfo"] = self.resultInfo
             DataTmp["timeStamp"] = time.strftime(":%S", time.localtime())
-            Zero.saveConfig("Save/save.yaml",DataTmp)
+            linpg.saveConfig("Save/save.yaml",DataTmp)
     #从存档中加载游戏进程
     def load(self,screen):
-        DataTmp = Zero.loadConfig("Save/save.yaml")
+        DataTmp = linpg.loadConfig("Save/save.yaml")
         if DataTmp["type"] == "battle":
             self.chapterType = DataTmp["chapterType"]
             self.chapterId = DataTmp["chapterId"]
@@ -86,7 +86,7 @@ class BattleSystem(Zero.BattleSystemInterface):
             self.dialogData = DataTmp["dialogData"]
             self.resultInfo = DataTmp["resultInfo"]
         else:
-            raise Exception('ZeroEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
+            raise Exception('linpgEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
         self.loadFromSave = True
         self.initialize(screen)
     #加载游戏进程
@@ -95,43 +95,43 @@ class BattleSystem(Zero.BattleSystemInterface):
         self.window_x,self.window_y = screen.get_size()
         #生成标准文字渲染器
         self.FONTSIZE = int(self.window_x/76)
-        self.FONT = Zero.createFont(self.FONTSIZE)
+        self.FONT = linpg.createFont(self.FONTSIZE)
         #加载按钮的文字
         self.selectMenuUI = SelectMenu()
-        self.battleModeUiTxt = Zero.get_lang("Battle_UI")
+        self.battleModeUiTxt = linpg.get_lang("Battle_UI")
         self.warnings_to_display = WarningSystem()
-        loading_info = Zero.get_lang("LoadingTxt")
+        loading_info = linpg.get_lang("LoadingTxt")
         #加载剧情
-        DataTmp = Zero.loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,Zero.get_setting('Language'))) if self.collection_name == None\
-            else Zero.loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collection_name,self.chapterId,Zero.get_setting('Language')))
+        DataTmp = linpg.loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,linpg.get_setting('Language'))) if self.collection_name == None\
+            else linpg.loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collection_name,self.chapterId,linpg.get_setting('Language')))
         #章节标题显示
         self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleModeUiTxt["numChapter"],self.chapterId,DataTmp["title"],DataTmp["description"])
         self.battleMode_info = DataTmp["battle_info"]
         self.dialog_during_battle = DataTmp["dialog_during_battle"]
         #正在加载的gif动态图标
-        nowLoadingIcon = Zero.loadRealGif("Assets/image/UI/sv98_walking.gif",(self.window_x*0.7,self.window_y*0.83),(self.window_x*0.003*15,self.window_x*0.003*21))
+        nowLoadingIcon = linpg.loadRealGif("Assets/image/UI/sv98_walking.gif",(self.window_x*0.7,self.window_y*0.83),(self.window_x*0.003*15,self.window_x*0.003*21))
         #渐入效果
         for i in range(1,255,2):
             self.infoToDisplayDuringLoading.display(screen,i)
-            Zero.display.flip(True)
+            linpg.display.flip(True)
         #开始加载地图场景
         self.infoToDisplayDuringLoading.display(screen)
-        now_loading = self.FONT.render(loading_info["now_loading_map"],Zero.get_fontMode(),(255,255,255))
-        Zero.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
+        now_loading = self.FONT.render(loading_info["now_loading_map"],linpg.get_fontMode(),(255,255,255))
+        linpg.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
-        Zero.display.flip(True)
+        linpg.display.flip(True)
         #读取并初始化章节信息
-        DataTmp = Zero.loadConfig("Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId)) if self.collection_name == None\
-            else Zero.loadConfig("Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collection_name,self.chapterId))
+        DataTmp = linpg.loadConfig("Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId)) if self.collection_name == None\
+            else linpg.loadConfig("Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collection_name,self.chapterId))
         self.zoomIn = DataTmp["zoomIn"]*100
         #储存对话数据key的字典
         self.dialogInfo = DataTmp["dialogs"]
         if self.loadFromSave == True:
             #加载对应角色所需的图片
-            characterDataThread = Zero.loadCharacterDataFromSaveThread(self.characters_data,self.sangvisFerris_data)
+            characterDataThread = linpg.loadCharacterDataFromSaveThread(self.characters_data,self.sangvisFerris_data)
         else:
             #初始化角色信息
-            characterDataThread = Zero.initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
+            characterDataThread = linpg.initializeCharacterDataThread(DataTmp["character"],DataTmp["sangvisFerri"])
             #查看是否有战斗开始前的对话
             if "initial" not in self.dialogInfo or self.dialogInfo["initial"] == None:
                 self.dialogKey = None
@@ -140,12 +140,12 @@ class BattleSystem(Zero.BattleSystemInterface):
             self.dialogData = None
         self.bg_music = DataTmp["background_music"] 
         #初始化天气和环境的音效 -- 频道1
-        self.environment_sound = Zero.SoundManagement(1)
+        self.environment_sound = linpg.SoundManagement(1)
         self.weatherController = None
         if DataTmp["weather"] != None:
             self.environment_sound.add("Assets/sound/environment/{}.ogg".format(DataTmp["weather"]))
-            self.environment_sound.set_volume(Zero.get_setting("Sound","sound_environment")/100.0)
-            self.weatherController = Zero.WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
+            self.environment_sound.set_volume(linpg.get_setting("Sound","sound_environment")/100.0)
+            self.weatherController = linpg.WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
         #检测self.zoomIn参数是否越界
         if self.zoomIn < 200:
             self.zoomIn = 200
@@ -156,10 +156,10 @@ class BattleSystem(Zero.BattleSystemInterface):
         characterDataThread.start()
         while characterDataThread.isAlive():
             self.infoToDisplayDuringLoading.display(screen)
-            now_loading = self.FONT.render(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum),Zero.get_fontMode(),(255,255,255))
-            Zero.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
+            now_loading = self.FONT.render(loading_info["now_loading_characters"]+"({}/{})".format(characterDataThread.currentID,characterDataThread.totalNum),linpg.get_fontMode(),(255,255,255))
+            linpg.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
             nowLoadingIcon.draw(screen)
-            Zero.display.flip(True)
+            linpg.display.flip(True)
         if self.loadFromSave == False:
             #获取角色数据
             self.characters_data,self.sangvisFerris_data = characterDataThread.getResult()
@@ -173,70 +173,70 @@ class BattleSystem(Zero.BattleSystemInterface):
         self.MAP.calculate_darkness(self.characters_data)
         #开始加载关卡设定
         self.infoToDisplayDuringLoading.display(screen)
-        now_loading = self.FONT.render(loading_info["now_loading_level"],Zero.get_fontMode(),Zero.findColorRGBA("white"))
-        Zero.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
+        now_loading = self.FONT.render(loading_info["now_loading_level"],linpg.get_fontMode(),linpg.findColorRGBA("white"))
+        linpg.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
-        Zero.display.flip(True)
+        linpg.display.flip(True)
         #加载UI:
         #加载结束回合的图片
-        self.end_round_txt = self.FONT.render(Zero.get_lang("Battle_UI","endRound"),Zero.get_fontMode(),Zero.findColorRGBA("white"))
-        self.end_round_button = Zero.loadImage("Assets/image/UI/end_round_button.png",(self.window_x*0.8,self.window_y*0.7),self.end_round_txt.get_width()*2,self.end_round_txt.get_height()*2.5)
+        self.end_round_txt = self.FONT.render(linpg.get_lang("Battle_UI","endRound"),linpg.get_fontMode(),linpg.findColorRGBA("white"))
+        self.end_round_button = linpg.loadImage("Assets/image/UI/end_round_button.png",(self.window_x*0.8,self.window_y*0.7),self.end_round_txt.get_width()*2,self.end_round_txt.get_height()*2.5)
         #加载子弹图片
         #bullet_img = loadImg("Assets/image/UI/bullet.png", get_block_width()/6, self.MAP.block_height/12)
         #加载血条,各色方块等UI图片 size:get_block_width(), self.MAP.block_height/5
         self.original_UI_img = {
-            "hp_empty" : Zero.loadImg("Assets/image/UI/hp_empty.png"),
-            "hp_red" : Zero.loadImg("Assets/image/UI/hp_red.png"),
-            "hp_green" : Zero.loadImg("Assets/image/UI/hp_green.png"),
-            "action_point_blue" : Zero.loadImg("Assets/image/UI/action_point.png"),
-            "bullets_number_brown" : Zero.loadImg("Assets/image/UI/bullets_number.png"),
-            "green" : Zero.loadImg("Assets/image/UI/range/green.png"),
-            "red" : Zero.loadImg("Assets/image/UI/range/red.png"),
-            "yellow": Zero.loadImg("Assets/image/UI/range/yellow.png"),
-            "blue": Zero.loadImg("Assets/image/UI/range/blue.png"),
-            "orange": Zero.loadImg("Assets/image/UI/range/orange.png"),
-            "eye_orange": Zero.loadImg("Assets/image/UI/eye_orange.png"),
-            "eye_red": Zero.loadImg("Assets/image/UI/eye_red.png"),
-            "supplyBoard":Zero.loadImage("Assets/image/UI/score.png",((self.window_x-self.window_x/3)/2,-self.window_y/12),self.window_x/3,self.window_y/12),
+            "hp_empty" : linpg.loadImg("Assets/image/UI/hp_empty.png"),
+            "hp_red" : linpg.loadImg("Assets/image/UI/hp_red.png"),
+            "hp_green" : linpg.loadImg("Assets/image/UI/hp_green.png"),
+            "action_point_blue" : linpg.loadImg("Assets/image/UI/action_point.png"),
+            "bullets_number_brown" : linpg.loadImg("Assets/image/UI/bullets_number.png"),
+            "green" : linpg.loadImg("Assets/image/UI/range/green.png"),
+            "red" : linpg.loadImg("Assets/image/UI/range/red.png"),
+            "yellow": linpg.loadImg("Assets/image/UI/range/yellow.png"),
+            "blue": linpg.loadImg("Assets/image/UI/range/blue.png"),
+            "orange": linpg.loadImg("Assets/image/UI/range/orange.png"),
+            "eye_orange": linpg.loadImg("Assets/image/UI/eye_orange.png"),
+            "eye_red": linpg.loadImg("Assets/image/UI/eye_red.png"),
+            "supplyBoard":linpg.loadImage("Assets/image/UI/score.png",((self.window_x-self.window_x/3)/2,-self.window_y/12),self.window_x/3,self.window_y/12),
         }
         #UI - 变形后
         self.UI_img = {
-            "green" : Zero.resizeImg(self.original_UI_img["green"], (self.MAP.block_width*0.8, None)),
-            "red" : Zero.resizeImg(self.original_UI_img["red"], (self.MAP.block_width*0.8, None)),
-            "yellow" : Zero.resizeImg(self.original_UI_img["yellow"], (self.MAP.block_width*0.8, None)),
-            "blue" : Zero.resizeImg(self.original_UI_img["blue"], (self.MAP.block_width*0.8, None)),
-            "orange": Zero.resizeImg(self.original_UI_img["orange"], (self.MAP.block_width*0.8, None))
+            "green" : linpg.resizeImg(self.original_UI_img["green"], (self.MAP.block_width*0.8, None)),
+            "red" : linpg.resizeImg(self.original_UI_img["red"], (self.MAP.block_width*0.8, None)),
+            "yellow" : linpg.resizeImg(self.original_UI_img["yellow"], (self.MAP.block_width*0.8, None)),
+            "blue" : linpg.resizeImg(self.original_UI_img["blue"], (self.MAP.block_width*0.8, None)),
+            "orange": linpg.resizeImg(self.original_UI_img["orange"], (self.MAP.block_width*0.8, None))
         }
         #角色信息UI管理
         self.characterInfoBoardUI = CharacterInfoBoard(self.window_x,self.window_y)
         #加载对话框图片
-        self.dialoguebox_up = Zero.DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,self.window_x,self.window_y/2-self.window_y*0.35,self.FONTSIZE)
+        self.dialoguebox_up = linpg.DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,self.window_x,self.window_y/2-self.window_y*0.35,self.FONTSIZE)
         self.dialoguebox_up.flip()
-        self.dialoguebox_down = Zero.DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,-self.window_x*0.3,self.window_y/2+self.window_y*0.2,self.FONTSIZE)
+        self.dialoguebox_down = linpg.DialogBox("Assets/image/UI/dialoguebox.png",self.window_x*0.3,self.window_y*0.15,-self.window_x*0.3,self.window_y/2+self.window_y*0.2,self.FONTSIZE)
         #-----加载音效-----
         #行走的音效 -- 频道0
-        self.footstep_sounds = Zero.SoundManagement(0)
+        self.footstep_sounds = linpg.SoundManagement(0)
         for walkingSoundPath in glob.glob(r'Assets/sound/snow/*.wav'):
             self.footstep_sounds.add(walkingSoundPath)
-        self.footstep_sounds.set_volume(Zero.get_setting("Sound","sound_effects")/100)
+        self.footstep_sounds.set_volume(linpg.get_setting("Sound","sound_effects")/100)
         #攻击的音效 -- 频道2
-        self.attackingSounds = Zero.AttackingSoundManager(Zero.get_setting("Sound","sound_effects"),2)
+        self.attackingSounds = linpg.AttackingSoundManager(linpg.get_setting("Sound","sound_effects"),2)
         #切换回合时的UI
         self.RoundSwitchUI = RoundSwitch(self.window_x,self.window_y,self.battleModeUiTxt)
         #关卡背景介绍信息文字
         for i in range(len(self.battleMode_info)):
-            self.battleMode_info[i] = self.FONT.render(self.battleMode_info[i],Zero.get_fontMode(),(255,255,255))
+            self.battleMode_info[i] = self.FONT.render(self.battleMode_info[i],linpg.get_fontMode(),(255,255,255))
         #显示章节信息
         for a in range(0,250,2):
             self.infoToDisplayDuringLoading.display(screen)
             for i in range(len(self.battleMode_info)):
                 self.battleMode_info[i].set_alpha(a)
-                Zero.drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
+                linpg.drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
                 if i == 1:
-                    temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),Zero.get_fontMode(),(255,255,255))
+                    temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),linpg.get_fontMode(),(255,255,255))
                     temp_secode.set_alpha(a)
-                    Zero.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
-            Zero.display.flip(True)
+                    linpg.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
+            linpg.display.flip(True)
     #把战斗系统的画面画到screen上
     def display(self,screen):
         #更新输入事件
@@ -257,14 +257,14 @@ class BattleSystem(Zero.BattleSystemInterface):
             self.infoToDisplayDuringLoading.display(screen,self.txt_alpha)
             for i in range(len(self.battleMode_info)):
                 self.battleMode_info[i].set_alpha(self.txt_alpha)
-                Zero.drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
+                linpg.drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
                 if i == 1:
-                    temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),Zero.get_fontMode(),(255,255,255))
+                    temp_secode = self.FONT.render(time.strftime(":%S", time.localtime()),linpg.get_fontMode(),(255,255,255))
                     temp_secode.set_alpha(self.txt_alpha)
-                    Zero.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
+                    linpg.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
             self.txt_alpha -= 5
         #刷新画面
-        Zero.display.flip()
+        linpg.display.flip()
     #对话模块
     def __play_dialog(self,screen):
         #画出地图
@@ -302,15 +302,15 @@ class BattleSystem(Zero.BattleSystemInterface):
                                 if len(routeTmp)>0:
                                     self.characters_data[key].move_follow(routeTmp)
                                 else:
-                                    raise Exception('ZeroEngine-Error: Character {} cannot find a valid path!'.format(key))
+                                    raise Exception('linpgEngine-Error: Character {} cannot find a valid path!'.format(key))
                             elif key in self.sangvisFerris_data:
                                 routeTmp = self.MAP.findPath(self.sangvisFerris_data[key],pos,self.sangvisFerris_data,self.characters_data)
                                 if len(routeTmp)>0:
                                     self.sangvisFerris_data[key].move_follow(routeTmp)
                                 else:
-                                    raise Exception('ZeroEngine-Error: Character {} cannot find a valid path!'.format(key))
+                                    raise Exception('linpgEngine-Error: Character {} cannot find a valid path!'.format(key))
                             else:
-                                raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
+                                raise Exception('linpgEngine-Error: Cannot find character {}!'.format(key))
                         self.dialog_ifPathSet = True
                     #播放脚步声
                     self.footstep_sounds.play()
@@ -327,7 +327,7 @@ class BattleSystem(Zero.BattleSystemInterface):
                         elif key in self.sangvisFerris_data and self.sangvisFerris_data[key].is_idle() == False:
                             allGetToTargetPos = False
                         else:
-                            raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
+                            raise Exception('linpgEngine-Error: Cannot find character {}!'.format(key))
                     if reProcessMap:
                         self.MAP.calculate_darkness(self.characters_data)
                     if allGetToTargetPos:
@@ -343,7 +343,7 @@ class BattleSystem(Zero.BattleSystemInterface):
                         elif key in self.sangvisFerris_data:
                             self.sangvisFerris_data[key].setFlip(value)
                         else:
-                            raise Exception('ZeroEngine-Error: Cannot find character {}!'.format(key))
+                            raise Exception('linpgEngine-Error: Cannot find character {}!'.format(key))
                     self.dialogData["dialogId"] += 1
                 #改变动作（一次性）
                 elif "action" in currentDialog and currentDialog["action"] != None:
@@ -388,7 +388,7 @@ class BattleSystem(Zero.BattleSystemInterface):
                 #闲置一定时间（秒）
                 elif "idle" in currentDialog and currentDialog["idle"] != None:
                     if self.dialogData["secondsToIdle"] == None:
-                        self.dialogData["secondsToIdle"] = currentDialog["idle"]*Zero.display.fps
+                        self.dialogData["secondsToIdle"] = currentDialog["idle"]*linpg.display.fps
                     else:
                         if self.dialogData["secondsAlreadyIdle"] < self.dialogData["secondsToIdle"]:
                             self.dialogData["secondsAlreadyIdle"] += 1
@@ -411,12 +411,12 @@ class BattleSystem(Zero.BattleSystemInterface):
                 for event in self._get_event():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
-                            Zero.pause_menu.display(screen)
+                            linpg.pause_menu.display(screen)
                             self.__save_data()
-                            if Zero.pause_menu.ifBackToMainMenu == True:
-                                Zero.unloadBackgroundMusic()
+                            if linpg.pause_menu.ifBackToMainMenu == True:
+                                linpg.unloadBackgroundMusic()
                                 self.isPlaying = False
-                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and Zero.controller.joystick.get_button(0) == 1:
+                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and linpg.controller.joystick.get_button(0) == 1:
                         if "dialoguebox_up" in currentDialog or "dialoguebox_down" in currentDialog:
                             self.dialogData["dialogId"] += 1
                         if self.dialogData["dialogId"] < len(self.dialog_during_battle[self.dialogKey]):
@@ -461,7 +461,7 @@ class BattleSystem(Zero.BattleSystemInterface):
         right_click = False
         show_pause_menu = False
         #获取鼠标坐标
-        mouse_x,mouse_y = Zero.controller.get_pos()
+        mouse_x,mouse_y = linpg.controller.get_pos()
         #攻击范围
         attacking_range = None
         skill_range = None
@@ -478,13 +478,13 @@ class BattleSystem(Zero.BattleSystemInterface):
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 self._check_key_down(event)
                 if event.key == pygame.K_m:
-                    Zero.display.quit()
+                    linpg.display.quit()
             elif event.type == pygame.KEYUP:
                 self._check_key_up(event)
             #鼠标点击
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 #右键
-                if event.button == 1 or event.type == pygame.JOYBUTTONDOWN and Zero.controller.joystick.get_button(0) == 1:
+                if event.button == 1 or event.type == pygame.JOYBUTTONDOWN and linpg.controller.joystick.get_button(0) == 1:
                     right_click = True
                 #上下滚轮-放大和缩小地图
                 elif event.button == 4 and self.zoomIntoBe < 400:
@@ -504,7 +504,7 @@ class BattleSystem(Zero.BattleSystemInterface):
             self.MAP.changePerBlockSize(self.window_x/self.MAP.column*self.zoomIn/100,self.window_y/self.MAP.row*self.zoomIn/100,self.window_x,self.window_y)
             #根据block尺寸重新加载对应尺寸的UI
             for key in self.UI_img:
-                self.UI_img[key] = Zero.resizeImg(self.original_UI_img[key], (self.MAP.block_width*0.8, None))
+                self.UI_img[key] = linpg.resizeImg(self.original_UI_img[key], (self.MAP.block_width*0.8, None))
             self.selectMenuUI.allButton = None
         else:
             self.zoomIn = self.zoomIntoBe
@@ -514,14 +514,14 @@ class BattleSystem(Zero.BattleSystemInterface):
         for area in self.areaDrawColorBlock:
             for position in self.areaDrawColorBlock[area]:
                 xTemp,yTemp = self.MAP.calPosInMap(position[0],position[1])
-                Zero.drawImg(self.UI_img[area],(xTemp+self.MAP.block_width*0.1,yTemp),screen)
+                linpg.drawImg(self.UI_img[area],(xTemp+self.MAP.block_width*0.1,yTemp),screen)
 
         #玩家回合
         if self.whose_round == "player":
             if right_click == True:
                 block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                 #如果点击了回合结束的按钮
-                if Zero.ifHover(self.end_round_button) and self.isWaiting == True:
+                if linpg.ifHover(self.end_round_button) and self.isWaiting == True:
                     self.whose_round = "playerToSangvisFerris"
                     self.characterGetClick = None
                     self.NotDrawRangeBlocks = True
@@ -669,7 +669,7 @@ class BattleSystem(Zero.BattleSystemInterface):
                                 #显示路径
                                 self.areaDrawColorBlock["green"] = self.the_route
                                 xTemp,yTemp = self.MAP.calPosInMap(self.the_route[-1][0],self.the_route[-1][1])
-                                screen.blit(self.FONT.render(str(len(self.the_route)*2),Zero.get_fontMode(),(255,255,255)),(xTemp+self.FONTSIZE*2,yTemp+self.FONTSIZE))
+                                screen.blit(self.FONT.render(str(len(self.the_route)*2),linpg.get_fontMode(),(255,255,255)),(xTemp+self.FONTSIZE*2,yTemp+self.FONTSIZE))
                                 self.characters_data[self.characterGetClick].draw_custom("move",(xTemp,yTemp),screen,self.MAP)
                 #显示攻击范围        
                 elif self.action_choice == "attack":
@@ -841,10 +841,10 @@ class BattleSystem(Zero.BattleSystemInterface):
                             for itemType,itemData in decoration.items.items():
                                 if itemType == "bullet":
                                     self.characters_data[self.characterGetClick].bullets_carried += itemData
-                                    self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(itemData),Zero.get_fontMode(),(255,255,255)))
+                                    self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
                                 elif itemType == "hp":
                                     self.characters_data[self.characterGetClick].current_hp += itemData
-                                    self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(itemData),Zero.get_fontMode(),(255,255,255)))
+                                    self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
                             if len(self.original_UI_img["supplyBoard"].items)>0:
                                 self.original_UI_img["supplyBoard"].yTogo = 10
                             self.MAP.remove_decoration(decoration)
@@ -868,11 +868,11 @@ class BattleSystem(Zero.BattleSystemInterface):
                         self.attackingSounds.play(self.characters_data[self.characterGetClick].kind)
                     if self.characters_data[self.characterGetClick].get_imgId("attack") == self.characters_data[self.characterGetClick].get_imgNum("attack")-2:
                         for each_enemy in self.enemiesGetAttack:
-                            if self.enemiesGetAttack[each_enemy] == "near" and Zero.randomInt(1,100) <= 95 or self.enemiesGetAttack[each_enemy] == "middle" and Zero.randomInt(1,100) <= 80 or self.enemiesGetAttack[each_enemy] == "far" and Zero.randomInt(1,100) <= 65:
+                            if self.enemiesGetAttack[each_enemy] == "near" and linpg.randomInt(1,100) <= 95 or self.enemiesGetAttack[each_enemy] == "middle" and linpg.randomInt(1,100) <= 80 or self.enemiesGetAttack[each_enemy] == "far" and linpg.randomInt(1,100) <= 65:
                                 the_damage = self.sangvisFerris_data[each_enemy].attackBy(self.characters_data[self.characterGetClick])
-                                self.damage_do_to_characters[each_enemy] = self.FONT.render("-"+str(the_damage),Zero.get_fontMode(),Zero.findColorRGBA("red"))
+                                self.damage_do_to_characters[each_enemy] = self.FONT.render("-"+str(the_damage),linpg.get_fontMode(),linpg.findColorRGBA("red"))
                             else:
-                                self.damage_do_to_characters[each_enemy] = self.FONT.render("Miss",Zero.get_fontMode(),Zero.findColorRGBA("red"))
+                                self.damage_do_to_characters[each_enemy] = self.FONT.render("Miss",linpg.get_fontMode(),linpg.findColorRGBA("red"))
                     elif self.characters_data[self.characterGetClick].get_imgId("attack") == self.characters_data[self.characterGetClick].get_imgNum("attack")-1:
                         self.characters_data[self.characterGetClick].current_bullets -= 1
                         self.isWaiting = True
@@ -891,7 +891,7 @@ class BattleSystem(Zero.BattleSystemInterface):
         if self.whose_round == "sangvisFerris":
             self.enemy_in_control = self.sangvisFerris_name_list[self.enemies_in_control_id]
             if self.enemy_action == None:
-                self.enemy_action = Zero.AI(self.enemy_in_control,self.MAP,self.characters_data,self.sangvisFerris_data,self.the_characters_detected_last_round)
+                self.enemy_action = linpg.AI(self.enemy_in_control,self.MAP,self.characters_data,self.sangvisFerris_data,self.the_characters_detected_last_round)
                 if self.enemy_action["action"] == "move" or self.enemy_action["action"] == "move&attack":
                     self.sangvisFerris_data[self.enemy_in_control].move_follow(self.enemy_action["route"])
                 elif self.enemy_action["action"] == "attack":
@@ -914,13 +914,13 @@ class BattleSystem(Zero.BattleSystemInterface):
                 if self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == 3:
                     self.attackingSounds.play(self.sangvisFerris_data[self.enemy_in_control].kind)
                 elif self.sangvisFerris_data[self.enemy_in_control].get_imgId("attack") == self.sangvisFerris_data[self.enemy_in_control].get_imgNum("attack")-1:
-                    temp_value = Zero.randomInt(0,100)
+                    temp_value = linpg.randomInt(0,100)
                     if self.enemy_action["target_area"] == "near" and temp_value <= 95 or self.enemy_action["target_area"] == "middle" and temp_value <= 80 or self.enemy_action["target_area"] == "far" and temp_value <= 65:
                         the_damage = self.characters_data[self.enemy_action["target"]].attackBy(self.sangvisFerris_data[self.enemy_in_control],self.resultInfo)
                         self.MAP.calculate_darkness(self.characters_data)
-                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),Zero.get_fontMode(),Zero.findColorRGBA("red"))
+                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),linpg.get_fontMode(),linpg.findColorRGBA("red"))
                     else:
-                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",Zero.get_fontMode(),Zero.findColorRGBA("red"))
+                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",linpg.get_fontMode(),linpg.findColorRGBA("red"))
                     self.enemy_action["action"] = "stay"
             #最终的idle状态
             elif self.enemy_action["action"] == "stay":
@@ -936,7 +936,7 @@ class BattleSystem(Zero.BattleSystemInterface):
 
         """↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"""
         rightClickCharacterAlphaDeduct = True
-        for key,value in Zero.dicMerge(self.characters_data,self.sangvisFerris_data).items():
+        for key,value in linpg.dicMerge(self.characters_data,self.sangvisFerris_data).items():
             #如果天亮的双方都可以看见/天黑，但是是友方角色/天黑，但是是敌方角色在可观测的范围内 -- 则画出角色
             if value.faction == "character" or value.faction == "sangvisFerri" and self.MAP.inLightArea(value):
                 if self.NotDrawRangeBlocks == True and pygame.mouse.get_pressed()[2]:
@@ -966,7 +966,7 @@ class BattleSystem(Zero.BattleSystemInterface):
                     xTemp,yTemp = self.MAP.calPosInMap(value.x,value.y)
                     xTemp+=self.MAP.block_width*0.05
                     yTemp-=self.MAP.block_width*0.05
-                    Zero.displayInCenter(self.damage_do_to_characters[key],self.UI_img["green"],xTemp,yTemp,screen)
+                    linpg.displayInCenter(self.damage_do_to_characters[key],self.UI_img["green"],xTemp,yTemp,screen)
                     self.damage_do_to_characters[key].set_alpha(the_alpha_to_check-5)
                 else:
                     del self.damage_do_to_characters[key]
@@ -1073,7 +1073,7 @@ class BattleSystem(Zero.BattleSystemInterface):
             start_point = (self.window_x - lenTemp)/2
             for i in range(len(self.original_UI_img["supplyBoard"].items)):
                 start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*0.25
-                Zero.drawImg(self.original_UI_img["supplyBoard"].items[i],(start_point,(self.original_UI_img["supplyBoard"].height - self.original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,self.original_UI_img["supplyBoard"].y)
+                linpg.drawImg(self.original_UI_img["supplyBoard"].items[i],(start_point,(self.original_UI_img["supplyBoard"].height - self.original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,self.original_UI_img["supplyBoard"].y)
                 start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*1.25
 
         if self.whose_round == "player":
@@ -1088,7 +1088,7 @@ class BattleSystem(Zero.BattleSystemInterface):
         if not pygame.mixer.music.get_busy():
             pygame.mixer.music.load("Assets/music/"+self.bg_music)
             pygame.mixer.music.play()
-            pygame.mixer.music.set_volume(Zero.get_setting("Sound","background_music")/100.0)
+            pygame.mixer.music.set_volume(linpg.get_setting("Sound","background_music")/100.0)
 
         #结束动画--胜利
         if self.whose_round == "result_win":
@@ -1106,8 +1106,8 @@ class BattleSystem(Zero.BattleSystemInterface):
             pass
         #展示暂停菜单
         if show_pause_menu == True:
-            Zero.pause_menu.display(screen)
+            linpg.pause_menu.display(screen)
             self.__save_data()
-            if Zero.pause_menu.ifBackToMainMenu == True:
-                Zero.unloadBackgroundMusic()
+            if linpg.pause_menu.ifBackToMainMenu == True:
+                linpg.unloadBackgroundMusic()
                 self.isPlaying = False

@@ -21,9 +21,9 @@ def skill(characterName,click_potcion,the_skill_cover_area,sangvisFerris_data,ch
             characters_data[skill_target].heal(healed_hp)
             if characters_data[skill_target].dying != False:
                 characters_data[skill_target].dying = False
-            damage_do_to_character[skill_target] = Zero.fontRender("+"+str(healed_hp),"green",25)
+            damage_do_to_character[skill_target] = linpg.fontRender("+"+str(healed_hp),"green",25)
         elif characters_data[characterName].type == "asval" or characters_data[characterName].type == "pp1901" or characters_data[characterName].type == "sv-98":
-            the_damage = Zero.randomInt(characters_data[characterName].min_damage,characters_data[characterName].max_damage)
+            the_damage = linpg.randomInt(characters_data[characterName].min_damage,characters_data[characterName].max_damage)
             sangvisFerris_data[skill_target].decreaseHp(the_damage)
-            damage_do_to_character[skill_target] = Zero.fontRender("-"+str(the_damage),"red",25)
+            damage_do_to_character[skill_target] = linpg.fontRender("-"+str(the_damage),"red",25)
         return damage_do_to_character

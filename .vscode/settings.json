@@ -33,6 +33,7 @@
         "isinstance",
         "jiaose",
         "kalina",
+        "linpg",
         "makedirs",
         "manticore",
         "maxsize",
