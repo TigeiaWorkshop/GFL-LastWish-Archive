@@ -248,7 +248,7 @@ class BattleSystem(linpg.BattleSystemInterface):
             linpg.display.flip(True)
     #把战斗系统的画面画到screen上
     def display(self,screen):
-        super().display()
+        self._update_event()
         #环境声音-频道1
         self.environment_sound.play()
         # 游戏主循环
@@ -376,10 +376,9 @@ class BattleSystem(linpg.BattleSystemInterface):
                         #对话框的移动
                         if self.dialoguebox_up.x > self.window_x/2+self.dialoguebox_up.get_width()*0.4:
                             self.dialoguebox_up.x -= self.dialoguebox_up.get_width()*0.134
-                        elif self.dialoguebox_up.updated == False:
-                            currentTmp = currentDialog["dialoguebox_up"]
-                            self.dialoguebox_up.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
-                            del currentTmp
+                        elif not self.dialoguebox_up.updated:
+                            self.dialoguebox_up.update(currentDialog["dialoguebox_up"]["content"],\
+                                currentDialog["dialoguebox_up"]["speaker"],currentDialog["dialoguebox_up"]["speaker_icon"])
                         #对话框图片
                         self.dialoguebox_up.display(screen,self.characterInfoBoardUI)
                     #下方对话框
@@ -387,10 +386,9 @@ class BattleSystem(linpg.BattleSystemInterface):
                         #对话框的移动
                         if self.dialoguebox_down.x < self.window_x/2-self.dialoguebox_down.get_width()*1.4:
                             self.dialoguebox_down.x += self.dialoguebox_down.get_width()*0.134
-                        elif self.dialoguebox_down.updated == False:
-                            currentTmp = currentDialog["dialoguebox_down"]
-                            self.dialoguebox_down.update(currentTmp["content"],currentTmp["speaker"],currentTmp["speaker_icon"])
-                            del currentTmp
+                        elif not self.dialoguebox_down.updated:
+                            self.dialoguebox_down.update(currentDialog["dialoguebox_down"]["content"],\
+                                currentDialog["dialoguebox_down"]["speaker"],currentDialog["dialoguebox_down"]["speaker_icon"])
                         #对话框图片
                         self.dialoguebox_down.display(screen,self.characterInfoBoardUI)
                 #闲置一定时间（秒）
@@ -425,31 +423,41 @@ class BattleSystem(linpg.BattleSystemInterface):
                                 linpg.unloadBackgroundMusic()
                                 self.isPlaying = False
                     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and linpg.controller.joystick.get_button(0) == 1:
-                        if "dialoguebox_up" in currentDialog or "dialoguebox_down" in currentDialog:
+                        goToNextSlide = False
+                        if "dialoguebox_up" in currentDialog and self.dialoguebox_up.updated:
+                            if not self.dialoguebox_up.play_all():
+                                self.dialoguebox_up.set_play_all()
+                            else:
+                                goToNextSlide = True
+                        if "dialoguebox_down" in currentDialog and self.dialoguebox_down.updated:
+                            if not self.dialoguebox_down.play_all():
+                                self.dialoguebox_down.set_play_all()
+                            else:
+                                goToNextSlide = True
+                        if goToNextSlide:
                             self.dialogData["dialogId"] += 1
-                        if self.dialogData["dialogId"] < len(self.dialog_during_battle[self.dialogKey]):
-                            currentDialog = self.dialog_during_battle[self.dialogKey][self.dialogData["dialogId"]]
-                            lastDialog = self.dialog_during_battle[self.dialogKey][self.dialogData["dialogId"]-1] if self.dialogData["dialogId"] > 0 else {}
-                            if "dialoguebox_up" in currentDialog:
-                                #检测上方对话框
-                                if currentDialog["dialoguebox_up"] == None or "dialoguebox_up" not in lastDialog or lastDialog["dialoguebox_up"] == None or currentDialog["dialoguebox_up"]["speaker"] != lastDialog["dialoguebox_up"]["speaker"]:
+                            if self.dialogData["dialogId"] < len(self.dialog_during_battle[self.dialogKey]):
+                                currentDialog = self.dialog_during_battle[self.dialogKey][self.dialogData["dialogId"]]
+                                lastDialog = self.dialog_during_battle[self.dialogKey][self.dialogData["dialogId"]-1] if self.dialogData["dialogId"] > 0 else {}
+                                if "dialoguebox_up" in currentDialog:
+                                    #检测上方对话框
+                                    if currentDialog["dialoguebox_up"] == None or "dialoguebox_up" not in lastDialog or lastDialog["dialoguebox_up"] == None or currentDialog["dialoguebox_up"]["speaker"] != lastDialog["dialoguebox_up"]["speaker"]:
+                                        self.dialoguebox_up.reset()
+                                    elif currentDialog["dialoguebox_up"]["content"] != lastDialog["dialoguebox_up"]["content"]:
+                                        self.dialoguebox_up.updated = False
+                                else:
                                     self.dialoguebox_up.reset()
-                                elif currentDialog["dialoguebox_up"]["content"] != lastDialog["dialoguebox_up"]["content"]:
-                                    self.dialoguebox_up.updated = False
+                                if "dialoguebox_down" in currentDialog:
+                                    #检测下方对话框    
+                                    if currentDialog["dialoguebox_down"] == None or "dialoguebox_down" not in lastDialog or lastDialog["dialoguebox_down"] == None or currentDialog["dialoguebox_down"]["speaker"] != lastDialog["dialoguebox_down"]["speaker"]:
+                                        self.dialoguebox_down.reset()
+                                    elif currentDialog["dialoguebox_down"]["content"] != lastDialog["dialoguebox_down"]["content"]:
+                                        self.dialoguebox_down.updated = False
+                                else:
+                                    self.dialoguebox_down.reset()
                             else:
                                 self.dialoguebox_up.reset()
-                            if "dialoguebox_down" in currentDialog:
-                                #检测下方对话框    
-                                if currentDialog["dialoguebox_down"] == None or "dialoguebox_down" not in lastDialog or lastDialog["dialoguebox_down"] == None or currentDialog["dialoguebox_down"]["speaker"] != lastDialog["dialoguebox_down"]["speaker"]:
-                                    self.dialoguebox_down.reset()
-                                elif currentDialog["dialoguebox_down"]["content"] != lastDialog["dialoguebox_down"]["content"]:
-                                    self.dialoguebox_down.updated = False
-                            else:
                                 self.dialoguebox_down.reset()
-                        else:
-                            self.dialoguebox_up.reset()
-                            self.dialoguebox_down.reset()
-                        break
             else:
                 self.dialogData = None
                 self.dialogKey = None
@@ -466,6 +474,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                 self.battleMode = True
     #战斗模块
     def __play_battle(self,screen):
+        self.play_bgm()
         right_click = False
         show_pause_menu = False
         #获取鼠标坐标
@@ -1087,7 +1096,7 @@ class BattleSystem(linpg.BattleSystemInterface):
         if self.whose_round == "player":
             #加载结束回合的按钮
             self.end_round_button.draw(screen)
-            screen.blit(self.end_round_txt,(self.end_round_button.x+self.end_round_button.width-self.end_round_txt.get_width()-self.FONTSIZE,self.end_round_button.y+(self.end_round_button.height-self.FONTSIZE)/2.3))
+            screen.blit(self.end_round_txt,(self.end_round_button.x+self.end_round_button.width*0.35,self.end_round_button.y+(self.end_round_button.height-self.FONTSIZE)/2.3))
 
         #显示警告
         self.warnings_to_display.display(screen)
