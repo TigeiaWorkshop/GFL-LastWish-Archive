@@ -210,28 +210,25 @@ class MainMenu:
         if not linpg.pause_menu.checkIfBackToMainMenu():
             dialog(chapterType,chapterId,screen,"dialog_after_battle",collection_name)
         self.__reset_menu()
+    #继续章节
     def __continue_scene(self,screen):
         self.videoCapture.stop()
-        if os.path.exists("Save/save.yaml"):
-            SAVE = linpg.loadConfig("Save/save.yaml")
-            startPoint = SAVE["type"]
-            if startPoint == "dialog_before_battle":
-                dialog(None,None,screen,None)
-                if not linpg.pause_menu.checkIfBackToMainMenu():
-                    battle(SAVE["chapterType"],SAVE["chapterId"],screen,SAVE["collection_name"])
-                else:
-                    return
-                if not linpg.pause_menu.checkIfBackToMainMenu():
-                    dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
-            elif startPoint == "battle":
-                battle(None,None,screen,)
-                if not linpg.pause_menu.checkIfBackToMainMenu():
-                    dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
-            elif startPoint == "dialog_after_battle":
-                dialog(None,None,screen,None)
-        else:
-            #raise Exception('linpgEngine-Error: The save.yaml is not exist')
-            pass
+        SAVE = linpg.loadConfig("Save/save.yaml")
+        startPoint = SAVE["type"]
+        if startPoint == "dialog_before_battle":
+            dialog(None,None,screen,None)
+            if not linpg.pause_menu.checkIfBackToMainMenu():
+                battle(SAVE["chapterType"],SAVE["chapterId"],screen,SAVE["collection_name"])
+            else:
+                return
+            if not linpg.pause_menu.checkIfBackToMainMenu():
+                dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
+        elif startPoint == "battle":
+            battle(None,None,screen,)
+            if not linpg.pause_menu.checkIfBackToMainMenu():
+                dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
+        elif startPoint == "dialog_after_battle":
+            dialog(None,None,screen,None)
         self.__reset_menu()
     #更新主菜单的部分元素
     def __reset_menu(self):
@@ -277,7 +274,7 @@ class MainMenu:
                 #主菜单
                 if self.menu_type == 0:
                     #继续游戏
-                    if linpg.ifHover(self.main_menu_txt["menu_main"]["0_continue"]):
+                    if linpg.ifHover(self.main_menu_txt["menu_main"]["0_continue"]) and os.path.exists("Save/save.yaml"):
                         self.__continue_scene(screen)
                     #选择章节
                     elif linpg.ifHover(self.main_menu_txt["menu_main"]["1_chooseChapter"]):

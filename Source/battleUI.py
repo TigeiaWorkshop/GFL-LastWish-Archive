@@ -275,7 +275,7 @@ class CharacterInfoBoard:
         tcgc_hp1 = linpg.fontRender("HP: ","white",fontSize)
         tcgc_hp2 = linpg.fontRender(str(theCharacterData.current_hp)+"/"+str(theCharacterData.max_hp),"black",fontSize)
         tcgc_action_point1 = linpg.fontRender("AP: ","white",fontSize)
-        tcgc_action_point2 = linpg.fontRender(str(theCharacterData.get_action_point())+"/"+str(theCharacterData.max_action_point),"black",fontSize)
+        tcgc_action_point2 = linpg.fontRender(str(theCharacterData.current_action_point)+"/"+str(theCharacterData.max_action_point),"black",fontSize)
         tcgc_bullets_situation1 = linpg.fontRender("BP: ","white",fontSize)
         tcgc_bullets_situation2 = linpg.fontRender(str(theCharacterData.current_bullets)+"/"+str(theCharacterData.bullets_carried),"black",fontSize)
         #先画出hp,ap和bp的文字
@@ -293,7 +293,7 @@ class CharacterInfoBoard:
         self.informationBoard.blit(hp_empty,(temp_posX,temp_posY+self.text_size*3))
         #画出三个信息条
         self.informationBoard.blit(linpg.resizeImg(original_UI_img["hp_green"],(int(hp_empty.get_width()*theCharacterData.current_hp/theCharacterData.max_hp),int(self.text_size))),(temp_posX ,temp_posY))
-        self.informationBoard.blit(linpg.resizeImg(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*theCharacterData.get_action_point()/theCharacterData.max_action_point),int(self.text_size))),(temp_posX ,temp_posY+self.text_size*1.5))
+        self.informationBoard.blit(linpg.resizeImg(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*theCharacterData.current_action_point/theCharacterData.max_action_point),int(self.text_size))),(temp_posX ,temp_posY+self.text_size*1.5))
         self.informationBoard.blit(linpg.resizeImg(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*theCharacterData.current_bullets/theCharacterData.magazine_capacity),int(self.text_size))),(temp_posX ,temp_posY+self.text_size*3))
         linpg.displayInCenter(tcgc_hp2,hp_empty,temp_posX ,temp_posY,self.informationBoard)
         linpg.displayInCenter(tcgc_action_point2,hp_empty,temp_posX ,temp_posY+self.text_size*1.5,self.informationBoard)
