@@ -14,7 +14,7 @@ def dialog(chapterType,chapterId,screen,part,collection_name=None):
     #卸载音乐
     linpg.unloadBackgroundMusic()
     #初始化对话系统模块
-    DIALOG = linpg.DialogSystem()
+    DIALOG = DialogSystem()
     if chapterType != None:
         DIALOG.new(chapterType,chapterId,part,collection_name)
     else:

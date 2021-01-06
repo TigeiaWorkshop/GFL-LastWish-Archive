@@ -75,8 +75,8 @@ class BattleSystem(linpg.BattleSystemInterface):
             raise Exception('linpgEngine-Error: cannot find faction "{}"'.formate(faction))
     #储存章节信息
     def __save_data(self):
-        if linpg.pause_menu.ifSave:
-            linpg.pause_menu.ifSave = False
+        if linpg.pauseMenu.ifSave:
+            linpg.pauseMenu.ifSave = False
             linpg.saveConfig("Save/save.yaml", {
                 "type": "battle",
                 "chapterType": self.chapterType,
@@ -417,21 +417,21 @@ class BattleSystem(linpg.BattleSystemInterface):
                 for event in self._get_event():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
-                            linpg.pause_menu.display(screen)
+                            linpg.pauseMenu.display(screen)
                             self.__save_data()
-                            if linpg.pause_menu.ifBackToMainMenu == True:
+                            if linpg.pauseMenu.ifBackToMainMenu == True:
                                 linpg.unloadBackgroundMusic()
                                 self.isPlaying = False
                     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and linpg.controller.joystick.get_button(0) == 1:
                         goToNextSlide = False
                         if "dialoguebox_up" in currentDialog and self.dialoguebox_up.updated:
-                            if not self.dialoguebox_up.play_all():
-                                self.dialoguebox_up.set_play_all()
+                            if not self.dialoguebox_up.is_all_played():
+                                self.dialoguebox_up.play_all()
                             else:
                                 goToNextSlide = True
                         if "dialoguebox_down" in currentDialog and self.dialoguebox_down.updated:
-                            if not self.dialoguebox_down.play_all():
-                                self.dialoguebox_down.set_play_all()
+                            if not self.dialoguebox_down.is_all_played():
+                                self.dialoguebox_down.play_all()
                             else:
                                 goToNextSlide = True
                         if goToNextSlide:
@@ -476,7 +476,7 @@ class BattleSystem(linpg.BattleSystemInterface):
     def __play_battle(self,screen):
         self.play_bgm()
         right_click = False
-        show_pause_menu = False
+        show_pauseMenu = False
         #获取鼠标坐标
         mouse_x,mouse_y = linpg.controller.get_pos()
         #攻击范围
@@ -485,7 +485,7 @@ class BattleSystem(linpg.BattleSystemInterface):
         for event in self._get_event():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE and self.characterGetClick == None:
-                    show_pause_menu = True
+                    show_pauseMenu = True
                 if event.key == pygame.K_ESCAPE and self.isWaiting == True:
                     self.NotDrawRangeBlocks = True
                     self.characterGetClick = None
@@ -1116,9 +1116,9 @@ class BattleSystem(linpg.BattleSystemInterface):
         elif self.whose_round == "result_fail":
             pass
         #展示暂停菜单
-        if show_pause_menu == True:
-            linpg.pause_menu.display(screen)
+        if show_pauseMenu:
+            linpg.pauseMenu.display(screen)
             self.__save_data()
-            if linpg.pause_menu.ifBackToMainMenu == True:
+            if linpg.pauseMenu.ifBackToMainMenu == True:
                 linpg.unloadBackgroundMusic()
                 self.isPlaying = False

@@ -2,7 +2,7 @@ from .battleSystem import *
 
 class DialogSystem(linpg.DialogSystem):
     def __init__(self):
-        DialogSystem.__init__(self)
+        linpg.DialogSystem.__init__(self)
     #保存数据
     def save_process(self):
         DataTmp = {

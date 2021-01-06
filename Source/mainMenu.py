@@ -17,8 +17,7 @@ class MainMenu:
         #修改控制台的位置
         linpg.console.set_pos(window_x*0.1,window_y*0.8)
         self.main_menu_txt = linpg.get_lang('MainMenu')
-        #选项模块
-        self.settingUI = linpg.SettingContoller(window_x,window_y,linpg.get_lang("SettingUI"))
+        self.settingMenu = linpg.SettingContoller(screen.get_size())
         #当前可用的菜单选项
         disabled_option = ["6_developer_team","2_dlc","4_collection"]
         if not os.path.exists("Save/save.yaml"):
@@ -203,12 +202,10 @@ class MainMenu:
         self.videoCapture.stop()
         collection_name = None if chapterType == "main_chapter" else self.current_selected_workshop_collection
         dialog(chapterType,chapterId,screen,"dialog_before_battle",collection_name)
-        if not linpg.pause_menu.checkIfBackToMainMenu():
+        if not linpg.pauseMenu.checkIfBackToMainMenu():
             battle(chapterType,chapterId,screen,collection_name)
-        else:
-            return
-        if not linpg.pause_menu.checkIfBackToMainMenu():
-            dialog(chapterType,chapterId,screen,"dialog_after_battle",collection_name)
+            if not linpg.pauseMenu.checkIfBackToMainMenu():
+                dialog(chapterType,chapterId,screen,"dialog_after_battle",collection_name)
         self.__reset_menu()
     #继续章节
     def __continue_scene(self,screen):
@@ -217,15 +214,15 @@ class MainMenu:
         startPoint = SAVE["type"]
         if startPoint == "dialog_before_battle":
             dialog(None,None,screen,None)
-            if not linpg.pause_menu.checkIfBackToMainMenu():
+            if not linpg.pauseMenu.checkIfBackToMainMenu():
                 battle(SAVE["chapterType"],SAVE["chapterId"],screen,SAVE["collection_name"])
             else:
                 return
-            if not linpg.pause_menu.checkIfBackToMainMenu():
+            if not linpg.pauseMenu.checkIfBackToMainMenu():
                 dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
         elif startPoint == "battle":
             battle(None,None,screen,)
-            if not linpg.pause_menu.checkIfBackToMainMenu():
+            if not linpg.pauseMenu.checkIfBackToMainMenu():
                 dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
         elif startPoint == "dialog_after_battle":
             dialog(None,None,screen,None)
@@ -260,7 +257,7 @@ class MainMenu:
             #菜单选项
             self.__draw_buttons(screen)
             #展示设置UI
-            if self.settingUI.display(screen) == True:
+            if self.settingMenu.display(screen):
                 self.click_button_sound.set_volume(linpg.get_setting("Sound","sound_effects")/100.0)
                 self.hover_on_button_sound.set_volume(linpg.get_setting("Sound","sound_effects")/100.0)
                 self.videoCapture.set_volume(linpg.get_setting("Sound","background_music")/100.0)
@@ -269,7 +266,7 @@ class MainMenu:
             #展示控制台
             linpg.console.display(screen,events)
             #判断按键
-            if linpg.controller.get_event(events) == "comfirm" and self.settingUI.ifDisplay != True:
+            if linpg.controller.get_event(events) == "comfirm" and not self.settingMenu.isDisplaying:
                 self.click_button_sound.play()
                 #主菜单
                 if self.menu_type == 0:
@@ -292,7 +289,7 @@ class MainMenu:
                         pass
                     #设置
                     elif linpg.ifHover(self.main_menu_txt["menu_main"]["5_setting"]):
-                        self.settingUI.ifDisplay = True
+                        self.settingMenu.isDisplaying = True
                     #制作组
                     elif linpg.ifHover(self.main_menu_txt["menu_main"]["6_developer_team"]):
                         pass
