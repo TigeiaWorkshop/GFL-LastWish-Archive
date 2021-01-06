@@ -57,6 +57,9 @@ class BattleSystem(linpg.BattleSystemInterface):
         self.friendsCanSave = []
         #是否从存档中加载的数据-默认否
         self.loadFromSave = False
+        #暂停菜单
+        self.pause_menu = linpg.PauseMenu()
+        self.show_pause_menu = False
     @property
     def griffinCharactersData(self):
         return self.alliances_data
@@ -74,22 +77,20 @@ class BattleSystem(linpg.BattleSystemInterface):
         else:
             raise Exception('linpgEngine-Error: cannot find faction "{}"'.formate(faction))
     #储存章节信息
-    def __save_data(self):
-        if linpg.pauseMenu.ifSave:
-            linpg.pauseMenu.ifSave = False
-            linpg.saveConfig("Save/save.yaml", {
-                "type": "battle",
-                "chapterType": self.chapterType,
-                "chapterId": self.chapterId,
-                "collection_name": self.collection_name,
-                "griffin": self.griffinCharactersData,
-                "sangvisFerri": self.sangvisFerrisData,
-                "MAP": self.MAP,
-                "dialogKey": self.dialogKey,
-                "dialogData": self.dialogData,
-                "resultInfo": self.resultInfo,
-                "timeStamp": time.strftime(":%S", time.localtime())
-            })
+    def save_process(self):
+        linpg.saveConfig("Save/save.yaml", {
+            "type": "battle",
+            "chapterType": self.chapterType,
+            "chapterId": self.chapterId,
+            "collection_name": self.collection_name,
+            "griffin": self.griffinCharactersData,
+            "sangvisFerri": self.sangvisFerrisData,
+            "MAP": self.MAP,
+            "dialogKey": self.dialogKey,
+            "dialogData": self.dialogData,
+            "resultInfo": self.resultInfo,
+            "timeStamp": time.strftime(":%S", time.localtime())
+        })
     #从存档中加载游戏进程
     def load(self,screen):
         DataTmp = linpg.loadConfig("Save/save.yaml")
@@ -150,7 +151,6 @@ class BattleSystem(linpg.BattleSystemInterface):
         self.weatherController = None
         if DataTmp["weather"] != None:
             self.environment_sound.add("Assets/sound/environment/{}.ogg".format(DataTmp["weather"]))
-            self.environment_sound.set_volume(linpg.get_setting("Sound","sound_environment")/100.0)
             self.weatherController = linpg.WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
         #检测self.zoomIn参数是否越界
         if self.zoomIn < 200:
@@ -227,7 +227,8 @@ class BattleSystem(linpg.BattleSystemInterface):
         self.footstep_sounds = linpg.SoundManagement(0)
         for walkingSoundPath in glob.glob(r'Assets/sound/snow/*.wav'):
             self.footstep_sounds.add(walkingSoundPath)
-        self.footstep_sounds.set_volume(linpg.get_setting("Sound","sound_effects")/100)
+        #更新所有音效的音量
+        self.__update_sound_volume()
         #攻击的音效 -- 频道2
         self.attackingSounds = linpg.AttackingSoundManager(linpg.get_setting("Sound","sound_effects"),2)
         #切换回合时的UI
@@ -246,6 +247,11 @@ class BattleSystem(linpg.BattleSystemInterface):
                     temp_secode.set_alpha(a)
                     linpg.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
             linpg.display.flip(True)
+    #更新音量
+    def __update_sound_volume(self):
+        self.footstep_sounds.set_volume(linpg.get_setting("Sound","sound_effects")/100)
+        self.environment_sound.set_volume(linpg.get_setting("Sound","sound_environment")/100.0)
+        self.set_bgm_volume(linpg.get_setting("Sound","background_music")/100.0)
     #把战斗系统的画面画到screen上
     def display(self,screen):
         self._update_event()
@@ -271,6 +277,28 @@ class BattleSystem(linpg.BattleSystemInterface):
                     temp_secode.set_alpha(self.txt_alpha)
                     linpg.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
             self.txt_alpha -= 5
+        #展示暂停菜单
+        while self.show_pause_menu:
+            self._update_event()
+            result = self.pause_menu.display(screen,self.events)
+            if result == "Break":
+                linpg.setting.isDisplaying = False
+                self.show_pause_menu = False
+            elif result == "Save":
+                self.save_process()
+                print("游戏已经保存")
+            elif result == "Setting":
+                linpg.setting.isDisplaying = True
+            elif result == "BackToMainMenu":
+                linpg.setting.isDisplaying = False
+                linpg.unloadBackgroundMusic()
+                self.isPlaying = False
+                self.show_pause_menu = False
+            #如果播放玩菜单后发现有东西需要更新
+            if linpg.setting.display(screen,self.events):
+                self.__update_sound_volume()
+            linpg.display.flip()
+        self.pause_menu.screenshot = None
         #刷新画面
         linpg.display.flip()
     #对话模块
@@ -414,14 +442,10 @@ class BattleSystem(linpg.BattleSystemInterface):
                         self.screen_to_move_y = None
                         self.dialogData["dialogId"] += 1
                 #玩家输入按键判定
-                for event in self._get_event():
+                for event in self.events:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
-                            linpg.pauseMenu.display(screen)
-                            self.__save_data()
-                            if linpg.pauseMenu.ifBackToMainMenu == True:
-                                linpg.unloadBackgroundMusic()
-                                self.isPlaying = False
+                            self.show_pause_menu = True
                     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 or event.type == pygame.JOYBUTTONDOWN and linpg.controller.joystick.get_button(0) == 1:
                         goToNextSlide = False
                         if "dialoguebox_up" in currentDialog and self.dialoguebox_up.updated:
@@ -476,16 +500,15 @@ class BattleSystem(linpg.BattleSystemInterface):
     def __play_battle(self,screen):
         self.play_bgm()
         right_click = False
-        show_pauseMenu = False
         #获取鼠标坐标
         mouse_x,mouse_y = linpg.controller.get_pos()
         #攻击范围
         attacking_range = None
         skill_range = None
-        for event in self._get_event():
+        for event in self.events():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE and self.characterGetClick == None:
-                    show_pauseMenu = True
+                    self.show_pause_menu = True
                 if event.key == pygame.K_ESCAPE and self.isWaiting == True:
                     self.NotDrawRangeBlocks = True
                     self.characterGetClick = None
@@ -1106,7 +1129,7 @@ class BattleSystem(linpg.BattleSystemInterface):
             if self.ResultBoardUI == None:
                 self.resultInfo["total_time"] = time.localtime(time.time()-self.resultInfo["total_time"])
                 self.ResultBoardUI = ResultBoard(self.resultInfo,self.window_x,self.window_y)
-            for event in self._get_event():
+            for event in self.events():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         self.battleMode = False
@@ -1115,10 +1138,3 @@ class BattleSystem(linpg.BattleSystemInterface):
         #结束动画--失败
         elif self.whose_round == "result_fail":
             pass
-        #展示暂停菜单
-        if show_pauseMenu:
-            linpg.pauseMenu.display(screen)
-            self.__save_data()
-            if linpg.pauseMenu.ifBackToMainMenu == True:
-                linpg.unloadBackgroundMusic()
-                self.isPlaying = False
