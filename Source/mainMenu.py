@@ -258,7 +258,7 @@ class MainMenu:
         while self.isAlive:
             #背景视频
             self.videoCapture.display(screen)
-            if self.menu_type == 1 and linpg.ifHover(self.chapter_select[0]):
+            if self.menu_type == 1 and linpg.isHover(self.chapter_select[0]):
                 if self.cover_alpha < 255:
                     self.cover_alpha += 15
             elif self.cover_alpha >= 0:
@@ -284,63 +284,63 @@ class MainMenu:
                 #主菜单
                 if self.menu_type == 0:
                     #继续游戏
-                    if linpg.ifHover(self.main_menu_txt["menu_main"]["0_continue"]) and os.path.exists("Save/save.yaml"):
+                    if linpg.isHover(self.main_menu_txt["menu_main"]["0_continue"]) and os.path.exists("Save/save.yaml"):
                         self.__continue_scene(screen)
                     #选择章节
-                    elif linpg.ifHover(self.main_menu_txt["menu_main"]["1_chooseChapter"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_main"]["1_chooseChapter"]):
                         #加载菜单章节选择页面的文字
                         self.__reload_chapter_select_list(screen.get_size())
                         self.menu_type = 1
                     #dlc
-                    elif linpg.ifHover(self.main_menu_txt["menu_main"]["2_dlc"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_main"]["2_dlc"]):
                         pass
                     #创意工坊
-                    elif linpg.ifHover(self.main_menu_txt["menu_main"]["3_workshop"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_main"]["3_workshop"]):
                         self.menu_type = 2
                     #收集物
-                    elif linpg.ifHover(self.main_menu_txt["menu_main"]["4_collection"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_main"]["4_collection"]):
                         pass
                     #设置
-                    elif linpg.ifHover(self.main_menu_txt["menu_main"]["5_setting"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_main"]["5_setting"]):
                         linpg.setting.isDisplaying = True
                     #制作组
-                    elif linpg.ifHover(self.main_menu_txt["menu_main"]["6_developer_team"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_main"]["6_developer_team"]):
                         pass
                     #退出
-                    elif linpg.ifHover(self.main_menu_txt["menu_main"]["7_exit"]) and self.exit_confirm_menu.draw() == 0:
+                    elif linpg.isHover(self.main_menu_txt["menu_main"]["7_exit"]) and self.exit_confirm_menu.draw() == 0:
                         self.videoCapture.stop()
                         linpg.display.quit()
                 #选择主线章节
                 elif self.menu_type == 1:
-                    if linpg.ifHover(self.chapter_select[-1]):
+                    if linpg.isHover(self.chapter_select[-1]):
                         self.menu_type = 0
                     else:
                         for i in range(len(self.chapter_select)-1):
                             #章节选择
-                            if linpg.ifHover(self.chapter_select[i]):
+                            if linpg.isHover(self.chapter_select[i]):
                                 self.__load_scene("main_chapter",i+1,screen)
                                 break
                 #选择创意工坊选项
                 elif self.menu_type == 2:
-                    if linpg.ifHover(self.main_menu_txt["menu_workshop_choice"]["0_play"]):
+                    if linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["0_play"]):
                         self.__reload_workshop_files_list(screen.get_size(),False)
                         self.menu_type = 3
-                    elif linpg.ifHover(self.main_menu_txt["menu_workshop_choice"]["1_mapCreator"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["1_mapCreator"]):
                         self.__reload_workshop_files_list(screen.get_size(),True)
                         self.menu_type = 4
-                    elif linpg.ifHover(self.main_menu_txt["menu_workshop_choice"]["2_dialogCreator"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["2_dialogCreator"]):
                         self.__reload_workshop_files_list(screen.get_size(),True)
                         self.menu_type = 5
-                    elif linpg.ifHover(self.main_menu_txt["menu_workshop_choice"]["back"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["back"]):
                         self.menu_type = 0
                 #创意工坊-选择想要游玩的合集
                 elif self.menu_type == 3:
-                    if linpg.ifHover(self.workshop_files[-1]):
+                    if linpg.isHover(self.workshop_files[-1]):
                         self.menu_type = 2
                     else:
                         for i in range(len(self.workshop_files)-1):
                             #章节选择
-                            if linpg.ifHover(self.workshop_files[i]):
+                            if linpg.isHover(self.workshop_files[i]):
                                 self.current_selected_workshop_collection = self.workshop_files_text[i]
                                 self.__reload_chapter_select_list(screen.get_size(),"workshop")
                                 self.menu_type = 6
@@ -348,16 +348,16 @@ class MainMenu:
                 #创意工坊-选择想要编辑地图的合集
                 elif self.menu_type == 4:
                     #新建合集
-                    if linpg.ifHover(self.workshop_files[0]):
+                    if linpg.isHover(self.workshop_files[0]):
                         self.__create_new_file()
                         self.__reload_workshop_files_list(screen.get_size(),True)
                     #返回创意工坊选项菜单
-                    elif linpg.ifHover(self.workshop_files[-1]):
+                    elif linpg.isHover(self.workshop_files[-1]):
                         self.menu_type = 2
                     else:
                         for i in range(1,len(self.workshop_files)-1):
                             #章节选择
-                            if linpg.ifHover(self.workshop_files[i]):
+                            if linpg.isHover(self.workshop_files[i]):
                                 self.current_selected_workshop_collection = self.workshop_files_text[i-1]
                                 self.__reload_chapter_select_list(screen.get_size(),"workshop",True,"map")
                                 self.menu_type = 7
@@ -365,41 +365,41 @@ class MainMenu:
                 #创意工坊-选择想要编辑对话的合集
                 elif self.menu_type == 5:
                     #新建合集
-                    if linpg.ifHover(self.workshop_files[0]):
+                    if linpg.isHover(self.workshop_files[0]):
                         self.__create_new_file()
                         self.__reload_workshop_files_list(screen.get_size(),True)
                     #返回创意工坊选项菜单
-                    elif linpg.ifHover(self.workshop_files[-1]):
+                    elif linpg.isHover(self.workshop_files[-1]):
                         self.menu_type = 2
                     else:
                         for i in range(1,len(self.workshop_files)-1):
                             #章节选择
-                            if linpg.ifHover(self.workshop_files[i]):
+                            if linpg.isHover(self.workshop_files[i]):
                                 self.current_selected_workshop_collection = self.workshop_files_text[i-1]
                                 self.__reload_chapter_select_list(screen.get_size(),"workshop",True)
                                 self.menu_type = 8
                                 break
                 #创意工坊-选择当前合集想要游玩的关卡
                 elif self.menu_type == 6:
-                    if linpg.ifHover(self.chapter_select[-1]):
+                    if linpg.isHover(self.chapter_select[-1]):
                         self.menu_type = 3
                     else:
                         for i in range(len(self.chapter_select)-1):
                             #章节选择
-                            if linpg.ifHover(self.chapter_select[i]):
+                            if linpg.isHover(self.chapter_select[i]):
                                 self.__load_scene("workshop",i+1,screen)
                                 break
                 #创意工坊-选择当前合集想要编辑地图的关卡
                 elif self.menu_type == 7:
-                    if linpg.ifHover(self.chapter_select[0]):
+                    if linpg.isHover(self.chapter_select[0]):
                         self.__create_new_map()
                         self.__reload_chapter_select_list(screen.get_size(),"workshop",True,"map")
-                    elif linpg.ifHover(self.chapter_select[-1]):
+                    elif linpg.isHover(self.chapter_select[-1]):
                         self.menu_type = 4
                     else:
                         for i in range(1,len(self.chapter_select)-1):
                             #章节选择
-                            if linpg.ifHover(self.chapter_select[i]):
+                            if linpg.isHover(self.chapter_select[i]):
                                 self.videoCapture.stop()
                                 mapCreator("workshop",i,screen,self.current_selected_workshop_collection)
                                 self.videoCapture = self.videoCapture.clone()
@@ -407,15 +407,15 @@ class MainMenu:
                                 break
                 #创意工坊-选择当前合集想要编辑对话的关卡
                 elif self.menu_type == 8:
-                    if linpg.ifHover(self.chapter_select[0]):
+                    if linpg.isHover(self.chapter_select[0]):
                         self.__create_new_dialog()
                         self.__reload_chapter_select_list(screen.get_size(),"workshop",True)
-                    elif linpg.ifHover(self.chapter_select[-1]):
+                    elif linpg.isHover(self.chapter_select[-1]):
                         self.menu_type = 5
                     else:
                         for i in range(1,len(self.chapter_select)-1):
                             #章节选择
-                            if linpg.ifHover(self.chapter_select[i]):
+                            if linpg.isHover(self.chapter_select[i]):
                                 self.videoCapture.stop()
                                 dialogCreator("workshop",i,screen,"dialog_before_battle",self.current_selected_workshop_collection)
                                 self.videoCapture = self.videoCapture.clone()

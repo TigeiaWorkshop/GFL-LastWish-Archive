@@ -106,7 +106,7 @@ class BattleSystem(linpg.BattleSystemInterface):
         else:
             raise Exception('linpgEngine-Error: Cannot load the data from the "save.yaml" file because the file type does not match')
         #因为地图模块已被加载，只需加载图片即可
-        self.MAP.load_env_img((round(self.window_x/10),round(self.window_y/10)))
+        self.MAP.load_env_img((round(screen.get_width()/10),round(screen.get_height()/10)))
         self.loadFromSave = True
         self.initialize(screen)
     #加载游戏进程
@@ -505,7 +505,7 @@ class BattleSystem(linpg.BattleSystemInterface):
         #攻击范围
         attacking_range = None
         skill_range = None
-        for event in self.events():
+        for event in self.events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE and self.characterGetClick == None:
                     self.show_pause_menu = True
@@ -561,7 +561,7 @@ class BattleSystem(linpg.BattleSystemInterface):
             if right_click == True:
                 block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                 #如果点击了回合结束的按钮
-                if linpg.ifHover(self.end_round_button) and self.isWaiting == True:
+                if linpg.isHover(self.end_round_button) and self.isWaiting == True:
                     self.whose_round = "playerToSangvisFerris"
                     self.characterGetClick = None
                     self.NotDrawRangeBlocks = True
@@ -1113,13 +1113,13 @@ class BattleSystem(linpg.BattleSystemInterface):
             start_point = (self.window_x - lenTemp)/2
             for i in range(len(self.original_UI_img["supplyBoard"].items)):
                 start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*0.25
-                linpg.drawImg(self.original_UI_img["supplyBoard"].items[i],(start_point,(self.original_UI_img["supplyBoard"].height - self.original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,self.original_UI_img["supplyBoard"].y)
+                linpg.drawImg(self.original_UI_img["supplyBoard"].items[i],(start_point,(self.original_UI_img["supplyBoard"].get_height() - self.original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,self.original_UI_img["supplyBoard"].y)
                 start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*1.25
 
         if self.whose_round == "player":
             #加载结束回合的按钮
             self.end_round_button.draw(screen)
-            screen.blit(self.end_round_txt,(self.end_round_button.x+self.end_round_button.width*0.35,self.end_round_button.y+(self.end_round_button.height-self.FONTSIZE)/2.3))
+            screen.blit(self.end_round_txt,(self.end_round_button.x+self.end_round_button.get_width()*0.35,self.end_round_button.y+(self.end_round_button.get_height()-self.FONTSIZE)/2.3))
 
         #显示警告
         self.warnings_to_display.display(screen)
