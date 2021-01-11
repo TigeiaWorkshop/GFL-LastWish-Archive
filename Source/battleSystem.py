@@ -78,7 +78,7 @@ class BattleSystem(linpg.BattleSystemInterface):
             raise Exception('linpgEngine-Error: cannot find faction "{}"'.formate(faction))
     #储存章节信息
     def save_process(self):
-        linpg.saveConfig("Save/save.yaml", {
+        save_thread = linpg.SaveDataThread("Save/save.yaml", {
             "type": "battle",
             "chapterType": self.chapterType,
             "chapterId": self.chapterId,
@@ -91,6 +91,9 @@ class BattleSystem(linpg.BattleSystemInterface):
             "resultInfo": self.resultInfo,
             "timeStamp": time.strftime(":%S", time.localtime())
         })
+        save_thread.start()
+        save_thread.join()
+        del save_thread
     #从存档中加载游戏进程
     def load(self,screen):
         DataTmp = linpg.loadConfig("Save/save.yaml")
@@ -278,6 +281,8 @@ class BattleSystem(linpg.BattleSystemInterface):
                     linpg.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
             self.txt_alpha -= 5
         #展示暂停菜单
+        process_saved_text = linpg.ImageSurface(self.FONT.render(linpg.get_lang("ProcessSaved"),linpg.get_fontMode(),(255,255,255)),0,0)
+        process_saved_text.set_alpha(0)
         while self.show_pause_menu:
             self._update_event()
             result = self.pause_menu.display(screen,self.events)
@@ -286,7 +291,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                 self.show_pause_menu = False
             elif result == "Save":
                 self.save_process()
-                print("游戏已经保存")
+                process_saved_text.set_alpha(255)
             elif result == "Setting":
                 linpg.setting.isDisplaying = True
             elif result == "BackToMainMenu":
@@ -297,7 +302,10 @@ class BattleSystem(linpg.BattleSystemInterface):
             #如果播放玩菜单后发现有东西需要更新
             if linpg.setting.display(screen,self.events):
                 self.__update_sound_volume()
+            process_saved_text.drawOnTheCenterOf(screen)
+            process_saved_text.fade_out(5)
             linpg.display.flip()
+        del process_saved_text
         self.pause_menu.screenshot = None
         #刷新画面
         linpg.display.flip()

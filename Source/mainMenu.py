@@ -1,7 +1,7 @@
 # cython: language_level=3
 from .scene import *
 
-class MainMenu:
+class MainMenu(linpg.SystemObject):
     def __init__(self,screen):
         #初始化设置
         linpg.setting.init(screen.get_size())
@@ -258,6 +258,8 @@ class MainMenu:
         while self.isAlive:
             #背景视频
             self.videoCapture.display(screen)
+            #更新输入事件
+            self._update_event()
             if self.menu_type == 1 and linpg.isHover(self.chapter_select[0]):
                 if self.cover_alpha < 255:
                     self.cover_alpha += 15
@@ -269,17 +271,15 @@ class MainMenu:
                 linpg.drawImg(self.cover_img, (0,0),screen)
             #菜单选项
             self.__draw_buttons(screen)
-            #获取输入事件
-            events = linpg.get_pygame_events()
             #展示设置UI
-            if linpg.setting.display(screen,events):
+            if linpg.setting.display(screen,self.events):
                 self.click_button_sound.set_volume(linpg.get_setting("Sound","sound_effects")/100.0)
                 self.hover_on_button_sound.set_volume(linpg.get_setting("Sound","sound_effects")/100.0)
                 self.videoCapture.set_volume(linpg.get_setting("Sound","background_music")/100.0)
             #展示控制台
-            linpg.console.display(screen,events)
+            linpg.console.display(screen,self.events)
             #判断按键
-            if linpg.controller.get_event(events) == "comfirm" and not linpg.setting.isDisplaying:
+            if linpg.controller.get_event(self.events) == "comfirm" and not linpg.setting.isDisplaying:
                 self.click_button_sound.play()
                 #主菜单
                 if self.menu_type == 0:
