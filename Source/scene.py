@@ -57,6 +57,7 @@ def battle(chapterType,chapterId,screen,collection_name=None):
 def dialogCreator(chapterType,chapterId,screen,part,collection_name=None):
     #卸载音乐
     linpg.unloadBackgroundMusic()
+    linpg.display.set_caption(linpg.get_lang('GameTitle_DialogCreator'))
     #加载对话
     DIALOG = linpg.DialogSystemDev(chapterType,chapterId,part,collection_name)
     #主循环
@@ -65,18 +66,19 @@ def dialogCreator(chapterType,chapterId,screen,part,collection_name=None):
             linpg.display.flip()
         else:
             break
+    linpg.display.set_caption(linpg.get_lang('GameTitle'))
 
 #地图编辑器
 def mapCreator(chapterType,chapterId,screen,collection_name=None):
     #卸载音乐
     linpg.unloadBackgroundMusic()
-    MAPCREATOR = linpg.mapCreator(chapterType,chapterId,collection_name)
+    linpg.display.set_caption(linpg.get_lang('GameTitle_MapCreator'))
+    MAPCREATOR = MapCreator(chapterType,chapterId,collection_name)
     MAPCREATOR.initialize(screen)
     #战斗系统主要loop
     while MAPCREATOR.isPlaying == True:
         MAPCREATOR.display(screen)
-    #暂停声效 - 尤其是环境声
-    linpg.unloadBackgroundMusic()
+    linpg.display.set_caption(linpg.get_lang('GameTitle'))
 
 #blit载入页面
 def dispaly_loading_screen(screen,start,end,value):

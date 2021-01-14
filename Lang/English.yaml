@@ -23,7 +23,9 @@ DialogCreator:
   reload: Reload configuration file
   removeNpc: Remove this npc
   save: Save
-GameTitle: Girls' Frontline - Last wish
+GameTitle: Girls' Frontline - Last Wish
+GameTitle_DialogCreator: Girls' Frontline - Last Wish (Dialog Creator)
+GameTitle_MapCreator: Girls' Frontline - Last Wish (Map Creator)
 LoadingTxt:
   now_loading: Loading...
   now_loading_characters: Loading characters' data...

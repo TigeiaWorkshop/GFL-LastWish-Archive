@@ -1,5 +1,5 @@
 # cython: language_level=3
-from .skill import *
+from .mapCreator import *
 
 class BattleSystem(linpg.BattleSystemInterface):
     def __init__(self,chapterType=None,chapterId=None,collection_name=None):
@@ -114,8 +114,6 @@ class BattleSystem(linpg.BattleSystemInterface):
         self.initialize(screen)
     #加载游戏进程
     def initialize(self,screen):
-        #获取屏幕的尺寸
-        self.window_x,self.window_y = screen.get_size()
         #生成标准文字渲染器
         self.FONTSIZE = int(self.window_x/76)
         self.FONT = linpg.createFont(self.FONTSIZE)

@@ -24,6 +24,8 @@ DialogCreator:
   removeNpc: 移除该角色
   save: 保存
 GameTitle: 少女前线-遗愿
+GameTitle_DialogCreator: 少女前线-遗愿 (对话制作器)
+GameTitle_MapCreator: 少女前线-遗愿 (地图制作器)
 HealthyGamingAdvice:
 - 抵制不良游戏，拒绝盗版游戏。
 - 注意自我保护，谨防受骗上当。
