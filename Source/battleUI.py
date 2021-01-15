@@ -4,11 +4,11 @@ from .init import *
 #显示回合切换的UI
 class RoundSwitch:
     def __init__(self,window_x,window_y,battleUiTxt):
-        self.lineRedDown = linpg.loadImg("Assets/image/UI/lineRed.png",window_x,window_y/50)
+        self.lineRedDown = linpg.loadImg("Assets/image/UI/lineRed.png",(window_x,window_y/50))
         self.lineRedUp = pygame.transform.rotate(self.lineRedDown, 180)
-        self.lineGreenDown = linpg.loadImg("Assets/image/UI/lineGreen.png",window_x,window_y/50)
+        self.lineGreenDown = linpg.loadImg("Assets/image/UI/lineGreen.png",(window_x,window_y/50))
         self.lineGreenUp = pygame.transform.rotate(self.lineGreenDown, 180)
-        self.baseImg = linpg.loadImg("Assets/image/UI/roundSwitchBase.png",window_x,window_y/5)
+        self.baseImg = linpg.loadImg("Assets/image/UI/roundSwitchBase.png",(window_x,window_y/5))
         self.baseImg.set_alpha(0)
         self.x = -window_x
         self.y = int((window_y - self.baseImg.get_height())/2)
@@ -253,12 +253,12 @@ class SelectMenu:
 #角色信息版
 class CharacterInfoBoard:
     def __init__(self,window_x,window_y,text_size=20):
-        self.boardImg = linpg.loadImg("Assets/image/UI/score.png",window_x/5,window_y/6)
+        self.boardImg = linpg.loadImg("Assets/image/UI/score.png",(window_x/5,window_y/6))
         self.characterIconImages = {}
         all_icon_file_list = glob.glob(r'Assets/image/npc_icon/*.png')
         for i in range(len(all_icon_file_list)):
             img_name = all_icon_file_list[i].replace("Assets","").replace("image","").replace("npc_icon","").replace(".png","").replace("\\","").replace("/","")
-            self.characterIconImages[img_name] = linpg.loadImg(all_icon_file_list[i],window_y*0.08,window_y*0.08)
+            self.characterIconImages[img_name] = linpg.loadImg(all_icon_file_list[i],(window_y*0.08,window_y*0.08))
         del all_icon_file_list
         self.text_size = text_size
         self.informationBoard = None
@@ -310,7 +310,7 @@ class ResultBoard:
         self.x = int(window_x/9.6)
         self.y = int(window_x/9.6)
         self.txt_x = int(window_x/7.68)
-        self.boardImg = linpg.loadImg("Assets/image/UI/score.png",window_x/6,window_x/3)
+        self.boardImg = linpg.loadImg("Assets/image/UI/score.png",(window_x/6,window_x/3))
         self.total_kills = linpg.fontRender(resultTxt["total_kills"]+": "+str(finalResult["total_kills"]),"white",window_x/96)
         self.total_time = linpg.fontRender(resultTxt["total_time"]+": "+str(time.strftime('%M:%S',finalResult["total_time"])),"white",window_x/96)
         self.total_rounds_txt = linpg.fontRender(resultTxt["total_rounds"]+": "+str(finalResult["total_rounds"]),"white",window_x/96)

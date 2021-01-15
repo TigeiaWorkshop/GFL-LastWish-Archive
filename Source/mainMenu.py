@@ -51,7 +51,7 @@ class MainMenu(linpg.SystemObject):
         self.current_selected_workshop_collection = None
         self.exit_confirm_menu = linpg.Message(self.main_menu_txt["other"]["tip"],self.main_menu_txt["other"]["exit_confirm"],(self.main_menu_txt["other"]["confirm"],self.main_menu_txt["other"]["deny"]),True,return_button=1,escape_button=1)
         #关卡选择的封面
-        self.cover_img = linpg.loadImg("Assets/image/covers/chapter1.png",window_x,window_y)
+        self.cover_img = linpg.loadImg("Assets/image/covers/chapter1.png",screen.get_size())
         #音效
         self.click_button_sound = linpg.loadSound("Assets/sound/ui/main_menu_click_button.ogg",linpg.get_setting("Sound","sound_effects")/100.0)
         self.hover_on_button_sound = linpg.loadSound("Assets/sound/ui/main_menu_hover_on_button.ogg",linpg.get_setting("Sound","sound_effects")/100.0)

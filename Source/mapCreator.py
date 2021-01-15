@@ -38,30 +38,30 @@ class MapCreator(linpg.BattleSystemInterface):
         self.envImgDict={}
         for imgPath in glob.glob(r'Assets/image/environment/block/*.png'):
             img_name = imgPath.replace(".","").replace("Assets","").replace("block","").replace("image","").replace("environment","").replace("png","").replace("\\","").replace("/","")
-            self.envImgDict[img_name] = linpg.loadImg(imgPath,int(self.MAP.block_width/3))
+            self.envImgDict[img_name] = linpg.loadImg(imgPath,(self.MAP.block_width/3,None))
         #加载所有友方的角色的图片文件
         self.charactersImgDict={}
         for imgPath in glob.glob(r'Assets/image/character/*'):
             img_name = imgPath.replace(".","").replace("Assets","").replace("image","").replace("character","").replace("\\","").replace("/","")
-            img = linpg.loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",self.MAP.block_width*1.5)
+            img = linpg.loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",(self.MAP.block_width*1.5,None))
             pos = img.get_bounding_rect()
             self.charactersImgDict[img_name] = linpg.cropImg(img,(pos.left,pos.top),(pos.right,pos.top))
         #加载所有敌对角色的图片文件
         self.sangvisFerrisImgDict={}
         for imgPath in glob.glob(r'Assets/image/sangvisFerri/*'):
             img_name = imgPath.replace(".","").replace("Assets","").replace("image","").replace("sangvisFerri","").replace("\\","").replace("/","")
-            img = linpg.loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",self.MAP.block_width*1.5)
+            img = linpg.loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",(self.MAP.block_width*1.5,None))
             pos = img.get_bounding_rect()
             self.sangvisFerrisImgDict[img_name] = linpg.cropImg(img,(pos.left,pos.top),(pos.right,pos.top))
         #加载所有的装饰品
         self.decorationsImgDict = {}
         for imgPath in glob.glob(r'Assets/image/environment/decoration/*'):
             img_name = imgPath.replace(".png","").replace(".","").replace("Assets","").replace("image","").replace("environment","").replace("decoration","").replace("\\","").replace("/","")
-            self.decorationsImgDict[img_name] = linpg.loadImg(imgPath,self.MAP.block_width/5)
+            self.decorationsImgDict[img_name] = linpg.loadImg(imgPath,(self.MAP.block_width/5,None))
         #绿色方块/方块标准
-        self.greenBlock = linpg.loadImg("Assets/image/UI/range/green.png",int(self.MAP.block_width*0.8))
+        self.greenBlock = linpg.loadImg("Assets/image/UI/range/green.png",(self.MAP.block_width*0.8,None))
         self.greenBlock.set_alpha(150)
-        self.redBlock = linpg.loadImg("Assets/image/UI/range/red.png",int(self.MAP.block_width*0.8))
+        self.redBlock = linpg.loadImg("Assets/image/UI/range/red.png",(self.MAP.block_width*0.8,None))
         self.redBlock.set_alpha(150)
         self.deleteMode = False
         self.object_to_put_down = None

@@ -130,7 +130,7 @@ class BattleSystem(linpg.BattleSystemInterface):
         self.battleMode_info = DataTmp["battle_info"]
         self.dialog_during_battle = DataTmp["dialog_during_battle"]
         #正在加载的gif动态图标
-        nowLoadingIcon = linpg.loadRealGif("Assets/image/UI/sv98_walking.gif",(self.window_x*0.7,self.window_y*0.83),(self.window_x*0.003*15,self.window_x*0.003*21))
+        nowLoadingIcon = linpg.loadGif("Assets/image/UI/sv98_walking.gif",(self.window_x*0.7,self.window_y*0.83),(self.window_x*0.003*15,self.window_x*0.003*21))
         #渐入效果
         for i in range(1,255,2):
             self.infoToDisplayDuringLoading.display(screen,i)

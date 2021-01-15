@@ -4,8 +4,8 @@ from .dialogSystem import *
 #对话系统
 def dialog(chapterType,chapterId,screen,part,collection_name=None):
     #加载闸门动画的图片素材
-    LoadingImgAbove = linpg.loadImg("Assets/image/UI/LoadingImgAbove.png",screen.get_width()+8,screen.get_height()/1.7)
-    LoadingImgBelow = linpg.loadImg("Assets/image/UI/LoadingImgBelow.png",screen.get_width()+8,screen.get_height()/2.05)
+    LoadingImgAbove = linpg.loadImg("Assets/image/UI/LoadingImgAbove.png",(screen.get_width()+8,screen.get_height()/1.7))
+    LoadingImgBelow = linpg.loadImg("Assets/image/UI/LoadingImgBelow.png",(screen.get_width()+8,screen.get_height()/2.05))
     #开始加载-闸门关闭的效果
     for i in range(101):
         linpg.drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
