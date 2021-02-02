@@ -29,29 +29,11 @@ def dialog(chapterType,chapterId,screen,part,collection_name=None):
     DIALOG.ready()
     #DIALOG.auto_save = True
     #主循环
-    while True:
-        if not DIALOG.display(screen):
-            linpg.display.flip()
-        else:
-            break
+    while DIALOG.isPlaying:
+        DIALOG.display(screen)
+        linpg.display.flip()
     #返回玩家做出的选项
     return DIALOG.dialog_options
-
-#战斗系统
-def battle(chapterType,chapterId,screen,collection_name=None):
-    #卸载音乐
-    linpg.unloadBackgroundMusic()
-    BATTLE = BattleSystem(chapterType,chapterId,collection_name)
-    if chapterType != None:
-        BATTLE.initialize(screen)
-    else:
-        BATTLE.load(screen)
-    #战斗系统主要loop
-    while BATTLE.isPlaying == True:
-        BATTLE.display(screen)
-    #暂停声效 - 尤其是环境声
-    linpg.unloadBackgroundMusic()
-    return BATTLE.resultInfo
 
 #对话编辑器
 def dialogCreator(chapterType,chapterId,screen,part,collection_name=None):
@@ -61,12 +43,25 @@ def dialogCreator(chapterType,chapterId,screen,part,collection_name=None):
     #加载对话
     DIALOG = linpg.DialogSystemDev(chapterType,chapterId,part,collection_name)
     #主循环
-    while True:
-        if not DIALOG.display(screen):
-            linpg.display.flip()
-        else:
-            break
+    while DIALOG.isPlaying:
+        DIALOG.display(screen)
+        linpg.display.flip()
     linpg.display.set_caption(linpg.get_lang('GameTitle'))
+
+#战斗系统
+def battle(chapterType,chapterId,screen,collection_name=None):
+    #卸载音乐
+    linpg.unloadBackgroundMusic()
+    BATTLE = TurnBased_BattleSystem(chapterType,chapterId,collection_name)
+    if chapterType != None:
+        BATTLE.initialize(screen)
+    else:
+        BATTLE.load(screen)
+    #战斗系统主要loop
+    while BATTLE.isPlaying: BATTLE.display(screen)
+    #暂停声效 - 尤其是环境声
+    linpg.unloadBackgroundMusic()
+    return BATTLE.resultInfo
 
 #地图编辑器
 def mapCreator(chapterType,chapterId,screen,collection_name=None):
@@ -76,8 +71,7 @@ def mapCreator(chapterType,chapterId,screen,collection_name=None):
     MAPCREATOR = MapCreator(chapterType,chapterId,collection_name)
     MAPCREATOR.initialize(screen)
     #战斗系统主要loop
-    while MAPCREATOR.isPlaying == True:
-        MAPCREATOR.display(screen)
+    while MAPCREATOR.isPlaying: MAPCREATOR.display(screen)
     linpg.display.set_caption(linpg.get_lang('GameTitle'))
 
 #blit载入页面

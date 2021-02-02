@@ -1,7 +1,140 @@
 # cython: language_level=3
 from .mapCreator import *
 
-class BattleSystem(linpg.BattleSystemInterface):
+#生存类游戏战斗系统
+class Survival_BattleSystem(linpg.BattleSystemInterface):
+    def __init__(self):
+        """data"""
+        linpg.BattleSystemInterface.__init__(self,None,None,None)
+        #用于检测是否有方向键被按到的字典
+        self.__pressKeyToMoveMe = {"up":False,"down":False,"left":False,"right":False}
+        self.window_x,self.window_y = linpg.display.get_size()
+        self.DATABASE = linpg.loadCharacterData()
+        self.original_UI_img = {
+            "hp_empty" : linpg.loadImg("Assets/image/UI/hp_empty.png"),
+            "hp_red" : linpg.loadImg("Assets/image/UI/hp_red.png"),
+            "hp_green" : linpg.loadImg("Assets/image/UI/hp_green.png"),
+            "action_point_blue" : linpg.loadImg("Assets/image/UI/action_point.png"),
+            "bullets_number_brown" : linpg.loadImg("Assets/image/UI/bullets_number.png"),
+            "green" : linpg.loadImg("Assets/image/UI/range/green.png"),
+            "red" : linpg.loadImg("Assets/image/UI/range/red.png"),
+            "yellow": linpg.loadImg("Assets/image/UI/range/yellow.png"),
+            "blue": linpg.loadImg("Assets/image/UI/range/blue.png"),
+            "orange": linpg.loadImg("Assets/image/UI/range/orange.png"),
+            "eyeImg": linpg.ProgressBarSurface("Assets/image/UI/eye_red.png","Assets/image/UI/eye_orange.png",0,0,0,0),
+            "vigilanceImg": linpg.ProgressBarSurface("Assets/image/UI/vigilance_red.png","Assets/image/UI/vigilance_orange.png",0,0,0,0,"height"),
+            "supplyBoard":linpg.loadImage("Assets/image/UI/score.png",((self.window_x-self.window_x/3)/2,-self.window_y/12),self.window_x/3,self.window_y/12),
+        }
+        """init"""
+        shutil.copyfile("Data/chapter_map_example.yaml","Save/map1.yaml")
+        mapFileData = linpg.loadConfig("Save/map1.yaml")
+        SnowEnvImg = ["TileSnow01","TileSnow01ToStone01","TileSnow01ToStone02","TileSnow02","TileSnow02ToStone01","TileSnow02ToStone02"]
+        block_y = 50
+        block_x = 50
+        default_map = [[SnowEnvImg[linpg.randomInt(0,len(SnowEnvImg)-1)] for a in range(block_x)] for i in range(block_y)]
+        mapFileData["map"] = default_map
+        self.MAP = linpg.MapObject(mapFileData,round(linpg.display.get_width()/10),round(linpg.display.get_height()/10),True)
+        self.alliances = {"me": linpg.FriendlyCharacter(mapFileData["character"]["sv-98"],self.DATABASE["sv-98"])}
+        self.MAP.calculate_darkness(self.alliances)
+        self.pos_last = self.alliances["me"].get_pos()
+    def _check_key_down(self,event:object) -> None:
+        super()._check_key_down(event)
+        if event.key == pygame.K_w: self.__pressKeyToMoveMe["up"] = True
+        if event.key == pygame.K_s: self.__pressKeyToMoveMe["down"] = True
+        if event.key == pygame.K_a: self.__pressKeyToMoveMe["left"] = True
+        if event.key == pygame.K_d: self.__pressKeyToMoveMe["right"] = True
+    def _check_key_up(self,event:object) -> None:
+        super()._check_key_up(event)
+        if event.key == pygame.K_w: self.__pressKeyToMoveMe["up"] = False
+        if event.key == pygame.K_s: self.__pressKeyToMoveMe["down"] = False
+        if event.key == pygame.K_a: self.__pressKeyToMoveMe["left"] = False
+        if event.key == pygame.K_d: self.__pressKeyToMoveMe["right"] = False
+    def _check_if_move_screen(self) -> None:
+        super()._check_if_move_screen()
+        ifDisplayMove = False
+        if self.__pressKeyToMoveMe["up"]:
+            self.alliances["me"].y-=0.03
+            self.alliances["me"].x-=0.03
+            ifDisplayMove = True
+        if self.__pressKeyToMoveMe["down"]:
+            self.alliances["me"].y+=0.03
+            self.alliances["me"].x+=0.03
+            ifDisplayMove = True
+        if self.__pressKeyToMoveMe["left"]:
+            self.alliances["me"].x-=0.03
+            self.alliances["me"].y+=0.03
+            ifDisplayMove = True
+            self.alliances["me"].setFlip(True)
+        if self.__pressKeyToMoveMe["right"]:
+            self.alliances["me"].x+=0.03
+            self.alliances["me"].y-=0.03
+            ifDisplayMove = True
+            self.alliances["me"].setFlip(False)
+        if ifDisplayMove:
+            if self.alliances["me"].get_action() != "move":
+                self.alliances["me"].set_action("move")
+            if self.pos_last != (int(self.alliances["me"].x),int(self.alliances["me"].y)):
+                self.MAP.calculate_darkness(self.alliances)
+                self.pos_last = (int(self.alliances["me"].x),int(self.alliances["me"].y))
+        else:
+            if self.alliances["me"].get_action() != "wait":
+                self.alliances["me"].set_action("wait")
+    def _move_screen(self) -> None:
+        tempX,tempY = self.MAP.calPosInMap(self.alliances["me"].x,self.alliances["me"].y)
+        if tempX < self.window_x*0.3 and self.MAP.getPos_x()<=0:
+            self.screen_to_move_x = self.window_x*0.3-tempX
+        elif tempX > self.window_x*0.7 and self.MAP.getPos_x()>=self.MAP.column*self.MAP.block_width*-1:
+            self.screen_to_move_x = self.window_x*0.7-tempX
+
+        if tempY < self.window_y*0.3 and self.MAP.getPos_y()<=0:
+            self.screen_to_move_y = self.window_y*0.3-tempY
+        elif tempY > self.window_y*0.7 and self.MAP.getPos_y()>=self.MAP.row*self.MAP.block_height*-1:
+            self.screen_to_move_y = self.window_y*0.7-tempY
+        
+        #如果需要移动屏幕
+        if self.screen_to_move_x != None and self.screen_to_move_x != 0:
+            temp_value = int(self.MAP.getPos_x() + self.screen_to_move_x*0.2)
+            if self.window_x-self.MAP.surface_width<=temp_value<=0:
+                self.MAP.setPos_x(temp_value)
+                self.screen_to_move_x*=0.8
+                if int(self.screen_to_move_x) == 0: self.screen_to_move_x = 0
+            else:
+                self.screen_to_move_x = 0
+        if self.screen_to_move_y != None and self.screen_to_move_y !=0:
+            temp_value = int(self.MAP.getPos_y() + self.screen_to_move_y*0.2)
+            if self.window_y-self.MAP.surface_height<=temp_value<=0:
+                self.MAP.setPos_y(temp_value)
+                self.screen_to_move_y*=0.8
+                if int(self.screen_to_move_y) == 0: self.screen_to_move_y = 0
+            else:
+                self.screen_to_move_y = 0
+    #展示场景装饰物
+    def _display_decoration(self,screen:pygame.Surface) -> None: self.MAP.display_decoration(screen,self.alliances,{})
+    def display(self,screen):
+        self._update_event()
+        mouse_x,mouse_y = linpg.controller.get_pos()
+        for event in self.events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.isPlaying = False
+                self._check_key_down(event)
+            elif event.type == pygame.KEYUP:
+                self._check_key_up(event)
+        #其他移动的检查
+        self._check_right_click_move(mouse_x,mouse_y)
+        #画出地图
+        self._display_map(screen)
+        self.alliances["me"].draw(screen,self.MAP)
+        self.alliances["me"].drawUI(screen,self.original_UI_img,self.MAP)
+        #展示设施
+        self._display_decoration(screen)
+        pos_x,pos_y = self.MAP.calPosInMap(self.alliances["me"].x,self.alliances["me"].y)
+        pos_x += linpg.display.get_width()/20
+        pygame.draw.line(screen,linpg.findColorRGBA("red"),(pos_x,pos_y),(mouse_x,mouse_y),5)
+        linpg.display.flip()
+
+#回合制游戏战斗系统
+class TurnBased_BattleSystem(linpg.BattleSystemInterface):
     def __init__(self,chapterType=None,chapterId=None,collection_name=None):
         linpg.BattleSystemInterface.__init__(self,chapterType,chapterId,collection_name)
         #被选中的角色
@@ -114,6 +247,7 @@ class BattleSystem(linpg.BattleSystemInterface):
         self.initialize(screen)
     #加载游戏进程
     def initialize(self,screen):
+        self.window_x,self.window_y = screen.get_size()
         #生成标准文字渲染器
         self.FONTSIZE = int(self.window_x/76)
         self.FONT = linpg.createFont(self.FONTSIZE)
@@ -205,8 +339,8 @@ class BattleSystem(linpg.BattleSystemInterface):
             "yellow": linpg.loadImg("Assets/image/UI/range/yellow.png"),
             "blue": linpg.loadImg("Assets/image/UI/range/blue.png"),
             "orange": linpg.loadImg("Assets/image/UI/range/orange.png"),
-            "eye_orange": linpg.loadImg("Assets/image/UI/eye_orange.png"),
-            "eye_red": linpg.loadImg("Assets/image/UI/eye_red.png"),
+            "eyeImg": linpg.ProgressBarSurface("Assets/image/UI/eye_red.png","Assets/image/UI/eye_orange.png",0,0,0,0),
+            "vigilanceImg": linpg.ProgressBarSurface("Assets/image/UI/vigilance_red.png","Assets/image/UI/vigilance_orange.png",0,0,0,0,"height"),
             "supplyBoard":linpg.loadImage("Assets/image/UI/score.png",((self.window_x-self.window_x/3)/2,-self.window_y/12),self.window_x/3,self.window_y/12),
         }
         #UI - 变形后
@@ -547,7 +681,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                 self.zoomIn -= 5
             elif self.zoomIntoBe > self.zoomIn:
                 self.zoomIn += 5
-            self.MAP.changePerBlockSize(self.window_x/self.MAP.column*self.zoomIn/100,self.window_y/self.MAP.row*self.zoomIn/100,self.window_x,self.window_y)
+            self.MAP.changePerBlockSize(self.window_x/self.MAP.column*self.zoomIn/100,self.window_y/self.MAP.row*self.zoomIn/100)
             #根据block尺寸重新加载对应尺寸的UI
             for key in self.UI_img:
                 self.UI_img[key] = linpg.resizeImg(self.original_UI_img[key], (self.MAP.block_width*0.8, None))
@@ -578,7 +712,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                 elif len(self.the_route) != 0 and block_get_click != None and (block_get_click["x"], block_get_click["y"]) in self.the_route and self.NotDrawRangeBlocks==False:
                     self.isWaiting = False
                     self.NotDrawRangeBlocks = True
-                    self.characterInControl.reduce_action_point(len(self.the_route)*2)
+                    self.characterInControl.try_reduce_action_point(len(self.the_route)*2)
                     self.characterInControl.move_follow(self.the_route)
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 elif self.NotDrawRangeBlocks == "SelectMenu" and self.buttonGetHover == "attack":
@@ -623,7 +757,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                         self.warnings_to_display.add("no_enough_ap_to_interact")
                 #攻击判定
                 elif self.action_choice == "attack" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and len(self.enemiesGetAttack)>0:
-                    self.characterInControl.reduce_action_point(5)
+                    self.characterInControl.try_reduce_action_point(5)
                     self.characterInControl.noticed()
                     self.characterInControl.set_action("attack",False)
                     self.isWaiting = False
@@ -637,7 +771,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                     elif self.skill_target in self.sangvisFerrisData:
                         self.characterInControl.noticed()
                         self.characterInControl.setFlipBasedPos(self.sangvisFerrisData[self.skill_target])
-                    self.characterInControl.reduce_action_point(8)
+                    self.characterInControl.try_reduce_action_point(8)
                     self.characterInControl.playSound("skill")
                     self.characterInControl.set_action("skill",False)
                     self.isWaiting = False
@@ -645,7 +779,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                     skill_range = None
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 elif self.action_choice == "rescue" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.friendGetHelp != None:
-                    self.characterInControl.reduce_action_point(8)
+                    self.characterInControl.try_reduce_action_point(8)
                     self.characterInControl.noticed()
                     self.griffinCharactersData[self.friendGetHelp].heal(1)
                     self.characterGetClick = None
@@ -655,7 +789,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                     attacking_range = None
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 elif self.action_choice == "interact" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.decorationGetClick != None:
-                    self.characterInControl.reduce_action_point(2)
+                    self.characterInControl.try_reduce_action_point(2)
                     self.MAP.interact_decoration_with_id(self.decorationGetClick)
                     self._calculate_darkness()
                     self.characterGetClick = None
@@ -812,7 +946,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                     else:
                         self.skill_target = skill(self.characterGetClick,{"x":None,"y":None},None,self.sangvisFerrisData,self.griffinCharactersData)
                         if self.skill_target != None:
-                            self.characterInControl.reduce_action_point(8)
+                            self.characterInControl.try_reduce_action_point(8)
                             self.isWaiting = False
                             self.NotDrawRangeBlocks = True
                 #换弹
@@ -824,7 +958,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                         if self.characterInControl.get_imgId("reload") != None:
                             self.characterInControl.set_action("reload",False)
                         #扣去对应的行动值
-                        self.characterInControl.reduce_action_point(5)
+                        self.characterInControl.try_reduce_action_point(5)
                         #当所剩子弹足够换弹的时候
                         if bullets_to_add <= self.characterInControl.bullets_carried:
                             self.characterInControl.bullets_carried -= bullets_to_add
@@ -876,6 +1010,7 @@ class BattleSystem(linpg.BattleSystemInterface):
                             for key in self.sangvisFerrisData:
                                 if self.sangvisFerrisData[key].isInAttackRange(self.characterInControl,self.MAP):
                                     self.characterInControl.noticed()
+                                    self.sangvisFerrisData[key].alert()
                                     break
                             self._calculate_darkness()
                     else:

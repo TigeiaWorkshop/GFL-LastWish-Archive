@@ -66,17 +66,17 @@ class MapCreator(linpg.BattleSystemInterface):
         self.deleteMode = False
         self.object_to_put_down = None
         #加载容器图片
-        self.UIContainer = linpg.loadDynamicImage("Assets/image/UI/container.png",(0,self.window_y),(0,self.window_y*0.75),(0,self.window_y*0.25/10),int(self.window_x*0.8), int(self.window_y*0.25))
-        self.UIContainerButton = linpg.loadImage("Assets/image/UI/container_button.png",(self.window_x*0.33,-self.window_y*0.05),int(self.window_x*0.14),int(self.window_y*0.06))
-        widthTmp = int(self.window_x*0.2)
-        self.UIContainerRight = linpg.loadDynamicImage("Assets/image/UI/container.png",(self.window_x*0.8+widthTmp,0),(self.window_x*0.8,0),(widthTmp/10,0),widthTmp,self.window_y)
-        self.UIContainerRightButton = linpg.loadImage("Assets/image/UI/container_button.png",(-self.window_x*0.03,self.window_y*0.4),int(self.window_x*0.04),int(self.window_y*0.2))
+        self.UIContainer = linpg.loadDynamicImage("Assets/image/UI/container.png",(0,screen.get_height()),(0,screen.get_height()*0.75),(0,screen.get_height()*0.25/10),int(screen.get_width()*0.8), int(screen.get_height()*0.25))
+        self.UIContainerButton = linpg.loadImage("Assets/image/UI/container_button.png",(screen.get_width()*0.33,-screen.get_height()*0.05),int(screen.get_width()*0.14),int(screen.get_height()*0.06))
+        widthTmp = int(screen.get_width()*0.2)
+        self.UIContainerRight = linpg.loadDynamicImage("Assets/image/UI/container.png",(screen.get_width()*0.8+widthTmp,0),(screen.get_width()*0.8,0),(widthTmp/10,0),widthTmp,screen.get_height())
+        self.UIContainerRightButton = linpg.loadImage("Assets/image/UI/container_button.png",(-screen.get_width()*0.03,screen.get_height()*0.4),int(screen.get_width()*0.04),int(screen.get_height()*0.2))
         self.UIContainerRight.rotate(90)
         self.UIContainerRightButton.rotate(90)
         #UI按钮
         self.UIButton = {}
         UI_x = self.MAP.block_width*0.5
-        UI_y = int(self.window_y*0.02)
+        UI_y = int(screen.get_height()*0.02)
         UI_height = int(self.MAP.block_width*0.3)
         self.UIButton["save"] = linpg.ButtonWithFadeInOut("Assets/image/UI/menu.png",linpg.get_lang("MapCreator","save"),"black",100,UI_x,UI_y,UI_height)
         UI_x += self.UIButton["save"].get_width()+UI_height
@@ -109,9 +109,9 @@ class MapCreator(linpg.BattleSystemInterface):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 #上下滚轮-放大和缩小地图
                 if linpg.isHover(self.UIContainerRight) and event.button == 4 and self.UI_local_y<0:
-                    self.UI_local_y += self.window_y*0.1
+                    self.UI_local_y += screen.get_height()*0.1
                 elif linpg.isHover(self.UIContainerRight) and event.button == 5:
-                    self.UI_local_y -= self.window_y*0.1
+                    self.UI_local_y -= screen.get_height()*0.1
                 elif linpg.isHover(self.UIContainerRightButton,None,self.UIContainerRight.x):
                     self.UIContainerRight.switch()
                     self.UIContainerRightButton.flip(True,False)
@@ -121,9 +121,9 @@ class MapCreator(linpg.BattleSystemInterface):
                 elif linpg.isHover(self.UIContainer):
                     #上下滚轮-放大和缩小地图
                     if event.button == 4 and self.UI_local_x<0:
-                        self.UI_local_x += self.window_x*0.05
+                        self.UI_local_x += screen.get_width()*0.05
                     elif event.button == 5:
-                        self.UI_local_x -= self.window_x*0.05
+                        self.UI_local_x -= screen.get_width()*0.05
                 elif self.deleteMode == True and block_get_click != None:
                     #查看当前位置是否有装饰物
                     decoration = self.MAP.find_decoration_on((block_get_click["x"],block_get_click["y"]))
@@ -286,7 +286,7 @@ class MapCreator(linpg.BattleSystemInterface):
         i=0
         for img_name in self.envImgDict:
             posY = self.UIContainerRight.y+self.MAP.block_width*5*int(i/4)+self.UI_local_y
-            if self.window_y*0.05<posY<self.window_y*0.9:
+            if screen.get_height()*0.05<posY<screen.get_height()*0.9:
                 posX = self.UIContainerRight.x+self.MAP.block_width/6+self.MAP.block_width/2.3*(i%4)
                 linpg.drawImg(self.envImgDict[img_name],(posX,posY),screen)
                 if pygame.mouse.get_pressed()[0] and linpg.isHover(self.envImgDict[img_name],(posX,posY)):
@@ -294,7 +294,7 @@ class MapCreator(linpg.BattleSystemInterface):
             i+=1
         for img_name in self.decorationsImgDict:
             posY = self.UIContainerRight.y+self.MAP.block_width*5*int(i/4)+self.UI_local_y
-            if self.window_y*0.05<posY<self.window_y*0.9:
+            if screen.get_height()*0.05<posY<screen.get_height()*0.9:
                 posX = self.UIContainerRight.x+self.MAP.block_width/6+self.MAP.block_width/2.3*(i%4)
                 linpg.drawImg(self.decorationsImgDict[img_name],(posX,posY),screen)
                 if pygame.mouse.get_pressed()[0] and linpg.isHover(self.decorationsImgDict[img_name],(posX,posY)):
@@ -314,15 +314,15 @@ class MapCreator(linpg.BattleSystemInterface):
         
         #显示即将被编辑的数据
         if self.data_to_edit != None:
-            linpg.drawImg(linpg.fontRender("action points: "+str(self.data_to_edit.max_action_point),"black",15),(self.window_x*0.91,self.window_y*0.8),screen)
-            linpg.drawImg(linpg.fontRender("attack range: "+str(self.data_to_edit.attack_range),"black",15),(self.window_x*0.91,self.window_y*0.8+20),screen)
-            linpg.drawImg(linpg.fontRender("current bullets: "+str(self.data_to_edit.current_bullets),"black",15),(self.window_x*0.91,self.window_y*0.8+20*2),screen)
-            linpg.drawImg(linpg.fontRender("magazine capacity: "+str(self.data_to_edit.magazine_capacity),"black",15),(self.window_x*0.91,self.window_y*0.8+20*3),screen)
-            linpg.drawImg(linpg.fontRender("max hp: "+str(self.data_to_edit.max_hp),"black",15),(self.window_x*0.91,self.window_y*0.8+20*4),screen)
-            linpg.drawImg(linpg.fontRender("effective range: "+str(self.data_to_edit.effective_range),"black",15),(self.window_x*0.91,self.window_y*0.8+20*5),screen)
-            linpg.drawImg(linpg.fontRender("max damage: "+str(self.data_to_edit.max_damage),"black",15),(self.window_x*0.91,self.window_y*0.8+20*6),screen)
-            linpg.drawImg(linpg.fontRender("min damage: "+str(self.data_to_edit.min_damage),"black",15),(self.window_x*0.91,self.window_y*0.8+20*7),screen)
-            linpg.drawImg(linpg.fontRender("x: "+str(self.data_to_edit.x),"black",15),(self.window_x*0.91,self.window_y*0.8+20*8),screen)
-            linpg.drawImg(linpg.fontRender("y: "+str(self.data_to_edit.y),"black",15),(self.window_x*0.91,self.window_y*0.8+20*9),screen)
+            linpg.drawImg(linpg.fontRender("action points: "+str(self.data_to_edit.max_action_point),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8),screen)
+            linpg.drawImg(linpg.fontRender("attack range: "+str(self.data_to_edit.attack_range),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8+20),screen)
+            linpg.drawImg(linpg.fontRender("current bullets: "+str(self.data_to_edit.current_bullets),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8+20*2),screen)
+            linpg.drawImg(linpg.fontRender("magazine capacity: "+str(self.data_to_edit.magazine_capacity),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8+20*3),screen)
+            linpg.drawImg(linpg.fontRender("max hp: "+str(self.data_to_edit.max_hp),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8+20*4),screen)
+            linpg.drawImg(linpg.fontRender("effective range: "+str(self.data_to_edit.effective_range),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8+20*5),screen)
+            linpg.drawImg(linpg.fontRender("max damage: "+str(self.data_to_edit.max_damage),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8+20*6),screen)
+            linpg.drawImg(linpg.fontRender("min damage: "+str(self.data_to_edit.min_damage),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8+20*7),screen)
+            linpg.drawImg(linpg.fontRender("x: "+str(self.data_to_edit.x),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8+20*8),screen)
+            linpg.drawImg(linpg.fontRender("y: "+str(self.data_to_edit.y),"black",15),(screen.get_width()*0.91,screen.get_height()*0.8+20*9),screen)
 
         linpg.display.flip()
