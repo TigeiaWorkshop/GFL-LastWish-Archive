@@ -636,6 +636,36 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     self.sangvisFerrisData[enemies].drawUI(screen,self.original_UI_img,self.MAP)
             if self.txt_alpha == 0:
                 self.battleMode = True
+    #切换回合
+    def switch_round(self,screen):
+        if self.whose_round == "playerToSangvisFerris" or self.whose_round == "sangvisFerrisToPlayer":
+            if self.RoundSwitchUI.display(screen,self.whose_round,self.resultInfo["total_rounds"]):
+                if self.whose_round == "playerToSangvisFerris":
+                    self.enemies_in_control_id = 0
+                    self.sangvisFerris_name_list = []
+                    any_is_alert = False
+                    for every_chara in self.sangvisFerrisData:
+                        if self.sangvisFerrisData[every_chara].current_hp > 0:
+                            self.sangvisFerris_name_list.append(every_chara)
+                            if self.sangvisFerrisData[every_chara].is_alert: any_is_alert = True
+                    #如果有一个铁血角色已经处于完全察觉的状态，则让所有铁血角色进入警觉状态
+                    if any_is_alert:
+                        for every_chara in self.sangvisFerrisData:
+                            self.sangvisFerrisData[every_chara].alert(100)
+                    #让倒地的角色更接近死亡
+                    for every_chara in self.griffinCharactersData:
+                        if self.griffinCharactersData[every_chara].dying != False:
+                            self.griffinCharactersData[every_chara].dying -= 1
+                    #现在是铁血的回合！
+                    self.whose_round = "sangvisFerris"
+                elif self.whose_round == "sangvisFerrisToPlayer":
+                    characters_detect_this_round = {}
+                    for key in self.griffinCharactersData:
+                        self.griffinCharactersData[key].reset_action_point()
+                        if not self.griffinCharactersData[key].detection:
+                            characters_detect_this_round[key] = [self.griffinCharactersData[key].x,self.griffinCharactersData[key].y]
+                    #到你了，Good luck, you need it!
+                    self.whose_round = "player"
     #战斗模块
     def __play_battle(self,screen):
         self.play_bgm()
@@ -1209,23 +1239,9 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         #加载雪花
         self._display_weather(screen)
         
-        #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓中间检测区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓#
-        if self.whose_round == "playerToSangvisFerris" or self.whose_round == "sangvisFerrisToPlayer":
-            if self.RoundSwitchUI.display(screen,self.whose_round,self.resultInfo["total_rounds"]) == True:
-                if self.whose_round == "playerToSangvisFerris":
-                    self.enemies_in_control_id = 0
-                    self.sangvisFerris_name_list = [every_chara for every_chara in self.sangvisFerrisData if self.sangvisFerrisData[every_chara].current_hp > 0]
-                    for every_chara in self.griffinCharactersData:
-                        if self.griffinCharactersData[every_chara].dying != False:
-                            self.griffinCharactersData[every_chara].dying -= 1
-                    self.whose_round = "sangvisFerris"
-                elif self.whose_round == "sangvisFerrisToPlayer":
-                    characters_detect_this_round = {}
-                    for key in self.griffinCharactersData:
-                        self.griffinCharactersData[key].reset_action_point()
-                        if self.griffinCharactersData[key].detection == False:
-                            characters_detect_this_round[key] = [self.griffinCharactersData[key].x,self.griffinCharactersData[key].y]
-                    self.whose_round = "player"
+        #检测回合是否结束
+        self.switch_round(screen)
+
         #检测所有敌人是否都已经被消灭
         if len(self.sangvisFerrisData) == 0 and self.whose_round != "result_win":
             self.characterGetClick = None

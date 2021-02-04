@@ -35,29 +35,28 @@ class MapCreator(linpg.BattleSystemInterface):
         self._create_map(mapFileData,False)
         del mapFileData
         #加载背景图片
-        self.envImgDict={}
+        self.envImgDict = {}
         for imgPath in glob.glob(r'Assets/image/environment/block/*.png'):
-            img_name = imgPath.replace(".","").replace("Assets","").replace("block","").replace("image","").replace("environment","").replace("png","").replace("\\","").replace("/","")
-            self.envImgDict[img_name] = linpg.loadImg(imgPath,(self.MAP.block_width/3,None))
-        #加载所有友方的角色的图片文件
-        self.charactersImgDict={}
-        for imgPath in glob.glob(r'Assets/image/character/*'):
-            img_name = imgPath.replace(".","").replace("Assets","").replace("image","").replace("character","").replace("\\","").replace("/","")
-            img = linpg.loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",(self.MAP.block_width*1.5,None))
-            pos = img.get_bounding_rect()
-            self.charactersImgDict[img_name] = linpg.cropImg(img,(pos.left,pos.top),(pos.right,pos.top))
-        #加载所有敌对角色的图片文件
-        self.sangvisFerrisImgDict={}
-        for imgPath in glob.glob(r'Assets/image/sangvisFerri/*'):
-            img_name = imgPath.replace(".","").replace("Assets","").replace("image","").replace("sangvisFerri","").replace("\\","").replace("/","")
-            img = linpg.loadImg(imgPath+"/wait/"+img_name+"_wait_0.png",(self.MAP.block_width*1.5,None))
-            pos = img.get_bounding_rect()
-            self.sangvisFerrisImgDict[img_name] = linpg.cropImg(img,(pos.left,pos.top),(pos.right,pos.top))
+            self.envImgDict[os.path.basename(imgPath).replace(".png","")] = linpg.loadImg(imgPath,(self.MAP.block_width/3,None))
+        print(self.envImgDict)
         #加载所有的装饰品
         self.decorationsImgDict = {}
         for imgPath in glob.glob(r'Assets/image/environment/decoration/*'):
-            img_name = imgPath.replace(".png","").replace(".","").replace("Assets","").replace("image","").replace("environment","").replace("decoration","").replace("\\","").replace("/","")
-            self.decorationsImgDict[img_name] = linpg.loadImg(imgPath,(self.MAP.block_width/5,None))
+            self.decorationsImgDict[os.path.basename(imgPath).replace(".png","")] = linpg.loadImg(imgPath,(self.MAP.block_width/5,None))
+        #加载所有友方的角色的图片文件
+        self.charactersImgDict = {}
+        for imgPath in glob.glob(r'Assets/image/character/*'):
+            img_name = os.path.basename(imgPath).replace(".png","")
+            img = linpg.loadImg("{0}/wait/{1}_wait_0.png".format(imgPath,img_name),(self.MAP.block_width*1.5,None))
+            pos = img.get_bounding_rect()
+            self.charactersImgDict[img_name] = linpg.cropImg(img,(pos.left,pos.top),(pos.right,pos.top))
+        #加载所有敌对角色的图片文件
+        self.sangvisFerrisImgDict = {}
+        for imgPath in glob.glob(r'Assets/image/sangvisFerri/*'):
+            img_name = os.path.basename(imgPath).replace(".png","")
+            img = linpg.loadImg("{0}/wait/{1}_wait_0.png".format(imgPath,img_name),(self.MAP.block_width*1.5,None))
+            pos = img.get_bounding_rect()
+            self.sangvisFerrisImgDict[img_name] = linpg.cropImg(img,(pos.left,pos.top),(pos.right,pos.top))
         #绿色方块/方块标准
         self.greenBlock = linpg.loadImg("Assets/image/UI/range/green.png",(self.MAP.block_width*0.8,None))
         self.greenBlock.set_alpha(150)
@@ -66,11 +65,35 @@ class MapCreator(linpg.BattleSystemInterface):
         self.deleteMode = False
         self.object_to_put_down = None
         #加载容器图片
-        self.UIContainer = linpg.loadDynamicImage("Assets/image/UI/container.png",(0,screen.get_height()),(0,screen.get_height()*0.75),(0,screen.get_height()*0.25/10),int(screen.get_width()*0.8), int(screen.get_height()*0.25))
-        self.UIContainerButton = linpg.loadImage("Assets/image/UI/container_button.png",(screen.get_width()*0.33,-screen.get_height()*0.05),int(screen.get_width()*0.14),int(screen.get_height()*0.06))
+        self.UIContainer = linpg.loadDynamicImage(
+            "Assets/image/UI/container.png",
+            (0,screen.get_height()),
+            (0,screen.get_height()*0.75),
+            (0,screen.get_height()*0.25/10),
+            int(screen.get_width()*0.8),
+            int(screen.get_height()*0.25)
+            )
+        self.UIContainerButton = linpg.loadImage(
+            "Assets/image/UI/container_button.png",
+            (screen.get_width()*0.33,-screen.get_height()*0.05),
+            int(screen.get_width()*0.14),
+            int(screen.get_height()*0.06)
+            )
         widthTmp = int(screen.get_width()*0.2)
-        self.UIContainerRight = linpg.loadDynamicImage("Assets/image/UI/container.png",(screen.get_width()*0.8+widthTmp,0),(screen.get_width()*0.8,0),(widthTmp/10,0),widthTmp,screen.get_height())
-        self.UIContainerRightButton = linpg.loadImage("Assets/image/UI/container_button.png",(-screen.get_width()*0.03,screen.get_height()*0.4),int(screen.get_width()*0.04),int(screen.get_height()*0.2))
+        self.UIContainerRight = linpg.loadDynamicImage(
+            "Assets/image/UI/container.png",
+            (screen.get_width()*0.8+widthTmp,0),
+            (screen.get_width()*0.8,0),
+            (widthTmp/10,0),
+            widthTmp,
+            screen.get_height()
+            )
+        self.UIContainerRightButton = linpg.loadImage(
+            "Assets/image/UI/container_button.png",
+            (-screen.get_width()*0.03,screen.get_height()*0.4),
+            int(screen.get_width()*0.04),
+            int(screen.get_height()*0.2)
+            )
         self.UIContainerRight.rotate(90)
         self.UIContainerRightButton.rotate(90)
         #UI按钮
@@ -78,13 +101,29 @@ class MapCreator(linpg.BattleSystemInterface):
         UI_x = self.MAP.block_width*0.5
         UI_y = int(screen.get_height()*0.02)
         UI_height = int(self.MAP.block_width*0.3)
-        self.UIButton["save"] = linpg.ButtonWithFadeInOut("Assets/image/UI/menu.png",linpg.get_lang("MapCreator","save"),"black",100,UI_x,UI_y,UI_height)
+        self.UIButton["save"] = linpg.ButtonWithFadeInOut(
+            "Assets/image/UI/menu.png",
+            linpg.get_lang("MapCreator","save"),
+            "black",100,UI_x,UI_y,UI_height
+            )
         UI_x += self.UIButton["save"].get_width()+UI_height
-        self.UIButton["back"] = linpg.ButtonWithFadeInOut("Assets/image/UI/menu.png",linpg.get_lang("MapCreator","back"),"black",100,UI_x,UI_y,UI_height)
+        self.UIButton["back"] = linpg.ButtonWithFadeInOut(
+            "Assets/image/UI/menu.png",
+            linpg.get_lang("MapCreator","back"),
+            "black",100,UI_x,UI_y,UI_height
+            )
         UI_x += self.UIButton["back"].get_width()+UI_height
-        self.UIButton["delete"] = linpg.ButtonWithFadeInOut("Assets/image/UI/menu.png",linpg.get_lang("MapCreator","delete"),"black",100,UI_x,UI_y,UI_height)
+        self.UIButton["delete"] = linpg.ButtonWithFadeInOut(
+            "Assets/image/UI/menu.png",
+            linpg.get_lang("MapCreator","delete"),
+            "black",100,UI_x,UI_y,UI_height
+            )
         UI_x += self.UIButton["delete"].get_width()+UI_height
-        self.UIButton["reload"] = linpg.ButtonWithFadeInOut("Assets/image/UI/menu.png",linpg.get_lang("MapCreator","reload"),"black",100,UI_x,UI_y,UI_height)
+        self.UIButton["reload"] = linpg.ButtonWithFadeInOut(
+            "Assets/image/UI/menu.png",
+            linpg.get_lang("MapCreator","reload"),
+            "black",100,UI_x,UI_y,UI_height
+            )
         #数据控制器
         self.data_to_edit = None
         #其他函数
