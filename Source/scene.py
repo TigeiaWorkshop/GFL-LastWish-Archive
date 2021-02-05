@@ -29,7 +29,7 @@ def dialog(chapterType,chapterId,screen,part,collection_name=None):
     DIALOG.ready()
     #DIALOG.auto_save = True
     #主循环
-    while DIALOG.isPlaying:
+    while DIALOG.is_playing():
         DIALOG.display(screen)
         linpg.display.flip()
     #返回玩家做出的选项
@@ -39,14 +39,14 @@ def dialog(chapterType,chapterId,screen,part,collection_name=None):
 def dialogCreator(chapterType,chapterId,screen,part,collection_name=None):
     #卸载音乐
     linpg.unloadBackgroundMusic()
-    linpg.display.set_caption(linpg.get_lang('GameTitle_DialogCreator'))
+    linpg.display.set_caption("{0} ({1})".format(linpg.get_lang('General','game_title'),linpg.get_lang('General','dialog_creator')))
     #加载对话
     DIALOG = linpg.DialogSystemDev(chapterType,chapterId,part,collection_name)
     #主循环
-    while DIALOG.isPlaying:
+    while DIALOG.is_playing():
         DIALOG.display(screen)
         linpg.display.flip()
-    linpg.display.set_caption(linpg.get_lang('GameTitle'))
+    linpg.display.set_caption(linpg.get_lang('General','game_title'))
 
 #战斗系统
 def battle(chapterType,chapterId,screen,collection_name=None):
@@ -58,7 +58,7 @@ def battle(chapterType,chapterId,screen,collection_name=None):
     else:
         BATTLE.load(screen)
     #战斗系统主要loop
-    while BATTLE.isPlaying: BATTLE.display(screen)
+    while BATTLE.is_playing(): BATTLE.display(screen)
     #暂停声效 - 尤其是环境声
     linpg.unloadBackgroundMusic()
     return BATTLE.resultInfo
@@ -67,12 +67,12 @@ def battle(chapterType,chapterId,screen,collection_name=None):
 def mapCreator(chapterType,chapterId,screen,collection_name=None):
     #卸载音乐
     linpg.unloadBackgroundMusic()
-    linpg.display.set_caption(linpg.get_lang('GameTitle_MapCreator'))
+    linpg.display.set_caption("{0} ({1})".format(linpg.get_lang('General','game_title'),linpg.get_lang('General','map_creator')))
     MAPCREATOR = MapCreator(chapterType,chapterId,collection_name)
     MAPCREATOR.initialize(screen)
     #战斗系统主要loop
-    while MAPCREATOR.isPlaying: MAPCREATOR.display(screen)
-    linpg.display.set_caption(linpg.get_lang('GameTitle'))
+    while MAPCREATOR.is_playing(): MAPCREATOR.display(screen)
+    linpg.display.set_caption(linpg.get_lang('General','game_title'))
 
 #blit载入页面
 def dispaly_loading_screen(screen,start,end,value):

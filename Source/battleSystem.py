@@ -116,7 +116,7 @@ class Survival_BattleSystem(linpg.BattleSystemInterface):
         for event in self.events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.isPlaying = False
+                    self._isPlaying = False
                 self._check_key_down(event)
             elif event.type == pygame.KEYUP:
                 self._check_key_up(event)
@@ -429,7 +429,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             elif result == "BackToMainMenu":
                 linpg.setting.isDisplaying = False
                 linpg.unloadBackgroundMusic()
-                self.isPlaying = False
+                self._isPlaying = False
                 self.show_pause_menu = False
             #如果播放玩菜单后发现有东西需要更新
             if linpg.setting.display(screen,self.events):
@@ -1290,7 +1290,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         self.battleMode = False
-                        self.isPlaying = False
+                        self._isPlaying = False
             self.ResultBoardUI.display(screen)
         #结束动画--失败
         elif self.whose_round == "result_fail":

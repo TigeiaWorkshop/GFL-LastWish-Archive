@@ -3,17 +3,17 @@ from .scene import *
 
 class MainMenu(linpg.SystemObject):
     def __init__(self,screen):
+        #初始化系统模块
+        linpg.SystemObject.__init__(self)
         #初始化设置
         linpg.setting.init(screen.get_size())
         #获取屏幕的尺寸
         window_x,window_y = screen.get_size()
-        #载入页面 - 渐入
-        dispaly_loading_screen(screen,0,250,2)
-        #是否主菜单在播放
-        self.isAlive = True
         #窗口标题图标
         linpg.display.set_icon("Assets/image/UI/icon.png")
-        linpg.display.set_caption(linpg.get_lang('GameTitle'))
+        linpg.display.set_caption(linpg.get_lang('General','game_title'))
+        #载入页面 - 渐入
+        dispaly_loading_screen(screen,0,250,2)
         #设置引擎的标准文字大小
         linpg.set_standard_font_size(int(window_x/40),"medium")
         #修改控制台的位置
@@ -38,7 +38,9 @@ class MainMenu(linpg.SystemObject):
             self.main_menu_txt["menu_main"][key] = linpg.fontRenderPro(txt,mode,(txt_location,txt_y),linpg.get_standard_font_size("medium"))
             txt_y += font_size
         #加载创意工坊选择页面的文字
-        self.main_menu_txt["menu_workshop_choice"]["back"] = self.main_menu_txt["other"]["back"]
+        self.main_menu_txt["menu_workshop_choice"]["map_creator"] = linpg.get_lang("General","map_creator")
+        self.main_menu_txt["menu_workshop_choice"]["dialog_creator"] = linpg.get_lang("General","dialog_creator")
+        self.main_menu_txt["menu_workshop_choice"]["back"] = linpg.get_lang("General","back")
         txt_y = (window_y-len(self.main_menu_txt["menu_workshop_choice"])*font_size)/2
         for key,txt in self.main_menu_txt["menu_workshop_choice"].items():
             self.main_menu_txt["menu_workshop_choice"][key] = linpg.fontRenderPro(txt,"enable",(txt_location,txt_y),linpg.get_standard_font_size("medium"))
@@ -74,7 +76,7 @@ class MainMenu(linpg.SystemObject):
             filePath,fileName = os.path.split(path)
             self.workshop_files_text.append(fileName)
             self.workshop_files.append(data["title"][linpg.get_setting("Language")])
-        self.workshop_files.append(self.main_menu_txt["other"]["back"])
+        self.workshop_files.append(linpg.get_lang("General","back"))
         txt_location = int(screen_size[0]*2/3)
         txt_y = (screen_size[1]-len(self.workshop_files)*linpg.get_standard_font_size("medium")*2)/2
         for i in range(len(self.workshop_files)):
@@ -112,7 +114,7 @@ class MainMenu(linpg.SystemObject):
             else:
                 self.chapter_select.append(chapterTitle.format(chapterId)+": "+titleName)
         #将返回按钮放到菜单列表中
-        self.chapter_select.append(self.main_menu_txt["other"]["back"])
+        self.chapter_select.append(linpg.get_lang("General","back"))
         txt_y = (screen_size[1]-len(self.chapter_select)*linpg.get_standard_font_size("medium")*2)/2
         txt_x = int(screen_size[0]*2/3)
         #将菜单列表中的文字转换成文字surface
@@ -254,8 +256,8 @@ class MainMenu(linpg.SystemObject):
     def display(self,screen):
         #开始播放背景视频
         self.videoCapture.start()
-        # 主循环
-        while self.isAlive:
+        #主循环
+        while self._isPlaying:
             #背景视频
             self.videoCapture.display(screen)
             #更新输入事件
@@ -325,10 +327,10 @@ class MainMenu(linpg.SystemObject):
                     if linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["0_play"]):
                         self.__reload_workshop_files_list(screen.get_size(),False)
                         self.menu_type = 3
-                    elif linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["1_mapCreator"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["map_creator"]):
                         self.__reload_workshop_files_list(screen.get_size(),True)
                         self.menu_type = 4
-                    elif linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["2_dialogCreator"]):
+                    elif linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["dialog_creator"]):
                         self.__reload_workshop_files_list(screen.get_size(),True)
                         self.menu_type = 5
                     elif linpg.isHover(self.main_menu_txt["menu_workshop_choice"]["back"]):

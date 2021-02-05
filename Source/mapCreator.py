@@ -38,7 +38,6 @@ class MapCreator(linpg.BattleSystemInterface):
         self.envImgDict = {}
         for imgPath in glob.glob(r'Assets/image/environment/block/*.png'):
             self.envImgDict[os.path.basename(imgPath).replace(".png","")] = linpg.loadImg(imgPath,(self.MAP.block_width/3,None))
-        print(self.envImgDict)
         #加载所有的装饰品
         self.decorationsImgDict = {}
         for imgPath in glob.glob(r'Assets/image/environment/decoration/*'):
@@ -103,13 +102,13 @@ class MapCreator(linpg.BattleSystemInterface):
         UI_height = int(self.MAP.block_width*0.3)
         self.UIButton["save"] = linpg.ButtonWithFadeInOut(
             "Assets/image/UI/menu.png",
-            linpg.get_lang("MapCreator","save"),
+            linpg.get_lang("General","save"),
             "black",100,UI_x,UI_y,UI_height
             )
         UI_x += self.UIButton["save"].get_width()+UI_height
         self.UIButton["back"] = linpg.ButtonWithFadeInOut(
             "Assets/image/UI/menu.png",
-            linpg.get_lang("MapCreator","back"),
+            linpg.get_lang("General","back"),
             "black",100,UI_x,UI_y,UI_height
             )
         UI_x += self.UIButton["back"].get_width()+UI_height
@@ -129,7 +128,6 @@ class MapCreator(linpg.BattleSystemInterface):
         #其他函数
         self.UI_local_x = 0
         self.UI_local_y = 0
-        self.isPlaying = True
         #读取地图原始文件
         self.originalData = linpg.loadConfig(self.fileLocation)
     def display(self,screen):
@@ -185,7 +183,7 @@ class MapCreator(linpg.BattleSystemInterface):
                 elif linpg.isHover(self.UIButton["save"]) and self.object_to_put_down == None and self.deleteMode == False:
                     linpg.saveConfig(self.fileLocation,self.originalData)
                 elif linpg.isHover(self.UIButton["back"]) and self.object_to_put_down == None and self.deleteMode == False:
-                    self.isPlaying = False
+                    self._isPlaying = False
                     break
                 elif linpg.isHover(self.UIButton["delete"]) and self.object_to_put_down == None and self.deleteMode == False:
                     self.object_to_put_down = None

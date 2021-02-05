@@ -22,10 +22,12 @@ DialogCreator:
   previous: Previous dialog
   reload: Reload configuration file
   removeNpc: Remove this npc
+General:
+  back: Back
+  dialog_creator: Dialog Creator
+  game_title: Girls' Frontline - Last Wish
+  map_creator: Map Creator
   save: Save
-GameTitle: Girls' Frontline - Last Wish
-GameTitle_DialogCreator: Girls' Frontline - Last Wish (Dialog Creator)
-GameTitle_MapCreator: Girls' Frontline - Last Wish (Map Creator)
 LoadingTxt:
   now_loading: Loading...
   now_loading_characters: Loading characters' data...
@@ -43,10 +45,7 @@ MainMenu:
     7_exit: Exit
   menu_workshop_choice:
     0_play: Play
-    1_mapCreator: Map Creator
-    2_dialogCreator: Dialog Creator
   other:
-    back: Back
     confirm: 'Yes'
     deny: 'No'
     exit_confirm: Are you sure you want to quit the game?
@@ -54,10 +53,8 @@ MainMenu:
     new_collection: Create New Collection
     tip: Tip
 MapCreator:
-  back: Back
   delete: Delete
   reload: Reload
-  save: Save
 Numbers:
 - Zero
 - One
@@ -70,6 +67,16 @@ Numbers:
 - Eight
 - Nine
 - Ten
+- Eleven
+- Twelve
+- Thirteen
+- Fourteen
+- Fifteen
+- Sixteen
+- Seventeen
+- Eighteen
+- Nineteen
+- Twenty
 ProcessSaved: The process has been saved
 ResultBoard:
   characters_down: Friendly character down
