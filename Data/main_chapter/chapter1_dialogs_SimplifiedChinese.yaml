@@ -457,6 +457,9 @@ dialog_before_battle:
     next_dialog_id: null
 dialog_during_battle:
   initial_dialog:
+  - changePos:
+      x: 0
+      y: 0
   - move:
       gsh-18:
         x: 8
@@ -495,12 +498,12 @@ dialog_during_battle:
       speaker_icon: asval
     dialoguebox_up: null
   - changePos:
-      x: -400
-      y: -400
+      x: 30
+      y: 30
   - idle: 1
   - changePos:
-      x: 400
-      y: 400
+      x: 0
+      y: 0
   - dialoguebox_down:
       content:
       - 该死...我已经没有弹药了

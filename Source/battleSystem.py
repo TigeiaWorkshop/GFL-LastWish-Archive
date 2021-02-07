@@ -90,24 +90,7 @@ class Survival_BattleSystem(linpg.BattleSystemInterface):
             self.screen_to_move_y = self.window_y*0.3-tempY
         elif tempY > self.window_y*0.7 and self.MAP.getPos_y()>=self.MAP.row*self.MAP.block_height*-1:
             self.screen_to_move_y = self.window_y*0.7-tempY
-        
-        #如果需要移动屏幕
-        if self.screen_to_move_x != None and self.screen_to_move_x != 0:
-            temp_value = int(self.MAP.getPos_x() + self.screen_to_move_x*0.2)
-            if self.window_x-self.MAP.surface_width<=temp_value<=0:
-                self.MAP.setPos_x(temp_value)
-                self.screen_to_move_x*=0.8
-                if int(self.screen_to_move_x) == 0: self.screen_to_move_x = 0
-            else:
-                self.screen_to_move_x = 0
-        if self.screen_to_move_y != None and self.screen_to_move_y !=0:
-            temp_value = int(self.MAP.getPos_y() + self.screen_to_move_y*0.2)
-            if self.window_y-self.MAP.surface_height<=temp_value<=0:
-                self.MAP.setPos_y(temp_value)
-                self.screen_to_move_y*=0.8
-                if int(self.screen_to_move_y) == 0: self.screen_to_move_y = 0
-            else:
-                self.screen_to_move_y = 0
+        super()._move_screen()
     #展示场景装饰物
     def _display_decoration(self,screen:pygame.Surface) -> None: self.MAP.display_decoration(screen,self.alliances,{})
     def display(self,screen):
@@ -193,6 +176,26 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         #暂停菜单
         self.pause_menu = linpg.PauseMenu()
         self.show_pause_menu = False
+        #每次需要更新的物品
+        self.__itemsToBlit = []
+        self.__maxItemWeight = 0
+    #新增需要在屏幕上画出的物品
+    def __add_on_screen_object(self,image,weight=-1,pos=None,offSet=None) -> None:
+        if weight < 0:
+            self.__maxItemWeight += 1
+            weight = self.__maxItemWeight
+        elif weight > self.__maxItemWeight:
+            self.__maxItemWeight = weight
+        self.__itemsToBlit.append(linpg.ItemNeedBlit(image,weight,pos,offSet))
+    #更新屏幕
+    def __update_scene(self,screen):
+        self.__itemsToBlit.sort()
+        for item in self.__itemsToBlit:
+            item.blit(screen)
+        self.__itemsToBlit.clear()
+        self.__maxItemWeight = 0
+        #刷新画面
+        linpg.display.flip()
     @property
     def griffinCharactersData(self):
         return self.alliances_data
@@ -257,14 +260,32 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         self.warnings_to_display = WarningSystem()
         loading_info = linpg.get_lang("LoadingTxt")
         #加载剧情
-        DataTmp = linpg.loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(self.chapterType,self.chapterId,linpg.get_setting('Language'))) if self.collection_name == None\
-            else linpg.loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(self.chapterType,self.collection_name,self.chapterId,linpg.get_setting('Language')))
+        DataTmp = linpg.loadConfig("Data/{0}/chapter{1}_dialogs_{2}.yaml".format(
+            self.chapterType,
+            self.chapterId,
+            linpg.get_setting('Language')
+            )
+        ) if self.collection_name == None else linpg.loadConfig("Data/{0}/{1}/chapter{2}_dialogs_{3}.yaml".format(
+            self.chapterType,
+            self.collection_name,
+            self.chapterId,linpg.get_setting('Language')
+            )
+        )
         #章节标题显示
-        self.infoToDisplayDuringLoading = LoadingTitle(self.window_x,self.window_y,self.battleModeUiTxt["numChapter"],self.chapterId,DataTmp["title"],DataTmp["description"])
+        self.infoToDisplayDuringLoading = LoadingTitle(
+            self.window_x,
+            self.window_y,
+            self.battleModeUiTxt["numChapter"],
+            self.chapterId,DataTmp["title"],DataTmp["description"]
+        )
         self.battleMode_info = DataTmp["battle_info"]
         self.dialog_during_battle = DataTmp["dialog_during_battle"]
         #正在加载的gif动态图标
-        nowLoadingIcon = linpg.loadGif("Assets/image/UI/sv98_walking.gif",(self.window_x*0.7,self.window_y*0.83),(self.window_x*0.003*15,self.window_x*0.003*21))
+        nowLoadingIcon = linpg.loadGif(
+            "Assets/image/UI/sv98_walking.gif",
+            (self.window_x*0.7,self.window_y*0.83),
+            (self.window_x*0.003*15,self.window_x*0.003*21)
+        )
         #渐入效果
         for i in range(1,255,2):
             self.infoToDisplayDuringLoading.display(screen,i)
@@ -339,8 +360,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             "yellow": linpg.loadImg("Assets/image/UI/range/yellow.png"),
             "blue": linpg.loadImg("Assets/image/UI/range/blue.png"),
             "orange": linpg.loadImg("Assets/image/UI/range/orange.png"),
-            "eyeImg": linpg.ProgressBarSurface("Assets/image/UI/eye_red.png","Assets/image/UI/eye_orange.png",0,0,0,0),
-            "vigilanceImg": linpg.ProgressBarSurface("Assets/image/UI/vigilance_red.png","Assets/image/UI/vigilance_orange.png",0,0,0,0,"height"),
             "supplyBoard":linpg.loadImage("Assets/image/UI/score.png",((self.window_x-self.window_x/3)/2,-self.window_y/12),self.window_x/3,self.window_y/12),
         }
         #UI - 变形后
@@ -412,6 +431,8 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     temp_secode.set_alpha(self.txt_alpha)
                     linpg.drawImg(temp_secode,(self.window_x/20+self.battleMode_info[i].get_width(),self.window_y*0.75+self.battleMode_info[i].get_height()*1.2),screen)
             self.txt_alpha -= 5
+        #刷新画面
+        self.__update_scene(screen)
         #展示暂停菜单
         process_saved_text = linpg.ImageSurface(self.FONT.render(linpg.get_lang("ProcessSaved"),linpg.get_fontMode(),(255,255,255)),0,0)
         process_saved_text.set_alpha(0)
@@ -439,12 +460,10 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             linpg.display.flip()
         del process_saved_text
         self.pause_menu.screenshot = None
-        #刷新画面
-        linpg.display.flip()
     #对话模块
     def __play_dialog(self,screen):
         #画出地图
-        self.MAP.display_map(screen)
+        self._display_map(screen)
         #角色动画
         for every_chara in self.griffinCharactersData:
             self.griffinCharactersData[every_chara].draw(screen,self.MAP)
@@ -545,8 +564,11 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         if self.dialoguebox_up.x > self.window_x/2+self.dialoguebox_up.get_width()*0.4:
                             self.dialoguebox_up.x -= self.dialoguebox_up.get_width()*0.134
                         elif not self.dialoguebox_up.updated:
-                            self.dialoguebox_up.update(currentDialog["dialoguebox_up"]["content"],\
-                                currentDialog["dialoguebox_up"]["speaker"],currentDialog["dialoguebox_up"]["speaker_icon"])
+                            self.dialoguebox_up.update(
+                                currentDialog["dialoguebox_up"]["content"],
+                                currentDialog["dialoguebox_up"]["speaker"],
+                                currentDialog["dialoguebox_up"]["speaker_icon"]
+                            )
                         #对话框图片
                         self.dialoguebox_up.display(screen,self.characterInfoBoardUI)
                     #下方对话框
@@ -555,8 +577,11 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         if self.dialoguebox_down.x < self.window_x/2-self.dialoguebox_down.get_width()*1.4:
                             self.dialoguebox_down.x += self.dialoguebox_down.get_width()*0.134
                         elif not self.dialoguebox_down.updated:
-                            self.dialoguebox_down.update(currentDialog["dialoguebox_down"]["content"],\
-                                currentDialog["dialoguebox_down"]["speaker"],currentDialog["dialoguebox_down"]["speaker_icon"])
+                            self.dialoguebox_down.update(
+                                currentDialog["dialoguebox_down"]["content"],
+                                currentDialog["dialoguebox_down"]["speaker"],
+                                currentDialog["dialoguebox_down"]["speaker_icon"]
+                            )
                         #对话框图片
                         self.dialoguebox_down.display(screen,self.characterInfoBoardUI)
                 #闲置一定时间（秒）
@@ -572,15 +597,16 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                             self.dialogData["secondsToIdle"] = None
                 #调整窗口位置
                 elif "changePos" in currentDialog and currentDialog["changePos"] != None:
-                    if self.screen_to_move_x == None and "x" in currentDialog["changePos"]:
-                        self.screen_to_move_x = currentDialog["changePos"]["x"]
-                    if self.screen_to_move_y == None and "y" in currentDialog["changePos"]:
-                        self.screen_to_move_y = currentDialog["changePos"]["y"]
-                    self._move_screen()
-                    if self.screen_to_move_x == 0 and self.screen_to_move_y == 0 or self.screen_to_move_x == None and self.screen_to_move_y == None:
+                    if self.screen_to_move_x == None or self.screen_to_move_y == None:
+                        tempX,tempY = self.MAP.calPosInMap(currentDialog["changePos"]["x"],currentDialog["changePos"]["y"])
+                        self.screen_to_move_x = -tempX + screen.get_width()/2
+                        self.screen_to_move_y = -tempY + screen.get_height()/2
+                    if self.screen_to_move_x == 0 and self.screen_to_move_y == 0:
                         self.screen_to_move_x = None
                         self.screen_to_move_y = None
                         self.dialogData["dialogId"] += 1
+                else:
+                    raise Exception("Error: Dialog Data on {0} with id {1} cannot pass through any statement!".format(self.dialogKey,self.dialogData["dialogId"]))
                 #玩家输入按键判定
                 for event in self.events:
                     if event.type == pygame.KEYDOWN:
@@ -718,8 +744,10 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             self.selectMenuUI.allButton = None
         else:
             self.zoomIn = self.zoomIntoBe
+
         #画出地图
         self._display_map(screen)
+
         #画出用彩色方块表示的范围
         for area in self.areaDrawColorBlock:
             for position in self.areaDrawColorBlock[area]:
@@ -1039,8 +1067,11 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         if self.characterInControl.needUpdateMap():
                             for key in self.sangvisFerrisData:
                                 if self.sangvisFerrisData[key].isInAttackRange(self.characterInControl,self.MAP):
-                                    self.characterInControl.noticed()
-                                    self.sangvisFerrisData[key].alert()
+                                    if not self.sangvisFerrisData[key].is_alert:
+                                        self.characterInControl.noticed()
+                                        self.sangvisFerrisData[key].alert()
+                                    else:
+                                        self.characterInControl.noticed(100)
                                     break
                             self._calculate_darkness()
                     else:
@@ -1262,24 +1293,26 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             if self.original_UI_img["supplyBoard"].y > self.original_UI_img["supplyBoard"].yTogo:
                 self.original_UI_img["supplyBoard"].y -= 5
 
-        self.original_UI_img["supplyBoard"].draw(screen)
         if len(self.original_UI_img["supplyBoard"].items) > 0 and self.original_UI_img["supplyBoard"].y != -self.window_y/30:
+            self.__add_on_screen_object(self.original_UI_img["supplyBoard"])
             lenTemp = 0
             for i in range(len(self.original_UI_img["supplyBoard"].items)):
                 lenTemp += self.original_UI_img["supplyBoard"].items[i].get_width()*1.5
             start_point = (self.window_x - lenTemp)/2
             for i in range(len(self.original_UI_img["supplyBoard"].items)):
                 start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*0.25
-                linpg.drawImg(self.original_UI_img["supplyBoard"].items[i],(start_point,(self.original_UI_img["supplyBoard"].get_height() - self.original_UI_img["supplyBoard"].items[i].get_height())/2),screen,0,self.original_UI_img["supplyBoard"].y)
+                self.__add_on_screen_object(self.original_UI_img["supplyBoard"].items[i],-1,(start_point,
+                (self.original_UI_img["supplyBoard"].get_height()-self.original_UI_img["supplyBoard"].items[i].get_height())/2
+                ),(0,self.original_UI_img["supplyBoard"].y))
                 start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*1.25
 
         if self.whose_round == "player":
             #加载结束回合的按钮
-            self.end_round_button.draw(screen)
-            screen.blit(self.end_round_txt,(self.end_round_button.x+self.end_round_button.get_width()*0.35,self.end_round_button.y+(self.end_round_button.get_height()-self.FONTSIZE)/2.3))
-
+            self.__add_on_screen_object(self.end_round_button)
+            self.__add_on_screen_object(self.end_round_txt,-1,self.end_round_button.pos,(self.end_round_button.get_width()*0.35,(self.end_round_button.get_height()-self.FONTSIZE)/2.3))
+        
         #显示警告
-        self.warnings_to_display.display(screen)
+        self.__add_on_screen_object(self.warnings_to_display)
 
         #结束动画--胜利
         if self.whose_round == "result_win":
@@ -1291,7 +1324,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     if event.key == pygame.K_SPACE:
                         self.battleMode = False
                         self._isPlaying = False
-            self.ResultBoardUI.display(screen)
+            self.__add_on_screen_object(self.ResultBoardUI)
         #结束动画--失败
         elif self.whose_round == "result_fail":
             pass

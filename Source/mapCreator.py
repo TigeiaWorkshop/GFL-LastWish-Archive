@@ -264,7 +264,7 @@ class MapCreator(linpg.BattleSystemInterface):
         #画出地图
         self._display_map(screen)
 
-        if block_get_click != None and linpg.isHover(self.UIContainerRight)==False and linpg.isHover(self.UIContainer)==False:
+        if block_get_click != None and not linpg.isHover(self.UIContainerRight) and not linpg.isHover(self.UIContainer):
             if self.deleteMode == True:
                 xTemp,yTemp = self.MAP.calPosInMap(block_get_click["x"],block_get_click["y"])
                 linpg.drawImg(self.redBlock,(xTemp+self.MAP.block_width*0.1,yTemp),screen)
@@ -322,7 +322,7 @@ class MapCreator(linpg.BattleSystemInterface):
         #显示所有可放置的环境方块
         i=0
         for img_name in self.envImgDict:
-            posY = self.UIContainerRight.y+self.MAP.block_width*5*int(i/4)+self.UI_local_y
+            posY = self.UIContainerRight.y+self.MAP.block_width*int(i/4)+self.UI_local_y
             if screen.get_height()*0.05<posY<screen.get_height()*0.9:
                 posX = self.UIContainerRight.x+self.MAP.block_width/6+self.MAP.block_width/2.3*(i%4)
                 linpg.drawImg(self.envImgDict[img_name],(posX,posY),screen)
@@ -330,7 +330,7 @@ class MapCreator(linpg.BattleSystemInterface):
                     self.object_to_put_down = {"type":"block","id":img_name}
             i+=1
         for img_name in self.decorationsImgDict:
-            posY = self.UIContainerRight.y+self.MAP.block_width*5*int(i/4)+self.UI_local_y
+            posY = self.UIContainerRight.y+self.MAP.block_width*int(i/4)+self.UI_local_y
             if screen.get_height()*0.05<posY<screen.get_height()*0.9:
                 posX = self.UIContainerRight.x+self.MAP.block_width/6+self.MAP.block_width/2.3*(i%4)
                 linpg.drawImg(self.decorationsImgDict[img_name],(posX,posY),screen)
