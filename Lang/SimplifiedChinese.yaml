@@ -86,6 +86,7 @@ ProcessSaved: 进度已保存
 ResultBoard:
   characters_down: 友方角色被击倒
   pressKeyContinue: 按空格继续
+  pressKeyRestart: 按空格重新开始，按Backspace返回主菜单
   rank: 评价
   total_kills: 总消灭
   total_rounds: 回合数

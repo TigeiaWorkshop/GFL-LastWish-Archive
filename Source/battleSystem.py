@@ -205,13 +205,32 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
     @property
     def characterInControl(self):
         return self.alliances_data[self.characterGetClick]
-    def character(self,name,faction):
-        if faction == "griffin" or faction == "g&k":
-            return self.alliances_data[name]
-        elif faction == "sangvisFerri" or faction == "sf":
-            return self.enemies_data[name]
-        else:
-            raise Exception('linpgEngine-Error: cannot find faction "{}"'.formate(faction))
+    def _check_whether_player_win_or_lost(self):
+        #常规
+        """检测失败条件"""
+        #如果有回合限制
+        if "round_limitation" in self.mission_objectives and self.mission_objectives["round_limitation"] != None\
+            and self.resultInfo["total_rounds"] > self.mission_objectives["round_limitation"]:
+            self.whose_round = "result_fail"
+        #如果不允许失去任何一位同伴
+        if "allow_any_one_die" not in self.mission_objectives or not self.mission_objectives["allow_any_one_die"]:
+            for character in self.alliances_data:
+                if not isinstance(self.alliances_data[character].dying,bool) and self.alliances_data[character].dying == 0:
+                    self.whose_round = "result_fail"
+                    break
+        """检测胜利条件"""
+        #歼灭模式
+        if self.mission_objectives["type"] == "annihilation":
+            #如果需要检测是否所有敌人都已经被消灭
+            if "target" not in self.mission_objectives or self.mission_objectives["target"] == None:
+                if len(self.sangvisFerrisData) == 0:
+                    self.characterGetClick = None
+                    self.NotDrawRangeBlocks = False
+                    self.whose_round = "result_win"
+                else:
+                    pass
+            elif self.mission_objectives["target"] not in self.enemies_data:
+                self.whose_round = "result_win"
     #储存章节信息
     def save_process(self):
         save_thread = linpg.SaveDataThread("Save/save.yaml", {
@@ -302,6 +321,8 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         #设置背景音乐
         self.set_bgm(DataTmp["background_music"])
         self.zoomIn = DataTmp["zoomIn"]*100
+        #加载胜利目标
+        self.mission_objectives = DataTmp["mission_objectives"]
         #初始化天气和环境的音效 -- 频道1
         self.environment_sound = linpg.SoundManagement(1)
         self.weatherController = None
@@ -599,8 +620,8 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 elif "changePos" in currentDialog and currentDialog["changePos"] != None:
                     if self.screen_to_move_x == None or self.screen_to_move_y == None:
                         tempX,tempY = self.MAP.calPosInMap(currentDialog["changePos"]["x"],currentDialog["changePos"]["y"])
-                        self.screen_to_move_x = -tempX + screen.get_width()/2
-                        self.screen_to_move_y = -tempY + screen.get_height()/2
+                        self.screen_to_move_x =  screen.get_width()/2 - tempX
+                        self.screen_to_move_y = screen.get_height()/2 - tempY
                     if self.screen_to_move_x == 0 and self.screen_to_move_y == 0:
                         self.screen_to_move_x = None
                         self.screen_to_move_y = None
@@ -692,6 +713,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                             characters_detect_this_round[key] = [self.griffinCharactersData[key].x,self.griffinCharactersData[key].y]
                     #到你了，Good luck, you need it!
                     self.whose_round = "player"
+                    self.resultInfo["total_rounds"] += 1
     #战斗模块
     def __play_battle(self,screen):
         self.play_bgm()
@@ -1170,7 +1192,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 self.enemies_in_control_id +=1
                 if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
                     self.whose_round = "sangvisFerrisToPlayer"
-                    self.resultInfo["total_rounds"] += 1
                 self.enemy_action = None
                 self.enemy_in_control = None
             else:
@@ -1272,12 +1293,8 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         
         #检测回合是否结束
         self.switch_round(screen)
-
-        #检测所有敌人是否都已经被消灭
-        if len(self.sangvisFerrisData) == 0 and self.whose_round != "result_win":
-            self.characterGetClick = None
-            self.NotDrawRangeBlocks = False
-            self.whose_round = "result_win"
+        #检测玩家是否胜利或失败
+        self._check_whether_player_win_or_lost()
 
         #显示获取到的物资
         if self.original_UI_img["supplyBoard"].yTogo == 10:
@@ -1318,8 +1335,8 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         if self.whose_round == "result_win":
             if self.ResultBoardUI == None:
                 self.resultInfo["total_time"] = time.localtime(time.time()-self.resultInfo["total_time"])
-                self.ResultBoardUI = ResultBoard(self.resultInfo,self.window_x,self.window_y)
-            for event in self.events():
+                self.ResultBoardUI = ResultBoard(self.resultInfo,self.window_x/96)
+            for event in self.events:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         self.battleMode = False
@@ -1327,4 +1344,19 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             self.__add_on_screen_object(self.ResultBoardUI)
         #结束动画--失败
         elif self.whose_round == "result_fail":
-            pass
+            if self.ResultBoardUI == None:
+                self.resultInfo["total_time"] = time.localtime(time.time()-self.resultInfo["total_time"])
+                self.ResultBoardUI = ResultBoard(self.resultInfo,self.window_x/96,False)
+            for event in self.events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        linpg.unloadBackgroundMusic()
+                        self.__init__(self.chapterType,self.chapterId,self.collection_name)
+                        self.initialize(screen)
+                        break
+                    elif event.key == pygame.K_BACKSPACE:
+                        linpg.unloadBackgroundMusic()
+                        self._isPlaying = False
+                        self.battleMode = False
+                        break
+            self.__add_on_screen_object(self.ResultBoardUI)

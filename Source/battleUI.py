@@ -305,18 +305,18 @@ class CharacterInfoBoard:
 
 #计分板
 class ResultBoard:
-    def __init__(self,finalResult,window_x,window_y):
+    def __init__(self,finalResult,font_size,is_win=True):
         resultTxt = linpg.get_lang("ResultBoard")
-        self.x = int(window_x/9.6)
-        self.y = int(window_x/9.6)
-        self.txt_x = int(window_x/7.68)
-        self.boardImg = linpg.loadImg("Assets/image/UI/score.png",(window_x/6,window_x/3))
-        self.total_kills = linpg.fontRender(resultTxt["total_kills"]+": "+str(finalResult["total_kills"]),"white",window_x/96)
-        self.total_time = linpg.fontRender(resultTxt["total_time"]+": "+str(time.strftime('%M:%S',finalResult["total_time"])),"white",window_x/96)
-        self.total_rounds_txt = linpg.fontRender(resultTxt["total_rounds"]+": "+str(finalResult["total_rounds"]),"white",window_x/96)
-        self.characters_down = linpg.fontRender(resultTxt["characters_down"]+": "+str(finalResult["times_characters_down"]),"white",window_x/96)
-        self.player_rate = linpg.fontRender(resultTxt["rank"]+": "+"A","white",window_x/96)
-        self.pressKeyContinue = linpg.fontRender(resultTxt["pressKeyContinue"],"white",window_x/96)
+        self.x = int(font_size*10)
+        self.y = int(font_size*10)
+        self.txt_x = int(font_size*12)
+        self.boardImg = linpg.loadImg("Assets/image/UI/score.png",(font_size*16,font_size*32))
+        self.total_kills = linpg.fontRender(resultTxt["total_kills"]+": "+str(finalResult["total_kills"]),"white",font_size)
+        self.total_time = linpg.fontRender(resultTxt["total_time"]+": "+str(time.strftime('%M:%S',finalResult["total_time"])),"white",font_size)
+        self.total_rounds_txt = linpg.fontRender(resultTxt["total_rounds"]+": "+str(finalResult["total_rounds"]),"white",font_size)
+        self.characters_down = linpg.fontRender(resultTxt["characters_down"]+": "+str(finalResult["times_characters_down"]),"white",font_size)
+        self.player_rate = linpg.fontRender(resultTxt["rank"]+": "+"A","white",font_size)
+        self.pressKeyContinue = linpg.fontRender(resultTxt["pressKeyContinue"],"white",font_size) if is_win else linpg.fontRender(resultTxt["pressKeyRestart"],"white",font_size)
     def display(self,screen):
         screen.blit(self.boardImg,(self.x,self.y))
         screen.blit(self.total_kills,(self.txt_x ,300))

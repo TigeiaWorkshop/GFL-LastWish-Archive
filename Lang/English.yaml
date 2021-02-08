@@ -80,7 +80,8 @@ Numbers:
 ProcessSaved: The process has been saved
 ResultBoard:
   characters_down: Friendly character down
-  pressKeyContinue: Press space to continue
+  pressKeyContinue: Press Space to continue
+  pressKeyRestart: Press Space to restart, or press Backspace go back to main menu
   rank: Rank
   total_kills: Total elimination
   total_rounds: Rounds

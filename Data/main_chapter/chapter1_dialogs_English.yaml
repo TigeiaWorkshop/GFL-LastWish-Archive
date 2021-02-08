@@ -183,7 +183,7 @@ dialog_before_battle:
     narrator: Sv-98
 dialog_during_battle:
   initial_dialog:
-  - changePos:
+  - changePos: null
     x: 0
     y: 0
   - move:
