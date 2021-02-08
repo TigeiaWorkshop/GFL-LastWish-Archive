@@ -427,6 +427,18 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         self.footstep_sounds.set_volume(linpg.get_setting("Sound","sound_effects")/100)
         self.environment_sound.set_volume(linpg.get_setting("Sound","sound_environment")/100.0)
         self.set_bgm_volume(linpg.get_setting("Sound","background_music")/100.0)
+    def alert_enemy_around(self,name,value=10):
+        enemies_need_check = []
+        for key in self.sangvisFerrisData:
+            if self.sangvisFerrisData[key].can_attack(self.griffinCharactersData[name],self.MAP):
+                self.sangvisFerrisData[key].alert(value)
+                enemies_need_check.append(key)
+        for key in enemies_need_check:
+            if self.sangvisFerrisData[key].is_alert:
+                for character in self.griffinCharactersData:
+                    if self.sangvisFerrisData[key].can_attack(self.griffinCharactersData[character],self.MAP):
+                        self.griffinCharactersData[character].notice(100)
+
     #把战斗系统的画面画到screen上
     def display(self,screen):
         self._update_event()
@@ -706,11 +718,17 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     #现在是铁血的回合！
                     self.whose_round = "sangvisFerris"
                 elif self.whose_round == "sangvisFerrisToPlayer":
-                    characters_detect_this_round = {}
                     for key in self.griffinCharactersData:
                         self.griffinCharactersData[key].reset_action_point()
-                        if not self.griffinCharactersData[key].detection:
-                            characters_detect_this_round[key] = [self.griffinCharactersData[key].x,self.griffinCharactersData[key].y]
+                        if not self.griffinCharactersData[key].is_detected:
+                            value_reduce = int(self.griffinCharactersData[key].detection*0.3)
+                            if value_reduce < 15: value_reduce = 15
+                            self.griffinCharactersData[key].notice(0-value_reduce)
+                    for key in self.sangvisFerrisData:
+                        if not self.sangvisFerrisData[key].is_alert:
+                            value_reduce = int(self.sangvisFerrisData[key].vigilance*0.2)
+                            if value_reduce < 10: value_reduce = 10
+                            self.sangvisFerrisData[key].alert(0-value_reduce)
                     #到你了，Good luck, you need it!
                     self.whose_round = "player"
                     self.resultInfo["total_rounds"] += 1
@@ -838,7 +856,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 #攻击判定
                 elif self.action_choice == "attack" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and len(self.enemiesGetAttack)>0:
                     self.characterInControl.try_reduce_action_point(5)
-                    self.characterInControl.noticed()
+                    self.characterInControl.notice()
                     self.characterInControl.set_action("attack",False)
                     self.isWaiting = False
                     self.NotDrawRangeBlocks = True
@@ -849,7 +867,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         self.characterInControl.setFlipBasedPos(self.griffinCharactersData[self.skill_target])
                         
                     elif self.skill_target in self.sangvisFerrisData:
-                        self.characterInControl.noticed()
+                        self.characterInControl.notice()
                         self.characterInControl.setFlipBasedPos(self.sangvisFerrisData[self.skill_target])
                     self.characterInControl.try_reduce_action_point(8)
                     self.characterInControl.playSound("skill")
@@ -860,7 +878,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 elif self.action_choice == "rescue" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.friendGetHelp != None:
                     self.characterInControl.try_reduce_action_point(8)
-                    self.characterInControl.noticed()
+                    self.characterInControl.notice()
                     self.griffinCharactersData[self.friendGetHelp].heal(1)
                     self.characterGetClick = None
                     self.action_choice = None
@@ -1087,14 +1105,8 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         self.footstep_sounds.play()
                         #是否需要更新
                         if self.characterInControl.needUpdateMap():
-                            for key in self.sangvisFerrisData:
-                                if self.sangvisFerrisData[key].isInAttackRange(self.characterInControl,self.MAP):
-                                    if not self.sangvisFerrisData[key].is_alert:
-                                        self.characterInControl.noticed()
-                                        self.sangvisFerrisData[key].alert()
-                                    else:
-                                        self.characterInControl.noticed(100)
-                                    break
+                            self.characterInControl.notice()
+                            self.alert_enemy_around(self.characterGetClick)
                             self._calculate_darkness()
                     else:
                         self.footstep_sounds.stop()

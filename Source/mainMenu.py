@@ -320,7 +320,10 @@ class MainMenu(linpg.SystemObject):
                         for i in range(len(self.chapter_select)-1):
                             #章节选择
                             if linpg.isHover(self.chapter_select[i]):
-                                self.__load_scene("main_chapter",i+1,screen)
+                                if linpg.console.get_events("dev"):
+                                    self.__load_scene("main_chapter",i,screen)
+                                else:
+                                    self.__load_scene("main_chapter",i+1,screen)
                                 break
                 #选择创意工坊选项
                 elif self.menu_type == 2:
