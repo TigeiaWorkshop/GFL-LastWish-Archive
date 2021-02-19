@@ -11,11 +11,6 @@ class Survival_BattleSystem(linpg.BattleSystemInterface):
         self.window_x,self.window_y = linpg.display.get_size()
         self.DATABASE = linpg.loadCharacterData()
         self.original_UI_img = {
-            "hp_empty" : linpg.loadImg("Assets/image/UI/hp_empty.png"),
-            "hp_red" : linpg.loadImg("Assets/image/UI/hp_red.png"),
-            "hp_green" : linpg.loadImg("Assets/image/UI/hp_green.png"),
-            "action_point_blue" : linpg.loadImg("Assets/image/UI/action_point.png"),
-            "bullets_number_brown" : linpg.loadImg("Assets/image/UI/bullets_number.png"),
             "green" : linpg.loadImg("Assets/image/UI/range/green.png"),
             "red" : linpg.loadImg("Assets/image/UI/range/red.png"),
             "yellow": linpg.loadImg("Assets/image/UI/range/yellow.png"),
@@ -319,7 +314,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         DataTmp = linpg.loadConfig("Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId)) if self.collection_name == None\
             else linpg.loadConfig("Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collection_name,self.chapterId))
         #设置背景音乐
-        self.set_bgm(DataTmp["background_music"])
+        self.set_bgm("Assets\music\{}".format(DataTmp["background_music"]))
         self.zoomIn = DataTmp["zoomIn"]*100
         #加载胜利目标
         self.mission_objectives = DataTmp["mission_objectives"]
@@ -371,11 +366,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         #bullet_img = loadImg("Assets/image/UI/bullet.png", get_block_width()/6, self.MAP.block_height/12)
         #加载血条,各色方块等UI图片 size:get_block_width(), self.MAP.block_height/5
         self.original_UI_img = {
-            "hp_empty" : linpg.loadImg("Assets/image/UI/hp_empty.png"),
-            "hp_red" : linpg.loadImg("Assets/image/UI/hp_red.png"),
-            "hp_green" : linpg.loadImg("Assets/image/UI/hp_green.png"),
-            "action_point_blue" : linpg.loadImg("Assets/image/UI/action_point.png"),
-            "bullets_number_brown" : linpg.loadImg("Assets/image/UI/bullets_number.png"),
             "green" : linpg.loadImg("Assets/image/UI/range/green.png"),
             "red" : linpg.loadImg("Assets/image/UI/range/red.png"),
             "yellow": linpg.loadImg("Assets/image/UI/range/yellow.png"),
@@ -639,7 +629,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         self.screen_to_move_y = None
                         self.dialogData["dialogId"] += 1
                 else:
-                    raise Exception("Error: Dialog Data on {0} with id {1} cannot pass through any statement!".format(self.dialogKey,self.dialogData["dialogId"]))
+                    raise Exception("Error: Dialog Data on '{0}' with id '{1}' cannot pass through any statement!".format(self.dialogKey,self.dialogData["dialogId"]))
                 #玩家输入按键判定
                 for event in self.events:
                     if event.type == pygame.KEYDOWN:
@@ -689,10 +679,10 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         elif self.dialogKey == None:
             #角色UI
             for every_chara in self.griffinCharactersData:
-                self.griffinCharactersData[every_chara].drawUI(screen,self.original_UI_img,self.MAP)
+                self.griffinCharactersData[every_chara].drawUI(screen,self.MAP)
             for enemies in self.sangvisFerrisData:
                 if self.MAP.inLightArea(self.sangvisFerrisData[enemies]):
-                    self.sangvisFerrisData[enemies].drawUI(screen,self.original_UI_img,self.MAP)
+                    self.sangvisFerrisData[enemies].drawUI(screen,self.MAP)
             if self.txt_alpha == 0:
                 self.battleMode = True
     #切换回合
@@ -1290,14 +1280,14 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         self._display_decoration(screen)
         #展示所有角色Ui
         for every_chara in self.griffinCharactersData:
-            self.griffinCharactersData[every_chara].drawUI(screen,self.original_UI_img,self.MAP)
+            self.griffinCharactersData[every_chara].drawUI(screen,self.MAP)
         for enemies in self.sangvisFerrisData:
             if self.MAP.isPosInLightArea(int(self.sangvisFerrisData[enemies].x),int(self.sangvisFerrisData[enemies].y)):
-                self.sangvisFerrisData[enemies].drawUI(screen,self.original_UI_img,self.MAP)
+                self.sangvisFerrisData[enemies].drawUI(screen,self.MAP)
         #显示选择菜单
         if self.NotDrawRangeBlocks == "SelectMenu":
             #左下角的角色信息
-            self.characterInfoBoardUI.display(screen,self.characterInControl,self.original_UI_img)
+            self.characterInfoBoardUI.display(screen,self.characterInControl)
             #----选择菜单----
             self.buttonGetHover = self.selectMenuUI.display(screen,round(self.MAP.block_width/10),self.MAP.getBlockExactLocation(self.characterInControl.x,self.characterInControl.y),self.characterInControl.kind,self.friendsCanSave,self.thingsCanReact)
         #加载雪花

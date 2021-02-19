@@ -1,4 +1,5 @@
 # cython: language_level=3
+from linpg.scr_core.surface import ProgressBar, ProgressBarSurface
 from .init import *
 
 #显示回合切换的UI
@@ -262,11 +263,16 @@ class CharacterInfoBoard:
         del all_icon_file_list
         self.text_size = text_size
         self.informationBoard = None
+        hp_empty_img = linpg.loadImg("Assets/image/UI/hp_empty.png")
+        self.hp_red = ProgressBarSurface("Assets/image/UI/hp_red.png",hp_empty_img,0,0,window_x/15,text_size)
+        self.hp_green = ProgressBarSurface("Assets/image/UI/hp_green.png",hp_empty_img,0,0,window_x/15,text_size)
+        self.action_point_blue = ProgressBarSurface("Assets/image/UI/action_point.png",hp_empty_img,0,0,window_x/15,text_size)
+        self.bullets_number_brown = ProgressBarSurface("Assets/image/UI/bullets_number.png",hp_empty_img,0,0,window_x/15,text_size)
     #标记需要更新
     def update(self):
         self.informationBoard = None
     #更新信息了
-    def updateInformationBoard(self,fontSize,theCharacterData,original_UI_img):
+    def updateInformationBoard(self,fontSize,theCharacterData):
         self.informationBoard = self.boardImg.copy()
         padding = (self.boardImg.get_height()-self.characterIconImages[theCharacterData.type].get_height())/2
         #画出角色图标
@@ -284,23 +290,27 @@ class CharacterInfoBoard:
         self.informationBoard.blit(tcgc_hp1,(temp_posX,temp_posY))
         self.informationBoard.blit(tcgc_action_point1,(temp_posX,temp_posY+self.text_size*1.5))
         self.informationBoard.blit(tcgc_bullets_situation1,(temp_posX,temp_posY+self.text_size*3.0))
-        #画出底部空白的血条格
-        hp_empty = linpg.resizeImg(original_UI_img["hp_empty"],(int(self.boardImg.get_width()/3),int(self.text_size)))
+        #设置坐标和百分比
         temp_posX = self.characterIconImages[theCharacterData.type].get_width()*2.4
         temp_posY = padding
-        self.informationBoard.blit(hp_empty,(temp_posX,temp_posY))
-        self.informationBoard.blit(hp_empty,(temp_posX,temp_posY+self.text_size*1.5))
-        self.informationBoard.blit(hp_empty,(temp_posX,temp_posY+self.text_size*3))
-        #画出三个信息条
-        self.informationBoard.blit(linpg.resizeImg(original_UI_img["hp_green"],(int(hp_empty.get_width()*theCharacterData.current_hp/theCharacterData.max_hp),int(self.text_size))),(temp_posX ,temp_posY))
-        self.informationBoard.blit(linpg.resizeImg(original_UI_img["action_point_blue"],(int(hp_empty.get_width()*theCharacterData.current_action_point/theCharacterData.max_action_point),int(self.text_size))),(temp_posX ,temp_posY+self.text_size*1.5))
-        self.informationBoard.blit(linpg.resizeImg(original_UI_img["bullets_number_brown"],(int(hp_empty.get_width()*theCharacterData.current_bullets/theCharacterData.magazine_capacity),int(self.text_size))),(temp_posX ,temp_posY+self.text_size*3))
-        linpg.displayInCenter(tcgc_hp2,hp_empty,temp_posX ,temp_posY,self.informationBoard)
-        linpg.displayInCenter(tcgc_action_point2,hp_empty,temp_posX ,temp_posY+self.text_size*1.5,self.informationBoard)
-        linpg.displayInCenter(tcgc_bullets_situation2,hp_empty,temp_posX ,temp_posY+self.text_size*3,self.informationBoard)
-    def display(self,screen,theCharacterData,original_UI_img):
+        self.hp_red.set_pos(temp_posX,temp_posY)
+        self.hp_red.set_percentage(theCharacterData.current_hp/theCharacterData.max_hp)
+        self.hp_green.set_pos(temp_posX,temp_posY)
+        self.hp_green.set_percentage(theCharacterData.current_hp/theCharacterData.max_hp)
+        self.action_point_blue.set_pos(temp_posX,temp_posY+self.text_size*1.5)
+        self.action_point_blue.set_percentage(theCharacterData.current_action_point/theCharacterData.max_action_point)
+        self.bullets_number_brown.set_pos(temp_posX,temp_posY+self.text_size*3)
+        self.bullets_number_brown.set_percentage(theCharacterData.current_bullets/theCharacterData.magazine_capacity)
+        #画出
+        self.hp_green.draw(self.informationBoard)
+        linpg.displayInCenter(tcgc_hp2,self.hp_green,temp_posX ,temp_posY,self.informationBoard)
+        self.action_point_blue.draw(self.informationBoard)
+        linpg.displayInCenter(tcgc_action_point2,self.action_point_blue,temp_posX ,temp_posY+self.text_size*1.5,self.informationBoard)
+        self.bullets_number_brown.draw(self.informationBoard)
+        linpg.displayInCenter(tcgc_bullets_situation2,self.bullets_number_brown,temp_posX ,temp_posY+self.text_size*3,self.informationBoard)
+    def display(self,screen,theCharacterData):
         if self.informationBoard == None:
-            self.updateInformationBoard(screen.get_width()/96,theCharacterData,original_UI_img)
+            self.updateInformationBoard(screen.get_width()/96,theCharacterData)
         screen.blit(self.informationBoard,(0,screen.get_height()-self.boardImg.get_height()))
 
 #计分板
