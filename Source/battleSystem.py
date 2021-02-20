@@ -365,22 +365,22 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         #加载子弹图片
         #bullet_img = loadImg("Assets/image/UI/bullet.png", get_block_width()/6, self.MAP.block_height/12)
         #加载血条,各色方块等UI图片 size:get_block_width(), self.MAP.block_height/5
-        self.original_UI_img = {
-            "green" : linpg.loadImg("Assets/image/UI/range/green.png"),
-            "red" : linpg.loadImg("Assets/image/UI/range/red.png"),
-            "yellow": linpg.loadImg("Assets/image/UI/range/yellow.png"),
-            "blue": linpg.loadImg("Assets/image/UI/range/blue.png"),
-            "orange": linpg.loadImg("Assets/image/UI/range/orange.png"),
-            "supplyBoard":linpg.loadImage("Assets/image/UI/score.png",((self.window_x-self.window_x/3)/2,-self.window_y/12),self.window_x/3,self.window_y/12),
+        self.supply_board_ui_img = linpg.loadImage(
+            "Assets/image/UI/score.png",
+            ((self.window_x-self.window_x/3)/2,-self.window_y/12),
+            self.window_x/3,
+            self.window_y/12
+        )
+        #用于表示范围的方框图片
+        self.range_ui_images = {
+            "green" : linpg.SrcalphaSurface("Assets/image/UI/range/green.png",0,0),
+            "red" : linpg.SrcalphaSurface("Assets/image/UI/range/red.png",0,0),
+            "yellow": linpg.SrcalphaSurface("Assets/image/UI/range/yellow.png",0,0),
+            "blue": linpg.SrcalphaSurface("Assets/image/UI/range/blue.png",0,0),
+            "orange": linpg.SrcalphaSurface("Assets/image/UI/range/orange.png",0,0),
         }
-        #UI - 变形后
-        self.UI_img = {
-            "green" : linpg.resizeImg(self.original_UI_img["green"], (self.MAP.block_width*0.8, None)),
-            "red" : linpg.resizeImg(self.original_UI_img["red"], (self.MAP.block_width*0.8, None)),
-            "yellow" : linpg.resizeImg(self.original_UI_img["yellow"], (self.MAP.block_width*0.8, None)),
-            "blue" : linpg.resizeImg(self.original_UI_img["blue"], (self.MAP.block_width*0.8, None)),
-            "orange": linpg.resizeImg(self.original_UI_img["orange"], (self.MAP.block_width*0.8, None))
-        }
+        for key in self.range_ui_images:
+            self.range_ui_images[key].set_width_with_size_locked(self.MAP.block_width*0.8)
         #角色信息UI管理
         self.characterInfoBoardUI = CharacterInfoBoard(self.window_x,self.window_y)
         #加载对话框图片
@@ -769,8 +769,8 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 self.zoomIn += 5
             self.MAP.changePerBlockSize(self.window_x/self.MAP.column*self.zoomIn/100,self.window_y/self.MAP.row*self.zoomIn/100)
             #根据block尺寸重新加载对应尺寸的UI
-            for key in self.UI_img:
-                self.UI_img[key] = linpg.resizeImg(self.original_UI_img[key], (self.MAP.block_width*0.8, None))
+            for key in self.range_ui_images:
+                self.range_ui_images[key].set_width_with_size_locked(self.MAP.block_width*0.8)
             self.selectMenuUI.allButton = None
         else:
             self.zoomIn = self.zoomIntoBe
@@ -782,7 +782,8 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         for area in self.areaDrawColorBlock:
             for position in self.areaDrawColorBlock[area]:
                 xTemp,yTemp = self.MAP.calPosInMap(position[0],position[1])
-                linpg.drawImg(self.UI_img[area],(xTemp+self.MAP.block_width*0.1,yTemp),screen)
+                self.range_ui_images[area].set_pos(xTemp+self.MAP.block_width*0.1,yTemp)
+                self.range_ui_images[area].draw(screen)
 
         #玩家回合
         if self.whose_round == "player":
@@ -1103,16 +1104,16 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         #检测是不是站在补给上
                         decoration = self.MAP.find_decoration_on(self.characterInControl.get_pos())
                         if decoration != None and decoration.type == "chest":
-                            self.original_UI_img["supplyBoard"].items = []
+                            self.supply_board_ui_img.items = []
                             for itemType,itemData in decoration.items.items():
                                 if itemType == "bullet":
                                     self.characterInControl.bullets_carried += itemData
-                                    self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
+                                    self.supply_board_ui_img.items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
                                 elif itemType == "hp":
                                     self.characterInControl.current_hp += itemData
-                                    self.original_UI_img["supplyBoard"].items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
-                            if len(self.original_UI_img["supplyBoard"].items)>0:
-                                self.original_UI_img["supplyBoard"].yTogo = 10
+                                    self.supply_board_ui_img.items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
+                            if len(self.supply_board_ui_img.items)>0:
+                                self.supply_board_ui_img.yTogo = 10
                             self.MAP.remove_decoration(decoration)
                         keyTemp = str(self.characterInControl.x)+"-"+str(self.characterInControl.y) 
                         #检测是否角色有set的动画
@@ -1212,9 +1213,9 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                             self.rightClickCharacterAlpha = 0
                         if self.rightClickCharacterAlpha < 255:
                             self.rightClickCharacterAlpha += 17
-                            self.UI_img["yellow"].set_alpha(self.rightClickCharacterAlpha)
-                            self.UI_img["blue"].set_alpha(self.rightClickCharacterAlpha)
-                            self.UI_img["green"].set_alpha(self.rightClickCharacterAlpha)
+                            self.range_ui_images["yellow"].set_alpha(self.rightClickCharacterAlpha)
+                            self.range_ui_images["blue"].set_alpha(self.rightClickCharacterAlpha)
+                            self.range_ui_images["green"].set_alpha(self.rightClickCharacterAlpha)
                         rangeCanAttack =  value.getAttackRange(self.MAP)
                         self.areaDrawColorBlock["yellow"] = rangeCanAttack["far"]
                         self.areaDrawColorBlock["blue"] =  rangeCanAttack["middle"]
@@ -1231,7 +1232,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     xTemp,yTemp = self.MAP.calPosInMap(value.x,value.y)
                     xTemp+=self.MAP.block_width*0.05
                     yTemp-=self.MAP.block_width*0.05
-                    linpg.displayInCenter(self.damage_do_to_characters[key],self.UI_img["green"],xTemp,yTemp,screen)
+                    linpg.displayInCenter(self.damage_do_to_characters[key],self.range_ui_images["green"],xTemp,yTemp,screen)
                     self.damage_do_to_characters[key].set_alpha(the_alpha_to_check-5)
                 else:
                     del self.damage_do_to_characters[key]
@@ -1262,19 +1263,19 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 del self.the_dead_one[key]
         """↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑角色动画展示区↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑"""
         #调整范围方块的透明度
-        if rightClickCharacterAlphaDeduct == True and self.rightClickCharacterAlpha != None:
-            if self.rightClickCharacterAlpha>0:
-                self.rightClickCharacterAlpha-=17
-                self.UI_img["yellow"].set_alpha(self.rightClickCharacterAlpha)
-                self.UI_img["blue"].set_alpha(self.rightClickCharacterAlpha)
-                self.UI_img["green"].set_alpha(self.rightClickCharacterAlpha)
+        if rightClickCharacterAlphaDeduct and self.rightClickCharacterAlpha != None:
+            if self.rightClickCharacterAlpha > 0:
+                self.rightClickCharacterAlpha -= 17
+                self.range_ui_images["yellow"].set_alpha(self.rightClickCharacterAlpha)
+                self.range_ui_images["blue"].set_alpha(self.rightClickCharacterAlpha)
+                self.range_ui_images["green"].set_alpha(self.rightClickCharacterAlpha)
             elif self.rightClickCharacterAlpha == 0:
                 self.areaDrawColorBlock["yellow"] = []
                 self.areaDrawColorBlock["blue"] = []
                 self.areaDrawColorBlock["green"] = []
-                self.UI_img["yellow"].set_alpha(255)
-                self.UI_img["blue"].set_alpha(255)
-                self.UI_img["green"].set_alpha(255)
+                self.range_ui_images["yellow"].set_alpha(255)
+                self.range_ui_images["blue"].set_alpha(255)
+                self.range_ui_images["green"].set_alpha(255)
                 self.rightClickCharacterAlpha = None
         #展示设施
         self._display_decoration(screen)
@@ -1299,31 +1300,31 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         self._check_whether_player_win_or_lost()
 
         #显示获取到的物资
-        if self.original_UI_img["supplyBoard"].yTogo == 10:
-            if self.original_UI_img["supplyBoard"].y < self.original_UI_img["supplyBoard"].yTogo:
-                self.original_UI_img["supplyBoard"].y += 5
+        if self.supply_board_ui_img.yTogo == 10:
+            if self.supply_board_ui_img.y < self.supply_board_ui_img.yTogo:
+                self.supply_board_ui_img.y += 5
             else:
                 if self.stayingTime == 30:
-                    self.original_UI_img["supplyBoard"].yTogo = -self.window_y/12
+                    self.supply_board_ui_img.yTogo = -self.window_y/12
                     self.stayingTime = 0
                 else:
                     self.stayingTime += 1
         else:
-            if self.original_UI_img["supplyBoard"].y > self.original_UI_img["supplyBoard"].yTogo:
-                self.original_UI_img["supplyBoard"].y -= 5
+            if self.supply_board_ui_img.y > self.supply_board_ui_img.yTogo:
+                self.supply_board_ui_img.y -= 5
 
-        if len(self.original_UI_img["supplyBoard"].items) > 0 and self.original_UI_img["supplyBoard"].y != -self.window_y/30:
-            self.__add_on_screen_object(self.original_UI_img["supplyBoard"])
+        if len(self.supply_board_ui_img.items) > 0 and self.supply_board_ui_img.y != -self.window_y/30:
+            self.__add_on_screen_object(self.supply_board_ui_img)
             lenTemp = 0
-            for i in range(len(self.original_UI_img["supplyBoard"].items)):
-                lenTemp += self.original_UI_img["supplyBoard"].items[i].get_width()*1.5
+            for i in range(len(self.supply_board_ui_img.items)):
+                lenTemp += self.supply_board_ui_img.items[i].get_width()*1.5
             start_point = (self.window_x - lenTemp)/2
-            for i in range(len(self.original_UI_img["supplyBoard"].items)):
-                start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*0.25
-                self.__add_on_screen_object(self.original_UI_img["supplyBoard"].items[i],-1,(start_point,
-                (self.original_UI_img["supplyBoard"].get_height()-self.original_UI_img["supplyBoard"].items[i].get_height())/2
-                ),(0,self.original_UI_img["supplyBoard"].y))
-                start_point += self.original_UI_img["supplyBoard"].items[i].get_width()*1.25
+            for i in range(len(self.supply_board_ui_img.items)):
+                start_point += self.supply_board_ui_img.items[i].get_width()*0.25
+                self.__add_on_screen_object(self.supply_board_ui_img.items[i],-1,(start_point,
+                (self.supply_board_ui_img.get_height()-self.supply_board_ui_img.items[i].get_height())/2
+                ),(0,self.supply_board_ui_img.y))
+                start_point += self.supply_board_ui_img.items[i].get_width()*1.25
 
         if self.whose_round == "player":
             #加载结束回合的按钮

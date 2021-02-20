@@ -5,3 +5,5 @@ import shutil
 import time
 import pygame
 import linpg
+
+version = "0.0"
