@@ -36,6 +36,8 @@ decoration:
     chest1:
       items:
         bullet: 100
+      whitelist:
+      - sv-98
       x: 15
       y: 10
   obstacle:
@@ -440,7 +442,11 @@ decoration:
 dialogs:
   initial: initial_dialog
   move:
-    15-10: tutorial1
+    15-10:
+      repeat: false
+      whitelist:
+      - sv-98
+      dialog_key: tutorial1
 local_x: -3000
 local_y: 1000
 map:
@@ -2971,4 +2977,3 @@ sangvisFerri:
     x: 18
     y: 10
 weather: snow
-zoomIn: 3

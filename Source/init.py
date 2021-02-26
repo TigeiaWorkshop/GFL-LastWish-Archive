@@ -6,4 +6,8 @@ import time
 import pygame
 import linpg
 
-version = "0.0"
+#加载版本信息
+version_info = linpg.loadConfig("Data/version.yaml")
+VERSION = version_info["version"]
+REVISION = version_info["revision"]
+del version_info

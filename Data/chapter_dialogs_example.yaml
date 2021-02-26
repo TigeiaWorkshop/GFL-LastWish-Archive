@@ -6,6 +6,7 @@ battle_info:
 - 5 lines are the maximum
 description: The description of the chapter, will be displayed during the loading
   screen
+dialog_during_battle: null
 dialogs:
   dialog_after_battle:
     head:
@@ -49,5 +50,4 @@ dialogs:
       last_dialog_id: head
       narrator: Name
       next_dialog_id: null
-dialog_during_battle: null
 title: The title of this chapter

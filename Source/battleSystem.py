@@ -191,15 +191,16 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         self.__maxItemWeight = 0
         #刷新画面
         linpg.display.flip()
+    #格里芬角色
     @property
-    def griffinCharactersData(self):
-        return self.alliances_data
+    def griffinCharactersData(self): return self.alliances_data
+    #铁血角色
     @property
-    def sangvisFerrisData(self):
-        return self.enemies_data
+    def sangvisFerrisData(self): return self.enemies_data
+    #正在控制的角色
     @property
-    def characterInControl(self):
-        return self.alliances_data[self.characterGetClick]
+    def characterInControl(self) -> linpg.FriendlyCharacter: return self.alliances_data[self.characterGetClick]
+    #胜利失败判定
     def _check_whether_player_win_or_lost(self):
         #常规
         """检测失败条件"""
@@ -216,7 +217,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         """检测胜利条件"""
         #歼灭模式
         if self.mission_objectives["type"] == "annihilation":
-            #如果需要检测是否所有敌人都已经被消灭
+            #检测是否所有敌人都已经被消灭
             if "target" not in self.mission_objectives or self.mission_objectives["target"] == None:
                 if len(self.sangvisFerrisData) == 0:
                     self.characterGetClick = None
@@ -224,8 +225,17 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     self.whose_round = "result_win"
                 else:
                     pass
-            elif self.mission_objectives["target"] not in self.enemies_data:
+            #检测是否特定敌人已经被消灭
+            elif isinstance(self.mission_objectives["target"],str) and self.mission_objectives["target"] not in self.enemies_data:
                 self.whose_round = "result_win"
+            #检测是否所有给定的目标都已经被歼灭
+            elif isinstance(self.mission_objectives["target"],(list,tuple)):
+                find_one = False
+                for key in self.alliances_data:
+                    if key in self.mission_objectives["target"]:
+                        find_one = True
+                        break
+                if not find_one: self.whose_round = "result_win"
     #储存章节信息
     def save_process(self):
         save_thread = linpg.SaveDataThread("Save/save.yaml", {
@@ -315,7 +325,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             else linpg.loadConfig("Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collection_name,self.chapterId))
         #设置背景音乐
         self.set_bgm("Assets\music\{}".format(DataTmp["background_music"]))
-        self.zoomIn = DataTmp["zoomIn"]*100
         #加载胜利目标
         self.mission_objectives = DataTmp["mission_objectives"]
         #初始化天气和环境的音效 -- 频道1
@@ -324,12 +333,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         if DataTmp["weather"] != None:
             self.environment_sound.add("Assets/sound/environment/{}.ogg".format(DataTmp["weather"]))
             self.weatherController = linpg.WeatherSystem(DataTmp["weather"],self.window_x,self.window_y)
-        #检测self.zoomIn参数是否越界
-        if self.zoomIn < 200:
-            self.zoomIn = 200
-        elif self.zoomIn > 400:
-            self.zoomIn = 400
-        self.zoomIntoBe = self.zoomIn
         #加载对话信息
         self.dialogInfo = DataTmp["dialogs"]
         if not self.loadFromSave:
@@ -417,6 +420,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         self.footstep_sounds.set_volume(linpg.get_setting("Sound","sound_effects")/100)
         self.environment_sound.set_volume(linpg.get_setting("Sound","sound_environment")/100.0)
         self.set_bgm_volume(linpg.get_setting("Sound","background_music")/100.0)
+    #警告某个角色周围的敌人
     def alert_enemy_around(self,name,value=10):
         enemies_need_check = []
         for key in self.sangvisFerrisData:
@@ -428,7 +432,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 for character in self.griffinCharactersData:
                     if self.sangvisFerrisData[key].can_attack(self.griffinCharactersData[character],self.MAP):
                         self.griffinCharactersData[character].notice(100)
-
     #把战斗系统的画面画到screen上
     def display(self,screen):
         self._update_event()
@@ -753,10 +756,10 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 if event.button == 1 or event.type == pygame.JOYBUTTONDOWN and linpg.controller.joystick.get_button(0) == 1:
                     right_click = True
                 #上下滚轮-放大和缩小地图
-                elif event.button == 4 and self.zoomIntoBe < 400:
-                    self.zoomIntoBe += 20
-                elif event.button == 5 and self.zoomIntoBe > 200:
-                    self.zoomIntoBe -= 20
+                elif event.button == 4 and self.zoomIntoBe < 150:
+                    self.zoomIntoBe += 10
+                elif event.button == 5 and self.zoomIntoBe > 50:
+                    self.zoomIntoBe -= 10
         #其他移动的检查
         self._check_right_click_move(mouse_x,mouse_y)
         self._check_jostick_events()
@@ -767,13 +770,11 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 self.zoomIn -= 5
             elif self.zoomIntoBe > self.zoomIn:
                 self.zoomIn += 5
-            self.MAP.changePerBlockSize(self.window_x/self.MAP.column*self.zoomIn/100,self.window_y/self.MAP.row*self.zoomIn/100)
+            self.MAP.changePerBlockSize(self.standard_block_width*self.zoomIn/100,self.standard_block_height*self.zoomIn/100)
             #根据block尺寸重新加载对应尺寸的UI
             for key in self.range_ui_images:
                 self.range_ui_images[key].set_width_with_size_locked(self.MAP.block_width*0.8)
             self.selectMenuUI.allButton = None
-        else:
-            self.zoomIn = self.zoomIntoBe
 
         #画出地图
         self._display_map(screen)
@@ -1104,25 +1105,40 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         #检测是不是站在补给上
                         decoration = self.MAP.find_decoration_on(self.characterInControl.get_pos())
                         if decoration != None and decoration.type == "chest":
-                            self.supply_board_ui_img.items = []
-                            for itemType,itemData in decoration.items.items():
-                                if itemType == "bullet":
-                                    self.characterInControl.bullets_carried += itemData
-                                    self.supply_board_ui_img.items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
-                                elif itemType == "hp":
-                                    self.characterInControl.current_hp += itemData
-                                    self.supply_board_ui_img.items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
-                            if len(self.supply_board_ui_img.items)>0:
-                                self.supply_board_ui_img.yTogo = 10
-                            self.MAP.remove_decoration(decoration)
-                        keyTemp = str(self.characterInControl.x)+"-"+str(self.characterInControl.y) 
-                        #检测是否角色有set的动画
+                            if decoration.whitelist == None or\
+                                self.characterGetClick == decoration.whitelist or self.characterGetClick in decoration.whitelist:
+                                #尝试清空储存列表
+                                try:
+                                    self.supply_board_ui_img.items.clear()
+                                #如果无法清空，则多半列表还没被初始化
+                                except:
+                                    self.supply_board_ui_img.items = []
+                                #将物品按照类型放入列表
+                                for itemType,itemData in decoration.items.items():
+                                    if itemType == "bullet":
+                                        self.characterInControl.bullets_carried += itemData
+                                        self.supply_board_ui_img.items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
+                                    elif itemType == "hp":
+                                        self.characterInControl.current_hp += itemData
+                                        self.supply_board_ui_img.items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
+                                #如果UI已经回到原位
+                                if len(self.supply_board_ui_img.items) > 0: self.supply_board_ui_img.yTogo = 10
+                                #移除箱子
+                                self.MAP.remove_decoration(decoration)
+                        #检测当前所在点是否应该触发对话
+                        name_from_by_pos = str(self.characterInControl.x)+"-"+str(self.characterInControl.y)
+                        if "move" in self.dialogInfo and name_from_by_pos in self.dialogInfo["move"]:
+                            dialog_to_check = self.dialogInfo["move"][name_from_by_pos]
+                            if "whitelist" not in dialog_to_check or dialog_to_check["whitelist"] == None or\
+                                self.characterGetClick == dialog_to_check["whitelist"] or self.characterGetClick in dialog_to_check["whitelist"]:
+                                self.dialogKey = dialog_to_check["dialog_key"]
+                                self.battleMode = False
+                                #如果对话不重复，则删除（默认不重复）
+                                if "repeat" not in dialog_to_check or not dialog_to_check["repeat"]: del dialog_to_check
+                        #玩家可以继续选择需要进行的操作
                         self.isWaiting = True
                         self.characterGetClick = None
                         self.action_choice = None
-                        if "move" in self.dialogInfo and keyTemp in self.dialogInfo["move"]:
-                            self.dialogKey = self.dialogInfo["move"][keyTemp]
-                            self.battleMode = False
                 elif self.action_choice == "attack":
                     #根据敌我坐标判断是否需要反转角色
                     if self.characterInControl.get_imgId("attack") == 0:
@@ -1183,7 +1199,10 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 elif self.sangvisFerrisData[self.enemy_in_control].get_imgId("attack") == self.sangvisFerrisData[self.enemy_in_control].get_imgNum("attack")-1:
                     temp_value = linpg.randomInt(0,100)
                     if self.enemy_action["target_area"] == "near" and temp_value <= 95 or self.enemy_action["target_area"] == "middle" and temp_value <= 80 or self.enemy_action["target_area"] == "far" and temp_value <= 65:
-                        the_damage = self.griffinCharactersData[self.enemy_action["target"]].attackBy(self.sangvisFerrisData[self.enemy_in_control],self.resultInfo)
+                        the_damage = self.griffinCharactersData[self.enemy_action["target"]].attackBy(self.sangvisFerrisData[self.enemy_in_control])
+                        #如果角色进入倒地或者死亡状态，则应该将times_characters_down加一
+                        if self.griffinCharactersData[self.enemy_action["target"]].current_hp == 0: self.resultInfo["times_characters_down"] += 1
+                        #重新计算迷雾区域
                         self._calculate_darkness()
                         self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),linpg.get_fontMode(),linpg.findColorRGBA("red"))
                     else:
