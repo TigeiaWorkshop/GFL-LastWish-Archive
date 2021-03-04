@@ -21,7 +21,7 @@ def dialog(chapterType,chapterId,screen,part,collection_name=None):
         DIALOG.load("Save/save.yaml")
     #加载完成-闸门开启的效果
     for i in range(100,-1,-1):
-        DIALOG.npc_and_background_image_content.display_bg_img(screen)
+        DIALOG.display_background_image(screen)
         linpg.drawImg(LoadingImgAbove,(-4,LoadingImgAbove.get_height()/100*i-LoadingImgAbove.get_height()),screen)
         linpg.drawImg(LoadingImgBelow,(-4,screen.get_height()-LoadingImgBelow.get_height()/100*i),screen)
         linpg.display.flip(True)

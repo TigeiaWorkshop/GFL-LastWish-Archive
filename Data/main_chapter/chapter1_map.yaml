@@ -443,10 +443,10 @@ dialogs:
   initial: initial_dialog
   move:
     15-10:
+      dialog_key: tutorial1
       repeat: false
       whitelist:
       - sv-98
-      dialog_key: tutorial1
 local_x: -3000
 local_y: 1000
 map:
