@@ -33,6 +33,11 @@ dialogs: {}
 local_x: 0
 local_y: 0
 map: null
+mission_objectives:
+  allow_any_one_die: false
+  round_limitation: 10
+  target: null
+  type: annihilation
 sangvisFerri:
   guard:
     type: guard

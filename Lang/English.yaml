@@ -107,7 +107,6 @@ Warnings:
   magazine_is_empty: Current character has an empty magazine, please reload.
   magazine_is_full: Current character has a full magazine, no need to reload.
   no_bullets_left: Current character has no bullet left.
-  no_enemy_in_effective_range: There is no enemy in this character's attack range.
   no_enough_ap_to_attack: You don't have enough action points for attacking.
   no_enough_ap_to_interact: You don't have enough action points for interacting.
   no_enough_ap_to_move: You don't have enough action points for moving.

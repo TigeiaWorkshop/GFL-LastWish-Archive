@@ -136,11 +136,11 @@ class SelectMenu:
         selectMenuTxtDic = linpg.get_lang("SelectMenu")
         self.selectButtonImg = linpg.loadImg("Assets/image/UI/menu.png")
         #攻击
-        self.attackAP = 5
+        self.attackAP = linpg.AP_IS_NEEDED_TO_ATTACK
         self.attackTxt = selectMenuTxtDic["attack"]
         self.attackAPTxt = str(self.attackAP)+" AP"
         #移动
-        self.moveAP = 2
+        self.moveAP = linpg.AP_IS_NEEDED_TO_MOVE_ONE_BLOCK
         self.moveTxt = selectMenuTxtDic["move"]
         self.moveAPTxt = str(self.moveAP)+"N AP"
         #换弹
@@ -294,9 +294,9 @@ class CharacterInfoBoard:
         temp_posX = self.characterIconImages[theCharacterData.type].get_width()*2.4
         temp_posY = padding
         self.hp_red.set_pos(temp_posX,temp_posY)
-        self.hp_red.set_percentage(theCharacterData.current_hp/theCharacterData.max_hp)
+        self.hp_red.set_percentage(theCharacterData.hp_precentage)
         self.hp_green.set_pos(temp_posX,temp_posY)
-        self.hp_green.set_percentage(theCharacterData.current_hp/theCharacterData.max_hp)
+        self.hp_green.set_percentage(theCharacterData.hp_precentage)
         self.action_point_blue.set_pos(temp_posX,temp_posY+self.text_size*1.5)
         self.action_point_blue.set_percentage(theCharacterData.current_action_point/theCharacterData.max_action_point)
         self.bullets_number_brown.set_pos(temp_posX,temp_posY+self.text_size*3)

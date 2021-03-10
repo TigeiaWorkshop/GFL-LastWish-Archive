@@ -135,11 +135,10 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         self.buttonGetHover = None
         #被救助的那个角色
         self.friendGetHelp = None
-        #AI系统正在操控的地方角色ID
-        self.enemy_in_control = None
+        #AI系统正在操控的敌对角色ID
         self.enemies_in_control_id = None
         #所有敌对角色的名字列表
-        self.sangvisFerris_name_list = None
+        self.sangvisFerris_name_list = []
         #战斗状态数据
         self.resultInfo = {
             "total_rounds" : 1,
@@ -156,8 +155,10 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         #上个回合因为暴露被敌人发现的角色
         #格式：角色：[x,y]
         self.the_characters_detected_last_round = {}
-        #敌人的状态
-        self.enemy_action = None
+        #敌人的指令
+        self.enemy_instructions = None
+        #敌人当前需要执行的指令
+        self.current_instruction = None
         #积分栏的UI模块
         self.ResultBoardUI = None
         #对话-动作是否被设置
@@ -200,13 +201,16 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
     #正在控制的角色
     @property
     def characterInControl(self) -> linpg.FriendlyCharacter: return self.alliances_data[self.characterGetClick]
+    #正在控制的铁血角色
+    @property
+    def enemy_in_control(self) -> str: return self.sangvisFerris_name_list[self.enemies_in_control_id]
     #胜利失败判定
     def _check_whether_player_win_or_lost(self):
         #常规
         """检测失败条件"""
         #如果有回合限制
-        if "round_limitation" in self.mission_objectives and self.mission_objectives["round_limitation"] != None\
-            and self.resultInfo["total_rounds"] > self.mission_objectives["round_limitation"]:
+        if "round_limitation" in self.mission_objectives and self.mission_objectives["round_limitation"] != None and\
+            self.mission_objectives["round_limitation"] > 0 and self.resultInfo["total_rounds"] > self.mission_objectives["round_limitation"]:
             self.whose_round = "result_fail"
         #如果不允许失去任何一位同伴
         if "allow_any_one_die" not in self.mission_objectives or not self.mission_objectives["allow_any_one_die"]:
@@ -424,13 +428,13 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
     def alert_enemy_around(self,name,value=10):
         enemies_need_check = []
         for key in self.sangvisFerrisData:
-            if self.sangvisFerrisData[key].can_attack(self.griffinCharactersData[name],self.MAP):
+            if self.sangvisFerrisData[key].can_attack(self.griffinCharactersData[name]):
                 self.sangvisFerrisData[key].alert(value)
                 enemies_need_check.append(key)
         for key in enemies_need_check:
             if self.sangvisFerrisData[key].is_alert:
                 for character in self.griffinCharactersData:
-                    if self.sangvisFerrisData[key].can_attack(self.griffinCharactersData[character],self.MAP):
+                    if self.sangvisFerrisData[key].can_attack(self.griffinCharactersData[character]):
                         self.griffinCharactersData[character].notice(100)
     #把战斗系统的画面画到screen上
     def display(self,screen):
@@ -694,10 +698,10 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             if self.RoundSwitchUI.display(screen,self.whose_round,self.resultInfo["total_rounds"]):
                 if self.whose_round == "playerToSangvisFerris":
                     self.enemies_in_control_id = 0
-                    self.sangvisFerris_name_list = []
+                    self.sangvisFerris_name_list.clear()
                     any_is_alert = False
                     for every_chara in self.sangvisFerrisData:
-                        if self.sangvisFerrisData[every_chara].current_hp > 0:
+                        if self.sangvisFerrisData[every_chara].is_alive():
                             self.sangvisFerris_name_list.append(every_chara)
                             if self.sangvisFerrisData[every_chara].is_alert: any_is_alert = True
                     #如果有一个铁血角色已经处于完全察觉的状态，则让所有铁血角色进入警觉状态
@@ -731,8 +735,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         right_click = False
         #获取鼠标坐标
         mouse_x,mouse_y = linpg.controller.get_pos()
-        #攻击范围
-        attacking_range = None
         skill_range = None
         for event in self.events:
             if event.type == pygame.KEYDOWN:
@@ -742,7 +744,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     self.NotDrawRangeBlocks = True
                     self.characterGetClick = None
                     self.action_choice = None
-                    attacking_range = None
                     skill_range = None
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 self._check_key_down(event)
@@ -795,7 +796,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     self.whose_round = "playerToSangvisFerris"
                     self.characterGetClick = None
                     self.NotDrawRangeBlocks = True
-                    attacking_range = None
                     skill_range = None
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 #是否在显示移动范围后点击了且点击区域在移动范围内
@@ -852,7 +852,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     self.characterInControl.set_action("attack",False)
                     self.isWaiting = False
                     self.NotDrawRangeBlocks = True
-                    attacking_range = None
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 elif self.action_choice == "skill" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.skill_target != None:
                     if self.skill_target in self.griffinCharactersData:
@@ -876,7 +875,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     self.action_choice = None
                     self.isWaiting = True
                     self.NotDrawRangeBlocks = True
-                    attacking_range = None
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 elif self.action_choice == "interact" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.decorationGetClick != None:
                     self.characterInControl.try_reduce_action_point(2)
@@ -886,7 +884,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     self.action_choice = None
                     self.isWaiting = True
                     self.NotDrawRangeBlocks = True
-                    attacking_range = None
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 #判断是否有被点击的角色
                 elif block_get_click != None:
@@ -894,7 +891,6 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         if self.griffinCharactersData[key].on_pos(block_get_click) and self.isWaiting == True and self.griffinCharactersData[key].dying == False and self.NotDrawRangeBlocks != False:
                             self.screen_to_move_x = None
                             self.screen_to_move_y = None
-                            attacking_range = None
                             skill_range = None
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                             if self.characterGetClick != key:
@@ -943,49 +939,35 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                                 self.characterInControl.draw_custom("move",(xTemp,yTemp),screen,self.MAP)
                 #显示攻击范围        
                 elif self.action_choice == "attack":
-                    if attacking_range == None:
-                        attacking_range = self.characterInControl.getAttackRange(self.MAP)
-                    any_character_in_attack_range = False
-                    for enemies in self.sangvisFerrisData:
-                        if self.sangvisFerrisData[enemies].current_hp > 0:
-                            if (self.sangvisFerrisData[enemies].x,self.sangvisFerrisData[enemies].y) in attacking_range["near"]\
-                                or (self.sangvisFerrisData[enemies].x,self.sangvisFerrisData[enemies].y) in attacking_range["middle"]\
-                                    or (self.sangvisFerrisData[enemies].x,self.sangvisFerrisData[enemies].y) in attacking_range["far"]:
-                                any_character_in_attack_range = True
+                    attacking_range = self.characterInControl.getAttackRange(self.MAP)
+                    self.areaDrawColorBlock["green"] = attacking_range["near"]
+                    self.areaDrawColorBlock["blue"] = attacking_range["middle"]
+                    self.areaDrawColorBlock["yellow"] = attacking_range["far"]
+                    if block_get_click != None:
+                        the_attacking_range_area = []
+                        for area in attacking_range:
+                            if (block_get_click["x"],block_get_click["y"]) in attacking_range[area]:
+                                for y in range(block_get_click["y"]-self.characterInControl.attack_range+1,block_get_click["y"]+self.characterInControl.attack_range):
+                                    if y < block_get_click["y"]:
+                                        for x in range(block_get_click["x"]-self.characterInControl.attack_range-(y-block_get_click["y"])+1,block_get_click["x"]+self.characterInControl.attack_range+(y-block_get_click["y"])):
+                                            if self.MAP.ifBlockCanPassThrough({"x":x,"y":y}):
+                                                the_attacking_range_area.append((x,y))
+                                    else:
+                                        for x in range(block_get_click["x"]-self.characterInControl.attack_range+(y-block_get_click["y"])+1,block_get_click["x"]+self.characterInControl.attack_range-(y-block_get_click["y"])):
+                                            if self.MAP.ifBlockCanPassThrough({"x":x,"y":y}):
+                                                the_attacking_range_area.append((x,y))
                                 break
-                    if any_character_in_attack_range == True:
-                        self.areaDrawColorBlock["green"] = attacking_range["near"]
-                        self.areaDrawColorBlock["blue"] = attacking_range["middle"]
-                        self.areaDrawColorBlock["yellow"] = attacking_range["far"]
-                        if block_get_click != None:
-                            the_attacking_range_area = []
-                            for area in attacking_range:
-                                if (block_get_click["x"],block_get_click["y"]) in attacking_range[area]:
-                                    for y in range(block_get_click["y"]-self.characterInControl.attack_range+1,block_get_click["y"]+self.characterInControl.attack_range):
-                                        if y < block_get_click["y"]:
-                                            for x in range(block_get_click["x"]-self.characterInControl.attack_range-(y-block_get_click["y"])+1,block_get_click["x"]+self.characterInControl.attack_range+(y-block_get_click["y"])):
-                                                if self.MAP.ifBlockCanPassThrough({"x":x,"y":y}):
-                                                    the_attacking_range_area.append([x,y])
-                                        else:
-                                            for x in range(block_get_click["x"]-self.characterInControl.attack_range+(y-block_get_click["y"])+1,block_get_click["x"]+self.characterInControl.attack_range-(y-block_get_click["y"])):
-                                                if self.MAP.ifBlockCanPassThrough({"x":x,"y":y}):
-                                                    the_attacking_range_area.append([x,y])
-                                    break
-                            self.enemiesGetAttack = {}
-                            if len(the_attacking_range_area) > 0:
-                                self.areaDrawColorBlock["orange"] = the_attacking_range_area
-                                for enemies in self.sangvisFerrisData:
-                                    if [self.sangvisFerrisData[enemies].x,self.sangvisFerrisData[enemies].y] in the_attacking_range_area and self.sangvisFerrisData[enemies].current_hp>0:
-                                        if (self.sangvisFerrisData[enemies].x,self.sangvisFerrisData[enemies].y) in attacking_range["far"]:
-                                            self.enemiesGetAttack[enemies] = "far"
-                                        elif (self.sangvisFerrisData[enemies].x,self.sangvisFerrisData[enemies].y) in attacking_range["middle"]:
-                                            self.enemiesGetAttack[enemies] = "middle"
-                                        elif (self.sangvisFerrisData[enemies].x,self.sangvisFerrisData[enemies].y) in attacking_range["near"]:
-                                            self.enemiesGetAttack[enemies] = "near"
-                    else:
-                        self.warnings_to_display.add("no_enemy_in_effective_range")
-                        self.action_choice = None
-                        self.NotDrawRangeBlocks = "SelectMenu"
+                        self.enemiesGetAttack.clear()
+                        if len(the_attacking_range_area) > 0:
+                            self.areaDrawColorBlock["orange"] = the_attacking_range_area
+                            for enemies in self.sangvisFerrisData:
+                                if self.sangvisFerrisData[enemies].pos in the_attacking_range_area and self.sangvisFerrisData[enemies].is_alive():
+                                    if self.sangvisFerrisData[enemies].pos in attacking_range["far"]:
+                                        self.enemiesGetAttack[enemies] = "far"
+                                    elif self.sangvisFerrisData[enemies].pos in attacking_range["middle"]:
+                                        self.enemiesGetAttack[enemies] = "middle"
+                                    elif self.sangvisFerrisData[enemies].pos in attacking_range["near"]:
+                                        self.enemiesGetAttack[enemies] = "near"
                 #显示技能范围        
                 elif self.action_choice == "skill":
                     self.skill_target = None
@@ -1119,7 +1101,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                                         self.characterInControl.bullets_carried += itemData
                                         self.supply_board_ui_img.items.append(self.FONT.render(self.battleModeUiTxt["getBullets"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
                                     elif itemType == "hp":
-                                        self.characterInControl.current_hp += itemData
+                                        self.characterInControl.heal(itemData)
                                         self.supply_board_ui_img.items.append(self.FONT.render(self.battleModeUiTxt["getHealth"]+": "+str(itemData),linpg.get_fontMode(),(255,255,255)))
                                 #如果UI已经回到原位
                                 if len(self.supply_board_ui_img.items) > 0: self.supply_board_ui_img.yTogo = 10
@@ -1152,7 +1134,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     if self.characterInControl.get_imgId("attack") == self.characterInControl.get_imgNum("attack")-2:
                         for each_enemy in self.enemiesGetAttack:
                             if self.enemiesGetAttack[each_enemy] == "near" and linpg.randomInt(1,100) <= 95 or self.enemiesGetAttack[each_enemy] == "middle" and linpg.randomInt(1,100) <= 80 or self.enemiesGetAttack[each_enemy] == "far" and linpg.randomInt(1,100) <= 65:
-                                the_damage = self.sangvisFerrisData[each_enemy].attackBy(self.characterInControl)
+                                the_damage = self.characterInControl.attack(self.sangvisFerrisData[each_enemy])
                                 self.damage_do_to_characters[each_enemy] = self.FONT.render("-"+str(the_damage),linpg.get_fontMode(),linpg.findColorRGBA("red"))
                             else:
                                 self.damage_do_to_characters[each_enemy] = self.FONT.render("Miss",linpg.get_fontMode(),linpg.findColorRGBA("red"))
@@ -1172,52 +1154,47 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
 
         #敌方回合
         if self.whose_round == "sangvisFerris":
-            self.enemy_in_control = self.sangvisFerris_name_list[self.enemies_in_control_id]
-            if self.enemy_action == None:
-                self.enemy_action = self.sangvisFerrisData[self.enemy_in_control].make_decision(self.MAP,self.griffinCharactersData,self.sangvisFerrisData,self.the_characters_detected_last_round)
-                if self.enemy_action["action"] == "move" or self.enemy_action["action"] == "move&attack":
-                    self.sangvisFerrisData[self.enemy_in_control].move_follow(self.enemy_action["route"])
-                elif self.enemy_action["action"] == "attack":
-                    self.sangvisFerrisData[self.enemy_in_control].set_action("attack")
-                    self.sangvisFerrisData[self.enemy_in_control].setFlipBasedPos(self.griffinCharactersData[self.enemy_action["target"]])
-                print(self.enemy_in_control+" choses "+self.enemy_action["action"])
-            #根据选择调整动画
-            if self.enemy_action["action"] == "move" or  self.enemy_action["action"] == "move&attack":
-                if self.sangvisFerrisData[self.enemy_in_control].is_idle():
-                    self.footstep_sounds.play()
-                else:
-                    self.footstep_sounds.stop()
-                    if self.enemy_action["action"] == "move&attack":
-                        self.enemy_action["action"] = "attack"
+            #如果当前角色还没做出决定
+            if self.enemy_instructions == None:
+                self.enemy_instructions = self.sangvisFerrisData[self.enemy_in_control].make_decision(self.MAP,self.griffinCharactersData,self.sangvisFerrisData,self.the_characters_detected_last_round)
+            if not self.enemy_instructions.empty() or self.current_instruction != None:
+                #获取需要执行的指令
+                if self.current_instruction == None:
+                    self.current_instruction = self.enemy_instructions.get()
+                    if self.current_instruction.action == "move":
+                        self.sangvisFerrisData[self.enemy_in_control].move_follow(self.current_instruction.route)
+                    elif self.enemy_instructions.action == "attack":
                         self.sangvisFerrisData[self.enemy_in_control].set_action("attack")
-                        self.sangvisFerrisData[self.enemy_in_control].setFlipBasedPos(self.griffinCharactersData[self.enemy_action["target"]])
+                        self.sangvisFerrisData[self.enemy_in_control].setFlipBasedPos(self.griffinCharactersData[self.enemy_instructions.target])
+                #根据选择调整动画
+                if self.enemy_instructions.action == "move":
+                    if self.sangvisFerrisData[self.enemy_in_control].is_idle():
+                        self.footstep_sounds.play()
                     else:
-                        self.enemy_action["action"] = "stay"
-            elif self.enemy_action["action"] == "attack":
-                if self.sangvisFerrisData[self.enemy_in_control].get_imgId("attack") == 3:
-                    self.attackingSounds.play(self.sangvisFerrisData[self.enemy_in_control].kind)
-                elif self.sangvisFerrisData[self.enemy_in_control].get_imgId("attack") == self.sangvisFerrisData[self.enemy_in_control].get_imgNum("attack")-1:
-                    temp_value = linpg.randomInt(0,100)
-                    if self.enemy_action["target_area"] == "near" and temp_value <= 95 or self.enemy_action["target_area"] == "middle" and temp_value <= 80 or self.enemy_action["target_area"] == "far" and temp_value <= 65:
-                        the_damage = self.griffinCharactersData[self.enemy_action["target"]].attackBy(self.sangvisFerrisData[self.enemy_in_control])
-                        #如果角色进入倒地或者死亡状态，则应该将times_characters_down加一
-                        if self.griffinCharactersData[self.enemy_action["target"]].current_hp == 0: self.resultInfo["times_characters_down"] += 1
-                        #重新计算迷雾区域
-                        self._calculate_darkness()
-                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("-"+str(the_damage),linpg.get_fontMode(),linpg.findColorRGBA("red"))
-                    else:
-                        self.damage_do_to_characters[self.enemy_action["target"]] = self.FONT.render("Miss",linpg.get_fontMode(),linpg.findColorRGBA("red"))
-                    self.enemy_action["action"] = "stay"
-            #最终的idle状态
-            elif self.enemy_action["action"] == "stay":
-                self.sangvisFerrisData[self.enemy_in_control].set_action()
-                self.enemies_in_control_id +=1
-                if self.enemies_in_control_id >= len(self.sangvisFerris_name_list):
-                    self.whose_round = "sangvisFerrisToPlayer"
-                self.enemy_action = None
-                self.enemy_in_control = None
+                        self.footstep_sounds.stop()
+                        self.current_instruction = None
+                elif self.enemy_instructions.action == "attack":
+                    if self.sangvisFerrisData[self.enemy_in_control].get_imgId("attack") == 3:
+                        self.attackingSounds.play(self.sangvisFerrisData[self.enemy_in_control].kind)
+                    elif self.sangvisFerrisData[self.enemy_in_control].get_imgId("attack") == self.sangvisFerrisData[self.enemy_in_control].get_imgNum("attack")-1:
+                        temp_value = linpg.randomInt(0,100)
+                        if self.enemy_instructions.target_area == "near" and temp_value <= 95\
+                        or self.enemy_instructions.target_area == "middle" and temp_value <= 80\
+                        or self.enemy_instructions.target_area == "far" and temp_value <= 65:
+                            the_damage = self.sangvisFerrisData[self.enemy_in_control].attack(self.griffinCharactersData[self.enemy_instructions.target])
+                            #如果角色进入倒地或者死亡状态，则应该将times_characters_down加一
+                            if not self.griffinCharactersData[self.enemy_instructions.target].is_alive(): self.resultInfo["times_characters_down"] += 1
+                            #重新计算迷雾区域
+                            self._calculate_darkness()
+                            self.damage_do_to_characters[self.enemy_instructions.target] = self.FONT.render("-"+str(the_damage),linpg.get_fontMode(),linpg.findColorRGBA("red"))
+                        else:
+                            self.damage_do_to_characters[self.enemy_instructions.target] = self.FONT.render("Miss",linpg.get_fontMode(),linpg.findColorRGBA("red"))
+                        self.current_instruction = None
             else:
-                print("warning: not choice")
+                self.sangvisFerrisData[self.enemy_in_control].set_action()
+                self.enemies_in_control_id += 1
+                self.enemy_instructions = None
+                if self.enemies_in_control_id >= len(self.sangvisFerris_name_list): self.whose_round = "sangvisFerrisToPlayer"
 
         """↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"""
         rightClickCharacterAlphaDeduct = True
@@ -1241,7 +1218,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                         self.areaDrawColorBlock["green"] = rangeCanAttack["near"]
                 value.draw(screen,self.MAP)
             #是否有在播放死亡角色的动画（而不是倒地状态）
-            if value.current_hp<=0 and key not in self.the_dead_one:
+            if not value.is_alive() and key not in self.the_dead_one:
                 if value.kind == "HOC" or value.faction == "sangvisFerri":
                     self.the_dead_one[key] = value.faction
             #伤害/治理数值显示
