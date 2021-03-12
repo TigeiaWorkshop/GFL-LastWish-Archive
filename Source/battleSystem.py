@@ -59,12 +59,12 @@ class Survival_BattleSystem(linpg.BattleSystemInterface):
             self.alliances["me"].x-=0.03
             self.alliances["me"].y+=0.03
             ifDisplayMove = True
-            self.alliances["me"].setFlip(True)
+            self.alliances["me"].set_flip(True)
         if self.__pressKeyToMoveMe["right"]:
             self.alliances["me"].x+=0.03
             self.alliances["me"].y-=0.03
             ifDisplayMove = True
-            self.alliances["me"].setFlip(False)
+            self.alliances["me"].set_flip(False)
         if ifDisplayMove:
             if self.alliances["me"].get_action() != "move":
                 self.alliances["me"].set_action("move")
@@ -430,6 +430,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         for key in self.sangvisFerrisData:
             if self.sangvisFerrisData[key].can_attack(self.griffinCharactersData[name]):
                 self.sangvisFerrisData[key].alert(value)
+                self.characterInControl.notice(value)
                 enemies_need_check.append(key)
         for key in enemies_need_check:
             if self.sangvisFerrisData[key].is_alert:
@@ -564,9 +565,9 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 elif "direction" in currentDialog and currentDialog["direction"] != None:
                     for key,value in currentDialog["direction"].items():
                         if key in self.griffinCharactersData:
-                            self.griffinCharactersData[key].setFlip(value)
+                            self.griffinCharactersData[key].set_flip(value)
                         elif key in self.sangvisFerrisData:
-                            self.sangvisFerrisData[key].setFlip(value)
+                            self.sangvisFerrisData[key].set_flip(value)
                         else:
                             raise Exception('linpgEngine-Error: Cannot find character {}!'.format(key))
                     self.dialogData["dialogId"] += 1
@@ -855,13 +856,13 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                 elif self.action_choice == "skill" and self.NotDrawRangeBlocks == False and self.characterGetClick != None and self.skill_target != None:
                     if self.skill_target in self.griffinCharactersData:
-                        self.characterInControl.setFlipBasedPos(self.griffinCharactersData[self.skill_target])
+                        self.characterInControl.set_flip_based_on_pos(self.griffinCharactersData[self.skill_target])
                         
                     elif self.skill_target in self.sangvisFerrisData:
                         self.characterInControl.notice()
-                        self.characterInControl.setFlipBasedPos(self.sangvisFerrisData[self.skill_target])
+                        self.characterInControl.set_flip_based_on_pos(self.sangvisFerrisData[self.skill_target])
                     self.characterInControl.try_reduce_action_point(8)
-                    self.characterInControl.playSound("skill")
+                    self.characterInControl.play_sound("skill")
                     self.characterInControl.set_action("skill",False)
                     self.isWaiting = False
                     self.NotDrawRangeBlocks = True
@@ -894,7 +895,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                             skill_range = None
                             self.areaDrawColorBlock = {"green":[],"red":[],"yellow":[],"blue":[],"orange":[]}
                             if self.characterGetClick != key:
-                                self.griffinCharactersData[key].playSound("get_click")
+                                self.griffinCharactersData[key].play_sound("get_click")
                                 self.characterGetClick = key
                             self.characterInfoBoardUI.update()
                             self.friendsCanSave = [key2 for key2 in self.griffinCharactersData if self.griffinCharactersData[key2].dying != False and self.griffinCharactersData[key].near(self.griffinCharactersData[key2])]
@@ -1072,14 +1073,13 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             #当有角色被点击时
             if self.characterGetClick != None and self.isWaiting == False:
                 #被点击的角色动画
-                self.NotDrawRangeBlocks=True
+                self.NotDrawRangeBlocks = True
                 if self.action_choice == "move":
                     if not self.characterInControl.is_idle():
                         #播放脚步声
                         self.footstep_sounds.play()
                         #是否需要更新
                         if self.characterInControl.needUpdateMap():
-                            self.characterInControl.notice()
                             self.alert_enemy_around(self.characterGetClick)
                             self._calculate_darkness()
                     else:
@@ -1126,8 +1126,8 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     if self.characterInControl.get_imgId("attack") == 0:
                         block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                         if block_get_click != None:
-                            self.characterInControl.setFlipBasedPos(block_get_click)
-                        self.characterInControl.playSound("attack")
+                            self.characterInControl.set_flip_based_on_pos(block_get_click)
+                        self.characterInControl.play_sound("attack")
                     #播放射击音效
                     elif self.characterInControl.get_imgId("attack") == 3:
                         self.attackingSounds.play(self.characterInControl.kind)
@@ -1156,44 +1156,47 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         if self.whose_round == "sangvisFerris":
             #如果当前角色还没做出决定
             if self.enemy_instructions == None:
-                self.enemy_instructions = self.sangvisFerrisData[self.enemy_in_control].make_decision(self.MAP,self.griffinCharactersData,self.sangvisFerrisData,self.the_characters_detected_last_round)
+                #生成决定
+                self.enemy_instructions = self.sangvisFerrisData[self.enemy_in_control].make_decision(
+                    self.MAP,self.griffinCharactersData,self.sangvisFerrisData,self.the_characters_detected_last_round)
             if not self.enemy_instructions.empty() or self.current_instruction != None:
                 #获取需要执行的指令
                 if self.current_instruction == None:
                     self.current_instruction = self.enemy_instructions.get()
                     if self.current_instruction.action == "move":
                         self.sangvisFerrisData[self.enemy_in_control].move_follow(self.current_instruction.route)
-                    elif self.enemy_instructions.action == "attack":
+                    elif self.current_instruction.action == "attack":
                         self.sangvisFerrisData[self.enemy_in_control].set_action("attack")
-                        self.sangvisFerrisData[self.enemy_in_control].setFlipBasedPos(self.griffinCharactersData[self.enemy_instructions.target])
+                        self.sangvisFerrisData[self.enemy_in_control].set_flip_based_on_pos(self.griffinCharactersData[self.current_instruction.target])
                 #根据选择调整动画
-                if self.enemy_instructions.action == "move":
-                    if self.sangvisFerrisData[self.enemy_in_control].is_idle():
+                if self.current_instruction.action == "move":
+                    if not self.sangvisFerrisData[self.enemy_in_control].is_idle():
                         self.footstep_sounds.play()
                     else:
                         self.footstep_sounds.stop()
                         self.current_instruction = None
-                elif self.enemy_instructions.action == "attack":
+                elif self.current_instruction.action == "attack":
                     if self.sangvisFerrisData[self.enemy_in_control].get_imgId("attack") == 3:
                         self.attackingSounds.play(self.sangvisFerrisData[self.enemy_in_control].kind)
                     elif self.sangvisFerrisData[self.enemy_in_control].get_imgId("attack") == self.sangvisFerrisData[self.enemy_in_control].get_imgNum("attack")-1:
                         temp_value = linpg.randomInt(0,100)
-                        if self.enemy_instructions.target_area == "near" and temp_value <= 95\
-                        or self.enemy_instructions.target_area == "middle" and temp_value <= 80\
-                        or self.enemy_instructions.target_area == "far" and temp_value <= 65:
-                            the_damage = self.sangvisFerrisData[self.enemy_in_control].attack(self.griffinCharactersData[self.enemy_instructions.target])
+                        if self.current_instruction.target_area == "near" and temp_value <= 95\
+                        or self.current_instruction.target_area == "middle" and temp_value <= 80\
+                        or self.current_instruction.target_area == "far" and temp_value <= 65:
+                            the_damage = self.sangvisFerrisData[self.enemy_in_control].attack(self.griffinCharactersData[self.current_instruction.target])
                             #如果角色进入倒地或者死亡状态，则应该将times_characters_down加一
-                            if not self.griffinCharactersData[self.enemy_instructions.target].is_alive(): self.resultInfo["times_characters_down"] += 1
+                            if not self.griffinCharactersData[self.current_instruction.target].is_alive(): self.resultInfo["times_characters_down"] += 1
                             #重新计算迷雾区域
                             self._calculate_darkness()
-                            self.damage_do_to_characters[self.enemy_instructions.target] = self.FONT.render("-"+str(the_damage),linpg.get_fontMode(),linpg.findColorRGBA("red"))
+                            self.damage_do_to_characters[self.current_instruction.target] = self.FONT.render("-"+str(the_damage),linpg.get_fontMode(),linpg.findColorRGBA("red"))
                         else:
-                            self.damage_do_to_characters[self.enemy_instructions.target] = self.FONT.render("Miss",linpg.get_fontMode(),linpg.findColorRGBA("red"))
+                            self.damage_do_to_characters[self.current_instruction.target] = self.FONT.render("Miss",linpg.get_fontMode(),linpg.findColorRGBA("red"))
                         self.current_instruction = None
             else:
                 self.sangvisFerrisData[self.enemy_in_control].set_action()
                 self.enemies_in_control_id += 1
                 self.enemy_instructions = None
+                self.current_instruction = None
                 if self.enemies_in_control_id >= len(self.sangvisFerris_name_list): self.whose_round = "sangvisFerrisToPlayer"
 
         """↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓角色动画展示区↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"""
