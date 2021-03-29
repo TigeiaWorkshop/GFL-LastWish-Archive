@@ -2,10 +2,10 @@
 from .mapCreator import *
 
 #生存类游戏战斗系统
-class Survival_BattleSystem(linpg.BattleSystemInterface):
+class Survival_BattleSystem(linpg.AbstractBattleSystem):
     def __init__(self):
         """data"""
-        linpg.BattleSystemInterface.__init__(self,None,None,None)
+        linpg.AbstractBattleSystem.__init__(self,None,None,None)
         #用于检测是否有方向键被按到的字典
         self.__pressKeyToMoveMe = {"up":False,"down":False,"left":False,"right":False}
         self.window_x,self.window_y = linpg.display.get_size()
@@ -88,7 +88,7 @@ class Survival_BattleSystem(linpg.BattleSystemInterface):
         super()._move_screen()
     #展示场景装饰物
     def _display_decoration(self,screen:pygame.Surface) -> None: self.MAP.display_decoration(screen,self.alliances,{})
-    def display(self,screen):
+    def draw(self,screen):
         self._update_event()
         mouse_x,mouse_y = linpg.controller.get_pos()
         for event in self.events:
@@ -112,9 +112,9 @@ class Survival_BattleSystem(linpg.BattleSystemInterface):
         linpg.display.flip()
 
 #回合制游戏战斗系统
-class TurnBased_BattleSystem(linpg.BattleSystemInterface):
+class TurnBased_BattleSystem(linpg.AbstractBattleSystem):
     def __init__(self,chapterType=None,chapterId=None,collection_name=None):
-        linpg.BattleSystemInterface.__init__(self,chapterType,chapterId,collection_name)
+        linpg.AbstractBattleSystem.__init__(self,chapterType,chapterId,collection_name)
         #被选中的角色
         self.characterGetClick = None
         self.enemiesGetAttack = {}
@@ -316,10 +316,10 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         )
         #渐入效果
         for i in range(1,255,2):
-            self.infoToDisplayDuringLoading.display(screen,i)
+            self.infoToDisplayDuringLoading.draw(screen,i)
             linpg.display.flip(True)
         #开始加载地图场景
-        self.infoToDisplayDuringLoading.display(screen)
+        self.infoToDisplayDuringLoading.draw(screen)
         now_loading = self.FONT.render(loading_info["now_loading_map"],linpg.get_fontMode(),(255,255,255))
         linpg.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
@@ -352,7 +352,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         #加载角色信息
         self._start_characters_loader()
         while self._is_characters_loader_alive():
-            self.infoToDisplayDuringLoading.display(screen)
+            self.infoToDisplayDuringLoading.draw(screen)
             now_loading = self.FONT.render(loading_info["now_loading_characters"]+"({}/{})".format(self.characters_loaded,self.characters_total),linpg.get_fontMode(),(255,255,255))
             linpg.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
             nowLoadingIcon.draw(screen)
@@ -360,7 +360,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         #计算光亮区域 并初始化地图
         self._calculate_darkness()
         #开始加载关卡设定
-        self.infoToDisplayDuringLoading.display(screen)
+        self.infoToDisplayDuringLoading.draw(screen)
         now_loading = self.FONT.render(loading_info["now_loading_level"],linpg.get_fontMode(),linpg.findColorRGBA("white"))
         linpg.drawImg(now_loading,(self.window_x*0.75,self.window_y*0.9),screen)
         nowLoadingIcon.draw(screen)
@@ -410,7 +410,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             self.battleMode_info[i] = self.FONT.render(self.battleMode_info[i],linpg.get_fontMode(),(255,255,255))
         #显示章节信息
         for a in range(0,250,2):
-            self.infoToDisplayDuringLoading.display(screen)
+            self.infoToDisplayDuringLoading.draw(screen)
             for i in range(len(self.battleMode_info)):
                 self.battleMode_info[i].set_alpha(a)
                 linpg.drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
@@ -438,7 +438,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                     if self.sangvisFerrisData[key].can_attack(self.griffinCharactersData[character]):
                         self.griffinCharactersData[character].notice(100)
     #把战斗系统的画面画到screen上
-    def display(self,screen):
+    def draw(self,screen):
         self._update_event()
         #环境声音-频道1
         self.environment_sound.play()
@@ -453,7 +453,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
             self.txt_alpha = 250
         if self.txt_alpha > 0:
             self.infoToDisplayDuringLoading.black_bg.set_alpha(self.txt_alpha)
-            self.infoToDisplayDuringLoading.display(screen,self.txt_alpha)
+            self.infoToDisplayDuringLoading.draw(screen,self.txt_alpha)
             for i in range(len(self.battleMode_info)):
                 self.battleMode_info[i].set_alpha(self.txt_alpha)
                 linpg.drawImg(self.battleMode_info[i],(self.window_x/20,self.window_y*0.75+self.battleMode_info[i].get_height()*1.2*i),screen)
@@ -469,7 +469,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         process_saved_text.set_alpha(0)
         while self.show_pause_menu:
             self._update_event()
-            result = self.pause_menu.display(screen,self.events)
+            result = self.pause_menu.draw(screen,self.events)
             if result == "Break":
                 linpg.setting.isDisplaying = False
                 self.show_pause_menu = False
@@ -484,7 +484,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                 self._isPlaying = False
                 self.show_pause_menu = False
             #如果播放玩菜单后发现有东西需要更新
-            if linpg.setting.display(screen,self.events):
+            if linpg.setting.draw(screen,self.events):
                 self.__update_sound_volume()
             process_saved_text.drawOnTheCenterOf(screen)
             process_saved_text.fade_out(5)
@@ -601,7 +601,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                                 currentDialog["dialoguebox_up"]["speaker_icon"]
                             )
                         #对话框图片
-                        self.dialoguebox_up.display(screen,self.characterInfoBoardUI)
+                        self.dialoguebox_up.draw(screen,self.characterInfoBoardUI)
                     #下方对话框
                     if currentDialog["dialoguebox_down"] != None:
                         #对话框的移动
@@ -614,7 +614,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
                                 currentDialog["dialoguebox_down"]["speaker_icon"]
                             )
                         #对话框图片
-                        self.dialoguebox_down.display(screen,self.characterInfoBoardUI)
+                        self.dialoguebox_down.draw(screen,self.characterInfoBoardUI)
                 #闲置一定时间（秒）
                 elif "idle" in currentDialog and currentDialog["idle"] != None:
                     if self.dialogData["secondsToIdle"] == None:
@@ -696,7 +696,7 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
     #切换回合
     def switch_round(self,screen):
         if self.whose_round == "playerToSangvisFerris" or self.whose_round == "sangvisFerrisToPlayer":
-            if self.RoundSwitchUI.display(screen,self.whose_round,self.resultInfo["total_rounds"]):
+            if self.RoundSwitchUI.draw(screen,self.whose_round,self.resultInfo["total_rounds"]):
                 if self.whose_round == "playerToSangvisFerris":
                     self.enemies_in_control_id = 0
                     self.sangvisFerris_name_list.clear()
@@ -1287,9 +1287,9 @@ class TurnBased_BattleSystem(linpg.BattleSystemInterface):
         #显示选择菜单
         if self.NotDrawRangeBlocks == "SelectMenu":
             #左下角的角色信息
-            self.characterInfoBoardUI.display(screen,self.characterInControl)
+            self.characterInfoBoardUI.draw(screen,self.characterInControl)
             #----选择菜单----
-            self.buttonGetHover = self.selectMenuUI.display(screen,round(self.MAP.block_width/10),self.MAP.getBlockExactLocation(self.characterInControl.x,self.characterInControl.y),self.characterInControl.kind,self.friendsCanSave,self.thingsCanReact)
+            self.buttonGetHover = self.selectMenuUI.draw(screen,round(self.MAP.block_width/10),self.MAP.getBlockExactLocation(self.characterInControl.x,self.characterInControl.y),self.characterInControl.kind,self.friendsCanSave,self.thingsCanReact)
         #加载雪花
         self._display_weather(screen)
         

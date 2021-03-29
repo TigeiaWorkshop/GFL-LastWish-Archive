@@ -28,7 +28,7 @@ def dialog(chapterType,chapterId,screen,part,collection_name=None):
     #DIALOG.auto_save = True
     #主循环
     while DIALOG.is_playing():
-        DIALOG.display(screen)
+        DIALOG.draw(screen)
         linpg.display.flip()
     #返回玩家做出的选项
     return DIALOG.dialog_options
@@ -42,7 +42,7 @@ def dialogCreator(chapterType,chapterId,screen,part,collection_name=None):
     DIALOG = linpg.DialogSystemDev(chapterType,chapterId,part,collection_name)
     #主循环
     while DIALOG.is_playing():
-        DIALOG.display(screen)
+        DIALOG.draw(screen)
         linpg.display.flip()
     linpg.display.set_caption(linpg.get_lang('General','game_title'))
 
@@ -56,7 +56,7 @@ def battle(chapterType,chapterId,screen,collection_name=None):
     else:
         BATTLE.load(screen)
     #战斗系统主要loop
-    while BATTLE.is_playing(): BATTLE.display(screen)
+    while BATTLE.is_playing(): BATTLE.draw(screen)
     #暂停声效 - 尤其是环境声
     linpg.unloadBackgroundMusic()
     return BATTLE.resultInfo
@@ -69,7 +69,7 @@ def mapCreator(chapterType,chapterId,screen,collection_name=None):
     MAPCREATOR = MapCreator(chapterType,chapterId,collection_name)
     MAPCREATOR.initialize(screen)
     #战斗系统主要loop
-    while MAPCREATOR.is_playing(): MAPCREATOR.display(screen)
+    while MAPCREATOR.is_playing(): MAPCREATOR.draw(screen)
     linpg.display.set_caption(linpg.get_lang('General','game_title'))
 
 #blit载入页面

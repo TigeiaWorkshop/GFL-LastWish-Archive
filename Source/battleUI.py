@@ -1,5 +1,4 @@
 # cython: language_level=3
-from linpg.scr_core.surface import ProgressBar, ProgressBarSurface
 from .init import *
 
 #显示回合切换的UI
@@ -23,10 +22,10 @@ class RoundSwitch:
         self.your_round_txt_surface.set_alpha(0)
         self.enemy_round_txt_surface = linpg.fontRender(battleUiTxt["enemyRound"], "white",window_x/36)
         self.enemy_round_txt_surface.set_alpha(0)
-    def display(self,screen,whose_round,total_rounds):
+    def draw(self,screen,whose_round,total_rounds):
         #如果“第N回合”的文字surface还没有初始化，则初始化该文字
         if self.now_total_rounds_surface == None:
-            self.now_total_rounds_surface = linpg.fontRender(self.now_total_rounds_text.format(str(total_rounds)), "white",screen.get_width()/38)
+            self.now_total_rounds_surface = linpg.fontRender(self.now_total_rounds_text.format(linpg.get_num_in_local_text(total_rounds)), "white",screen.get_width()/38)
             self.now_total_rounds_surface.set_alpha(0)
         #如果UI底的alpha值在渐入阶段
         if self.baseAlphaUp == True:
@@ -116,7 +115,7 @@ class WarningSystem:
         if len(self.all_warnings)>=5:
             self.all_warnings.pop()
         self.all_warnings.insert(0,linpg.fontRender(self.warnings[the_warning],"red",fontSize,True))
-    def display(self,screen):
+    def draw(self,screen):
         for i in range(len(self.all_warnings)):
             try:
                 img_alpha = self.all_warnings[i].get_alpha()
@@ -205,7 +204,7 @@ class SelectMenu:
         txt_temp2 = linpg.fontRender(self.interactAPTxt,"black",sizeSmall)
         self.allButton["interact"].blit(txt_temp,((selectButtonBaseWidth-txt_temp.get_width())/2,txt_temp.get_height()*0.15))
         self.allButton["interact"].blit(txt_temp2,((selectButtonBaseWidth-txt_temp2.get_width())/2,txt_temp.get_height()*1.1))
-    def display(self,screen,fontSize,location,kind,friendsCanSave,thingsCanReact):
+    def draw(self,screen,fontSize,location,kind,friendsCanSave,thingsCanReact):
         if self.allButton == None:
             self.initialButtons(fontSize)
         buttonGetHover = None
@@ -264,10 +263,10 @@ class CharacterInfoBoard:
         self.text_size = text_size
         self.informationBoard = None
         hp_empty_img = linpg.loadImg("Assets/image/UI/hp_empty.png")
-        self.hp_red = ProgressBarSurface("Assets/image/UI/hp_red.png",hp_empty_img,0,0,window_x/15,text_size)
-        self.hp_green = ProgressBarSurface("Assets/image/UI/hp_green.png",hp_empty_img,0,0,window_x/15,text_size)
-        self.action_point_blue = ProgressBarSurface("Assets/image/UI/action_point.png",hp_empty_img,0,0,window_x/15,text_size)
-        self.bullets_number_brown = ProgressBarSurface("Assets/image/UI/bullets_number.png",hp_empty_img,0,0,window_x/15,text_size)
+        self.hp_red = linpg.ProgressBarSurface("Assets/image/UI/hp_red.png",hp_empty_img,0,0,window_x/15,text_size)
+        self.hp_green = linpg.ProgressBarSurface("Assets/image/UI/hp_green.png",hp_empty_img,0,0,window_x/15,text_size)
+        self.action_point_blue = linpg.ProgressBarSurface("Assets/image/UI/action_point.png",hp_empty_img,0,0,window_x/15,text_size)
+        self.bullets_number_brown = linpg.ProgressBarSurface("Assets/image/UI/bullets_number.png",hp_empty_img,0,0,window_x/15,text_size)
     #标记需要更新
     def update(self):
         self.informationBoard = None
@@ -308,7 +307,7 @@ class CharacterInfoBoard:
         linpg.displayInCenter(tcgc_action_point2,self.action_point_blue,temp_posX ,temp_posY+self.text_size*1.5,self.informationBoard)
         self.bullets_number_brown.draw(self.informationBoard)
         linpg.displayInCenter(tcgc_bullets_situation2,self.bullets_number_brown,temp_posX ,temp_posY+self.text_size*3,self.informationBoard)
-    def display(self,screen,theCharacterData):
+    def draw(self,screen,theCharacterData):
         if self.informationBoard == None:
             self.updateInformationBoard(screen.get_width()/96,theCharacterData)
         screen.blit(self.informationBoard,(0,screen.get_height()-self.boardImg.get_height()))
@@ -327,7 +326,7 @@ class ResultBoard:
         self.characters_down = linpg.fontRender(resultTxt["characters_down"]+": "+str(finalResult["times_characters_down"]),"white",font_size)
         self.player_rate = linpg.fontRender(resultTxt["rank"]+": "+"A","white",font_size)
         self.pressKeyContinue = linpg.fontRender(resultTxt["pressKeyContinue"],"white",font_size) if is_win else linpg.fontRender(resultTxt["pressKeyRestart"],"white",font_size)
-    def display(self,screen):
+    def draw(self,screen):
         screen.blit(self.boardImg,(self.x,self.y))
         screen.blit(self.total_kills,(self.txt_x ,300))
         screen.blit(self.total_time,(self.txt_x ,350))
@@ -346,7 +345,7 @@ class LoadingTitle:
         self.title_chapterName = linpg.ImageSurface(title_chapterName,(window_x-title_chapterName.get_width())/2,window_y*0.46)
         title_description = linpg.fontRender(chapterDesc_txt,"white",window_x/76)
         self.title_description = linpg.ImageSurface(title_description,(window_x-title_description.get_width())/2,window_y*0.6)
-    def display(self,screen,alpha=255):
+    def draw(self,screen,alpha=255):
         self.title_chapterNum.set_alpha(alpha)
         self.title_chapterName.set_alpha(alpha)
         self.title_description.set_alpha(alpha)

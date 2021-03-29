@@ -108,9 +108,9 @@ class MainMenu(linpg.SystemObject):
             if chapterId < 11:
                 if chapterId > 0 or linpg.console.get_events("dev"):
                     if len(titleName) > 0:
-                        self.chapter_select.append(chapterTitle.format(linpg.get_lang("Numbers")[chapterId])+": "+titleName)
+                        self.chapter_select.append(chapterTitle.format(linpg.get_num_in_local_text(chapterId))+": "+titleName)
                     else:
-                        self.chapter_select.append(chapterTitle.format(linpg.get_lang("Numbers")[chapterId]))
+                        self.chapter_select.append(chapterTitle.format(linpg.get_num_in_local_text(chapterId)))
             else:
                 self.chapter_select.append(chapterTitle.format(chapterId)+": "+titleName)
         #将返回按钮放到菜单列表中
@@ -132,33 +132,33 @@ class MainMenu(linpg.SystemObject):
         i=0
         #主菜单
         if self.menu_type == 0:
-            for key in self.main_menu_txt["menu_main"]:
-                if self.main_menu_txt["menu_main"][key].display(screen):
-                    self.hover_sound_play_on = i
+            for button in self.main_menu_txt["menu_main"].values():
+                button.draw(screen)
+                if linpg.isHover(button): self.hover_sound_play_on = i
                 i+=1
         #选择主线的章节
         elif self.menu_type == 1:
             for button in self.chapter_select:
-                if button.display(screen):
-                    self.hover_sound_play_on = i
+                button.draw(screen)
+                if linpg.isHover(button): self.hover_sound_play_on = i
                 i+=1
         #创意工坊选择菜单
         elif self.menu_type == 2:
-            for key in self.main_menu_txt["menu_workshop_choice"]:
-                if self.main_menu_txt["menu_workshop_choice"][key].display(screen):
-                    self.hover_sound_play_on = i
+            for button in self.main_menu_txt["menu_workshop_choice"].values():
+                button.draw(screen)
+                if linpg.isHover(button): self.hover_sound_play_on = i
                 i+=1
         #展示合集 （3-游玩，4-地图编辑器，5-对话编辑器）
         elif 5 >= self.menu_type >= 3:
             for button in self.workshop_files:
-                if button.display(screen):
-                    self.hover_sound_play_on = i
+                button.draw(screen)
+                if linpg.isHover(button): self.hover_sound_play_on = i
                 i+=1
         #选择章节（6-游玩，7-地图编辑器，8-对话编辑器）
         elif 8 >= self.menu_type >= 6:
             for button in self.chapter_select:
-                if button.display(screen):
-                    self.hover_sound_play_on = i
+                button.draw(screen)
+                if linpg.isHover(button): self.hover_sound_play_on = i
                 i+=1
         #播放按钮的音效
         if self.last_hover_sound_play_on != self.hover_sound_play_on:
@@ -225,11 +225,10 @@ class MainMenu(linpg.SystemObject):
             dialog(None,None,screen,None)
             if not linpg.get_glob_value("BackToMainMenu"):
                 battle(SAVE["chapterType"],SAVE["chapterId"],screen,SAVE["collection_name"])
-            else:
-                linpg.set_glob_value("BackToMainMenu",False)
-                return
-            if not linpg.get_glob_value("BackToMainMenu"):
-                dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
+                if not linpg.get_glob_value("BackToMainMenu"):
+                    dialog(SAVE["chapterType"],SAVE["chapterId"],screen,"dialog_after_battle",SAVE["collection_name"])
+                else:
+                    linpg.set_glob_value("BackToMainMenu",False)
             else:
                 linpg.set_glob_value("BackToMainMenu",False)
         elif startPoint == "battle":
@@ -253,13 +252,13 @@ class MainMenu(linpg.SystemObject):
         elif not os.path.exists("Save/save.yaml") and self.continueButtonIsOn == True:
             self.main_menu_txt["menu_main"]["0_continue"] = linpg.fontRenderPro(linpg.get_lang("MainMenu")["menu_main"]["0_continue"],"disable",self.main_menu_txt["menu_main"]["0_continue"].get_pos(),linpg.get_standard_font_size("medium"))
             self.continueButtonIsOn = False
-    def display(self,screen):
+    def draw(self,screen):
         #开始播放背景视频
         self.videoCapture.start()
         #主循环
         while self._isPlaying:
             #背景视频
-            self.videoCapture.display(screen)
+            self.videoCapture.draw(screen)
             #更新输入事件
             self._update_event()
             if self.menu_type == 1 and linpg.isHover(self.chapter_select[0]):
@@ -274,12 +273,12 @@ class MainMenu(linpg.SystemObject):
             #菜单选项
             self.__draw_buttons(screen)
             #展示设置UI
-            if linpg.setting.display(screen,self.events):
+            if linpg.setting.draw(screen,self.events):
                 self.click_button_sound.set_volume(linpg.get_setting("Sound","sound_effects")/100.0)
                 self.hover_on_button_sound.set_volume(linpg.get_setting("Sound","sound_effects")/100.0)
                 self.videoCapture.set_volume(linpg.get_setting("Sound","background_music")/100.0)
             #展示控制台
-            linpg.console.display(screen,self.events)
+            linpg.console.draw(screen,self.events)
             #判断按键
             if linpg.controller.get_event(self.events) == "comfirm" and not linpg.setting.isDisplaying:
                 self.click_button_sound.play()

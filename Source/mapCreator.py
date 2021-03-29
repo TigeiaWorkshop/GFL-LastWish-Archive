@@ -1,9 +1,9 @@
 # cython: language_level=3
 from .skill import *
 
-class MapCreator(linpg.BattleSystemInterface):
+class MapCreator(linpg.AbstractBattleSystem):
     def __init__(self,chapterType,chapterId,collection_name=None):
-        linpg.BattleSystemInterface.__init__(self,chapterType,chapterId,collection_name)
+        linpg.AbstractBattleSystem.__init__(self,chapterType,chapterId,collection_name)
         self.fileLocation = "Data/{0}/chapter{1}_map.yaml".format(self.chapterType,self.chapterId) if self.chapterType == "main_chapter" else "Data/{0}/{1}/chapter{2}_map.yaml".format(self.chapterType,self.collection_name,self.chapterId)
     #加载角色的数据
     def __load_characters_data(self,mapFileData):
@@ -32,7 +32,7 @@ class MapCreator(linpg.BattleSystemInterface):
             block_y = len(mapFileData["map"])
             block_x = len(mapFileData["map"][0])
         #加载地图
-        self._create_map(mapFileData,False)
+        self._create_map(mapFileData)
         del mapFileData
         #加载背景图片
         self.envImgDict = {}
@@ -130,7 +130,7 @@ class MapCreator(linpg.BattleSystemInterface):
         self.UI_local_y = 0
         #读取地图原始文件
         self.originalData = linpg.loadConfig(self.fileLocation)
-    def display(self,screen):
+    def draw(self,screen):
         self._update_event()
         mouse_x,mouse_y = linpg.controller.get_pos()
         block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
@@ -196,7 +196,7 @@ class MapCreator(linpg.BattleSystemInterface):
                     #初始化角色信息
                     self.__load_characters_data(mapFileData)
                     #加载地图
-                    self._create_map(mapFileData,False)
+                    self._create_map(mapFileData)
                     del mapFileData
                     self.MAP.setPos(tempLocal_x,tempLocal_y)
                     #读取地图
@@ -286,13 +286,13 @@ class MapCreator(linpg.BattleSystemInterface):
         self._display_decoration(screen)
 
         #画出UI
-        self.UIContainerButton.display(screen,0,self.UIContainer.y)
+        self.UIContainerButton.display(screen,(0,self.UIContainer.y))
         self.UIContainer.draw(screen)
-        self.UIContainerRightButton.display(screen,self.UIContainerRight.x)
+        self.UIContainerRightButton.display(screen,(self.UIContainerRight.x,0))
         self.UIContainerRight.draw(screen)
         for Image in self.UIButton:
             linpg.isHover(self.UIButton[Image])
-            self.UIButton[Image].display(screen)
+            self.UIButton[Image].draw(screen)
 
         #显示所有可放置的友方角色
         i=0
