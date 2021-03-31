@@ -793,7 +793,7 @@ class TurnBased_BattleSystem(linpg.AbstractBattleSystem):
             if right_click == True:
                 block_get_click = self.MAP.calBlockInMap(mouse_x,mouse_y)
                 #如果点击了回合结束的按钮
-                if linpg.isHover(self.end_round_button) and self.isWaiting == True:
+                if linpg.is_hover(self.end_round_button) and self.isWaiting == True:
                     self.whose_round = "playerToSangvisFerris"
                     self.characterGetClick = None
                     self.NotDrawRangeBlocks = True

@@ -4,7 +4,7 @@ import os
 import shutil
 import time
 import pygame
-import linpg
+import linpgdev as linpg
 
 #加载版本信息
 version_info = linpg.loadConfig("Data/version.yaml")
